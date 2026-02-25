@@ -31,6 +31,7 @@ let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
 let customOrders = [];
 let caseCount    = 0;
+let caseTeeth    = {}; // caseId -> Set of selected tooth numbers
 // Session
 let sessionEnd   = null;
 let sessionTimer = null;
@@ -321,6 +322,7 @@ function customTab(tab) {
 }
 function resetCustomForm() {
   caseCount = 0;
+  caseTeeth = {};
   document.getElementById('caseList').innerHTML = '';
   addCase();
   ['cust-clinic','cust-addr','cust-phone','cust-line'].forEach(function(id){ document.getElementById(id).value=''; });
@@ -328,13 +330,10 @@ function resetCustomForm() {
 function addCase() {
   caseCount++;
   var id  = caseCount;
+  caseTeeth[id] = new Set();
   var div = document.createElement('div');
   div.id  = 'case-' + id;
   div.className = 'bg-slate-50 rounded-2xl p-4 mb-3';
-  var brandOpts = '<option value="">임플란트 종류 선택</option>' +
-    IMPLANT_BRANDS.map(function(b){ return '<option value="' + b + '">' + b + '</option>'; }).join('');
-  var colorOpts = '<option value="">치아 색상 선택 (VITA)</option>' +
-    TOOTH_COLORS.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
   var delBtn = id > 1
     ? '<button onclick="removeCase(' + id + ')" class="text-red-400 font-black text-xs">✕ 삭제</button>'
     : '';
@@ -342,14 +341,10 @@ function addCase() {
     '<div class="flex justify-between items-center mb-3">' +
       '<span class="font-black text-xs text-slate-600">케이스 #' + id + '</span>' + delBtn +
     '</div>' +
-    '<input type="text" id="cp-' + id + '" placeholder="환자 ID (익명 가능, 예: P001)" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' +
-    '<select id="cb-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' + brandOpts + '</select>' +
-    '<input type="text" id="cs-' + id + '" placeholder="임플란트 사이즈 (예: Ø4.0 / L10)" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' +
-    '<select id="cc-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' + colorOpts + '</select>' +
-    '<div class="flex gap-2 mb-2">' +
-      '<input type="number" id="cq-' + id + '" min="1" max="10" value="1" class="w-24 p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100 text-center">' +
-      '<input type="date"   id="cd-' + id + '" class="flex-1 p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100">' +
-    '</div>' +
+    '<input type="text" id="cp-' + id + '" placeholder="환자 ID (익명 가능, 예: P001)" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-3 border border-slate-100">' +
+    '<div class="mb-1"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">치아 선택 · 탭하여 선택/해제</p>' + buildToothChart(id) + '</div>' +
+    '<div id="teeth-details-' + id + '" class="space-y-2 mt-3 mb-3"></div>' +
+    '<input type="date" id="cd-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100 mb-2">' +
     '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white">' +
       '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">STL 파일 업로드</p><p class="text-[9px] text-slate-400 mt-0.5">.stl 파일을 탭하여 선택</p>' +
     '</div>' +
@@ -357,7 +352,95 @@ function addCase() {
     '<textarea id="cm-' + id + '" rows="2" placeholder="특별 요청사항 (선택)" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border border-slate-100"></textarea>';
   document.getElementById('caseList').appendChild(div);
 }
-function removeCase(id) { var el=document.getElementById('case-'+id); if(el) el.remove(); }
+function removeCase(id) {
+  var el = document.getElementById('case-'+id);
+  if (el) el.remove();
+  if (caseTeeth[id]) delete caseTeeth[id];
+}
+function buildToothChart(caseId) {
+  var upper = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+  var lower = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+  function btn(num) {
+    return '<button type="button" id="tooth-' + caseId + '-' + num + '" onclick="toggleTooth(' + caseId + ',' + num + ')" ' +
+      'class="w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none">' +
+      num + '</button>';
+  }
+  var html = '<div class="bg-white rounded-2xl p-3 border border-slate-100">';
+  html += '<p class="text-center text-[8px] font-black text-blue-400 uppercase tracking-widest mb-2">상악 (Upper Jaw)</p>';
+  html += '<div class="flex justify-center gap-1 mb-2 flex-wrap">';
+  upper.forEach(function(n){ html += btn(n); });
+  html += '</div>';
+  html += '<div class="border-t border-dashed border-slate-200 my-2 relative"><span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-[8px] text-slate-300 font-bold">치열 경계</span></div>';
+  html += '<div class="flex justify-center gap-1 mt-2 flex-wrap">';
+  lower.forEach(function(n){ html += btn(n); });
+  html += '</div>';
+  html += '<p class="text-center text-[8px] font-black text-amber-400 uppercase tracking-widest mt-2">하악 (Lower Jaw)</p>';
+  html += '</div>';
+  return html;
+}
+function toggleTooth(caseId, toothNum) {
+  if (!caseTeeth[caseId]) caseTeeth[caseId] = new Set();
+  var btn = document.getElementById('tooth-' + caseId + '-' + toothNum);
+  if (caseTeeth[caseId].has(toothNum)) {
+    caseTeeth[caseId].delete(toothNum);
+    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none';
+  } else {
+    caseTeeth[caseId].add(toothNum);
+    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-blue-500 bg-blue-500 text-white transition active:scale-90 leading-none';
+  }
+  renderToothDetails(caseId);
+}
+function renderToothDetails(caseId) {
+  var container = document.getElementById('teeth-details-' + caseId);
+  if (!container) return;
+  var teeth = Array.from(caseTeeth[caseId]).sort(function(a,b){ return a-b; });
+  if (!teeth.length) { container.innerHTML = ''; return; }
+  var brandOpts = '<option value="">임플란트 종류 선택</option>' +
+    IMPLANT_BRANDS.map(function(b){ return '<option value="' + b + '">' + b + '</option>'; }).join('');
+  var colorOpts = '<option value="">치아 색상 (VITA)</option>' +
+    TOOTH_COLORS.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  // Preserve existing values before re-render
+  var saved = {};
+  teeth.forEach(function(t) {
+    var bEl = document.getElementById('tb-'+caseId+'-'+t);
+    var sEl = document.getElementById('ts-'+caseId+'-'+t);
+    var cEl = document.getElementById('tc-'+caseId+'-'+t);
+    if (bEl||sEl||cEl) saved[t] = { brand: bEl?bEl.value:'', size: sEl?sEl.value:'', color: cEl?cEl.value:'' };
+  });
+  container.innerHTML =
+    '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">선택된 치아 — ' + teeth.length + '개</p>' +
+    teeth.map(function(t) {
+      var sv = saved[t] || {};
+      var jaw = (t>=11&&t<=28) ? '<span class="text-blue-400 text-[8px] font-bold">상악</span>' : '<span class="text-amber-400 text-[8px] font-bold">하악</span>';
+      return '<div class="bg-white rounded-xl p-3 border border-slate-100">' +
+        '<div class="flex items-center gap-2 mb-2">' +
+          '<span class="w-8 h-8 rounded-lg bg-blue-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">' + t + '</span>' +
+          '<div><p class="text-[10px] font-black text-slate-700">' + getToothName(t) + '</p>' + jaw + '</div>' +
+        '</div>' +
+        '<select id="tb-' + caseId + '-' + t + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none mb-2 border border-slate-100">' + brandOpts + '</select>' +
+        '<input type="text" id="ts-' + caseId + '-' + t + '" placeholder="사이즈 (예: Ø4.0 / L10)" value="' + (sv.size||'') + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none mb-2 border border-slate-100">' +
+        '<select id="tc-' + caseId + '-' + t + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none border border-slate-100">' + colorOpts + '</select>' +
+      '</div>';
+    }).join('');
+  // Restore select values
+  teeth.forEach(function(t) {
+    var sv = saved[t];
+    if (!sv) return;
+    var bEl = document.getElementById('tb-'+caseId+'-'+t);
+    var cEl = document.getElementById('tc-'+caseId+'-'+t);
+    if (bEl && sv.brand) bEl.value = sv.brand;
+    if (cEl && sv.color) cEl.value = sv.color;
+  });
+}
+function getToothName(num) {
+  var map = {
+    11:'중절치',12:'측절치',13:'견치',14:'제1소구치',15:'제2소구치',16:'제1대구치',17:'제2대구치',18:'제3대구치',
+    21:'중절치',22:'측절치',23:'견치',24:'제1소구치',25:'제2소구치',26:'제1대구치',27:'제2대구치',28:'제3대구치',
+    31:'중절치',32:'측절치',33:'견치',34:'제1소구치',35:'제2소구치',36:'제1대구치',37:'제2대구치',38:'제3대구치',
+    41:'중절치',42:'측절치',43:'견치',44:'제1소구치',45:'제2소구치',46:'제1대구치',47:'제2대구치',48:'제3대구치',
+  };
+  return '#' + num + ' ' + (map[num] || '');
+}
 function onStl(id, input) {
   var f = input.files[0]; if(!f) return;
   var d = document.getElementById('stl-drop-'+id);
@@ -373,26 +456,39 @@ function submitCustom() {
   var cases = [];
   for (var i=1; i<=caseCount; i++) {
     if (!document.getElementById('case-'+i)) continue;
-    var brand = document.getElementById('cb-'+i).value;
-    var size  = document.getElementById('cs-'+i).value.trim();
-    if (!brand||!size) { alert('케이스 #'+i+': 임플란트 종류와 사이즈를 입력해주세요.'); return; }
+    var selectedTeeth = caseTeeth[i] ? Array.from(caseTeeth[i]).sort(function(a,b){return a-b;}) : [];
+    if (!selectedTeeth.length) { alert('케이스 #'+i+': 치아를 최소 1개 선택해주세요.'); return; }
+    var teethData = [];
+    var valid = true;
+    for (var ti=0; ti<selectedTeeth.length; ti++) {
+      var t = selectedTeeth[ti];
+      var brand = (document.getElementById('tb-'+i+'-'+t)||{}).value || '';
+      var size  = ((document.getElementById('ts-'+i+'-'+t)||{}).value || '').trim();
+      if (!brand||!size) { alert('케이스 #'+i+' 치아 #'+t+': 임플란트 종류와 사이즈를 입력해주세요.'); valid=false; break; }
+      teethData.push({
+        tooth:     t,
+        toothName: getToothName(t),
+        brand:     brand,
+        size:      size,
+        color:     (document.getElementById('tc-'+i+'-'+t)||{}).value || '',
+      });
+    }
+    if (!valid) return;
     cases.push({
-      patient: document.getElementById('cp-'+i).value.trim() || '익명',
-      brand:   brand,
-      size:    size,
-      color:   document.getElementById('cc-'+i).value,
-      qty:     parseInt(document.getElementById('cq-'+i).value, 10) || 1,
-      deadline:document.getElementById('cd-'+i).value,
-      memo:    document.getElementById('cm-'+i).value.trim(),
-      stl:     document.getElementById('stl-'+i).files[0] ? document.getElementById('stl-'+i).files[0].name : '미첨부',
+      patient:  document.getElementById('cp-'+i).value.trim() || '익명',
+      teeth:    teethData,
+      deadline: document.getElementById('cd-'+i).value,
+      memo:     document.getElementById('cm-'+i).value.trim(),
+      stl:      document.getElementById('stl-'+i).files[0] ? document.getElementById('stl-'+i).files[0].name : '미첨부',
     });
   }
   if (!cases.length) { alert('케이스를 최소 1개 추가해주세요.'); return; }
+  var totalTeeth = cases.reduce(function(s,c){ return s+c.teeth.length; },0);
   var oid = 'CA-' + Date.now().toString().slice(-6);
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString('ko-KR') };
   customOrders.unshift(order);
   sendLine(order, 'received');
-  alert('✅ 주문이 접수되었습니다!\n주문번호: ' + oid + (lineId ? '\nLine으로 확인 메시지를 보내드렸습니다.' : ''));
+  alert('✅ 주문이 접수되었습니다!\n주문번호: ' + oid + '\n케이스: ' + cases.length + '개 / 치아: ' + totalTeeth + '개' + (lineId ? '\nLine으로 확인 메시지를 보내드렸습니다.' : ''));
   customTab('list');
 }
 function renderCustomOrders() {
@@ -405,30 +501,52 @@ function renderCustomOrders() {
       var cls = i<si ? 'stage-done' : i===si ? 'stage-current' : 'stage-todo';
       return '<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full h-1.5 rounded-full ' + cls + '"></div><span class="text-[7px] font-bold text-center leading-tight">' + s.icon + '</span></div>';
     }).join('');
-    var caseRows = o.cases.map(function(cs){
-      return '<div class="flex justify-between items-center py-1.5 border-b border-slate-50 last:border-0">' +
-        '<div><span class="text-[10px] font-black text-slate-700">' + cs.brand + ' ' + cs.size + '</span><span class="text-[9px] text-slate-400 ml-1">· ' + cs.patient + ' · ' + (cs.color||'색상미정') + '</span></div>' +
-        '<span class="text-[9px] font-black text-blue-600">×' + cs.qty + '</span></div>';
+    var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
+    var caseRows = o.cases.map(function(cs, ci) {
+      var toothRows = (cs.teeth||[]).map(function(t) {
+        var isUpper = t>=11&&t<=28;
+        var jawDot = isUpper
+          ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block mr-1"></span>'
+          : '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block mr-1"></span>';
+        return '<div class="flex items-center gap-2 py-1.5 border-b border-slate-50 last:border-0">' +
+          '<span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 text-[9px] font-black flex items-center justify-center shrink-0">' + t.tooth + '</span>' +
+          '<div class="flex-1 min-w-0">' + jawDot + '<span class="text-[10px] font-black text-slate-700">' + t.brand + '</span><span class="text-[9px] text-slate-400 ml-1">' + t.size + '</span></div>' +
+          (t.color ? '<span class="text-[9px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md shrink-0">' + t.color + '</span>' : '') +
+        '</div>';
+      }).join('');
+      return '<div class="mb-3 last:mb-0">' +
+        '<div class="flex justify-between items-center mb-1">' +
+          '<p class="text-[10px] font-black text-slate-600">케이스 #' + (ci+1) + ' · 환자: ' + cs.patient + '</p>' +
+          '<span class="text-[9px] bg-blue-50 text-blue-600 font-black px-2 py-0.5 rounded-lg">' + (cs.teeth?cs.teeth.length:0) + '개 치아</span>' +
+        '</div>' +
+        (toothRows || '<p class="text-[9px] text-slate-300 font-bold">치아 정보 없음</p>') +
+        (cs.stl&&cs.stl!=='미첨부' ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '') +
+        (cs.deadline ? '<p class="text-[9px] text-slate-400 font-bold mt-1">📅 ' + cs.deadline + '</p>' : '') +
+      '</div>';
     }).join('');
-    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">' +
       '<div class="bg-[#001d4a] px-5 py-4 flex justify-between items-center">' +
         '<div><p class="font-black text-white text-sm">' + o.clinic + '</p><p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
-        '<span class="text-2xl">' + st.icon + '</span>' +
+        '<div class="text-right"><span class="text-xl">' + st.icon + '</span><p class="text-blue-300 text-[9px] font-bold mt-0.5">치아 ' + totalTeeth + '개</p></div>' +
       '</div>' +
       '<div class="px-5 py-4"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">진행 상황</p>' +
         '<div class="flex gap-1 mb-2">' + bars + '</div>' +
         '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + st.label + '</p>' +
       '</div>' +
-      '<div class="px-5 pb-4 border-t border-slate-50 pt-3"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">케이스 (' + o.cases.length + '개)</p>' + caseRows + '</div>' +
-      '<div class="px-5 pb-4 text-[9px] text-slate-400 font-bold space-y-0.5"><p>📍 ' + o.addr + '</p>' +
-        (o.cases[0]&&o.cases[0].deadline ? '<p>📅 납품 기한: ' + o.cases[0].deadline + '</p>' : '') +
+      '<div class="px-5 pb-5 border-t border-slate-50 pt-4">' +
+        '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">케이스 상세 (' + o.cases.length + '개 · 총 ' + totalTeeth + '개 치아)</p>' +
+        caseRows +
+      '</div>' +
+      '<div class="px-5 pb-4 text-[9px] text-slate-400 font-bold space-y-0.5 border-t border-slate-50 pt-3">' +
+        '<p>📍 ' + o.addr + '</p><p>📞 ' + o.phone + '</p>' +
       '</div></div>';
   }).join('');
 }
 async function sendLine(order, stageKey) {
   if (!LINE_TOKEN || LINE_TOKEN==='YOUR_LINE_NOTIFY_TOKEN') return;
-  var st  = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
-  var msg = '\n[Dentalk Custom] ' + st.icon + ' ' + st.label + '\n주문번호: ' + order.id + '\n치과: ' + order.clinic + '\n케이스: ' + order.cases.length + '개\n연락처: ' + order.phone;
+  var st = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
+  var totalTeeth = order.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
+  var msg = '\n[Dentalk Custom] ' + st.icon + ' ' + st.label + '\n주문번호: ' + order.id + '\n치과: ' + order.clinic + '\n케이스: ' + order.cases.length + '개 / 치아: ' + totalTeeth + '개\n연락처: ' + order.phone;
   try { await fetch('https://notify-api.line.me/api/notify',{method:'POST',headers:{'Authorization':'Bearer '+LINE_TOKEN,'Content-Type':'application/x-www-form-urlencoded'},body:'message='+encodeURIComponent(msg)}); }
   catch(e) {}
 }
