@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dentalk</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+* { -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Nunito', sans-serif; }
+.page { display: none; }
+.page.active { display: block; }
+.modal { display: none !important; }
+.modal.open { display: flex !important; }
+.no-scroll::-webkit-scrollbar { display: none; }
+.no-scroll { -ms-overflow-style:none; scrollbar-width:none; }
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+input[type=number] { -moz-appearance:textfield; }
+#sideMenu { transform:translateX(-100%); transition:transform .28s cubic-bezier(.4,0,.2,1); }
+#sideMenu.open { transform:translateX(0); }
+#sideOverlay { opacity:0; pointer-events:none; transition:opacity .28s; }
+#sideOverlay.open { opacity:1; pointer-events:auto; }
+.menu-btn { transition:background .15s; }
+.menu-btn.active { background:#1e3a8a; color:white; }
+.qty-input { width:44px; text-align:center; font-weight:900; border:2px solid #e2e8f0; border-radius:8px; padding:3px 0; background:#f8fafc; font-size:13px; }
+.tag-N { background:#dbeafe; color:#1e40af; }
+.tag-R { background:#fce7f3; color:#9d174d; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation:fadeUp .45s ease forwards; }
+.fade-up-2 { animation:fadeUp .45s .08s ease both; }
+.fade-up-3 { animation:fadeUp .45s .16s ease both; }
+.stage-done { background:#2563eb; }
+.stage-current { background:#f59e0b; }
+.stage-todo { background:#e2e8f0; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+<!-- ==============================
+     로그인 모달
+============================== -->
+<div id="loginModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
+  <div class="bg-[#001d4a] w-full max-w-sm rounded-3xl p-8 text-white shadow-2xl">
+    <div class="text-center mb-8">
+      <div class="flex items-baseline justify-center" style="font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1">
+        <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
+      </div>
+      <div style="height:2px;border-radius:99px;background:#D4AF37;opacity:.35;margin:-2px auto 0;width:140px"></div>
+      <p class="text-blue-300 text-[9px] font-bold uppercase tracking-[3px] mt-3">DOCTOR LOGIN</p>
+    </div>
+    <input id="licenseInput" type="text" placeholder="License Number"
+      class="w-full p-4 rounded-2xl text-black mb-4 outline-none font-bold text-center bg-white">
+    <button onclick="handleLogin()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3">LOGIN</button>
+    <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2">취소</button>
+  </div>
+</div>
+<!-- ==============================
+     세션 연장 모달
+============================== -->
+<div id="extendModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[900] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center">
+    <div class="text-4xl mb-3">⏰</div>
+    <h3 class="font-black text-slate-800 text-lg mb-2">세션 만료 임박</h3>
+    <p class="text-slate-500 text-sm mb-1">로그인이 <span id="extendRemain" class="font-black text-red-500"></span> 후 만료됩니다.</p>
+    <p class="text-slate-400 text-xs mb-6">지금 연장하시겠어요?</p>
+    <button onclick="extendSession()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-3 shadow">30분 연장하기</button>
+    <button onclick="closeModal('extendModal')" class="w-full text-slate-300 text-xs font-bold">나중에</button>
+  </div>
+</div>
+<!-- ==============================
+     주문 모달 (Shop)
+============================== -->
+<div id="orderModal" class="modal fixed inset-0 bg-black/70 z-[500] items-end">
+  <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
+    <div class="p-5 pb-3 border-b flex justify-between items-start">
+      <div>
+        <h2 id="orderModalTitle" class="text-lg font-black text-slate-800 italic"></h2>
+        <p id="orderModalDesc" class="text-[9px] text-slate-400 font-bold uppercase mt-0.5"></p>
+      </div>
+      <button onclick="closeModal('orderModal')" class="text-slate-300 font-black text-lg ml-4">✕</button>
+    </div>
+    <div class="flex-1 overflow-y-auto no-scroll p-4"><div id="orderTable"></div></div>
+    <div class="p-4 border-t bg-white">
+      <button onclick="addTableToCart()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg">장바구니 추가</button>
+      <p id="orderError" class="text-red-400 text-xs font-bold text-center mt-2 hidden">수량을 1개 이상 입력해주세요.</p>
+    </div>
+  </div>
+</div>
+<!-- ==============================
+     장바구니 모달
+============================== -->
+<div id="cartModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[500] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col" style="max-height:85vh">
+    <h2 class="text-2xl font-black text-slate-800 mb-5 italic">My Cart</h2>
+    <div id="cartItems" class="flex-1 overflow-y-auto space-y-3 no-scroll mb-5"></div>
+    <div class="border-t pt-4 space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="font-bold text-slate-400 text-sm">TOTAL</span>
+        <span id="totalPrice" class="font-black text-blue-900 text-xl font-mono">0 THB</span>
+      </div>
+      <button onclick="openAddressForm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow">CHECKOUT</button>
+      <button onclick="closeModal('cartModal')" class="w-full text-slate-300 text-[10px] font-black uppercase text-center">Close</button>
+    </div>
+  </div>
+</div>
+<!-- ==============================
+     주소 모달
+============================== -->
+<div id="addressModal" class="modal fixed inset-0 bg-[#001d4a]/95 backdrop-blur-lg z-[600] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-7">
+    <h2 class="text-2xl font-black text-slate-800 mb-6 italic">Delivery Info</h2>
+    <div class="space-y-3">
+      <input id="clinicName" type="text" placeholder="Clinic Name" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+      <input id="clinicPhone" type="tel" placeholder="Phone Number" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+      <textarea id="fullAddress" rows="3" placeholder="Full Address" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold resize-none"></textarea>
+    </div>
+    <button onclick="requestPay()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mt-5 shadow-xl">GENERATE QR</button>
+    <button onclick="closeModal('addressModal')" class="w-full text-slate-300 text-[10px] font-black mt-3 uppercase">← Back</button>
+  </div>
+</div>
+<!-- ==============================
+     QR 모달
+============================== -->
+<div id="qrModal" class="modal fixed inset-0 bg-slate-900/95 z-[700] items-center justify-center p-6">
+  <div class="bg-white p-7 rounded-3xl w-full max-w-sm text-center">
+    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Scan to Pay</p>
+    <img id="qrImg" alt="QR Code for payment" class="mx-auto w-52 h-52 border-4 border-slate-50 rounded-2xl mb-5">
+    <div id="qrSummary" class="text-left bg-slate-50 rounded-2xl p-4 mb-5 text-xs text-slate-600 space-y-1 max-h-40 overflow-y-auto no-scroll"></div>
+    <button onclick="completePayment()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg">PAYMENT COMPLETE</button>
+  </div>
+</div>
+<!-- ==============================
+     중고거래 연락처 모달
+============================== -->
+<div id="usedContactModal" class="modal fixed inset-0 bg-black/70 z-[500] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-7 text-center">
+    <p class="text-2xl mb-3">📞</p>
+    <h3 class="font-black text-slate-800 text-lg mb-2">Contact Seller</h3>
+    <p id="usedContactText" class="text-blue-700 font-black text-lg my-4 font-mono break-all"></p>
+    <button onclick="closeModal('usedContactModal')" class="w-full py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-600">Close</button>
+  </div>
+</div>
+<!-- ==============================
+     메인 앱
+============================== -->
+<div id="mainApp" class="min-h-screen flex flex-col">
+  <!-- 헤더 -->
+  <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-[200] shadow-lg">
+    <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex flex-col gap-1.5 items-center justify-center active:bg-white/20">
+      <span id="hb1" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
+      <span id="hb2" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
+      <span id="hb3" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
+    </button>
+    <div class="flex-1">
+      <div class="flex items-baseline" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
+        <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
+      </div>
+      <p id="pageTitle" class="text-[9px] text-blue-300 font-bold uppercase tracking-widest">Home</p>
+    </div>
+    <!-- 세션 타이머 -->
+    <div id="timerWrap" class="hidden">
+      <div id="timerBadge" class="flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5">
+        <span class="text-sm">🔑</span>
+        <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
+      </div>
+    </div>
+    <button onclick="openCart()" class="relative p-2 bg-white/10 rounded-xl">
+      <span class="text-xl">🛒</span>
+      <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+    </button>
+  </header>
+  <!-- 오버레이 -->
+  <div id="sideOverlay" class="fixed inset-0 bg-black/50 z-[300]" onclick="closeMenu()"></div>
+  <!-- 사이드 메뉴 -->
+  <div id="sideMenu" class="fixed top-0 left-0 h-full w-72 bg-[#001d4a] z-[400] flex flex-col shadow-2xl">
+    <div class="p-6 border-b border-white/10">
+      <div class="flex items-baseline" style="font-size:38px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px">
+        <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
+      </div>
+      <div style="height:2px;border-radius:99px;background:#D4AF37;opacity:.35;width:110px;margin:-3px 0 6px"></div>
+      <p class="text-blue-300 text-[9px] font-bold uppercase tracking-widest">BIOTEM × BIOPLANT</p>
+      <p id="sideUserInfo" class="text-[10px] text-slate-400 mt-1"></p>
+    </div>
+    <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+      <button onclick="goPage('home')"      class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-home"><span>🏠</span><span>HOME</span></button>
+      <button onclick="goPage('shop')"      class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-shop"><span>🦷</span><span>SHOP</span><span class="ml-auto text-slate-500 text-xs" id="lock-shop">🔒</span></button>
+      <button onclick="goPage('custom')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><span>🔧</span><span>CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
+      <button onclick="goPage('used')"      class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><span>♻️</span><span>USED MARKET</span></button>
+      <button onclick="goPage('forum')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><span>💬</span><span>FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
+      <button onclick="goPage('events')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span>EVENTS</span></button>
+      <button onclick="goPage('factory')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-factory"><span>🏭</span><span>FACTORY</span></button>
+      <button onclick="goPage('settings')"  class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><span>⚙️</span><span>SETTINGS</span></button>
+    </nav>
+    <div class="p-4 border-t border-white/10">
+      <div id="sideLoginArea">
+        <button onclick="openLoginModal(null)" class="w-full py-3 rounded-2xl bg-blue-500/30 text-blue-200 font-black text-sm flex items-center justify-center gap-2"><span>🔑</span>의사 로그인</button>
+      </div>
+      <div id="sideLoggedArea" class="hidden space-y-2">
+        <div class="bg-white/5 rounded-2xl px-4 py-3">
+          <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">로그인 중</p>
+          <p id="sideTimer" class="text-xs font-black text-white"></p>
+        </div>
+        <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-500/20 text-red-300 font-black text-sm">로그아웃</button>
+      </div>
+    </div>
+  </div>
+  <!-- 페이지 콘텐츠 -->
+  <div class="flex-1 overflow-y-auto pb-8">
+    <!-- ==================== HOME ==================== -->
+    <div id="page-home" class="page active">
+      <div style="background:linear-gradient(145deg,#001d4a 0%,#0a3072 50%,#1a1a2e 100%)" class="text-white px-6 pt-10 pb-12 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+        <div class="relative">
+          <div class="fade-up mb-5">
+            <div class="flex items-center gap-3 mb-1">
+              <span class="text-3xl font-black italic">BIOTEM</span>
+              <span class="text-blue-400 font-black text-xl">×</span>
+              <span class="text-3xl font-black italic text-blue-300">BIOPLANT</span>
+            </div>
+            <p class="text-[10px] text-blue-300 font-bold uppercase tracking-[3px]">Expert of Implant · Thailand</p>
+          </div>
+          <div class="fade-up-2 border-t border-white/10 pt-5">
+            <p class="text-lg font-black leading-snug mb-1">Digital Implant Parts</p>
+            <p class="text-lg font-black leading-snug text-blue-300">Ordering System</p>
+            <p class="text-xs text-blue-200/70 mt-3 leading-relaxed">Providing premium BIOTEM implant components<br>directly to dental clinics across Thailand.</p>
+          </div>
+          <div class="fade-up-3 mt-7">
+            <button onclick="goPage('shop')" class="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
+              <span>🦷</span> Go to Shop <span class="text-blue-200">›</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="px-4 -mt-4">
+        <!-- 회사 소개 -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span>About Us</h3>
+          <div class="space-y-3">
+            <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 text-lg">🏢</div><div><p class="font-black text-xs text-slate-800">BIOTEM Co., Ltd</p><p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Korea-based dental implant manufacturer. Expert of Implant with cutting-edge digital workflow solutions.</p></div></div>
+            <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0 text-lg">🏭</div><div><p class="font-black text-xs text-slate-800">BIOPLANT Thailand</p><p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Premium dental fixture manufacturing center in Bangkok. Supplying clinics across Southeast Asia.</p></div></div>
+          </div>
+        </div>
+        <!-- 제품 카테고리 배너 -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span>Product Categories</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="goPage('shop')" class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">🔬</p><p class="font-black text-xs">Scan Body</p><p class="text-[9px] text-blue-200 mt-1">Intra-Oral · Model · GeoMedi</p></button>
+            <button onclick="goPage('shop')" class="bg-gradient-to-br from-slate-700 to-slate-900 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">🦷</p><p class="font-black text-xs">Q-Base</p><p class="text-[9px] text-slate-300 mt-1">Zirconia Abutment</p></button>
+            <button onclick="goPage('shop')" class="bg-gradient-to-br from-indigo-600 to-indigo-900 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">⚙️</p><p class="font-black text-xs">Ready Made Abutment</p><p class="text-[9px] text-indigo-200 mt-1">Ø3.0 · 4.5 · 5.5 · 6.5</p></button>
+            <button onclick="goPage('custom')" class="bg-gradient-to-br from-amber-600 to-amber-800 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">🔧</p><p class="font-black text-xs">Custom Abutment</p><p class="text-[9px] text-amber-200 mt-1">CNC Milling · STL Upload</p></button>
+          </div>
+        </div>
+        <!-- 연락처 -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span>Contact & Address</h3>
+          <div class="space-y-3">
+            <div class="flex items-start gap-3"><span class="text-base mt-0.5">📍</span><div><p class="font-black text-xs text-slate-700">BIOPLANT Thailand</p><p class="text-[10px] text-slate-500 mt-0.5">Bangkok, Thailand</p></div></div>
+            <div class="flex items-center gap-3"><span class="text-base">📞</span><div><p class="font-black text-xs text-slate-700">+66 (0)2-XXX-XXXX</p><p class="text-[10px] text-slate-500">Mon-Fri 09:00-18:00</p></div></div>
+            <div class="flex items-center gap-3"><span class="text-base">💬</span><div><p class="font-black text-xs text-slate-700">Line Official</p><p class="text-[10px] text-slate-500 font-mono">@bioplant_th</p></div></div>
+            <div class="flex items-center gap-3"><span class="text-base">🌐</span><p class="font-black text-xs text-slate-700">www.biotemplant.com</p></div>
+          </div>
+        </div>
+        <p class="text-center text-[9px] text-slate-400 font-bold uppercase tracking-widest pb-4">© 2026 Dentalk · BIOTEM × BIOPLANT</p>
+      </div>
+    </div>
+    <!-- ==================== SHOP ==================== -->
+    <div id="page-shop" class="page p-4">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Select a category to order</p>
+      <div id="shopList" class="space-y-3"></div>
+    </div>
+    <!-- ==================== CUSTOM ABUTMENT ==================== -->
+    <div id="page-custom" class="page p-4">
+      <!-- 탭 -->
+      <div class="flex gap-2 mb-5">
+        <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">새 주문</button>
+        <button onclick="customTab('list')" id="ctab-list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">내 주문 현황</button>
+      </div>
+      <!-- 주문 폼 -->
+      <div id="custom-form">
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-amber-500 rounded-full inline-block"></span>커스텀 어버트먼트 주문</h3>
+          <div id="caseList"></div>
+          <button onclick="addCase()" class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black text-sm active:bg-slate-50">+ 케이스 추가</button>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>납품 정보</h3>
+          <input id="cust-clinic"  type="text" placeholder="치과명 / 기공소명" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+          <input id="cust-addr"    type="text" placeholder="납품 주소"         class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+          <input id="cust-phone"   type="text" placeholder="연락처"             class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+          <input id="cust-line"    type="text" placeholder="Line ID (알림 수신용)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
+        </div>
+        <button onclick="submitCustom()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg mb-2">주문 제출하기</button>
+        <p class="text-[9px] text-slate-400 text-center font-bold">주문 접수 시 Line으로 확인 메시지가 발송됩니다</p>
+      </div>
+      <!-- 주문 목록 -->
+      <div id="custom-list" class="hidden">
+        <div id="customOrdersContainer" class="space-y-4"></div>
+      </div>
+    </div>
+    <!-- ==================== USED MARKET ==================== -->
+    <div id="page-used" class="page p-4">
+      <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <h3 class="font-black text-sm text-slate-700 mb-3 flex items-center gap-2"><span>♻️</span>Sell Used Parts</h3>
+        <input id="u-name"    type="text"    placeholder="Part Name"        class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <input id="u-code"    type="text"    placeholder="Product Code"      class="w-full p-3 bg-slate-50 rounded-xl text-sm font-mono outline-none mb-2">
+        <div class="flex gap-2 mb-2">
+          <input id="u-price" type="number"  placeholder="Price (THB)"      class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
+          <select id="u-cond" class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-none">
+            <option value="new">Like New</option><option value="good">Good</option><option value="fair">Fair</option>
+          </select>
+        </div>
+        <textarea id="u-desc"    rows="2" placeholder="Condition details..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-2"></textarea>
+        <input id="u-contact" type="text"    placeholder="Contact (Line ID / Phone)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3">
+        <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm">POST FOR SALE</button>
+      </div>
+      <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1">Available Used Parts</h3>
+      <div id="usedList" class="space-y-3"></div>
+    </div>
+    <!-- ==================== FORUM ==================== -->
+    <div id="page-forum" class="page p-4">
+      <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3">New Post</h3>
+        <input id="postTitle"   type="text" placeholder="Title"              class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <textarea id="postBody" rows="3"    placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none"></textarea>
+        <button onclick="submitPost()" class="mt-3 w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm">POST</button>
+      </div>
+      <div id="postList" class="space-y-3"></div>
+    </div>
+    <!-- ==================== EVENTS ==================== -->
+    <div id="page-events" class="page p-4">
+      <div id="eventList" class="space-y-4"></div>
+    </div>
+    <!-- ==================== FACTORY ==================== -->
+    <div id="page-factory" class="page p-4 text-center">
+      <div class="bg-white rounded-3xl p-10 shadow-sm">
+        <h2 class="text-xl font-black italic text-blue-900 mb-2">BIOPLANT THAILAND</h2>
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose">Premium fixture manufacturing center in Bangkok</p>
+      </div>
+    </div>
+    <!-- ==================== SETTINGS ==================== -->
+    <div id="page-settings" class="page p-4 space-y-4">
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="font-black text-slate-800 mb-1">Language</h3>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <button onclick="setLang('en')" id="lang-en" class="p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700">🇺🇸 English</button>
+          <button onclick="setLang('ko')" id="lang-ko" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇰🇷 한국어</button>
+          <button onclick="setLang('zh')" id="lang-zh" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇨🇳 中文</button>
+          <button onclick="setLang('th')" id="lang-th" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇹🇭 ภาษาไทย</button>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="font-black text-slate-800 mb-1">Account</h3>
+        <p class="text-sm font-bold text-slate-600 mt-3">License: <span id="licenseDisplay" class="text-blue-700 font-mono">-</span></p>
+      </div>
+    </div>
+  </div><!-- /content -->
+</div><!-- /mainApp -->
+<script src="app.js" defer></script>
+</body>
+</html>

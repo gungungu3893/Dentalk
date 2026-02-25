@@ -1,0 +1,518 @@
+// ============================================================
+// 상수 & 데이터
+// ============================================================
+const LOCKED = ['shop','forum','custom'];
+const PAGE_TITLES = { home:'Home', shop:'Shop', custom:'Custom Abutment', used:'Used Market', forum:'Forum', events:'Events', factory:'Factory', settings:'Settings' };
+const IMPLANT_BRANDS = ['BIOTEM N','BIOTEM R','Osstem US','Osstem TS','Straumann BL','Straumann TL','Nobel Active','Nobel Replace','Zimmer TSV','Dentium SuperLine','기타'];
+const TOOTH_COLORS   = ['A1','A2','A3','A3.5','A4','B1','B2','B3','C1','C2','C3','D2','D3','BL (Bleach)'];
+const ORDER_STAGES   = [
+  {key:'received', label:'주문 접수', icon:'[1]'},
+  {key:'stl',      label:'STL 검토',  icon:'[2]'},
+  {key:'design',   label:'디자인 중', icon:'[3]'},
+  {key:'cnc',      label:'CNC 생산',  icon:'[4]'},
+  {key:'qc',       label:'품질 검사', icon:'[5]'},
+  {key:'shipping', label:'배송 중',   icon:'[6]'},
+  {key:'done',     label:'납품 완료', icon:'[7]'},
+];
+const LINE_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN';
+// ============================================================
+// 상태
+// ============================================================
+let currentPage  = 'home';
+let currentLang  = 'en';
+let cart         = [];
+let currentProd  = null;
+let tableQtys    = {};
+let usedItems    = [
+  {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10'},
+  {id:2,name:'Q-Base QBAM4401S',  code:'QBAM4401S', price:2000,cond:'new', desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18'},
+];
+let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin'}];
+let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
+let customOrders = [];
+let caseCount    = 0;
+// Session
+let sessionEnd   = null;
+let sessionTimer = null;
+let extShown     = false;
+let pendingPage  = null;
+// ============================================================
+// 세션 관리
+// ============================================================
+function isLoggedIn() { return sessionEnd && Date.now() < sessionEnd; }
+function openLoginModal(target) {
+  pendingPage = target;
+  document.getElementById('licenseInput').value = '';
+  openModal('loginModal');
+}
+function handleLogin() {
+  const lic = document.getElementById('licenseInput').value.trim();
+  if (lic.length < 3) { alert('Please enter your license number.'); return; }
+  sessionEnd = Date.now() + 30*60*1000;
+  extShown   = false;
+  document.getElementById('licenseDisplay').textContent = lic;
+  document.getElementById('sideUserInfo').textContent   = '🔑 ' + lic;
+  document.getElementById('sideLoginArea').classList.add('hidden');
+  document.getElementById('sideLoggedArea').classList.remove('hidden');
+  document.getElementById('timerWrap').classList.remove('hidden');
+  if (sessionTimer) clearInterval(sessionTimer);
+  sessionTimer = setInterval(tickSession, 1000);
+  tickSession();
+  closeModal('loginModal');
+  if (pendingPage) { goPage(pendingPage); pendingPage = null; }
+}
+function tickSession() {
+  if (!sessionEnd) return;
+  const rem = Math.max(0, Math.floor((sessionEnd - Date.now()) / 1000));
+  const m = Math.floor(rem/60), s = rem%60;
+  const txt = m + ':' + String(s).padStart(2,'0');
+  const el  = document.getElementById('timerText');
+  const bdg = document.getElementById('timerBadge');
+  const sd  = document.getElementById('sideTimer');
+  if (el)  el.textContent  = txt;
+  if (sd)  sd.textContent  = '남은 시간: ' + txt;
+  if (el)  el.className    = rem<=300 ? 'text-[11px] font-black text-red-400 font-mono' : 'text-[11px] font-black text-green-300 font-mono';
+  if (bdg) bdg.className   = rem<=300 ? 'flex items-center gap-1 bg-red-500/20 rounded-xl px-2 py-1.5 animate-pulse' : 'flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5';
+  if (rem<=300 && rem>0 && !extShown) {
+    extShown = true;
+    document.getElementById('extendRemain').textContent = m+'분 '+s+'초';
+    openModal('extendModal');
+  }
+  if (rem<=0) forceLogout();
+}
+function extendSession() {
+  sessionEnd = Date.now() + 30*60*1000;
+  extShown   = false;
+  closeModal('extendModal');
+}
+function forceLogout() {
+  clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  document.getElementById('sideLoginArea').classList.remove('hidden');
+  document.getElementById('sideLoggedArea').classList.add('hidden');
+  document.getElementById('timerWrap').classList.add('hidden');
+  document.getElementById('sideUserInfo').textContent = '';
+  if (LOCKED.includes(currentPage)) goPage('home');
+  alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+}
+function doLogout() {
+  clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  cart=[]; updateBadge();
+  document.getElementById('sideLoginArea').classList.remove('hidden');
+  document.getElementById('sideLoggedArea').classList.add('hidden');
+  document.getElementById('timerWrap').classList.add('hidden');
+  document.getElementById('sideUserInfo').textContent = '';
+  document.getElementById('licenseDisplay').textContent = '-';
+  if (LOCKED.includes(currentPage)) goPage('home');
+  closeMenu();
+}
+// ============================================================
+// 메뉴 & 페이지 전환
+// ============================================================
+let menuOpen = false;
+function toggleMenu() { menuOpen ? closeMenu() : openMenu(); }
+function openMenu() {
+  menuOpen = true;
+  document.getElementById('sideMenu').classList.add('open');
+  document.getElementById('sideOverlay').classList.add('open');
+  document.getElementById('hb1').style.cssText = 'transform:translateY(8px) rotate(45deg)';
+  document.getElementById('hb2').style.cssText = 'opacity:0';
+  document.getElementById('hb3').style.cssText = 'transform:translateY(-8px) rotate(-45deg)';
+}
+function closeMenu() {
+  menuOpen = false;
+  document.getElementById('sideMenu').classList.remove('open');
+  document.getElementById('sideOverlay').classList.remove('open');
+  document.getElementById('hb1').style.cssText = '';
+  document.getElementById('hb2').style.cssText = '';
+  document.getElementById('hb3').style.cssText = '';
+}
+function goPage(id) {
+  if (LOCKED.includes(id) && !isLoggedIn()) { closeMenu(); openLoginModal(id); return; }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const mb = document.getElementById('mb-' + id);
+  if (mb) mb.classList.add('active');
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[id] || id;
+  currentPage = id;
+  closeMenu();
+  if (id === 'shop')    renderShop();
+  if (id === 'used')    renderUsed();
+  if (id === 'forum')   renderForum();
+  if (id === 'events')  renderEvents();
+  if (id === 'custom')  { customTab('form'); resetCustomForm(); }
+}
+// ============================================================
+// 제품 DB
+// ============================================================
+const PRODUCTS = [
+  {id:'ScanBodyIntraOral',title:'Scan Body (Intra-Oral)',subtitle:'Healing type · Special coating',price:3500,tableType:'dh',connections:[{label:'Ø4.0',type:'N'},{label:'Ø4.0',type:'R'},{label:'Ø5.0',type:'R'},{label:'Ø6.0',type:'R'}],heights:['5','7','9'],codes:[['HSAM4005S','HSAM4007S','HSAM4009S'],['HSAR4005S','HSAR4007S','HSAR4009S'],['HSAR5005S','HSAR5007S','HSAR5009S'],['HSAR6005S','HSAR6007S','HSAR6009S']]},
+  {id:'ScanBodyModel',title:'Scan Body (Model)',subtitle:'Stone model scanbody',price:3500,tableType:'dh',connections:[{label:'Ø4.0',type:'N'},{label:'Ø4.0',type:'R'},{label:'Ø5.0',type:'R'},{label:'Ø6.0',type:'R'}],heights:['5','7','9'],codes:[['SMAM4005S','SMAM4007S','SMAM4009S'],['SMAR4005S','SMAR4007S','SMAR4009S'],['SMAR5005S','SMAR5007S','SMAR5009S'],['SMAR6005S','SMAR6007S','SMAR6009S']]},
+  {id:'GeoMediIntraOral',title:'Scan Body (GeoMedi Intra-Oral)',subtitle:'Ti-6Al-4V ELI · Short 7.5mm / Long 11.5mm',price:4000,tableType:'simple',rows:[{label:'N',type:'N',items:[{code:'GMS-ASRS',size:'Short 7.5mm'},{code:'GMS-ASRL',size:'Long 11.5mm'}]},{label:'R',type:'R',items:[{code:'GMS-SUROS',size:'Short 7.5mm'},{code:'GMS-SUROL',size:'Long 11.5mm'}]}]},
+  {id:'GeoMediModel',title:'Scan Body (GeoMedi Model)',subtitle:'Teflon-coating · Semipermanent',price:4000,tableType:'simple',rows:[{label:'N',type:'N',items:[{code:'SC-ASR',size:'Standard'}]},{label:'R',type:'R',items:[{code:'SC-SURO',size:'Standard'}]}]},
+  {id:'QBase',title:'Q-Base (Zirconia Abutment)',subtitle:'H=7mm · 3° taper',price:4500,tableType:'dh',connections:[{label:'Ø4.4',type:'N'},{label:'Ø5.5',type:'R'}],heights:['C1','C3','C5'],codes:[['QBAM4401S','QBAM4403S','QBAM4405S'],['QBAR5501S','QBAR5503S','QBAR5505S']]},
+  {id:'ReadyMade30',title:'Ready Made Abutment (Ø3.0 N)',subtitle:'Dual purpose · Torque 20N',price:5000,tableType2:'hxc',colLabels:['C1','C2','C3','C4'],rowLabels:['H 4.0','H 5.5','H 7.0'],codeMatrix:[['SAAT 30514 MSA','SAAT 30524 MSA','SAAT 30534 MSA','SAAT 30544 MSA'],['SAAT 30515 MSA','SAAT 30525 MSA','SAAT 30535 MSA','SAAT 30545 MSA'],['SAAT 30517 MSA','SAAT 30527 MSA','SAAT 30537 MSA','SAAT 30547 MSA']]},
+  {id:'ReadyMade45',title:'Ready Made Abutment (Ø4.5 R)',subtitle:'Dual purpose · Torque 30N',price:5000,tableType2:'hxc',colLabels:['C1','C2','C3','C4','C5','C6'],rowLabels:['H 4.0','H 5.5','H 7.0'],codeMatrix:[['SAAT 45514 SA','SAAT 45524 SA','SAAT 45534 SA','SAAT 45544 SA','',''],['SAAT 45515 SA','SAAT 45525 SA','SAAT 45535 SA','SAAT 45545 SA','SAAT 45555 SA','SAAT 45565 SA'],['SAAT 45517 SA','SAAT 45527 SA','SAAT 45537 SA','SAAT 45547 SA','SAAT 45557 SA','SAAT 45567 SA']]},
+  {id:'ReadyMade55',title:'Ready Made Abutment (Ø5.5 R)',subtitle:'Dual purpose · Torque 30N',price:5000,tableType2:'hxc',colLabels:['C1','C2','C3','C4','C5','C6'],rowLabels:['H 4.0','H 5.5','H 7.0'],codeMatrix:[['SAAT 55614 SA','SAAT 55624 SA','SAAT 55634 SA','SAAT 55644 SA','',''],['SAAT 55615 SA','SAAT 55625 SA','SAAT 55635 SA','SAAT 55645 SA','SAAT 55655 SA','SAAT 55665 SA'],['SAAT 55617 SA','SAAT 55627 SA','SAAT 55637 SA','SAAT 55647 SA','SAAT 55657 SA','SAAT 55667 SA']]},
+  {id:'ReadyMade65',title:'Ready Made Abutment (Ø6.5 R)',subtitle:'Dual purpose · Torque 30N',price:5000,tableType2:'hxc',colLabels:['C1','C2','C3','C4','C5','C6'],rowLabels:['H 4.0','H 5.5','H 7.0'],codeMatrix:[['SAAT 65714 SA','SAAT 65724 SA','SAAT 65734 SA','SAAT 65744 SA','',''],['SAAT 65715 SA','SAAT 65725 SA','SAAT 65735 SA','SAAT 65745 SA','SAAT 65755 SA','SAAT 65765 SA'],['SAAT 65717 SA','SAAT 65727 SA','SAAT 65737 SA','SAAT 65747 SA','SAAT 65757 SA','SAAT 65767 SA']]},
+  {id:'TiBase',title:'Ti-base Abutment',subtitle:'Ti+Zr CAD/CAM · H=4mm',price:3800,tableType:'simple',rows:[{label:'Ø4.0',type:'N',items:[{code:'Tibs-011 MSA',size:'H=4mm'}]},{label:'Ø4.5',type:'R',items:[{code:'Tibs-012 SA',size:'H=4mm'}]}]},
+  {id:'PreMilledN10',title:'Pre-Milled Abutment (N · H10)',subtitle:'Milling compatible · Torque 20N',price:6000,tableType:'simple',rows:[{label:'AM',type:'N',items:[{code:'PLAM10H AM',size:'Hex'},{code:'PLAM10N AM',size:'NonHex'}]},{label:'VH',type:'N',items:[{code:'PLAM10H VH',size:'Hex'},{code:'PLAM10N VH',size:'NonHex'}]},{label:'RD',type:'N',items:[{code:'PLAM10H RD',size:'Hex'},{code:'PLAM10N RD',size:'NonHex'}]},{label:'II',type:'N',items:[{code:'PLAM10H II',size:'Hex'},{code:'PLAM10N II',size:'NonHex'}]}]},
+  {id:'PreMilledR10',title:'Pre-Milled Abutment (R · H10)',subtitle:'Milling compatible · Torque 30N',price:6000,tableType:'simple',rows:[{label:'AM',type:'R',items:[{code:'PLAR10H AM',size:'Hex'},{code:'PLAR10N AM',size:'NonHex'}]},{label:'VH',type:'R',items:[{code:'PLAR10H VH',size:'Hex'},{code:'PLAR10N VH',size:'NonHex'}]},{label:'RD',type:'R',items:[{code:'PLAR10H RD',size:'Hex'},{code:'PLAR10N RD',size:'NonHex'}]},{label:'II',type:'R',items:[{code:'PLAR10H II',size:'Hex'},{code:'PLAR10N II',size:'NonHex'}]}]},
+  {id:'MultiUnit',title:'Multi Unit (All-on-X)',subtitle:'Multi Abutment / Scan-Body / Ti-base',price:5500,tableType:'simple',rows:[{label:'Multi Abutment',type:'N',items:[{code:'DBTS MUA',size:'D Ø4.8'}]},{label:'Multi Scan-Body',type:'N',items:[{code:'AMSB48',size:'N+R'}]},{label:'3D LAB Analog N',type:'N',items:[{code:'DLAAF3415S',size:'Narrow'}]},{label:'3D LAB Analog R',type:'R',items:[{code:'DLAAF4015S',size:'Regular'}]}]},
+  {id:'GeoMedi3DAnalog',title:'3D-Analog (GeoMedi)',subtitle:'Stone & 3D printed model',price:3200,tableType:'simple',rows:[{label:'N',type:'N',items:[{code:'3D-ASR',size:'Standard'}]},{label:'R',type:'R',items:[{code:'3D-SURO',size:'Standard'}]}]},
+];
+// ============================================================
+// SHOP
+// ============================================================
+function renderShop() {
+  document.getElementById('shopList').innerHTML = PRODUCTS.map(p =>
+    '<div onclick="openOrder(\'' + p.id + '\')" class="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition">' +
+      '<div class="flex-1 pr-3"><h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-tight">' + p.subtitle + '</p></div>' +
+      '<div class="text-right shrink-0"><p class="font-black text-blue-700 text-xs font-mono">' + p.price.toLocaleString() + ' THB</p><p class="text-[10px] text-blue-500 font-black mt-1">SELECT ›</p></div>' +
+    '</div>'
+  ).join('');
+}
+function openOrder(pid) {
+  currentProd = PRODUCTS.find(p => p.id === pid);
+  if (!currentProd) return;
+  tableQtys   = {};
+  document.getElementById('orderModalTitle').textContent = currentProd.title;
+  document.getElementById('orderModalDesc').textContent  = currentProd.subtitle;
+  document.getElementById('orderError').classList.add('hidden');
+  renderOrderTable();
+  openModal('orderModal');
+}
+function renderOrderTable() {
+  const p = currentProd;
+  let html = '';
+  if (p.tableType2 === 'hxc') {
+    html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr><th class="text-left pb-2 text-slate-400 font-bold text-[10px] pr-2">H / C</th>';
+    p.colLabels.forEach(c => { html += '<th class="text-center pb-2 text-slate-500 font-black text-[10px] px-1">' + c + '</th>'; });
+    html += '</tr></thead><tbody>';
+    p.rowLabels.forEach(function(row, ri) {
+      html += '<tr class="border-t border-slate-100"><td class="py-3 pr-2 font-black text-xs text-slate-700 whitespace-nowrap">' + row + '</td>';
+      p.colLabels.forEach(function(col, ci) {
+        var code = p.codeMatrix[ri][ci];
+        html += code
+          ? '<td class="py-3 px-1"><div class="flex flex-col items-center gap-1"><span class="text-[8px] text-slate-400 font-mono text-center leading-tight">' + code + '</span><input type="number" min="0" value="0" class="qty-input" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0"></div></td>'
+          : '<td class="py-3 px-1 text-center text-slate-200">-</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else if (p.tableType === 'dh') {
+    html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr><th class="text-left pb-2 text-slate-400 font-bold text-[10px] pr-2">D / H</th>';
+    p.heights.forEach(h => { html += '<th class="text-center pb-2 text-slate-500 font-black px-1">' + h + '</th>'; });
+    html += '</tr></thead><tbody>';
+    p.connections.forEach(function(conn, ci) {
+      html += '<tr class="border-t border-slate-100"><td class="py-3 pr-2 whitespace-nowrap"><div class="flex items-center gap-1.5"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + conn.type + '">' + conn.type + '</span><span class="font-black text-xs text-slate-700">' + conn.label + '</span></div></td>';
+      p.heights.forEach(function(h, hi) {
+        var code = p.codes[ci][hi];
+        html += '<td class="py-3 px-1"><div class="flex flex-col items-center gap-1"><span class="text-[8px] text-slate-400 font-mono text-center">' + code + '</span><input type="number" min="0" value="0" class="qty-input" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0"></div></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else {
+    html = '<div class="space-y-2">';
+    p.rows.forEach(function(row) {
+      row.items.forEach(function(item) {
+        html += '<div class="bg-slate-50 rounded-2xl p-4 flex justify-between items-center">' +
+          '<div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + row.type + '">' + row.type + '</span><span class="font-black text-xs text-slate-700">' + row.label + '</span><span class="text-[9px] text-slate-400 font-bold">' + item.size + '</span></div><p class="text-[9px] text-slate-500 font-mono font-bold">' + item.code + '</p></div>' +
+          '<div class="flex items-center gap-2 ml-3">' +
+            '<button onclick="stepQ(\'' + item.code + '\',-1)" class="w-7 h-7 rounded-full bg-slate-200 font-black text-sm flex items-center justify-center">−</button>' +
+            '<input type="number" min="0" value="0" class="qty-input" id="qi-' + item.code.replace(/\s/g,'_') + '" oninput="tableQtys[\'' + item.code + '\']=parseInt(this.value)||0">' +
+            '<button onclick="stepQ(\'' + item.code + '\',1)"  class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-black text-sm flex items-center justify-center">+</button>' +
+          '</div></div>';
+      });
+    });
+    html += '</div>';
+  }
+  html += '<p class="text-[9px] text-slate-400 mt-3 text-center font-bold">' + p.price.toLocaleString() + ' THB / each</p>';
+  document.getElementById('orderTable').innerHTML = html;
+}
+function stepQ(code, d) {
+  var el = document.getElementById('qi-' + code.replace(/\s/g,'_'));
+  if (!el) return;
+  var v = Math.max(0, (parseInt(el.value)||0) + d);
+  el.value = v; tableQtys[code] = v;
+}
+function addTableToCart() {
+  var items = Object.entries(tableQtys).filter(function(e){ return e[1]>0; });
+  if (!items.length) { document.getElementById('orderError').classList.remove('hidden'); return; }
+  items.forEach(function(e) {
+    var code=e[0], qty=e[1];
+    var ex = cart.find(function(c){ return c.code===code; });
+    if (ex) ex.qty += qty;
+    else cart.push({name:currentProd.title, code:code, price:currentProd.price, qty:qty});
+  });
+  updateBadge();
+  closeModal('orderModal');
+}
+// ============================================================
+// 장바구니
+// ============================================================
+function updateBadge() {
+  var tot = cart.reduce(function(s,c){ return s+c.qty; }, 0);
+  var b = document.getElementById('cartBadge');
+  b.textContent = tot;
+  b.classList.toggle('hidden', tot===0);
+}
+function openCart() {
+  if (!cart.length) { alert('Cart is empty!'); return; }
+  renderCart(); openModal('cartModal');
+}
+function renderCart() {
+  var total = 0;
+  document.getElementById('cartItems').innerHTML = cart.map(function(item, i) {
+    var sub = item.price * item.qty; total += sub;
+    return '<div class="bg-slate-50 p-4 rounded-2xl">' +
+      '<div class="flex justify-between items-start"><div class="flex-1 pr-2"><p class="font-black text-xs text-slate-800">' + item.name + '</p><p class="text-[9px] text-slate-400 font-mono uppercase font-bold mt-0.5">' + item.code + '</p></div>' +
+      '<button onclick="removeCart(' + i + ')" class="text-red-400 font-bold text-xs">✕</button></div>' +
+      '<div class="flex items-center justify-between mt-3">' +
+        '<div class="flex items-center gap-2">' +
+          '<button onclick="cartQty(' + i + ',-1)" class="w-7 h-7 rounded-full bg-slate-200 font-black text-sm flex items-center justify-center">−</button>' +
+          '<span class="font-black text-sm w-5 text-center">' + item.qty + '</span>' +
+          '<button onclick="cartQty(' + i + ',1)"  class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-black text-sm flex items-center justify-center">+</button>' +
+        '</div>' +
+        '<span class="font-black text-sm text-blue-900 font-mono">' + sub.toLocaleString() + ' THB</span>' +
+      '</div></div>';
+  }).join('');
+  document.getElementById('totalPrice').textContent = total.toLocaleString() + ' THB';
+}
+function removeCart(i) { cart.splice(i,1); updateBadge(); if(!cart.length) closeModal('cartModal'); else renderCart(); }
+function cartQty(i,n)  { cart[i].qty = Math.max(1, cart[i].qty+n); updateBadge(); renderCart(); }
+function openAddressForm() { closeModal('cartModal'); openModal('addressModal'); }
+async function requestPay() {
+  var clinic=document.getElementById('clinicName').value.trim();
+  var phone=document.getElementById('clinicPhone').value.trim();
+  var addr=document.getElementById('fullAddress').value.trim();
+  if (!clinic||!phone||!addr) { alert('Please fill in all delivery info.'); return; }
+  var amt = cart.reduce(function(s,c){ return s+c.price*c.qty; },0);
+  var qrUrl;
+  try {
+    var res = await fetch('http://localhost:3000/pay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart,address:clinic,phone,detailAddress:addr})});
+    qrUrl = (await res.json()).qr_image;
+  } catch(e) {
+    qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DENTALK_' + Date.now() + '_' + amt + 'THB';
+  }
+  document.getElementById('qrSummary').innerHTML =
+    '<p class="font-black text-slate-500 uppercase text-[9px] mb-2">Order Summary</p>' +
+    cart.map(function(c){ return '<div class="flex justify-between gap-2 text-[10px]"><span class="flex-1">' + c.name + '</span><span class="font-mono text-slate-500">' + c.code + '</span><span class="font-black ml-1">×' + c.qty + '</span><span class="font-mono font-black ml-1">' + (c.price*c.qty).toLocaleString() + '</span></div>'; }).join('') +
+    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-slate-800"><span>TOTAL</span><span class="font-mono">' + amt.toLocaleString() + ' THB</span></div>';
+  document.getElementById('qrImg').src = qrUrl;
+  closeModal('addressModal'); openModal('qrModal');
+}
+function completePayment() { cart=[]; updateBadge(); closeModal('qrModal'); goPage('shop'); }
+// ============================================================
+// CUSTOM ABUTMENT
+// ============================================================
+function customTab(tab) {
+  var isForm = tab==='form';
+  document.getElementById('custom-form').classList.toggle('hidden', !isForm);
+  document.getElementById('custom-list').classList.toggle('hidden', isForm);
+  document.getElementById('ctab-form').className = isForm
+    ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow'
+    : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  document.getElementById('ctab-list').className = !isForm
+    ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow'
+    : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  if (!isForm) renderCustomOrders();
+}
+function resetCustomForm() {
+  caseCount = 0;
+  document.getElementById('caseList').innerHTML = '';
+  addCase();
+  ['cust-clinic','cust-addr','cust-phone','cust-line'].forEach(function(id){ document.getElementById(id).value=''; });
+}
+function addCase() {
+  caseCount++;
+  var id  = caseCount;
+  var div = document.createElement('div');
+  div.id  = 'case-' + id;
+  div.className = 'bg-slate-50 rounded-2xl p-4 mb-3';
+  var brandOpts = '<option value="">임플란트 종류 선택</option>' +
+    IMPLANT_BRANDS.map(function(b){ return '<option value="' + b + '">' + b + '</option>'; }).join('');
+  var colorOpts = '<option value="">치아 색상 선택 (VITA)</option>' +
+    TOOTH_COLORS.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  var delBtn = id > 1
+    ? '<button onclick="removeCase(' + id + ')" class="text-red-400 font-black text-xs">✕ 삭제</button>'
+    : '';
+  div.innerHTML =
+    '<div class="flex justify-between items-center mb-3">' +
+      '<span class="font-black text-xs text-slate-600">케이스 #' + id + '</span>' + delBtn +
+    '</div>' +
+    '<input type="text" id="cp-' + id + '" placeholder="환자 ID (익명 가능, 예: P001)" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' +
+    '<select id="cb-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' + brandOpts + '</select>' +
+    '<input type="text" id="cs-' + id + '" placeholder="임플란트 사이즈 (예: Ø4.0 / L10)" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' +
+    '<select id="cc-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-2 border border-slate-100">' + colorOpts + '</select>' +
+    '<div class="flex gap-2 mb-2">' +
+      '<input type="number" id="cq-' + id + '" min="1" max="10" value="1" class="w-24 p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100 text-center">' +
+      '<input type="date"   id="cd-' + id + '" class="flex-1 p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100">' +
+    '</div>' +
+    '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white">' +
+      '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">STL 파일 업로드</p><p class="text-[9px] text-slate-400 mt-0.5">.stl 파일을 탭하여 선택</p>' +
+    '</div>' +
+    '<input type="file" id="stl-' + id + '" accept=".stl,.STL" class="hidden" onchange="onStl(' + id + ',this)">' +
+    '<textarea id="cm-' + id + '" rows="2" placeholder="특별 요청사항 (선택)" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border border-slate-100"></textarea>';
+  document.getElementById('caseList').appendChild(div);
+}
+function removeCase(id) { var el=document.getElementById('case-'+id); if(el) el.remove(); }
+function onStl(id, input) {
+  var f = input.files[0]; if(!f) return;
+  var d = document.getElementById('stl-drop-'+id);
+  d.innerHTML = '<p class="text-2xl mb-1">✅</p><p class="text-xs font-black text-green-600">' + f.name + '</p><p class="text-[9px] text-slate-400">' + (f.size/1024).toFixed(1) + ' KB</p>';
+  d.className = 'border-2 border-green-200 rounded-xl p-4 text-center mb-2 bg-green-50';
+}
+function submitCustom() {
+  var clinic = document.getElementById('cust-clinic').value.trim();
+  var addr   = document.getElementById('cust-addr').value.trim();
+  var phone  = document.getElementById('cust-phone').value.trim();
+  var lineId = document.getElementById('cust-line').value.trim();
+  if (!clinic||!addr||!phone) { alert('치과명, 납품 주소, 연락처를 입력해주세요.'); return; }
+  var cases = [];
+  for (var i=1; i<=caseCount; i++) {
+    if (!document.getElementById('case-'+i)) continue;
+    var brand = document.getElementById('cb-'+i).value;
+    var size  = document.getElementById('cs-'+i).value.trim();
+    if (!brand||!size) { alert('케이스 #'+i+': 임플란트 종류와 사이즈를 입력해주세요.'); return; }
+    cases.push({
+      patient: document.getElementById('cp-'+i).value.trim() || '익명',
+      brand:   brand,
+      size:    size,
+      color:   document.getElementById('cc-'+i).value,
+      qty:     parseInt(document.getElementById('cq-'+i).value, 10) || 1,
+      deadline:document.getElementById('cd-'+i).value,
+      memo:    document.getElementById('cm-'+i).value.trim(),
+      stl:     document.getElementById('stl-'+i).files[0] ? document.getElementById('stl-'+i).files[0].name : '미첨부',
+    });
+  }
+  if (!cases.length) { alert('케이스를 최소 1개 추가해주세요.'); return; }
+  var oid = 'CA-' + Date.now().toString().slice(-6);
+  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString('ko-KR') };
+  customOrders.unshift(order);
+  sendLine(order, 'received');
+  alert('✅ 주문이 접수되었습니다!\n주문번호: ' + oid + (lineId ? '\nLine으로 확인 메시지를 보내드렸습니다.' : ''));
+  customTab('list');
+}
+function renderCustomOrders() {
+  var c = document.getElementById('customOrdersContainer');
+  if (!customOrders.length) { c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">아직 주문 내역이 없어요</div>'; return; }
+  c.innerHTML = customOrders.map(function(o) {
+    var si = ORDER_STAGES.findIndex(function(s){ return s.key===o.stage; });
+    var st = ORDER_STAGES[si];
+    var bars = ORDER_STAGES.map(function(s,i){
+      var cls = i<si ? 'stage-done' : i===si ? 'stage-current' : 'stage-todo';
+      return '<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full h-1.5 rounded-full ' + cls + '"></div><span class="text-[7px] font-bold text-center leading-tight">' + s.icon + '</span></div>';
+    }).join('');
+    var caseRows = o.cases.map(function(cs){
+      return '<div class="flex justify-between items-center py-1.5 border-b border-slate-50 last:border-0">' +
+        '<div><span class="text-[10px] font-black text-slate-700">' + cs.brand + ' ' + cs.size + '</span><span class="text-[9px] text-slate-400 ml-1">· ' + cs.patient + ' · ' + (cs.color||'색상미정') + '</span></div>' +
+        '<span class="text-[9px] font-black text-blue-600">×' + cs.qty + '</span></div>';
+    }).join('');
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
+      '<div class="bg-[#001d4a] px-5 py-4 flex justify-between items-center">' +
+        '<div><p class="font-black text-white text-sm">' + o.clinic + '</p><p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
+        '<span class="text-2xl">' + st.icon + '</span>' +
+      '</div>' +
+      '<div class="px-5 py-4"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">진행 상황</p>' +
+        '<div class="flex gap-1 mb-2">' + bars + '</div>' +
+        '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + st.label + '</p>' +
+      '</div>' +
+      '<div class="px-5 pb-4 border-t border-slate-50 pt-3"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">케이스 (' + o.cases.length + '개)</p>' + caseRows + '</div>' +
+      '<div class="px-5 pb-4 text-[9px] text-slate-400 font-bold space-y-0.5"><p>📍 ' + o.addr + '</p>' +
+        (o.cases[0]&&o.cases[0].deadline ? '<p>📅 납품 기한: ' + o.cases[0].deadline + '</p>' : '') +
+      '</div></div>';
+  }).join('');
+}
+async function sendLine(order, stageKey) {
+  if (!LINE_TOKEN || LINE_TOKEN==='YOUR_LINE_NOTIFY_TOKEN') return;
+  var st  = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
+  var msg = '\n[Dentalk Custom] ' + st.icon + ' ' + st.label + '\n주문번호: ' + order.id + '\n치과: ' + order.clinic + '\n케이스: ' + order.cases.length + '개\n연락처: ' + order.phone;
+  try { await fetch('https://notify-api.line.me/api/notify',{method:'POST',headers:{'Authorization':'Bearer '+LINE_TOKEN,'Content-Type':'application/x-www-form-urlencoded'},body:'message='+encodeURIComponent(msg)}); }
+  catch(e) {}
+}
+// ============================================================
+// USED MARKET
+// ============================================================
+function renderUsed() {
+  var list = document.getElementById('usedList');
+  if (!usedItems.length) { list.innerHTML='<div class="text-center text-slate-400 font-bold text-sm py-10">아직 등록된 중고 물품이 없어요</div>'; return; }
+  var condMap = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
+  var condLabel = {new:'Like New',good:'Good',fair:'Fair'};
+  list.innerHTML = usedItems.map(function(item,i){
+    return '<div class="bg-white rounded-2xl p-5 shadow-sm">' +
+      '<div class="flex justify-between items-start mb-2">' +
+        '<div class="flex-1"><h4 class="font-black text-slate-800 text-sm">' + item.name + '</h4><p class="text-[9px] font-mono text-slate-400 font-bold mt-0.5">' + item.code + '</p></div>' +
+        '<span class="text-xs font-black px-2 py-1 rounded-lg ml-2 ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>' +
+      '</div>' +
+      '<p class="text-xs text-slate-500 mb-3 leading-relaxed">' + item.desc + '</p>' +
+      '<div class="flex justify-between items-center">' +
+        '<div><p class="font-black text-blue-800 text-lg font-mono">' + item.price.toLocaleString() + ' <span class="text-xs">THB</span></p><p class="text-[9px] text-slate-400">' + item.seller + ' · ' + item.date + '</p></div>' +
+        '<div class="flex gap-2">' +
+          '<button onclick="showContact(\'' + item.contact + '\')" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-black text-xs">연락하기</button>' +
+          '<button onclick="deleteUsed(' + i + ')" class="px-3 py-2 bg-red-50 text-red-400 rounded-xl font-black text-xs">삭제</button>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+}
+function submitUsed() {
+  var name=document.getElementById('u-name').value.trim();
+  var price=parseInt(document.getElementById('u-price').value, 10)||0;
+  var contact=document.getElementById('u-contact').value.trim();
+  if (!name||!price||!contact) { alert('부품명, 가격, 연락처를 입력해주세요.'); return; }
+  usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10)});
+  ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
+  renderUsed();
+}
+function deleteUsed(i) { usedItems.splice(i,1); renderUsed(); }
+function showContact(c) { document.getElementById('usedContactText').textContent=c; openModal('usedContactModal'); }
+// ============================================================
+// FORUM
+// ============================================================
+function renderForum() {
+  document.getElementById('postList').innerHTML = posts.map(function(p){
+    return '<div class="bg-white p-5 rounded-2xl border shadow-sm"><p class="font-black text-slate-800 text-sm mb-1">' + p.title + '</p><p class="text-xs text-slate-500 leading-relaxed">' + p.body + '</p><p class="text-[9px] text-slate-300 font-bold uppercase mt-3">' + p.author + '</p></div>';
+  }).join('');
+}
+function submitPost() {
+  var t=document.getElementById('postTitle').value.trim(), b=document.getElementById('postBody').value.trim();
+  if(!t||!b) return;
+  posts.unshift({id:Date.now(),title:t,body:b,author:'Doctor'});
+  document.getElementById('postTitle').value=''; document.getElementById('postBody').value='';
+  renderForum();
+}
+// ============================================================
+// EVENTS
+// ============================================================
+function renderEvents() {
+  document.getElementById('eventList').innerHTML = events_.map(function(e){
+    return '<div class="bg-white p-5 rounded-2xl border-l-8 border-blue-900 shadow-sm"><p class="text-xs font-black text-slate-400 font-mono uppercase">' + e.date + '</p><p class="font-black text-sm mt-1 text-slate-800">' + e.event + '</p><p class="text-xs text-slate-400 mt-1">📍 ' + e.loc + '</p></div>';
+  }).join('');
+}
+// ============================================================
+// SETTINGS
+// ============================================================
+function setLang(lang) {
+  currentLang = lang;
+  ['en','ko','zh','th'].forEach(function(l){
+    var b = document.getElementById('lang-'+l);
+    b.className = l===lang
+      ? 'p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700'
+      : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
+  });
+}
+// ============================================================
+// 모달 유틸
+// ============================================================
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+// ============================================================
+// 초기화
+// ============================================================
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('mb-home').classList.add('active');
+  renderUsed();
+  renderForum();
+  renderEvents();
+});
