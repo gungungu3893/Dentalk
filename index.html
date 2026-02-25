@@ -36,9 +36,7 @@ input[type=number] { -moz-appearance:textfield; }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
-<!-- ==============================
-     로그인 모달
-============================== -->
+<!-- ============================== 로그인 모달 ============================== -->
 <div id="loginModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
   <div class="bg-[#001d4a] w-full max-w-sm rounded-3xl p-8 text-white shadow-2xl">
     <div class="text-center mb-8">
@@ -46,30 +44,26 @@ input[type=number] { -moz-appearance:textfield; }
         <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
       </div>
       <div style="height:2px;border-radius:99px;background:#D4AF37;opacity:.35;margin:-2px auto 0;width:140px"></div>
-      <p class="text-blue-300 text-[9px] font-bold uppercase tracking-[3px] mt-3">DOCTOR LOGIN</p>
+      <p class="text-blue-300 text-[9px] font-bold uppercase tracking-[3px] mt-3" data-i18n="login_subtitle">DOCTOR LOGIN</p>
     </div>
-    <input id="licenseInput" type="text" placeholder="License Number"
+    <input id="licenseInput" type="text" data-i18n-ph="login_ph" placeholder="License Number"
       class="w-full p-4 rounded-2xl text-black mb-4 outline-none font-bold text-center bg-white">
-    <button onclick="handleLogin()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3">LOGIN</button>
-    <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2">취소</button>
+    <button onclick="handleLogin()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="login_btn">LOGIN</button>
+    <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2" data-i18n="login_cancel">Cancel</button>
   </div>
 </div>
-<!-- ==============================
-     세션 연장 모달
-============================== -->
+<!-- ============================== 세션 연장 모달 ============================== -->
 <div id="extendModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[900] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center">
     <div class="text-4xl mb-3">⏰</div>
-    <h3 class="font-black text-slate-800 text-lg mb-2">세션 만료 임박</h3>
-    <p class="text-slate-500 text-sm mb-1">로그인이 <span id="extendRemain" class="font-black text-red-500"></span> 후 만료됩니다.</p>
-    <p class="text-slate-400 text-xs mb-6">지금 연장하시겠어요?</p>
-    <button onclick="extendSession()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-3 shadow">30분 연장하기</button>
-    <button onclick="closeModal('extendModal')" class="w-full text-slate-300 text-xs font-bold">나중에</button>
+    <h3 class="font-black text-slate-800 text-lg mb-2" data-i18n="session_title">Session Expiring</h3>
+    <p class="text-slate-500 text-sm mb-1"><span data-i18n="session_desc1">Login expires in</span> <span id="extendRemain" class="font-black text-red-500"></span> <span data-i18n="session_desc2"></span></p>
+    <p class="text-slate-400 text-xs mb-6" data-i18n="session_q">Would you like to extend?</p>
+    <button onclick="extendSession()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mb-3 shadow" data-i18n="session_extend">Extend 30 min</button>
+    <button onclick="closeModal('extendModal')" class="w-full text-slate-300 text-xs font-bold" data-i18n="session_later">Later</button>
   </div>
 </div>
-<!-- ==============================
-     주문 모달 (Shop)
-============================== -->
+<!-- ============================== 주문 모달 (Shop) ============================== -->
 <div id="orderModal" class="modal fixed inset-0 bg-black/70 z-[500] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
     <div class="p-5 pb-3 border-b flex justify-between items-start">
@@ -81,68 +75,58 @@ input[type=number] { -moz-appearance:textfield; }
     </div>
     <div class="flex-1 overflow-y-auto no-scroll p-4"><div id="orderTable"></div></div>
     <div class="p-4 border-t bg-white">
-      <button onclick="addTableToCart()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg">장바구니 추가</button>
-      <p id="orderError" class="text-red-400 text-xs font-bold text-center mt-2 hidden">수량을 1개 이상 입력해주세요.</p>
+      <button onclick="addTableToCart()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg" data-i18n="order_add_cart">Add to Cart</button>
+      <p id="orderError" class="text-red-400 text-xs font-bold text-center mt-2 hidden" data-i18n="order_qty_error">Please enter at least 1 quantity.</p>
     </div>
   </div>
 </div>
-<!-- ==============================
-     장바구니 모달
-============================== -->
+<!-- ============================== 장바구니 모달 ============================== -->
 <div id="cartModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[500] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col" style="max-height:85vh">
-    <h2 class="text-2xl font-black text-slate-800 mb-5 italic">My Cart</h2>
+    <h2 class="text-2xl font-black text-slate-800 mb-5 italic" data-i18n="cart_title">My Cart</h2>
     <div id="cartItems" class="flex-1 overflow-y-auto space-y-3 no-scroll mb-5"></div>
     <div class="border-t pt-4 space-y-3">
       <div class="flex justify-between items-center">
-        <span class="font-bold text-slate-400 text-sm">TOTAL</span>
+        <span class="font-bold text-slate-400 text-sm" data-i18n="cart_total">TOTAL</span>
         <span id="totalPrice" class="font-black text-blue-900 text-xl font-mono">0 THB</span>
       </div>
-      <button onclick="openAddressForm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow">CHECKOUT</button>
-      <button onclick="closeModal('cartModal')" class="w-full text-slate-300 text-[10px] font-black uppercase text-center">Close</button>
+      <button onclick="openAddressForm()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow" data-i18n="cart_checkout">CHECKOUT</button>
+      <button onclick="closeModal('cartModal')" class="w-full text-slate-300 text-[10px] font-black uppercase text-center" data-i18n="cart_close">Close</button>
     </div>
   </div>
 </div>
-<!-- ==============================
-     주소 모달
-============================== -->
+<!-- ============================== 주소 모달 ============================== -->
 <div id="addressModal" class="modal fixed inset-0 bg-[#001d4a]/95 backdrop-blur-lg z-[600] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-7">
-    <h2 class="text-2xl font-black text-slate-800 mb-6 italic">Delivery Info</h2>
+    <h2 class="text-2xl font-black text-slate-800 mb-6 italic" data-i18n="addr_title">Delivery Info</h2>
     <div class="space-y-3">
-      <input id="clinicName" type="text" placeholder="Clinic Name" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
-      <input id="clinicPhone" type="tel" placeholder="Phone Number" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
-      <textarea id="fullAddress" rows="3" placeholder="Full Address" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold resize-none"></textarea>
+      <input id="clinicName" type="text" data-i18n-ph="addr_clinic_ph" placeholder="Clinic Name" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+      <input id="clinicPhone" type="tel" data-i18n-ph="addr_phone_ph" placeholder="Phone Number" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+      <textarea id="fullAddress" rows="3" data-i18n-ph="addr_addr_ph" placeholder="Full Address" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold resize-none"></textarea>
     </div>
-    <button onclick="requestPay()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mt-5 shadow-xl">GENERATE QR</button>
-    <button onclick="closeModal('addressModal')" class="w-full text-slate-300 text-[10px] font-black mt-3 uppercase">← Back</button>
+    <button onclick="requestPay()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mt-5 shadow-xl" data-i18n="addr_qr_btn">GENERATE QR</button>
+    <button onclick="closeModal('addressModal')" class="w-full text-slate-300 text-[10px] font-black mt-3 uppercase" data-i18n="addr_back">← Back</button>
   </div>
 </div>
-<!-- ==============================
-     QR 모달
-============================== -->
+<!-- ============================== QR 모달 ============================== -->
 <div id="qrModal" class="modal fixed inset-0 bg-slate-900/95 z-[700] items-center justify-center p-6">
   <div class="bg-white p-7 rounded-3xl w-full max-w-sm text-center">
-    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Scan to Pay</p>
+    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4" data-i18n="qr_label">Scan to Pay</p>
     <img id="qrImg" alt="QR Code for payment" class="mx-auto w-52 h-52 border-4 border-slate-50 rounded-2xl mb-5">
     <div id="qrSummary" class="text-left bg-slate-50 rounded-2xl p-4 mb-5 text-xs text-slate-600 space-y-1 max-h-40 overflow-y-auto no-scroll"></div>
-    <button onclick="completePayment()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg">PAYMENT COMPLETE</button>
+    <button onclick="completePayment()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg" data-i18n="qr_complete">PAYMENT COMPLETE</button>
   </div>
 </div>
-<!-- ==============================
-     중고거래 연락처 모달
-============================== -->
+<!-- ============================== 중고거래 연락처 모달 ============================== -->
 <div id="usedContactModal" class="modal fixed inset-0 bg-black/70 z-[500] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-7 text-center">
     <p class="text-2xl mb-3">📞</p>
-    <h3 class="font-black text-slate-800 text-lg mb-2">Contact Seller</h3>
+    <h3 class="font-black text-slate-800 text-lg mb-2" data-i18n="used_contact_title">Contact Seller</h3>
     <p id="usedContactText" class="text-blue-700 font-black text-lg my-4 font-mono break-all"></p>
-    <button onclick="closeModal('usedContactModal')" class="w-full py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-600">Close</button>
+    <button onclick="closeModal('usedContactModal')" class="w-full py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-600" data-i18n="used_contact_close">Close</button>
   </div>
 </div>
-<!-- ==============================
-     메인 앱
-============================== -->
+<!-- ============================== 메인 앱 ============================== -->
 <div id="mainApp" class="min-h-screen flex flex-col">
   <!-- 헤더 -->
   <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-[200] shadow-lg">
@@ -157,7 +141,6 @@ input[type=number] { -moz-appearance:textfield; }
       </div>
       <p id="pageTitle" class="text-[9px] text-blue-300 font-bold uppercase tracking-widest">Home</p>
     </div>
-    <!-- 세션 타이머 -->
     <div id="timerWrap" class="hidden">
       <div id="timerBadge" class="flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5">
         <span class="text-sm">🔑</span>
@@ -182,25 +165,27 @@ input[type=number] { -moz-appearance:textfield; }
       <p id="sideUserInfo" class="text-[10px] text-slate-400 mt-1"></p>
     </div>
     <nav class="flex-1 overflow-y-auto p-3 space-y-1">
-      <button onclick="goPage('home')"      class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-home"><span>🏠</span><span>HOME</span></button>
-      <button onclick="goPage('shop')"      class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-shop"><span>🦷</span><span>SHOP</span><span class="ml-auto text-slate-500 text-xs" id="lock-shop">🔒</span></button>
-      <button onclick="goPage('custom')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><span>🔧</span><span>CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
-      <button onclick="goPage('used')"      class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><span>♻️</span><span>USED MARKET</span></button>
-      <button onclick="goPage('forum')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><span>💬</span><span>FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
-      <button onclick="goPage('events')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span>EVENTS</span></button>
-      <button onclick="goPage('factory')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-factory"><span>🏭</span><span>FACTORY</span></button>
-      <button onclick="goPage('settings')"  class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><span>⚙️</span><span>SETTINGS</span></button>
+      <button onclick="goPage('home')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-home"><span>🏠</span><span data-i18n="nav_home">HOME</span></button>
+      <button onclick="goPage('shop')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-shop"><span>🦷</span><span data-i18n="nav_shop">SHOP</span><span class="ml-auto text-slate-500 text-xs" id="lock-shop">🔒</span></button>
+      <button onclick="goPage('custom')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><span>🔧</span><span data-i18n="nav_custom">CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
+      <button onclick="goPage('used')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><span>♻️</span><span data-i18n="nav_used">USED MARKET</span></button>
+      <button onclick="goPage('forum')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><span>💬</span><span data-i18n="nav_forum">FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
+      <button onclick="goPage('events')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span data-i18n="nav_events">EVENTS</span></button>
+      <button onclick="goPage('factory')"  class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-factory"><span>🏭</span><span data-i18n="nav_factory">FACTORY</span></button>
+      <button onclick="goPage('settings')" class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><span>⚙️</span><span data-i18n="nav_settings">SETTINGS</span></button>
     </nav>
     <div class="p-4 border-t border-white/10">
       <div id="sideLoginArea">
-        <button onclick="openLoginModal(null)" class="w-full py-3 rounded-2xl bg-blue-500/30 text-blue-200 font-black text-sm flex items-center justify-center gap-2"><span>🔑</span>의사 로그인</button>
+        <button onclick="openLoginModal(null)" class="w-full py-3 rounded-2xl bg-blue-500/30 text-blue-200 font-black text-sm flex items-center justify-center gap-2">
+          <span>🔑</span><span id="sideLoginTxt" data-i18n="side_login_btn">Doctor Login</span>
+        </button>
       </div>
       <div id="sideLoggedArea" class="hidden space-y-2">
         <div class="bg-white/5 rounded-2xl px-4 py-3">
-          <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">로그인 중</p>
+          <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1" data-i18n="side_logged_label">Logged In</p>
           <p id="sideTimer" class="text-xs font-black text-white"></p>
         </div>
-        <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-500/20 text-red-300 font-black text-sm">로그아웃</button>
+        <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-500/20 text-red-300 font-black text-sm" data-i18n="side_logout">Logout</button>
       </div>
     </div>
   </div>
@@ -217,32 +202,30 @@ input[type=number] { -moz-appearance:textfield; }
               <span class="text-blue-400 font-black text-xl">×</span>
               <span class="text-3xl font-black italic text-blue-300">BIOPLANT</span>
             </div>
-            <p class="text-[10px] text-blue-300 font-bold uppercase tracking-[3px]">Expert of Implant · Thailand</p>
+            <p class="text-[10px] text-blue-300 font-bold uppercase tracking-[3px]" data-i18n="home_subtitle">Expert of Implant · Thailand</p>
           </div>
           <div class="fade-up-2 border-t border-white/10 pt-5">
-            <p class="text-lg font-black leading-snug mb-1">Digital Implant Parts</p>
-            <p class="text-lg font-black leading-snug text-blue-300">Ordering System</p>
-            <p class="text-xs text-blue-200/70 mt-3 leading-relaxed">Providing premium BIOTEM implant components<br>directly to dental clinics across Thailand.</p>
+            <p class="text-lg font-black leading-snug mb-1" data-i18n="home_title1">Digital Implant Parts</p>
+            <p class="text-lg font-black leading-snug text-blue-300" data-i18n="home_title2">Ordering System</p>
+            <p class="text-xs text-blue-200/70 mt-3 leading-relaxed" data-i18n="home_desc">Providing premium BIOTEM implant components directly to dental clinics across Thailand.</p>
           </div>
           <div class="fade-up-3 mt-7">
             <button onclick="goPage('shop')" class="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
-              <span>🦷</span> Go to Shop <span class="text-blue-200">›</span>
+              <span>🦷</span> <span data-i18n="home_goto_shop">Go to Shop</span> <span class="text-blue-200">›</span>
             </button>
           </div>
         </div>
       </div>
       <div class="px-4 -mt-4">
-        <!-- 회사 소개 -->
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span>About Us</h3>
+          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span><span data-i18n="home_about">About Us</span></h3>
           <div class="space-y-3">
-            <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 text-lg">🏢</div><div><p class="font-black text-xs text-slate-800">BIOTEM Co., Ltd</p><p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Korea-based dental implant manufacturer. Expert of Implant with cutting-edge digital workflow solutions.</p></div></div>
-            <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0 text-lg">🏭</div><div><p class="font-black text-xs text-slate-800">BIOPLANT Thailand</p><p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Premium dental fixture manufacturing center in Bangkok. Supplying clinics across Southeast Asia.</p></div></div>
+            <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 text-lg">🏢</div><div><p class="font-black text-xs text-slate-800">BIOTEM Co., Ltd</p><p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed" data-i18n="home_biotem_desc">Korea-based dental implant manufacturer. Expert of Implant with cutting-edge digital workflow solutions.</p></div></div>
+            <div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center shrink-0 text-lg">🏭</div><div><p class="font-black text-xs text-slate-800">BIOPLANT Thailand</p><p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed" data-i18n="home_bioplant_desc">Premium dental fixture manufacturing center in Bangkok. Supplying clinics across Southeast Asia.</p></div></div>
           </div>
         </div>
-        <!-- 제품 카테고리 배너 -->
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span>Product Categories</h3>
+          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span><span data-i18n="home_categories">Product Categories</span></h3>
           <div class="grid grid-cols-2 gap-2">
             <button onclick="goPage('shop')" class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">🔬</p><p class="font-black text-xs">Scan Body</p><p class="text-[9px] text-blue-200 mt-1">Intra-Oral · Model · GeoMedi</p></button>
             <button onclick="goPage('shop')" class="bg-gradient-to-br from-slate-700 to-slate-900 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">🦷</p><p class="font-black text-xs">Q-Base</p><p class="text-[9px] text-slate-300 mt-1">Zirconia Abutment</p></button>
@@ -250,49 +233,45 @@ input[type=number] { -moz-appearance:textfield; }
             <button onclick="goPage('custom')" class="bg-gradient-to-br from-amber-600 to-amber-800 text-white rounded-2xl p-4 text-left active:scale-95 transition shadow-sm"><p class="text-lg mb-1">🔧</p><p class="font-black text-xs">Custom Abutment</p><p class="text-[9px] text-amber-200 mt-1">CNC Milling · STL Upload</p></button>
           </div>
         </div>
-        <!-- 연락처 -->
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span>Contact & Address</h3>
+          <h3 class="font-black text-slate-800 text-sm mb-3 flex items-center gap-2"><span class="w-1 h-4 bg-blue-700 rounded-full inline-block"></span><span data-i18n="home_contact">Contact & Address</span></h3>
           <div class="space-y-3">
-            <div class="flex items-start gap-3"><span class="text-base mt-0.5">📍</span><div><p class="font-black text-xs text-slate-700">BIOPLANT Thailand</p><p class="text-[10px] text-slate-500 mt-0.5">Bangkok, Thailand</p></div></div>
-            <div class="flex items-center gap-3"><span class="text-base">📞</span><div><p class="font-black text-xs text-slate-700">+66 (0)2-XXX-XXXX</p><p class="text-[10px] text-slate-500">Mon-Fri 09:00-18:00</p></div></div>
-            <div class="flex items-center gap-3"><span class="text-base">💬</span><div><p class="font-black text-xs text-slate-700">Line Official</p><p class="text-[10px] text-slate-500 font-mono">@bioplant_th</p></div></div>
+            <div class="flex items-start gap-3"><span class="text-base mt-0.5">📍</span><div><p class="font-black text-xs text-slate-700">BIOPLANT Thailand</p><p class="text-[10px] text-slate-500 mt-0.5" data-i18n="home_address">Bangkok, Thailand</p></div></div>
+            <div class="flex items-center gap-3"><span class="text-base">📞</span><div><p class="font-black text-xs text-slate-700">+66 (0)2-XXX-XXXX</p><p class="text-[10px] text-slate-500" data-i18n="home_hours">Mon-Fri 09:00-18:00</p></div></div>
+            <div class="flex items-center gap-3"><span class="text-base">💬</span><div><p class="font-black text-xs text-slate-700" data-i18n="home_line_label">Line Official</p><p class="text-[10px] text-slate-500 font-mono">@bioplant_th</p></div></div>
             <div class="flex items-center gap-3"><span class="text-base">🌐</span><p class="font-black text-xs text-slate-700">www.biotemplant.com</p></div>
           </div>
         </div>
-        <p class="text-center text-[9px] text-slate-400 font-bold uppercase tracking-widest pb-4">© 2026 Dentalk · BIOTEM × BIOPLANT</p>
+        <p class="text-center text-[9px] text-slate-400 font-bold uppercase tracking-widest pb-4" data-i18n="home_footer">© 2026 Dentalk · BIOTEM × BIOPLANT</p>
       </div>
     </div>
     <!-- ==================== SHOP ==================== -->
     <div id="page-shop" class="page p-4">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Select a category to order</p>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1" data-i18n="shop_hint">Select a category to order</p>
       <div id="shopList" class="space-y-3"></div>
     </div>
     <!-- ==================== CUSTOM ABUTMENT ==================== -->
     <div id="page-custom" class="page p-4">
-      <!-- 탭 -->
       <div class="flex gap-2 mb-5">
-        <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">새 주문</button>
-        <button onclick="customTab('list')" id="ctab-list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">내 주문 현황</button>
+        <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">New Order</button>
+        <button onclick="customTab('list')" id="ctab-list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">My Orders</button>
       </div>
-      <!-- 주문 폼 -->
       <div id="custom-form">
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-amber-500 rounded-full inline-block"></span>커스텀 어버트먼트 주문</h3>
+          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-amber-500 rounded-full inline-block"></span><span data-i18n="custom_form_title">Custom Abutment Order</span></h3>
           <div id="caseList"></div>
-          <button onclick="addCase()" class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black text-sm active:bg-slate-50">+ 케이스 추가</button>
+          <button onclick="addCase()" class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black text-sm active:bg-slate-50" data-i18n="case_add">+ Add Case</button>
         </div>
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>납품 정보</h3>
-          <input id="cust-clinic"  type="text" placeholder="치과명 / 기공소명" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-          <input id="cust-addr"    type="text" placeholder="납품 주소"         class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-          <input id="cust-phone"   type="text" placeholder="연락처"             class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-          <input id="cust-line"    type="text" placeholder="Line ID (알림 수신용)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
+          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-blue-500 rounded-full inline-block"></span><span data-i18n="custom_delivery_title">Delivery Info</span></h3>
+          <input id="cust-clinic" type="text" data-i18n-ph="custom_clinic_ph" placeholder="Clinic / Lab Name" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+          <input id="cust-addr"   type="text" data-i18n-ph="custom_addr_ph"   placeholder="Delivery Address"  class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+          <input id="cust-phone"  type="text" data-i18n-ph="custom_phone_ph"  placeholder="Contact Number"    class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+          <input id="cust-line"   type="text" data-i18n-ph="custom_line_ph"   placeholder="Line ID"           class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
         </div>
-        <button onclick="submitCustom()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg mb-2">주문 제출하기</button>
-        <p class="text-[9px] text-slate-400 text-center font-bold">주문 접수 시 Line으로 확인 메시지가 발송됩니다</p>
+        <button onclick="submitCustom()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg mb-2" data-i18n="custom_submit">Submit Order</button>
+        <p class="text-[9px] text-slate-400 text-center font-bold" data-i18n="custom_submit_note">Order confirmation will be sent via Line</p>
       </div>
-      <!-- 주문 목록 -->
       <div id="custom-list" class="hidden">
         <div id="customOrdersContainer" class="space-y-4"></div>
       </div>
@@ -300,29 +279,29 @@ input[type=number] { -moz-appearance:textfield; }
     <!-- ==================== USED MARKET ==================== -->
     <div id="page-used" class="page p-4">
       <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <h3 class="font-black text-sm text-slate-700 mb-3 flex items-center gap-2"><span>♻️</span>Sell Used Parts</h3>
-        <input id="u-name"    type="text"    placeholder="Part Name"        class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-        <input id="u-code"    type="text"    placeholder="Product Code"      class="w-full p-3 bg-slate-50 rounded-xl text-sm font-mono outline-none mb-2">
+        <h3 class="font-black text-sm text-slate-700 mb-3 flex items-center gap-2"><span>♻️</span><span data-i18n="used_sell_title">Sell Used Parts</span></h3>
+        <input id="u-name"    type="text"   data-i18n-ph="used_name_ph"    placeholder="Part Name"     class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <input id="u-code"    type="text"   data-i18n-ph="used_code_ph"    placeholder="Product Code"  class="w-full p-3 bg-slate-50 rounded-xl text-sm font-mono outline-none mb-2">
         <div class="flex gap-2 mb-2">
-          <input id="u-price" type="number"  placeholder="Price (THB)"      class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
+          <input id="u-price" type="number" data-i18n-ph="used_price_ph"   placeholder="Price (THB)"   class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
           <select id="u-cond" class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-none">
             <option value="new">Like New</option><option value="good">Good</option><option value="fair">Fair</option>
           </select>
         </div>
-        <textarea id="u-desc"    rows="2" placeholder="Condition details..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-2"></textarea>
-        <input id="u-contact" type="text"    placeholder="Contact (Line ID / Phone)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3">
-        <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm">POST FOR SALE</button>
+        <textarea id="u-desc"    rows="2" data-i18n-ph="used_desc_ph"    placeholder="Condition details..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-2"></textarea>
+        <input id="u-contact" type="text" data-i18n-ph="used_contact_ph" placeholder="Contact (Line ID / Phone)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3">
+        <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="used_post_btn">POST FOR SALE</button>
       </div>
-      <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1">Available Used Parts</h3>
+      <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
       <div id="usedList" class="space-y-3"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
       <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3">New Post</h3>
-        <input id="postTitle"   type="text" placeholder="Title"              class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-        <textarea id="postBody" rows="3"    placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none"></textarea>
-        <button onclick="submitPost()" class="mt-3 w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm">POST</button>
+        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3" data-i18n="forum_new_post">New Post</h3>
+        <input id="postTitle"   type="text" data-i18n-ph="forum_title_ph" placeholder="Title"               class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <textarea id="postBody" rows="3"    data-i18n-ph="forum_body_ph"  placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none"></textarea>
+        <button onclick="submitPost()" class="mt-3 w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="forum_post_btn">POST</button>
       </div>
       <div id="postList" class="space-y-3"></div>
     </div>
@@ -334,27 +313,31 @@ input[type=number] { -moz-appearance:textfield; }
     <div id="page-factory" class="page p-4 text-center">
       <div class="bg-white rounded-3xl p-10 shadow-sm">
         <h2 class="text-xl font-black italic text-blue-900 mb-2">BIOPLANT THAILAND</h2>
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose">Premium fixture manufacturing center in Bangkok</p>
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose" data-i18n="factory_subtitle">Premium fixture manufacturing center in Bangkok</p>
       </div>
     </div>
     <!-- ==================== SETTINGS ==================== -->
     <div id="page-settings" class="page p-4 space-y-4">
       <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h3 class="font-black text-slate-800 mb-1">Language</h3>
+        <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_lang">Language</h3>
+        <p class="text-[10px] text-amber-600 font-bold mt-2 hidden" id="langPendingNote" data-i18n="settings_pending">Select a language then press Save.</p>
         <div class="grid grid-cols-2 gap-3 mt-4">
-          <button onclick="setLang('en')" id="lang-en" class="p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700">🇺🇸 English</button>
-          <button onclick="setLang('ko')" id="lang-ko" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇰🇷 한국어</button>
-          <button onclick="setLang('zh')" id="lang-zh" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇨🇳 中文</button>
-          <button onclick="setLang('th')" id="lang-th" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇹🇭 ภาษาไทย</button>
+          <button onclick="selectLang('en')" id="lang-en" class="p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700">🇺🇸 English</button>
+          <button onclick="selectLang('ko')" id="lang-ko" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇰🇷 한국어</button>
+          <button onclick="selectLang('zh')" id="lang-zh" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇨🇳 中文</button>
+          <button onclick="selectLang('th')" id="lang-th" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇹🇭 ภาษาไทย</button>
         </div>
+        <button onclick="saveLang()" id="saveLangBtn" class="mt-4 w-full py-3.5 rounded-2xl bg-[#001d4a] text-white font-black text-sm shadow active:scale-95 transition" data-i18n="settings_save_btn">Save Language</button>
+        <p id="savedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="settings_saved_msg">Language saved!</p>
       </div>
       <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h3 class="font-black text-slate-800 mb-1">Account</h3>
-        <p class="text-sm font-bold text-slate-600 mt-3">License: <span id="licenseDisplay" class="text-blue-700 font-mono">-</span></p>
+        <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_account">Account</h3>
+        <p class="text-sm font-bold text-slate-600 mt-3"><span data-i18n="settings_license">License:</span> <span id="licenseDisplay" class="text-blue-700 font-mono">-</span></p>
       </div>
     </div>
-  </div><!-- /content -->
-</div><!-- /mainApp -->
+  </div>
+</div>
+<script src="lang.js" defer></script>
 <script src="app.js" defer></script>
 </body>
 </html>

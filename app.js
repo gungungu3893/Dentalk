@@ -2,17 +2,11 @@
 // 상수 & 데이터
 // ============================================================
 const LOCKED = ['shop','forum','custom'];
-const PAGE_TITLES = { home:'Home', shop:'Shop', custom:'Custom Abutment', used:'Used Market', forum:'Forum', events:'Events', factory:'Factory', settings:'Settings' };
 const IMPLANT_BRANDS = ['BIOTEM N','BIOTEM R','Osstem US','Osstem TS','Straumann BL','Straumann TL','Nobel Active','Nobel Replace','Zimmer TSV','Dentium SuperLine','기타'];
 const TOOTH_COLORS   = ['A1','A2','A3','A3.5','A4','B1','B2','B3','C1','C2','C3','D2','D3','BL (Bleach)'];
 const ORDER_STAGES   = [
-  {key:'received', label:'주문 접수', icon:'[1]'},
-  {key:'stl',      label:'STL 검토',  icon:'[2]'},
-  {key:'design',   label:'디자인 중', icon:'[3]'},
-  {key:'cnc',      label:'CNC 생산',  icon:'[4]'},
-  {key:'qc',       label:'품질 검사', icon:'[5]'},
-  {key:'shipping', label:'배송 중',   icon:'[6]'},
-  {key:'done',     label:'납품 완료', icon:'[7]'},
+  {key:'received',icon:'[1]'},{key:'stl',icon:'[2]'},{key:'design',icon:'[3]'},
+  {key:'cnc',icon:'[4]'},{key:'qc',icon:'[5]'},{key:'shipping',icon:'[6]'},{key:'done',icon:'[7]'},
 ];
 const LINE_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN';
 // ============================================================
@@ -20,18 +14,19 @@ const LINE_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN';
 // ============================================================
 let currentPage  = 'home';
 let currentLang  = 'en';
+let pendingLang  = null; // 저장 전 선택된 언어
 let cart         = [];
 let currentProd  = null;
 let tableQtys    = {};
 let usedItems    = [
   {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10'},
-  {id:2,name:'Q-Base QBAM4401S',  code:'QBAM4401S', price:2000,cond:'new', desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18'},
+  {id:2,name:'Q-Base QBAM4401S',code:'QBAM4401S',price:2000,cond:'new',desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18'},
 ];
 let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin'}];
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
 let customOrders = [];
 let caseCount    = 0;
-let caseTeeth    = {}; // caseId -> Set of selected tooth numbers
+let caseTeeth    = {};
 // Session
 let sessionEnd   = null;
 let sessionTimer = null;
@@ -48,7 +43,7 @@ function openLoginModal(target) {
 }
 function handleLogin() {
   const lic = document.getElementById('licenseInput').value.trim();
-  if (lic.length < 3) { alert('Please enter your license number.'); return; }
+  if (lic.length < 3) { alert(t('login_error')); return; }
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
   document.getElementById('licenseDisplay').textContent = lic;
@@ -71,12 +66,12 @@ function tickSession() {
   const bdg = document.getElementById('timerBadge');
   const sd  = document.getElementById('sideTimer');
   if (el)  el.textContent  = txt;
-  if (sd)  sd.textContent  = '남은 시간: ' + txt;
+  if (sd)  sd.textContent  = t('side_remain') + ' ' + txt;
   if (el)  el.className    = rem<=300 ? 'text-[11px] font-black text-red-400 font-mono' : 'text-[11px] font-black text-green-300 font-mono';
   if (bdg) bdg.className   = rem<=300 ? 'flex items-center gap-1 bg-red-500/20 rounded-xl px-2 py-1.5 animate-pulse' : 'flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5';
   if (rem<=300 && rem>0 && !extShown) {
     extShown = true;
-    document.getElementById('extendRemain').textContent = m+'분 '+s+'초';
+    document.getElementById('extendRemain').textContent = m + ':' + String(s).padStart(2,'0');
     openModal('extendModal');
   }
   if (rem<=0) forceLogout();
@@ -93,7 +88,7 @@ function forceLogout() {
   document.getElementById('timerWrap').classList.add('hidden');
   document.getElementById('sideUserInfo').textContent = '';
   if (LOCKED.includes(currentPage)) goPage('home');
-  alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+  alert(t('session_expired'));
 }
 function doLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
@@ -129,12 +124,12 @@ function closeMenu() {
 }
 function goPage(id) {
   if (LOCKED.includes(id) && !isLoggedIn()) { closeMenu(); openLoginModal(id); return; }
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.menu-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('page-' + id).classList.add('active');
-  const mb = document.getElementById('mb-' + id);
+  var mb = document.getElementById('mb-' + id);
   if (mb) mb.classList.add('active');
-  document.getElementById('pageTitle').textContent = PAGE_TITLES[id] || id;
+  document.getElementById('pageTitle').textContent = t('pt_' + id);
   currentPage = id;
   closeMenu();
   if (id === 'shop')    renderShop();
@@ -166,15 +161,15 @@ const PRODUCTS = [
 // SHOP
 // ============================================================
 function renderShop() {
-  document.getElementById('shopList').innerHTML = PRODUCTS.map(p =>
-    '<div onclick="openOrder(\'' + p.id + '\')" class="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition">' +
+  document.getElementById('shopList').innerHTML = PRODUCTS.map(function(p) {
+    return '<div onclick="openOrder(\'' + p.id + '\')" class="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition">' +
       '<div class="flex-1 pr-3"><h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-tight">' + p.subtitle + '</p></div>' +
-      '<div class="text-right shrink-0"><p class="font-black text-blue-700 text-xs font-mono">' + p.price.toLocaleString() + ' THB</p><p class="text-[10px] text-blue-500 font-black mt-1">SELECT ›</p></div>' +
-    '</div>'
-  ).join('');
+      '<div class="text-right shrink-0"><p class="font-black text-blue-700 text-xs font-mono">' + p.price.toLocaleString() + ' THB</p><p class="text-[10px] text-blue-500 font-black mt-1">' + t('shop_select') + '</p></div>' +
+    '</div>';
+  }).join('');
 }
 function openOrder(pid) {
-  currentProd = PRODUCTS.find(p => p.id === pid);
+  currentProd = PRODUCTS.find(function(p){ return p.id === pid; });
   if (!currentProd) return;
   tableQtys   = {};
   document.getElementById('orderModalTitle').textContent = currentProd.title;
@@ -184,11 +179,11 @@ function openOrder(pid) {
   openModal('orderModal');
 }
 function renderOrderTable() {
-  const p = currentProd;
-  let html = '';
+  var p = currentProd;
+  var html = '';
   if (p.tableType2 === 'hxc') {
     html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr><th class="text-left pb-2 text-slate-400 font-bold text-[10px] pr-2">H / C</th>';
-    p.colLabels.forEach(c => { html += '<th class="text-center pb-2 text-slate-500 font-black text-[10px] px-1">' + c + '</th>'; });
+    p.colLabels.forEach(function(c){ html += '<th class="text-center pb-2 text-slate-500 font-black text-[10px] px-1">' + c + '</th>'; });
     html += '</tr></thead><tbody>';
     p.rowLabels.forEach(function(row, ri) {
       html += '<tr class="border-t border-slate-100"><td class="py-3 pr-2 font-black text-xs text-slate-700 whitespace-nowrap">' + row + '</td>';
@@ -203,7 +198,7 @@ function renderOrderTable() {
     html += '</tbody></table></div>';
   } else if (p.tableType === 'dh') {
     html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr><th class="text-left pb-2 text-slate-400 font-bold text-[10px] pr-2">D / H</th>';
-    p.heights.forEach(h => { html += '<th class="text-center pb-2 text-slate-500 font-black px-1">' + h + '</th>'; });
+    p.heights.forEach(function(h){ html += '<th class="text-center pb-2 text-slate-500 font-black px-1">' + h + '</th>'; });
     html += '</tr></thead><tbody>';
     p.connections.forEach(function(conn, ci) {
       html += '<tr class="border-t border-slate-100"><td class="py-3 pr-2 whitespace-nowrap"><div class="flex items-center gap-1.5"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + conn.type + '">' + conn.type + '</span><span class="font-black text-xs text-slate-700">' + conn.label + '</span></div></td>';
@@ -223,13 +218,13 @@ function renderOrderTable() {
           '<div class="flex items-center gap-2 ml-3">' +
             '<button onclick="stepQ(\'' + item.code + '\',-1)" class="w-7 h-7 rounded-full bg-slate-200 font-black text-sm flex items-center justify-center">−</button>' +
             '<input type="number" min="0" value="0" class="qty-input" id="qi-' + item.code.replace(/\s/g,'_') + '" oninput="tableQtys[\'' + item.code + '\']=parseInt(this.value)||0">' +
-            '<button onclick="stepQ(\'' + item.code + '\',1)"  class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-black text-sm flex items-center justify-center">+</button>' +
+            '<button onclick="stepQ(\'' + item.code + '\',1)" class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-black text-sm flex items-center justify-center">+</button>' +
           '</div></div>';
       });
     });
     html += '</div>';
   }
-  html += '<p class="text-[9px] text-slate-400 mt-3 text-center font-bold">' + p.price.toLocaleString() + ' THB / each</p>';
+  html += '<p class="text-[9px] text-slate-400 mt-3 text-center font-bold">' + p.price.toLocaleString() + ' THB / ' + t('shop_each') + '</p>';
   document.getElementById('orderTable').innerHTML = html;
 }
 function stepQ(code, d) {
@@ -260,7 +255,7 @@ function updateBadge() {
   b.classList.toggle('hidden', tot===0);
 }
 function openCart() {
-  if (!cart.length) { alert('Cart is empty!'); return; }
+  if (!cart.length) { alert(t('cart_empty')); return; }
   renderCart(); openModal('cartModal');
 }
 function renderCart() {
@@ -274,7 +269,7 @@ function renderCart() {
         '<div class="flex items-center gap-2">' +
           '<button onclick="cartQty(' + i + ',-1)" class="w-7 h-7 rounded-full bg-slate-200 font-black text-sm flex items-center justify-center">−</button>' +
           '<span class="font-black text-sm w-5 text-center">' + item.qty + '</span>' +
-          '<button onclick="cartQty(' + i + ',1)"  class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-black text-sm flex items-center justify-center">+</button>' +
+          '<button onclick="cartQty(' + i + ',1)" class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 font-black text-sm flex items-center justify-center">+</button>' +
         '</div>' +
         '<span class="font-black text-sm text-blue-900 font-mono">' + sub.toLocaleString() + ' THB</span>' +
       '</div></div>';
@@ -288,7 +283,7 @@ async function requestPay() {
   var clinic=document.getElementById('clinicName').value.trim();
   var phone=document.getElementById('clinicPhone').value.trim();
   var addr=document.getElementById('fullAddress').value.trim();
-  if (!clinic||!phone||!addr) { alert('Please fill in all delivery info.'); return; }
+  if (!clinic||!phone||!addr) { alert(t('addr_fill_error')); return; }
   var amt = cart.reduce(function(s,c){ return s+c.price*c.qty; },0);
   var qrUrl;
   try {
@@ -298,9 +293,9 @@ async function requestPay() {
     qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DENTALK_' + Date.now() + '_' + amt + 'THB';
   }
   document.getElementById('qrSummary').innerHTML =
-    '<p class="font-black text-slate-500 uppercase text-[9px] mb-2">Order Summary</p>' +
+    '<p class="font-black text-slate-500 uppercase text-[9px] mb-2">' + t('qr_summary_title') + '</p>' +
     cart.map(function(c){ return '<div class="flex justify-between gap-2 text-[10px]"><span class="flex-1">' + c.name + '</span><span class="font-mono text-slate-500">' + c.code + '</span><span class="font-black ml-1">×' + c.qty + '</span><span class="font-mono font-black ml-1">' + (c.price*c.qty).toLocaleString() + '</span></div>'; }).join('') +
-    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-slate-800"><span>TOTAL</span><span class="font-mono">' + amt.toLocaleString() + ' THB</span></div>';
+    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-slate-800"><span>' + t('qr_total') + '</span><span class="font-mono">' + amt.toLocaleString() + ' THB</span></div>';
   document.getElementById('qrImg').src = qrUrl;
   closeModal('addressModal'); openModal('qrModal');
 }
@@ -312,12 +307,12 @@ function customTab(tab) {
   var isForm = tab==='form';
   document.getElementById('custom-form').classList.toggle('hidden', !isForm);
   document.getElementById('custom-list').classList.toggle('hidden', isForm);
-  document.getElementById('ctab-form').className = isForm
-    ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow'
-    : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
-  document.getElementById('ctab-list').className = !isForm
-    ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow'
-    : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  var fCls = isForm ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow' : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  var lCls = !isForm ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow' : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  var fBtn = document.getElementById('ctab-form');
+  var lBtn = document.getElementById('ctab-list');
+  fBtn.className = fCls; fBtn.textContent = t('custom_tab_new');
+  lBtn.className = lCls; lBtn.textContent = t('custom_tab_list');
   if (!isForm) renderCustomOrders();
 }
 function resetCustomForm() {
@@ -334,22 +329,20 @@ function addCase() {
   var div = document.createElement('div');
   div.id  = 'case-' + id;
   div.className = 'bg-slate-50 rounded-2xl p-4 mb-3';
-  var delBtn = id > 1
-    ? '<button onclick="removeCase(' + id + ')" class="text-red-400 font-black text-xs">✕ 삭제</button>'
-    : '';
+  var delBtn = id > 1 ? '<button onclick="removeCase(' + id + ')" class="text-red-400 font-black text-xs">' + t('case_remove') + '</button>' : '';
   div.innerHTML =
     '<div class="flex justify-between items-center mb-3">' +
-      '<span class="font-black text-xs text-slate-600">케이스 #' + id + '</span>' + delBtn +
+      '<span class="font-black text-xs text-slate-600">' + t('case_label') + id + '</span>' + delBtn +
     '</div>' +
-    '<input type="text" id="cp-' + id + '" placeholder="환자 ID (익명 가능, 예: P001)" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-3 border border-slate-100">' +
-    '<div class="mb-1"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">치아 선택 · 탭하여 선택/해제</p>' + buildToothChart(id) + '</div>' +
+    '<input type="text" id="cp-' + id + '" placeholder="' + t('case_patient_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-3 border border-slate-100">' +
+    '<div class="mb-1"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('case_tooth_hint') + '</p>' + buildToothChart(id) + '</div>' +
     '<div id="teeth-details-' + id + '" class="space-y-2 mt-3 mb-3"></div>' +
     '<input type="date" id="cd-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100 mb-2">' +
     '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white">' +
-      '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">STL 파일 업로드</p><p class="text-[9px] text-slate-400 mt-0.5">.stl 파일을 탭하여 선택</p>' +
+      '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">' + t('stl_label') + '</p><p class="text-[9px] text-slate-400 mt-0.5">' + t('stl_hint') + '</p>' +
     '</div>' +
     '<input type="file" id="stl-' + id + '" accept=".stl,.STL" class="hidden" onchange="onStl(' + id + ',this)">' +
-    '<textarea id="cm-' + id + '" rows="2" placeholder="특별 요청사항 (선택)" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border border-slate-100"></textarea>';
+    '<textarea id="cm-' + id + '" rows="2" placeholder="' + t('memo_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border border-slate-100"></textarea>';
   document.getElementById('caseList').appendChild(div);
 }
 function removeCase(id) {
@@ -362,19 +355,18 @@ function buildToothChart(caseId) {
   var lower = [47,46,45,44,43,42,41,31,32,33,34,35,36,37];
   function btn(num) {
     return '<button type="button" id="tooth-' + caseId + '-' + num + '" onclick="toggleTooth(' + caseId + ',' + num + ')" ' +
-      'class="w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none">' +
-      num + '</button>';
+      'class="w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none">' + num + '</button>';
   }
   var html = '<div class="bg-white rounded-2xl p-3 border border-slate-100">';
-  html += '<p class="text-center text-[8px] font-black text-blue-400 uppercase tracking-widest mb-2">상악 (Upper Jaw)</p>';
+  html += '<p class="text-center text-[8px] font-black text-blue-400 uppercase tracking-widest mb-2">' + t('upper_jaw') + '</p>';
   html += '<div class="flex justify-center gap-1 mb-2 flex-wrap">';
   upper.forEach(function(n){ html += btn(n); });
   html += '</div>';
-  html += '<div class="border-t border-dashed border-slate-200 my-2 relative"><span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-[8px] text-slate-300 font-bold">치열 경계</span></div>';
+  html += '<div class="border-t border-dashed border-slate-200 my-2 relative"><span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-[8px] text-slate-300 font-bold">' + t('jaw_border') + '</span></div>';
   html += '<div class="flex justify-center gap-1 mt-2 flex-wrap">';
   lower.forEach(function(n){ html += btn(n); });
   html += '</div>';
-  html += '<p class="text-center text-[8px] font-black text-amber-400 uppercase tracking-widest mt-2">하악 (Lower Jaw)</p>';
+  html += '<p class="text-center text-[8px] font-black text-amber-400 uppercase tracking-widest mt-2">' + t('lower_jaw') + '</p>';
   html += '</div>';
   return html;
 }
@@ -395,51 +387,47 @@ function renderToothDetails(caseId) {
   if (!container) return;
   var teeth = Array.from(caseTeeth[caseId]).sort(function(a,b){ return a-b; });
   if (!teeth.length) { container.innerHTML = ''; return; }
-  var brandOpts = '<option value="">임플란트 종류 선택</option>' +
+  var brandOpts = '<option value="">' + t('brand_ph') + '</option>' +
     IMPLANT_BRANDS.map(function(b){ return '<option value="' + b + '">' + b + '</option>'; }).join('');
-  var colorOpts = '<option value="">치아 색상 (VITA)</option>' +
+  var colorOpts = '<option value="">' + t('color_ph') + '</option>' +
     TOOTH_COLORS.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
-  // Preserve existing values before re-render
   var saved = {};
-  teeth.forEach(function(t) {
-    var bEl = document.getElementById('tb-'+caseId+'-'+t);
-    var sEl = document.getElementById('ts-'+caseId+'-'+t);
-    var cEl = document.getElementById('tc-'+caseId+'-'+t);
-    if (bEl||sEl||cEl) saved[t] = { brand: bEl?bEl.value:'', size: sEl?sEl.value:'', color: cEl?cEl.value:'' };
+  teeth.forEach(function(tn) {
+    var bEl = document.getElementById('tb-'+caseId+'-'+tn);
+    var sEl = document.getElementById('ts-'+caseId+'-'+tn);
+    var cEl = document.getElementById('tc-'+caseId+'-'+tn);
+    if (bEl||sEl||cEl) saved[tn] = { brand: bEl?bEl.value:'', size: sEl?sEl.value:'', color: cEl?cEl.value:'' };
   });
   container.innerHTML =
-    '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">선택된 치아 — ' + teeth.length + '개</p>' +
-    teeth.map(function(t) {
-      var sv = saved[t] || {};
-      var jaw = (t>=11&&t<=28) ? '<span class="text-blue-400 text-[8px] font-bold">상악</span>' : '<span class="text-amber-400 text-[8px] font-bold">하악</span>';
+    '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('selected_teeth') + ' ' + teeth.length + (t('sel_count_suffix')||'') + '</p>' +
+    teeth.map(function(tn) {
+      var sv = saved[tn] || {};
+      var jaw = (tn>=11&&tn<=28)
+        ? '<span class="text-blue-400 text-[8px] font-bold">' + t('upper') + '</span>'
+        : '<span class="text-amber-400 text-[8px] font-bold">' + t('lower') + '</span>';
       return '<div class="bg-white rounded-xl p-3 border border-slate-100">' +
         '<div class="flex items-center gap-2 mb-2">' +
-          '<span class="w-8 h-8 rounded-lg bg-blue-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">' + t + '</span>' +
-          '<div><p class="text-[10px] font-black text-slate-700">' + getToothName(t) + '</p>' + jaw + '</div>' +
+          '<span class="w-8 h-8 rounded-lg bg-blue-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">' + tn + '</span>' +
+          '<div><p class="text-[10px] font-black text-slate-700">' + getToothName(tn) + '</p>' + jaw + '</div>' +
         '</div>' +
-        '<select id="tb-' + caseId + '-' + t + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none mb-2 border border-slate-100">' + brandOpts + '</select>' +
-        '<input type="text" id="ts-' + caseId + '-' + t + '" placeholder="사이즈 (예: Ø4.0 / L10)" value="' + (sv.size||'') + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none mb-2 border border-slate-100">' +
-        '<select id="tc-' + caseId + '-' + t + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none border border-slate-100">' + colorOpts + '</select>' +
+        '<select id="tb-' + caseId + '-' + tn + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none mb-2 border border-slate-100">' + brandOpts + '</select>' +
+        '<input type="text" id="ts-' + caseId + '-' + tn + '" placeholder="' + t('size_ph') + '" value="' + (sv.size||'') + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none mb-2 border border-slate-100">' +
+        '<select id="tc-' + caseId + '-' + tn + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs font-bold outline-none border border-slate-100">' + colorOpts + '</select>' +
       '</div>';
     }).join('');
-  // Restore select values
-  teeth.forEach(function(t) {
-    var sv = saved[t];
+  teeth.forEach(function(tn) {
+    var sv = saved[tn];
     if (!sv) return;
-    var bEl = document.getElementById('tb-'+caseId+'-'+t);
-    var cEl = document.getElementById('tc-'+caseId+'-'+t);
+    var bEl = document.getElementById('tb-'+caseId+'-'+tn);
+    var cEl = document.getElementById('tc-'+caseId+'-'+tn);
     if (bEl && sv.brand) bEl.value = sv.brand;
     if (cEl && sv.color) cEl.value = sv.color;
   });
 }
 function getToothName(num) {
-  var map = {
-    11:'중절치',12:'측절치',13:'견치',14:'제1소구치',15:'제2소구치',16:'제1대구치',17:'제2대구치',
-    21:'중절치',22:'측절치',23:'견치',24:'제1소구치',25:'제2소구치',26:'제1대구치',27:'제2대구치',
-    31:'중절치',32:'측절치',33:'견치',34:'제1소구치',35:'제2소구치',36:'제1대구치',37:'제2대구치',
-    41:'중절치',42:'측절치',43:'견치',44:'제1소구치',45:'제2소구치',46:'제1대구치',47:'제2대구치',
-  };
-  return '#' + num + ' ' + (map[num] || '');
+  var n = num % 10;
+  var keyMap = {1:'tooth_11',2:'tooth_12',3:'tooth_13',4:'tooth_14',5:'tooth_15',6:'tooth_16',7:'tooth_17'};
+  return '#' + num + ' ' + (t(keyMap[n]) || '');
 }
 function onStl(id, input) {
   var f = input.files[0]; if(!f) return;
@@ -452,48 +440,51 @@ function submitCustom() {
   var addr   = document.getElementById('cust-addr').value.trim();
   var phone  = document.getElementById('cust-phone').value.trim();
   var lineId = document.getElementById('cust-line').value.trim();
-  if (!clinic||!addr||!phone) { alert('치과명, 납품 주소, 연락처를 입력해주세요.'); return; }
+  if (!clinic||!addr||!phone) { alert(t('err_fill_delivery')); return; }
   var cases = [];
   for (var i=1; i<=caseCount; i++) {
     if (!document.getElementById('case-'+i)) continue;
     var selectedTeeth = caseTeeth[i] ? Array.from(caseTeeth[i]).sort(function(a,b){return a-b;}) : [];
-    if (!selectedTeeth.length) { alert('케이스 #'+i+': 치아를 최소 1개 선택해주세요.'); return; }
+    if (!selectedTeeth.length) { alert(tf('err_select_tooth', i)); return; }
     var teethData = [];
     var valid = true;
     for (var ti=0; ti<selectedTeeth.length; ti++) {
-      var t = selectedTeeth[ti];
-      var brand = (document.getElementById('tb-'+i+'-'+t)||{}).value || '';
-      var size  = ((document.getElementById('ts-'+i+'-'+t)||{}).value || '').trim();
-      if (!brand||!size) { alert('케이스 #'+i+' 치아 #'+t+': 임플란트 종류와 사이즈를 입력해주세요.'); valid=false; break; }
+      var tn = selectedTeeth[ti];
+      var brand = (document.getElementById('tb-'+i+'-'+tn)||{}).value || '';
+      var size  = ((document.getElementById('ts-'+i+'-'+tn)||{}).value || '').trim();
+      if (!brand||!size) { alert(tf('err_fill_tooth', i, tn)); valid=false; break; }
       teethData.push({
-        tooth:     t,
-        toothName: getToothName(t),
+        tooth:     tn,
+        toothName: getToothName(tn),
         brand:     brand,
         size:      size,
-        color:     (document.getElementById('tc-'+i+'-'+t)||{}).value || '',
+        color:     (document.getElementById('tc-'+i+'-'+tn)||{}).value || '',
       });
     }
     if (!valid) return;
+    var stlFile = document.getElementById('stl-'+i).files[0];
     cases.push({
-      patient:  document.getElementById('cp-'+i).value.trim() || '익명',
+      patient:  document.getElementById('cp-'+i).value.trim() || t('anon_patient'),
       teeth:    teethData,
       deadline: document.getElementById('cd-'+i).value,
       memo:     document.getElementById('cm-'+i).value.trim(),
-      stl:      document.getElementById('stl-'+i).files[0] ? document.getElementById('stl-'+i).files[0].name : '미첨부',
+      stl:      stlFile ? stlFile.name : null,
     });
   }
-  if (!cases.length) { alert('케이스를 최소 1개 추가해주세요.'); return; }
+  if (!cases.length) { alert(t('err_add_case')); return; }
   var totalTeeth = cases.reduce(function(s,c){ return s+c.teeth.length; },0);
   var oid = 'CA-' + Date.now().toString().slice(-6);
-  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString('ko-KR') };
+  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString() };
   customOrders.unshift(order);
   sendLine(order, 'received');
-  alert('✅ 주문이 접수되었습니다!\n주문번호: ' + oid + '\n케이스: ' + cases.length + '개 / 치아: ' + totalTeeth + '개' + (lineId ? '\nLine으로 확인 메시지를 보내드렸습니다.' : ''));
+  var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
+  if (lineId) msg += t('order_success_line');
+  alert(msg);
   customTab('list');
 }
 function renderCustomOrders() {
   var c = document.getElementById('customOrdersContainer');
-  if (!customOrders.length) { c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">아직 주문 내역이 없어요</div>'; return; }
+  if (!customOrders.length) { c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('custom_empty') + '</div>'; return; }
   c.innerHTML = customOrders.map(function(o) {
     var si = ORDER_STAGES.findIndex(function(s){ return s.key===o.stage; });
     var st = ORDER_STAGES[si];
@@ -503,38 +494,40 @@ function renderCustomOrders() {
     }).join('');
     var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
     var caseRows = o.cases.map(function(cs, ci) {
-      var toothRows = (cs.teeth||[]).map(function(t) {
-        var isUpper = t>=11&&t<=28;
+      var toothRows = (cs.teeth||[]).map(function(td) {
+        var isUpper = td.tooth>=11&&td.tooth<=28;
         var jawDot = isUpper
           ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block mr-1"></span>'
           : '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block mr-1"></span>';
         return '<div class="flex items-center gap-2 py-1.5 border-b border-slate-50 last:border-0">' +
-          '<span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 text-[9px] font-black flex items-center justify-center shrink-0">' + t.tooth + '</span>' +
-          '<div class="flex-1 min-w-0">' + jawDot + '<span class="text-[10px] font-black text-slate-700">' + t.brand + '</span><span class="text-[9px] text-slate-400 ml-1">' + t.size + '</span></div>' +
-          (t.color ? '<span class="text-[9px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md shrink-0">' + t.color + '</span>' : '') +
+          '<span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 text-[9px] font-black flex items-center justify-center shrink-0">' + td.tooth + '</span>' +
+          '<div class="flex-1 min-w-0">' + jawDot + '<span class="text-[10px] font-black text-slate-700">' + td.brand + '</span><span class="text-[9px] text-slate-400 ml-1">' + td.size + '</span></div>' +
+          (td.color ? '<span class="text-[9px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md shrink-0">' + td.color + '</span>' : '') +
         '</div>';
       }).join('');
+      var nTeeth = cs.teeth ? cs.teeth.length : 0;
       return '<div class="mb-3 last:mb-0">' +
         '<div class="flex justify-between items-center mb-1">' +
-          '<p class="text-[10px] font-black text-slate-600">케이스 #' + (ci+1) + ' · 환자: ' + cs.patient + '</p>' +
-          '<span class="text-[9px] bg-blue-50 text-blue-600 font-black px-2 py-0.5 rounded-lg">' + (cs.teeth?cs.teeth.length:0) + '개 치아</span>' +
+          '<p class="text-[10px] font-black text-slate-600">' + t('case_nr') + (ci+1) + ' · ' + t('patient_label') + cs.patient + '</p>' +
+          '<span class="text-[9px] bg-blue-50 text-blue-600 font-black px-2 py-0.5 rounded-lg">' + nTeeth + t('teeth_count') + '</span>' +
         '</div>' +
-        (toothRows || '<p class="text-[9px] text-slate-300 font-bold">치아 정보 없음</p>') +
-        (cs.stl&&cs.stl!=='미첨부' ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '') +
+        (toothRows || '<p class="text-[9px] text-slate-300 font-bold">' + t('no_tooth_info') + '</p>') +
+        (cs.stl ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '') +
         (cs.deadline ? '<p class="text-[9px] text-slate-400 font-bold mt-1">📅 ' + cs.deadline + '</p>' : '') +
       '</div>';
     }).join('');
+    var detailHeader = t('case_detail') + ' (' + o.cases.length + t('cases_unit') + ' · ' + t('teeth_total_prefix') + totalTeeth + t('teeth_count') + ')';
     return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">' +
       '<div class="bg-[#001d4a] px-5 py-4 flex justify-between items-center">' +
         '<div><p class="font-black text-white text-sm">' + o.clinic + '</p><p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
-        '<div class="text-right"><span class="text-xl">' + st.icon + '</span><p class="text-blue-300 text-[9px] font-bold mt-0.5">치아 ' + totalTeeth + '개</p></div>' +
+        '<div class="text-right"><span class="text-xl">' + st.icon + '</span><p class="text-blue-300 text-[9px] font-bold mt-0.5">' + totalTeeth + t('teeth_count') + '</p></div>' +
       '</div>' +
-      '<div class="px-5 py-4"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">진행 상황</p>' +
+      '<div class="px-5 py-4"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('status_label') + '</p>' +
         '<div class="flex gap-1 mb-2">' + bars + '</div>' +
-        '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + st.label + '</p>' +
+        '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + t('stage_' + st.key) + '</p>' +
       '</div>' +
       '<div class="px-5 pb-5 border-t border-slate-50 pt-4">' +
-        '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">케이스 상세 (' + o.cases.length + '개 · 총 ' + totalTeeth + '개 치아)</p>' +
+        '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">' + detailHeader + '</p>' +
         caseRows +
       '</div>' +
       '<div class="px-5 pb-4 text-[9px] text-slate-400 font-bold space-y-0.5 border-t border-slate-50 pt-3">' +
@@ -546,7 +539,7 @@ async function sendLine(order, stageKey) {
   if (!LINE_TOKEN || LINE_TOKEN==='YOUR_LINE_NOTIFY_TOKEN') return;
   var st = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
   var totalTeeth = order.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
-  var msg = '\n[Dentalk Custom] ' + st.icon + ' ' + st.label + '\n주문번호: ' + order.id + '\n치과: ' + order.clinic + '\n케이스: ' + order.cases.length + '개 / 치아: ' + totalTeeth + '개\n연락처: ' + order.phone;
+  var msg = '\n[Dentalk Custom] ' + st.icon + ' ' + t('stage_' + st.key) + '\n' + order.id + '\n' + order.clinic + '\n' + order.cases.length + ' / ' + totalTeeth + '\n' + order.phone;
   try { await fetch('https://notify-api.line.me/api/notify',{method:'POST',headers:{'Authorization':'Bearer '+LINE_TOKEN,'Content-Type':'application/x-www-form-urlencoded'},body:'message='+encodeURIComponent(msg)}); }
   catch(e) {}
 }
@@ -555,9 +548,9 @@ async function sendLine(order, stageKey) {
 // ============================================================
 function renderUsed() {
   var list = document.getElementById('usedList');
-  if (!usedItems.length) { list.innerHTML='<div class="text-center text-slate-400 font-bold text-sm py-10">아직 등록된 중고 물품이 없어요</div>'; return; }
-  var condMap = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
-  var condLabel = {new:'Like New',good:'Good',fair:'Fair'};
+  if (!usedItems.length) { list.innerHTML='<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('used_empty') + '</div>'; return; }
+  var condMap   = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
+  var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   list.innerHTML = usedItems.map(function(item,i){
     return '<div class="bg-white rounded-2xl p-5 shadow-sm">' +
       '<div class="flex justify-between items-start mb-2">' +
@@ -568,17 +561,17 @@ function renderUsed() {
       '<div class="flex justify-between items-center">' +
         '<div><p class="font-black text-blue-800 text-lg font-mono">' + item.price.toLocaleString() + ' <span class="text-xs">THB</span></p><p class="text-[9px] text-slate-400">' + item.seller + ' · ' + item.date + '</p></div>' +
         '<div class="flex gap-2">' +
-          '<button onclick="showContact(\'' + item.contact + '\')" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-black text-xs">연락하기</button>' +
-          '<button onclick="deleteUsed(' + i + ')" class="px-3 py-2 bg-red-50 text-red-400 rounded-xl font-black text-xs">삭제</button>' +
+          '<button onclick="showContact(\'' + item.contact + '\')" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-black text-xs">' + t('used_contact_btn') + '</button>' +
+          '<button onclick="deleteUsed(' + i + ')" class="px-3 py-2 bg-red-50 text-red-400 rounded-xl font-black text-xs">' + t('used_delete_btn') + '</button>' +
         '</div>' +
       '</div></div>';
   }).join('');
 }
 function submitUsed() {
   var name=document.getElementById('u-name').value.trim();
-  var price=parseInt(document.getElementById('u-price').value, 10)||0;
+  var price=parseInt(document.getElementById('u-price').value,10)||0;
   var contact=document.getElementById('u-contact').value.trim();
-  if (!name||!price||!contact) { alert('부품명, 가격, 연락처를 입력해주세요.'); return; }
+  if (!name||!price||!contact) { alert(t('used_fill_error')); return; }
   usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10)});
   ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
   renderUsed();
@@ -594,9 +587,9 @@ function renderForum() {
   }).join('');
 }
 function submitPost() {
-  var t=document.getElementById('postTitle').value.trim(), b=document.getElementById('postBody').value.trim();
-  if(!t||!b) return;
-  posts.unshift({id:Date.now(),title:t,body:b,author:'Doctor'});
+  var tt=document.getElementById('postTitle').value.trim(), b=document.getElementById('postBody').value.trim();
+  if(!tt||!b) return;
+  posts.unshift({id:Date.now(),title:tt,body:b,author:'Doctor'});
   document.getElementById('postTitle').value=''; document.getElementById('postBody').value='';
   renderForum();
 }
@@ -609,13 +602,90 @@ function renderEvents() {
   }).join('');
 }
 // ============================================================
-// SETTINGS
+// SETTINGS - 언어 선택 (저장 전까지 pendingLang에 보관)
 // ============================================================
-function setLang(lang) {
-  currentLang = lang;
+function selectLang(lang) {
+  pendingLang = lang;
   ['en','ko','zh','th'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
     b.className = l===lang
+      ? 'p-4 rounded-2xl font-black text-sm border-2 border-amber-500 bg-amber-50 text-amber-700'
+      : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
+  });
+  // 현재 저장된 언어 버튼은 파란색으로 유지
+  var saved = document.getElementById('lang-'+currentLang);
+  if (saved && lang !== currentLang) {
+    // pending 선택은 amber, 저장된 언어는 일반 표시
+  }
+  var pendingNote = document.getElementById('langPendingNote');
+  if (pendingNote) pendingNote.classList.remove('hidden');
+  var savedMsg = document.getElementById('savedMsg');
+  if (savedMsg) savedMsg.classList.add('hidden');
+}
+function saveLang() {
+  if (!pendingLang) return;
+  currentLang = pendingLang;
+  pendingLang = null;
+  localStorage.setItem('dentalk_lang', currentLang);
+  // 저장된 언어 버튼 스타일 업데이트
+  ['en','ko','zh','th'].forEach(function(l){
+    var b = document.getElementById('lang-'+l);
+    b.className = l===currentLang
+      ? 'p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700'
+      : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
+  });
+  var pendingNote = document.getElementById('langPendingNote');
+  if (pendingNote) pendingNote.classList.add('hidden');
+  applyLang();
+  var savedMsg = document.getElementById('savedMsg');
+  if (savedMsg) {
+    savedMsg.classList.remove('hidden');
+    setTimeout(function(){ savedMsg.classList.add('hidden'); }, 2000);
+  }
+}
+// ============================================================
+// applyLang - 모든 UI 텍스트 업데이트
+// ============================================================
+function applyLang() {
+  // data-i18n 속성 요소 업데이트
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    el.textContent = t(el.dataset.i18n);
+  });
+  // data-i18n-ph 속성 요소 (placeholder) 업데이트
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+  // 중고마켓 상태 셀렉트 옵션 업데이트
+  var condSel = document.getElementById('u-cond');
+  if (condSel && condSel.options.length >= 3) {
+    condSel.options[0].text = t('cond_new');
+    condSel.options[1].text = t('cond_good');
+    condSel.options[2].text = t('cond_fair');
+  }
+  // 페이지 타이틀 업데이트
+  document.getElementById('pageTitle').textContent = t('pt_' + currentPage);
+  // 커스텀 탭 버튼 텍스트 업데이트
+  var fBtn = document.getElementById('ctab-form');
+  var lBtn = document.getElementById('ctab-list');
+  if (fBtn) fBtn.textContent = t('custom_tab_new');
+  if (lBtn) lBtn.textContent = t('custom_tab_list');
+  // 사이드 로그인 버튼
+  var sideLoginTxt = document.getElementById('sideLoginTxt');
+  if (sideLoginTxt) sideLoginTxt.textContent = t('side_login_btn');
+  // 현재 페이지 동적 콘텐츠 재렌더링
+  if (currentPage === 'shop')   renderShop();
+  if (currentPage === 'used')   renderUsed();
+  if (currentPage === 'forum')  renderForum();
+  if (currentPage === 'events') renderEvents();
+  if (currentPage === 'custom') renderCustomOrders();
+  // 설정 저장 버튼 텍스트
+  var saveBtn = document.getElementById('saveLangBtn');
+  if (saveBtn) saveBtn.textContent = t('settings_save_btn');
+  // 저장된 언어 버튼 스타일 반영
+  ['en','ko','zh','th'].forEach(function(l){
+    var b = document.getElementById('lang-'+l);
+    if (!b) return;
+    b.className = l===currentLang
       ? 'p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700'
       : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
   });
@@ -629,7 +699,11 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 // 초기화
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
+  var saved = localStorage.getItem('dentalk_lang') || 'en';
+  currentLang = saved;
+  pendingLang = null;
   document.getElementById('mb-home').classList.add('active');
+  applyLang();
   renderUsed();
   renderForum();
   renderEvents();
