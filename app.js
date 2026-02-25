@@ -9,6 +9,10 @@ const ORDER_STAGES   = [
   {key:'cnc',icon:'[4]'},{key:'qc',icon:'[5]'},{key:'shipping',icon:'[6]'},{key:'done',icon:'[7]'},
 ];
 const LINE_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN';
+// ── Supabase 면허 검증 ──────────────────────────────────────────
+// Supabase 프로젝트 생성 후 아래 두 값을 교체하세요.
+const SUPABASE_URL      = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 // ============================================================
 // 상태
 // ============================================================
@@ -41,13 +45,47 @@ function openLoginModal(target) {
   document.getElementById('licenseInput').value = '';
   openModal('loginModal');
 }
-function handleLogin() {
+// ── Supabase 면허 검증 함수 ─────────────────────────────────────
+async function verifyLicense(licNum) {
+  try {
+    const url = SUPABASE_URL + '/rest/v1/licenses'
+      + '?license_number=eq.' + encodeURIComponent(licNum)
+      + '&is_active=eq.true'
+      + '&select=doctor_name,clinic_name';
+    const res = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      }
+    });
+    if (!res.ok) return { ok: false, reason: 'network' };
+    const data = await res.json();
+    if (!data.length) return { ok: false, reason: 'not_found' };
+    return { ok: true, doctorName: data[0].doctor_name, clinicName: data[0].clinic_name };
+  } catch (e) {
+    return { ok: false, reason: 'network' };
+  }
+}
+async function handleLogin() {
   const lic = document.getElementById('licenseInput').value.trim();
   if (lic.length < 3) { alert(t('login_error')); return; }
+  // 로딩 상태
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = t('login_verifying');
+  const result = await verifyLicense(lic);
+  btn.disabled = false;
+  btn.textContent = t('login_btn');
+  if (!result.ok) {
+    alert(result.reason === 'network' ? t('login_network_error') : t('login_not_found'));
+    return;
+  }
+  // 로그인 성공
+  const displayName = result.doctorName || lic;
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
-  document.getElementById('licenseDisplay').textContent = lic;
-  document.getElementById('sideUserInfo').textContent   = '🔑 ' + lic;
+  document.getElementById('licenseDisplay').textContent = displayName;
+  document.getElementById('sideUserInfo').textContent   = '🔑 ' + displayName;
   document.getElementById('sideLoginArea').classList.add('hidden');
   document.getElementById('sideLoggedArea').classList.remove('hidden');
   document.getElementById('timerWrap').classList.remove('hidden');
