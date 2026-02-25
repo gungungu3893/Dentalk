@@ -49,7 +49,27 @@ input[type=number] { -moz-appearance:textfield; }
     <input id="licenseInput" type="text" data-i18n-ph="login_ph" placeholder="License Number"
       class="w-full p-4 rounded-2xl text-black mb-4 outline-none font-bold text-center bg-white">
     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="login_btn">LOGIN</button>
-    <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2" data-i18n="login_cancel">Cancel</button>
+    <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2 mb-1" data-i18n="login_cancel">Cancel</button>
+    <button onclick="openRegisterModal()" class="w-full text-blue-300 text-xs font-bold py-1 underline underline-offset-2" data-i18n="login_register_link">Request Access →</button>
+  </div>
+</div>
+<!-- ============================== 사용 신청 모달 ============================== -->
+<div id="registerModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
+  <div class="bg-[#001d4a] w-full max-w-sm rounded-3xl p-8 text-white shadow-2xl">
+    <div class="text-center mb-6">
+      <p class="font-black text-white text-lg mb-1" data-i18n="reg_title">Request Access</p>
+      <p class="text-blue-300 text-[10px] font-bold leading-relaxed" data-i18n="reg_subtitle">Fill in your details. Admin will approve within 24 hours.</p>
+    </div>
+    <input id="regLicense" type="text" data-i18n-ph="reg_license_ph" placeholder="License Number (required)"
+      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regName" type="text" data-i18n-ph="reg_name_ph" placeholder="Doctor Name (required)"
+      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regClinic" type="text" data-i18n-ph="reg_clinic_ph" placeholder="Clinic Name (required)"
+      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regContact" type="text" data-i18n-ph="reg_contact_ph" placeholder="Phone or Line ID (required)"
+      class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
+    <button id="regSubmitBtn" onclick="submitRegistration()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="reg_submit">Submit Request</button>
+    <button onclick="closeModal('registerModal')" class="w-full text-slate-400 text-xs font-bold py-2" data-i18n="login_cancel">Cancel</button>
   </div>
 </div>
 <!-- ============================== 세션 연장 모달 ============================== -->

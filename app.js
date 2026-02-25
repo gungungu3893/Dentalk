@@ -45,6 +45,43 @@ function openLoginModal(target) {
   document.getElementById('licenseInput').value = '';
   openModal('loginModal');
 }
+function openRegisterModal() {
+  closeModal('loginModal');
+  ['regLicense','regName','regClinic','regContact'].forEach(function(id){ document.getElementById(id).value=''; });
+  openModal('registerModal');
+}
+async function submitRegistration() {
+  var lic     = document.getElementById('regLicense').value.trim();
+  var name    = document.getElementById('regName').value.trim();
+  var clinic  = document.getElementById('regClinic').value.trim();
+  var contact = document.getElementById('regContact').value.trim();
+  if (!lic || !name || !clinic || !contact) { alert(t('reg_error')); return; }
+  var btn = document.getElementById('regSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = t('reg_submitting');
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/licenses', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ license_number:lic, doctor_name:name, clinic_name:clinic, contact:contact, is_active:false }),
+    });
+    btn.disabled = false;
+    btn.textContent = t('reg_submit');
+    if (res.status === 409) { alert(t('reg_duplicate')); return; }
+    if (!res.ok) { alert(t('reg_network_error')); return; }
+    alert(t('reg_success'));
+    closeModal('registerModal');
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = t('reg_submit');
+    alert(t('reg_network_error'));
+  }
+}
 // ── Supabase 면허 검증 함수 ─────────────────────────────────────
 async function verifyLicense(licNum) {
   try {
