@@ -23,10 +23,10 @@ let cart         = [];
 let currentProd  = null;
 let tableQtys    = {};
 let usedItems    = [
-  {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10'},
-  {id:2,name:'Q-Base QBAM4401S',code:'QBAM4401S',price:2000,cond:'new',desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18'},
+  {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10',views:0},
+  {id:2,name:'Q-Base QBAM4401S',code:'QBAM4401S',price:2000,cond:'new',desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18',views:0},
 ];
-let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin'}];
+let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin',views:0}];
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
 let customOrders = [];
 let caseCount    = 0;
@@ -627,19 +627,23 @@ function renderUsed() {
   var condMap   = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   list.innerHTML = usedItems.map(function(item,i){
-    return '<div class="bg-white rounded-2xl p-5 shadow-sm">' +
-      '<div class="flex justify-between items-start mb-2">' +
-        '<div class="flex-1"><h4 class="font-black text-slate-800 text-sm">' + item.name + '</h4><p class="text-[9px] font-mono text-slate-400 font-bold mt-0.5">' + item.code + '</p></div>' +
-        '<span class="text-xs font-black px-2 py-1 rounded-lg ml-2 ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>' +
-      '</div>' +
-      '<p class="text-xs text-slate-500 mb-3 leading-relaxed">' + item.desc + '</p>' +
-      '<div class="flex justify-between items-center">' +
-        '<div><p class="font-black text-blue-800 text-lg font-mono">' + item.price.toLocaleString() + ' <span class="text-xs">THB</span></p><p class="text-[9px] text-slate-400">' + item.seller + ' · ' + item.date + '</p></div>' +
-        '<div class="flex gap-2">' +
-          '<button onclick="showContact(\'' + item.contact + '\')" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-black text-xs">' + t('used_contact_btn') + '</button>' +
-          '<button onclick="deleteUsed(' + i + ')" class="px-3 py-2 bg-red-50 text-red-400 rounded-xl font-black text-xs">' + t('used_delete_btn') + '</button>' +
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
+      '<div class="p-5 cursor-pointer active:bg-slate-50" onclick="openUsedDetail(' + item.id + ')">' +
+        '<div class="flex justify-between items-start mb-2">' +
+          '<div class="flex-1"><h4 class="font-black text-slate-800 text-sm">' + item.name + '</h4><p class="text-[9px] font-mono text-slate-400 font-bold mt-0.5">' + item.code + '</p></div>' +
+          '<span class="text-xs font-black px-2 py-1 rounded-lg ml-2 ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>' +
         '</div>' +
-      '</div></div>';
+        '<p class="text-xs text-slate-500 mb-3 leading-relaxed">' + item.desc + '</p>' +
+        '<div class="flex justify-between items-center">' +
+          '<div><p class="font-black text-blue-800 text-lg font-mono">' + item.price.toLocaleString() + ' <span class="text-xs">THB</span></p><p class="text-[9px] text-slate-400">' + item.seller + ' · ' + item.date + '</p></div>' +
+          '<p class="text-[9px] text-slate-400 font-bold">👁 ' + (item.views||0) + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex gap-2 px-5 pb-4">' +
+        '<button onclick="showContact(\'' + item.contact + '\')" class="flex-1 py-2 bg-blue-600 text-white rounded-xl font-black text-xs">' + t('used_contact_btn') + '</button>' +
+        '<button onclick="deleteUsed(' + i + ')" class="px-3 py-2 bg-red-50 text-red-400 rounded-xl font-black text-xs">' + t('used_delete_btn') + '</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 function submitUsed() {
@@ -647,24 +651,57 @@ function submitUsed() {
   var price=parseInt(document.getElementById('u-price').value,10)||0;
   var contact=document.getElementById('u-contact').value.trim();
   if (!name||!price||!contact) { alert(t('used_fill_error')); return; }
-  usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10)});
+  usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10),views:0});
   ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
   renderUsed();
 }
 function deleteUsed(i) { usedItems.splice(i,1); renderUsed(); }
 function showContact(c) { document.getElementById('usedContactText').textContent=c; openModal('usedContactModal'); }
+function openUsedDetail(id) {
+  var item = usedItems.find(function(x){ return x.id===id; });
+  if (!item) return;
+  item.views = (item.views||0) + 1;
+  renderUsed();
+  var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
+  var condColor = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
+  document.getElementById('udName').textContent    = item.name;
+  document.getElementById('udCode').textContent    = item.code;
+  document.getElementById('udPrice').textContent   = item.price.toLocaleString() + ' THB';
+  document.getElementById('udCond').textContent    = condLabel[item.cond];
+  document.getElementById('udCond').className      = 'text-xs font-black px-2 py-1 rounded-lg ' + condColor[item.cond];
+  document.getElementById('udDesc').textContent    = item.desc;
+  document.getElementById('udMeta').textContent    = item.seller + ' · ' + item.date;
+  document.getElementById('udViews').textContent   = item.views;
+  document.getElementById('udContactBtn').onclick  = function(){ showContact(item.contact); };
+  openModal('usedDetailModal');
+}
+function openForumDetail(id) {
+  var post = posts.find(function(x){ return x.id===id; });
+  if (!post) return;
+  post.views = (post.views||0) + 1;
+  renderForum();
+  document.getElementById('fdTitle').textContent  = post.title;
+  document.getElementById('fdBody').textContent   = post.body;
+  document.getElementById('fdAuthor').textContent = post.author;
+  document.getElementById('fdViews').textContent  = post.views;
+  openModal('forumDetailModal');
+}
 // ============================================================
 // FORUM
 // ============================================================
 function renderForum() {
   document.getElementById('postList').innerHTML = posts.map(function(p){
-    return '<div class="bg-white p-5 rounded-2xl border shadow-sm"><p class="font-black text-slate-800 text-sm mb-1">' + p.title + '</p><p class="text-xs text-slate-500 leading-relaxed">' + p.body + '</p><p class="text-[9px] text-slate-300 font-bold uppercase mt-3">' + p.author + '</p></div>';
+    return '<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer active:bg-slate-50" onclick="openForumDetail(' + p.id + ')">' +
+      '<p class="font-black text-slate-800 text-sm mb-1">' + p.title + '</p>' +
+      '<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">' + p.body + '</p>' +
+      '<p class="text-[9px] text-slate-300 font-bold uppercase mt-3">' + p.author + ' · 👁 ' + (p.views||0) + '</p>' +
+    '</div>';
   }).join('');
 }
 function submitPost() {
   var tt=document.getElementById('postTitle').value.trim(), b=document.getElementById('postBody').value.trim();
   if(!tt||!b) return;
-  posts.unshift({id:Date.now(),title:tt,body:b,author:'Doctor'});
+  posts.unshift({id:Date.now(),title:tt,body:b,author:'Doctor',views:0});
   document.getElementById('postTitle').value=''; document.getElementById('postBody').value='';
   renderForum();
 }
