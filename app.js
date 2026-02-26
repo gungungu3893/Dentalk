@@ -631,11 +631,11 @@ function renderUsed() {
       ? '<img src="' + item.image + '" class="w-full h-full object-cover">'
       : '<div class="w-full h-full flex items-center justify-center text-slate-200 text-2xl">📷</div>';
     return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:opacity-75 flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
-      '<div class="aspect-square bg-slate-100 overflow-hidden">' + thumb + '</div>' +
+      '<div class="h-12 bg-slate-100 overflow-hidden">' + thumb + '</div>' +
       '<div class="p-1.5 flex flex-col gap-0.5">' +
-        '<p class="font-black text-slate-800 text-[8px] leading-tight line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-slate-800 text-2xl leading-tight line-clamp-2">' + item.name + '</p>' +
         '<p class="font-black text-blue-700 text-[8px] font-mono">' + item.price.toLocaleString() + ' <span class="font-normal text-[7px]">THB</span></p>' +
-        '<p class="text-[7px] text-slate-300">👁 ' + (item.views||0) + '</p>' +
+        '<p class="text-sm text-slate-300">👁 ' + (item.views||0) + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
