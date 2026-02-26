@@ -23,8 +23,8 @@ let cart         = [];
 let currentProd  = null;
 let tableQtys    = {};
 let usedItems    = [
-  {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10',views:0},
-  {id:2,name:'Q-Base QBAM4401S',code:'QBAM4401S',price:2000,cond:'new',desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18',views:0},
+  {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10',views:0,image:null},
+  {id:2,name:'Q-Base QBAM4401S',code:'QBAM4401S',price:2000,cond:'new',desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18',views:0,image:null},
 ];
 let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin',views:0}];
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
@@ -627,33 +627,49 @@ function renderUsed() {
   var condMap   = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   list.innerHTML = usedItems.map(function(item,i){
-    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
-      '<div class="p-5 cursor-pointer active:bg-slate-50" onclick="openUsedDetail(' + item.id + ')">' +
-        '<div class="flex justify-between items-start mb-2">' +
-          '<div class="flex-1"><h4 class="font-black text-slate-800 text-sm">' + item.name + '</h4><p class="text-[9px] font-mono text-slate-400 font-bold mt-0.5">' + item.code + '</p></div>' +
-          '<span class="text-xs font-black px-2 py-1 rounded-lg ml-2 ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>' +
-        '</div>' +
-        '<p class="text-xs text-slate-500 mb-3 leading-relaxed">' + item.desc + '</p>' +
-        '<div class="flex justify-between items-center">' +
-          '<div><p class="font-black text-blue-800 text-lg font-mono">' + item.price.toLocaleString() + ' <span class="text-xs">THB</span></p><p class="text-[9px] text-slate-400">' + item.seller + ' · ' + item.date + '</p></div>' +
-          '<p class="text-[9px] text-slate-400 font-bold">👁 ' + (item.views||0) + '</p>' +
-        '</div>' +
-      '</div>' +
-      '<div class="flex gap-2 px-5 pb-4">' +
-        '<button onclick="showContact(\'' + item.contact + '\')" class="flex-1 py-2 bg-blue-600 text-white rounded-xl font-black text-xs">' + t('used_contact_btn') + '</button>' +
-        '<button onclick="deleteUsed(' + i + ')" class="px-3 py-2 bg-red-50 text-red-400 rounded-xl font-black text-xs">' + t('used_delete_btn') + '</button>' +
+    var thumb = item.image
+      ? '<img src="' + item.image + '" class="w-full h-full object-cover">'
+      : '<div class="w-full h-full flex items-center justify-center text-slate-200 text-2xl">📷</div>';
+    return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:opacity-75 flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
+      '<div class="aspect-square bg-slate-100 overflow-hidden">' + thumb + '</div>' +
+      '<div class="p-1.5 flex flex-col gap-0.5">' +
+        '<p class="font-black text-slate-800 text-[8px] leading-tight line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-blue-700 text-[8px] font-mono">' + item.price.toLocaleString() + ' <span class="font-normal text-[7px]">THB</span></p>' +
+        '<p class="text-[7px] text-slate-300">👁 ' + (item.views||0) + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
 }
+function previewPhoto() {
+  var file = document.getElementById('u-photo').files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var prev = document.getElementById('u-photo-preview');
+    prev.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover">';
+  };
+  reader.readAsDataURL(file);
+}
 function submitUsed() {
-  var name=document.getElementById('u-name').value.trim();
-  var price=parseInt(document.getElementById('u-price').value,10)||0;
-  var contact=document.getElementById('u-contact').value.trim();
+  var name    = document.getElementById('u-name').value.trim();
+  var price   = parseInt(document.getElementById('u-price').value,10)||0;
+  var contact = document.getElementById('u-contact').value.trim();
   if (!name||!price||!contact) { alert(t('used_fill_error')); return; }
-  usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10),views:0});
-  ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
-  renderUsed();
+  function addItem(imgData) {
+    usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10),views:0,image:imgData||null});
+    ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('u-photo').value = '';
+    document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">Add Photo</span>';
+    renderUsed();
+  }
+  var file = document.getElementById('u-photo').files[0];
+  if (file) {
+    var reader = new FileReader();
+    reader.onload = function(e){ addItem(e.target.result); };
+    reader.readAsDataURL(file);
+  } else {
+    addItem(null);
+  }
 }
 function deleteUsed(i) { usedItems.splice(i,1); renderUsed(); }
 function showContact(c) { document.getElementById('usedContactText').textContent=c; openModal('usedContactModal'); }
@@ -673,6 +689,10 @@ function openUsedDetail(id) {
   document.getElementById('udMeta').textContent    = item.seller + ' · ' + item.date;
   document.getElementById('udViews').textContent   = item.views;
   document.getElementById('udContactBtn').onclick  = function(){ showContact(item.contact); };
+  var imgWrap = document.getElementById('udImageWrap');
+  var imgEl   = document.getElementById('udImage');
+  if (item.image) { imgEl.src = item.image; imgWrap.classList.remove('hidden'); }
+  else { imgWrap.classList.add('hidden'); imgEl.src = ''; }
   openModal('usedDetailModal');
 }
 function openForumDetail(id) {
