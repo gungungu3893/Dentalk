@@ -80,7 +80,7 @@ async function submitRegistration() {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       },
-      body: JSON.stringify({ license_number:lic, doctor_name:name, clinic_name:clinic, contact:contact, is_active:false }),
+      body: JSON.stringify({ license_number:lic, doctor_name:name, clinic_name:clinic, contact:contact, nickname:nickname, email:email, is_active:false }),
     });
     btn.disabled = false;
     btn.textContent = t('reg_submit');
@@ -103,7 +103,7 @@ async function verifyLicense(licNum) {
     const url = SUPABASE_URL + '/rest/v1/licenses'
       + '?license_number=eq.' + encodeURIComponent(licNum)
       + '&is_active=eq.true'
-      + '&select=doctor_name,clinic_name';
+      + '&select=doctor_name,clinic_name,nickname,email,phone,address';
     const res = await fetch(url, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -113,7 +113,15 @@ async function verifyLicense(licNum) {
     if (!res.ok) return { ok: false, reason: 'network' };
     const data = await res.json();
     if (!data.length) return { ok: false, reason: 'not_found' };
-    return { ok: true, doctorName: data[0].doctor_name, clinicName: data[0].clinic_name };
+    return {
+      ok: true,
+      doctorName: data[0].doctor_name || '',
+      clinicName: data[0].clinic_name || '',
+      nickname:   data[0].nickname    || '',
+      email:      data[0].email       || '',
+      phone:      data[0].phone       || '',
+      address:    data[0].address     || '',
+    };
   } catch (e) {
     return { ok: false, reason: 'network' };
   }
@@ -132,18 +140,21 @@ async function handleLogin() {
     alert(result.reason === 'network' ? t('login_network_error') : t('login_not_found'));
     return;
   }
-  // 로그인 성공 — 로컬 프로필 로드
+  // 로그인 성공 — Supabase 데이터 우선, localStorage 폴백
   var profileStr = localStorage.getItem('dentalk_profile_' + lic);
-  var profile    = profileStr ? JSON.parse(profileStr) : {};
+  var local      = profileStr ? JSON.parse(profileStr) : {};
   currentUser = {
     licenseNum: lic,
-    nickname:   profile.nickname   || result.doctorName || lic,
-    email:      profile.email      || '',
-    phone:      profile.phone      || '',
-    address:    profile.address    || '',
-    clinicName: profile.clinicName || result.clinicName || '',
-    doctorName: result.doctorName  || '',
+    nickname:   result.nickname   || local.nickname   || result.doctorName || lic,
+    email:      result.email      || local.email      || '',
+    phone:      result.phone      || local.phone      || '',
+    address:    result.address    || local.address    || '',
+    clinicName: result.clinicName || local.clinicName || '',
+    doctorName: result.doctorName || '',
   };
+  // Supabase에서 받은 최신 데이터를 localStorage에도 동기화
+  var sync = { nickname:currentUser.nickname, email:currentUser.email, phone:currentUser.phone, address:currentUser.address, clinicName:currentUser.clinicName, doctorName:currentUser.doctorName };
+  localStorage.setItem('dentalk_profile_' + lic, JSON.stringify(sync));
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
   document.getElementById('licenseDisplay').textContent = currentUser.nickname;
@@ -923,7 +934,7 @@ function openProfileEdit() {
   document.getElementById('pe-clinic').value  = currentUser.clinicName || '';
   openModal('profileEditModal');
 }
-function saveProfile() {
+async function saveProfile() {
   currentUser.email     = document.getElementById('pe-email').value.trim();
   currentUser.phone     = document.getElementById('pe-phone').value.trim();
   currentUser.address   = document.getElementById('pe-address').value.trim();
@@ -936,6 +947,24 @@ function saveProfile() {
   profile.address   = currentUser.address;
   profile.clinicName= currentUser.clinicName;
   localStorage.setItem('dentalk_profile_' + currentUser.licenseNum, JSON.stringify(profile));
+  // Supabase에 PATCH
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/licenses?license_number=eq.' + encodeURIComponent(currentUser.licenseNum), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        email:       currentUser.email,
+        phone:       currentUser.phone,
+        address:     currentUser.address,
+        clinic_name: currentUser.clinicName
+      })
+    });
+  } catch(e) { console.warn('Supabase PATCH 실패 (로컬에는 저장됨):', e); }
   closeModal('profileEditModal');
   renderProfileSettings();
   var msg = document.getElementById('profileSavedMsg');
