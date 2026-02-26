@@ -11,8 +11,8 @@ const ORDER_STAGES   = [
 const LINE_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN';
 // ── Supabase 면허 검증 ──────────────────────────────────────────
 // Supabase 프로젝트 생성 후 아래 두 값을 교체하세요.
-const SUPABASE_URL      = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL      = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGxnbnBqY213YnNyeHZveHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTA0MDYsImV4cCI6MjA4NzU4NjQwNn0.amIky4WslMDFBv30n9hcdJx-CWFBOdRvLR9rqwET-_o';
 // ============================================================
 // 상태
 // ============================================================
