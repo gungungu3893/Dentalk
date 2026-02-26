@@ -138,28 +138,28 @@ input[type=number] { -moz-appearance:textfield; }
 <!-- ============================== 프로필 수정 모달 ============================== -->
 <div id="profileEditModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl">
-    <h2 class="font-black text-slate-800 text-xl mb-5">✏️ 내 정보 수정</h2>
-    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">수정 가능 항목</p>
+    <h2 class="font-black text-slate-800 text-xl mb-5" data-i18n="pe_title">✏️ 내 정보 수정</h2>
+    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4" data-i18n="pe_subtitle">수정 가능 항목</p>
     <div class="space-y-3">
       <div>
-        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">이메일</label>
-        <input id="pe-email" type="email" placeholder="이메일 주소" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1" data-i18n="pe_email">이메일</label>
+        <input id="pe-email" type="email" placeholder="이메일 주소" data-i18n-ph="pe_email_ph" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
       </div>
       <div>
-        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">전화번호</label>
-        <input id="pe-phone" type="tel" placeholder="전화번호" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1" data-i18n="pe_phone">전화번호</label>
+        <input id="pe-phone" type="tel" placeholder="전화번호" data-i18n-ph="pe_phone_ph" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
       </div>
       <div>
-        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">주소</label>
-        <input id="pe-address" type="text" placeholder="주소" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1" data-i18n="pe_address">주소</label>
+        <input id="pe-address" type="text" placeholder="주소" data-i18n-ph="pe_address_ph" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
       </div>
       <div>
-        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">치과이름</label>
-        <input id="pe-clinic" type="text" placeholder="치과이름" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1" data-i18n="pe_clinic">치과이름</label>
+        <input id="pe-clinic" type="text" placeholder="치과이름" data-i18n-ph="pe_clinic_ph" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
       </div>
     </div>
-    <button onclick="saveProfile()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-xl mt-6 active:scale-95 transition">저장</button>
-    <button onclick="closeModal('profileEditModal')" class="w-full text-slate-400 text-xs font-bold py-3 mt-1">취소</button>
+    <button onclick="saveProfile()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-xl mt-6 active:scale-95 transition" data-i18n="pe_save">저장</button>
+    <button onclick="closeModal('profileEditModal')" class="w-full text-slate-400 text-xs font-bold py-3 mt-1" data-i18n="pe_cancel">취소</button>
   </div>
 </div>
 <!-- ============================== 중고거래 연락처 모달 ============================== -->
