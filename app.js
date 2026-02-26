@@ -652,16 +652,15 @@ function renderUsed() {
   list.innerHTML = usedItems.map(function(item,i){
     var thumb = item.image
       ? '<img src="' + item.image + '" class="w-full h-full object-contain">'
-      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-4xl">📷</span></div>';
-    var badge = '<span class="inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>';
-    return '<div class="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
+      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
+    var badge = '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>';
+    return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
       '<div class="aspect-square bg-slate-50 overflow-hidden">' + thumb + '</div>' +
-      '<div class="p-2.5 flex flex-col gap-1">' +
+      '<div class="p-1.5 flex flex-col gap-0.5">' +
         badge +
-        '<p class="font-bold text-slate-800 text-xs leading-snug line-clamp-2 mt-0.5">' + item.name + '</p>' +
-        '<p class="font-black text-blue-700 text-sm">' + item.price.toLocaleString() + ' <span class="text-[10px] font-normal text-slate-500">THB</span></p>' +
-        '<p class="text-[9px] text-slate-400">' + item.seller + ' · ' + item.date + '</p>' +
-        '<p class="text-[9px] text-slate-300">👁 ' + (item.views||0) + '</p>' +
+        '<p class="font-bold text-slate-800 text-[11px] leading-snug line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-blue-700 text-xs">' + item.price.toLocaleString() + ' <span class="text-[9px] font-normal text-slate-500">THB</span></p>' +
+        '<p class="text-[9px] text-slate-400">' + item.date + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
