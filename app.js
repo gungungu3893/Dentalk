@@ -651,10 +651,10 @@ function renderUsed() {
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   list.innerHTML = usedItems.map(function(item,i){
     var thumb = item.image
-      ? '<img src="' + item.image + '" class="w-full h-full object-cover">'
-      : '<div class="w-full h-full flex items-center justify-center text-slate-200 text-2xl">📷</div>';
+      ? '<img src="' + item.image + '" class="w-full object-contain">'
+      : '<div class="w-full flex items-center justify-center text-slate-200 text-2xl py-4">📷</div>';
     return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:opacity-75 flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
-      '<div class="h-12 bg-slate-100 overflow-hidden">' + thumb + '</div>' +
+      '<div class="bg-slate-100">' + thumb + '</div>' +
       '<div class="p-1.5 flex flex-col gap-0.5">' +
         '<p class="font-black text-slate-800 text-2xl leading-tight line-clamp-2">' + item.name + '</p>' +
         '<p class="font-black text-blue-700 text-[8px] font-mono">' + item.price.toLocaleString() + ' <span class="font-normal text-[7px]">THB</span></p>' +
