@@ -46,7 +46,9 @@ input[type=number] { -moz-appearance:textfield; }
       <div style="height:2px;border-radius:99px;background:#D4AF37;opacity:.35;margin:-2px auto 0;width:140px"></div>
       <p class="text-blue-300 text-[9px] font-bold uppercase tracking-[3px] mt-3" data-i18n="login_subtitle">DOCTOR LOGIN</p>
     </div>
-    <input id="licenseInput" type="text" data-i18n-ph="login_ph" placeholder="License Number"
+    <input id="loginNickname" type="text" data-i18n-ph="login_ph" placeholder="Nickname"
+      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold text-center bg-white">
+    <input id="loginPassword" type="password" data-i18n-ph="login_password_ph" placeholder="Password"
       class="w-full p-4 rounded-2xl text-black mb-4 outline-none font-bold text-center bg-white">
     <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="login_btn">LOGIN</button>
     <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2 mb-1" data-i18n="login_cancel">Cancel</button>
@@ -65,7 +67,9 @@ input[type=number] { -moz-appearance:textfield; }
     <input id="regName"     type="text"  placeholder="의사 이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
     <input id="regClinic"   type="text"  placeholder="치과이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
     <input id="regEmail"    type="email" placeholder="이메일주소 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regContact"  type="text"  placeholder="전화번호 또는 Line ID (필수)" class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
+    <input id="regContact"  type="text"  placeholder="전화번호 또는 Line ID (필수)" data-i18n-ph="reg_contact_ph" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regPassword" type="password" data-i18n-ph="reg_password_ph" placeholder="비밀번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regPasswordConfirm" type="password" data-i18n-ph="reg_password_confirm_ph" placeholder="비밀번호 확인 (필수)" class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
     <button id="regSubmitBtn" onclick="submitRegistration()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="reg_submit">Submit Request</button>
     <button onclick="closeModal('registerModal')" class="w-full text-slate-400 text-xs font-bold py-2" data-i18n="login_cancel">Cancel</button>
   </div>

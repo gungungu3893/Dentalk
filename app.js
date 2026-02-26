@@ -50,12 +50,13 @@ let pendingPage  = null;
 function isLoggedIn() { return sessionEnd && Date.now() < sessionEnd; }
 function openLoginModal(target) {
   pendingPage = target;
-  document.getElementById('licenseInput').value = '';
+  document.getElementById('loginNickname').value = '';
+  document.getElementById('loginPassword').value = '';
   openModal('loginModal');
 }
 function openRegisterModal() {
   closeModal('loginModal');
-  ['regLicense','regNickname','regName','regClinic','regEmail','regContact'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['regLicense','regNickname','regName','regClinic','regEmail','regContact','regPassword','regPasswordConfirm'].forEach(function(id){ document.getElementById(id).value=''; });
   openModal('registerModal');
 }
 async function submitRegistration() {
@@ -65,8 +66,13 @@ async function submitRegistration() {
   var clinic   = document.getElementById('regClinic').value.trim();
   var email    = document.getElementById('regEmail').value.trim();
   var contact  = document.getElementById('regContact').value.trim();
-  if (!lic || !nickname || !name || !clinic || !email || !contact) {
-    alert('모든 항목을 입력해 주세요.'); return;
+  var password = document.getElementById('regPassword').value.trim();
+  var passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
+  if (!lic || !nickname || !name || !clinic || !email || !contact || !password || !passwordConfirm) {
+    alert(t('reg_error')); return;
+  }
+  if (password !== passwordConfirm) {
+    alert(t('reg_pwd_mismatch')); return;
   }
   var btn = document.getElementById('regSubmitBtn');
   btn.disabled = true;
@@ -80,16 +86,13 @@ async function submitRegistration() {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       },
-      body: JSON.stringify({ license_number:lic, doctor_name:name, clinic_name:clinic, contact:contact, nickname:nickname, email:email, is_active:false }),
+      body: JSON.stringify({ license_number:lic, doctor_name:name, clinic_name:clinic, contact:contact, nickname:nickname, email:email, password:password, is_active:false }),
     });
     btn.disabled = false;
     btn.textContent = t('reg_submit');
     if (res.status === 409) { alert(t('reg_duplicate')); return; }
     if (!res.ok) { alert(t('reg_network_error')); return; }
-    // 로컬에 프로필 저장 (닉네임·이메일·연락처·치과이름)
-    var profile = { nickname:nickname, email:email, phone:contact, address:'', clinicName:clinic, doctorName:name };
-    localStorage.setItem('dentalk_profile_' + lic, JSON.stringify(profile));
-    alert('신청이 완료되었습니다! 관리자 승인 후 로그인 가능합니다.');
+    alert(t('reg_success'));
     closeModal('registerModal');
   } catch(e) {
     btn.disabled = false;
@@ -97,13 +100,14 @@ async function submitRegistration() {
     alert(t('reg_network_error'));
   }
 }
-// ── Supabase 면허 검증 함수 ─────────────────────────────────────
-async function verifyLicense(licNum) {
+// ── Supabase 사용자 검증 (닉네임 + 비밀번호) ─────────────────────
+async function verifyUser(nickname, password) {
   try {
     const url = SUPABASE_URL + '/rest/v1/licenses'
-      + '?license_number=eq.' + encodeURIComponent(licNum)
+      + '?nickname=eq.' + encodeURIComponent(nickname)
+      + '&password=eq.' + encodeURIComponent(password)
       + '&is_active=eq.true'
-      + '&select=doctor_name,clinic_name,nickname,email,phone,address';
+      + '&select=license_number,doctor_name,clinic_name,nickname,email,phone,address';
     const res = await fetch(url, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
@@ -115,25 +119,27 @@ async function verifyLicense(licNum) {
     if (!data.length) return { ok: false, reason: 'not_found' };
     return {
       ok: true,
-      doctorName: data[0].doctor_name || '',
-      clinicName: data[0].clinic_name || '',
-      nickname:   data[0].nickname    || '',
-      email:      data[0].email       || '',
-      phone:      data[0].phone       || '',
-      address:    data[0].address     || '',
+      licenseNum: data[0].license_number || '',
+      doctorName: data[0].doctor_name    || '',
+      clinicName: data[0].clinic_name    || '',
+      nickname:   data[0].nickname       || '',
+      email:      data[0].email          || '',
+      phone:      data[0].phone          || '',
+      address:    data[0].address        || '',
     };
   } catch (e) {
     return { ok: false, reason: 'network' };
   }
 }
 async function handleLogin() {
-  const lic = document.getElementById('licenseInput').value.trim();
-  if (lic.length < 3) { alert(t('login_error')); return; }
+  const nick = document.getElementById('loginNickname').value.trim();
+  const pwd  = document.getElementById('loginPassword').value.trim();
+  if (!nick || !pwd) { alert(t('login_error')); return; }
   // 로딩 상태
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
   btn.textContent = t('login_verifying');
-  const result = await verifyLicense(lic);
+  const result = await verifyUser(nick, pwd);
   btn.disabled = false;
   btn.textContent = t('login_btn');
   if (!result.ok) {
@@ -141,11 +147,12 @@ async function handleLogin() {
     return;
   }
   // 로그인 성공 — Supabase 데이터 우선, localStorage 폴백
+  var lic = result.licenseNum;
   var profileStr = localStorage.getItem('dentalk_profile_' + lic);
   var local      = profileStr ? JSON.parse(profileStr) : {};
   currentUser = {
     licenseNum: lic,
-    nickname:   result.nickname   || local.nickname   || result.doctorName || lic,
+    nickname:   result.nickname   || local.nickname   || nick,
     email:      result.email      || local.email      || '',
     phone:      result.phone      || local.phone      || '',
     address:    result.address    || local.address    || '',
