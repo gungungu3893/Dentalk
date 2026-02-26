@@ -27,7 +27,13 @@ let usedItems    = [
   {id:1,name:'Scan Body HSAM4007S',code:'HSAM4007S',price:1500,cond:'good',desc:'Used 2 times.',contact:'Line: dental_th',seller:'Dr. Kim',date:'2026-02-10',views:0,image:null},
   {id:2,name:'Q-Base QBAM4401S',code:'QBAM4401S',price:2000,cond:'new',desc:'Opened but never used.',contact:'Tel: 089-123-4567',seller:'Dr. Lee',date:'2026-02-18',views:0,image:null},
 ];
-let posts        = [{id:1,title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin',views:0}];
+let posts        = [
+  {id:1,category:'implant',title:'BIOPLANT Manufacturing Info',body:'Manufactured in Thailand with high precision.',author:'Admin',images:[],comments:[],views:0,date:'2026-02-10'},
+  {id:2,category:'prosthetic',title:'보철 케이스 공유',body:'보철 제작 시 참고할 만한 케이스입니다.',author:'Dr. Lee',images:[],comments:[],views:0,date:'2026-02-20'},
+];
+let forumCategory     = 'implant';
+let forumPhotos       = [];
+let currentForumPostId = null;
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
 let customOrders = [];
 let caseCount    = 0;
@@ -729,30 +735,120 @@ function openForumDetail(id) {
   var post = posts.find(function(x){ return x.id===id; });
   if (!post) return;
   post.views = (post.views||0) + 1;
+  currentForumPostId = id;
   renderForum();
+  // 카테고리 뱃지
+  document.getElementById('fdp-catBadge').textContent = post.category === 'implant' ? '🦷 임플란트' : '💎 보철';
   document.getElementById('fdp-title').textContent  = post.title;
   document.getElementById('fdp-body').textContent   = post.body;
-  document.getElementById('fdp-author').textContent = post.author;
+  document.getElementById('fdp-author').textContent = post.author + ' · ' + (post.date||'');
   document.getElementById('fdp-views').textContent  = post.views;
+  // 사진 갤러리
+  var photosWrap = document.getElementById('fdp-photos');
+  if (post.images && post.images.length) {
+    photosWrap.classList.remove('hidden');
+    photosWrap.innerHTML = post.images.map(function(src){
+      return '<img src="' + src + '" style="display:inline-block;height:180px;border-radius:12px;object-fit:contain;flex-shrink:0">';
+    }).join('');
+  } else {
+    photosWrap.classList.add('hidden');
+    photosWrap.innerHTML = '';
+  }
+  // 댓글
+  renderComments(post);
   goDetailPage('forum-detail', post.title, 'forum');
 }
 // ============================================================
 // FORUM
 // ============================================================
+function forumTab(cat) {
+  forumCategory = cat;
+  renderForum();
+}
 function renderForum() {
-  document.getElementById('postList').innerHTML = posts.map(function(p){
-    return '<div class="bg-white p-5 rounded-2xl border shadow-sm cursor-pointer active:bg-slate-50" onclick="openForumDetail(' + p.id + ')">' +
-      '<p class="font-black text-slate-800 text-sm mb-1">' + p.title + '</p>' +
-      '<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">' + p.body + '</p>' +
-      '<p class="text-[9px] text-slate-300 font-bold uppercase mt-3">' + p.author + ' · 👁 ' + (p.views||0) + '</p>' +
+  var implantBtn    = document.getElementById('ftab-implant');
+  var prostheticBtn = document.getElementById('ftab-prosthetic');
+  if (implantBtn && prostheticBtn) {
+    implantBtn.className    = 'flex-1 py-3 rounded-2xl font-black text-sm shadow ' + (forumCategory === 'implant'    ? 'bg-[#001d4a] text-white' : 'bg-slate-200 text-slate-500');
+    prostheticBtn.className = 'flex-1 py-3 rounded-2xl font-black text-sm shadow ' + (forumCategory === 'prosthetic' ? 'bg-[#001d4a] text-white' : 'bg-slate-200 text-slate-500');
+  }
+  var filtered = posts.filter(function(p){ return p.category === forumCategory; });
+  document.getElementById('postList').innerHTML = filtered.length ? filtered.map(function(p){
+    var thumb = (p.images && p.images.length) ? '<img src="' + p.images[0] + '" class="w-14 h-14 rounded-xl object-cover shrink-0">' : '';
+    return '<div class="bg-white p-4 rounded-2xl border shadow-sm cursor-pointer active:bg-slate-50 flex gap-3 items-start" onclick="openForumDetail(' + p.id + ')">' +
+      thumb +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="font-black text-slate-800 text-sm mb-0.5 leading-snug">' + p.title + '</p>' +
+        '<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">' + p.body + '</p>' +
+        '<p class="text-[9px] text-slate-300 font-bold mt-2">' + p.author + ' · ' + (p.date||'') + ' · 👁 ' + (p.views||0) + ' · 💬 ' + (p.comments?p.comments.length:0) + '</p>' +
+      '</div>' +
+    '</div>';
+  }).join('') : '<p class="text-center text-slate-400 text-sm py-10">게시물이 없습니다.</p>';
+}
+function previewForumPhotos() {
+  var input = document.getElementById('forumPhotos');
+  var files = Array.from(input.files).slice(0, 5);
+  forumPhotos = [];
+  var preview = document.getElementById('forumPhotoPreview');
+  preview.innerHTML = '';
+  if (!files.length) { preview.classList.add('hidden'); return; }
+  preview.classList.remove('hidden');
+  var loaded = 0;
+  files.forEach(function(file, i) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      forumPhotos[i] = e.target.result;
+      loaded++;
+      if (loaded === files.length) {
+        preview.innerHTML = forumPhotos.filter(Boolean).map(function(src){
+          return '<img src="' + src + '" class="w-16 h-16 rounded-xl object-cover">';
+        }).join('');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function submitPost() {
+  var tt   = document.getElementById('postTitle').value.trim();
+  var auth = document.getElementById('postAuthor').value.trim();
+  var b    = document.getElementById('postBody').value.trim();
+  if (!tt || !b) return;
+  var today = new Date().toISOString().slice(0,10);
+  posts.unshift({id:Date.now(), category:forumCategory, title:tt, body:b, author:auth||'익명', images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
+  document.getElementById('postTitle').value  = '';
+  document.getElementById('postAuthor').value = '';
+  document.getElementById('postBody').value   = '';
+  document.getElementById('forumPhotoPreview').innerHTML = '';
+  document.getElementById('forumPhotoPreview').classList.add('hidden');
+  document.getElementById('forumPhotos').value = '';
+  forumPhotos = [];
+  renderForum();
+}
+function renderComments(post) {
+  var el = document.getElementById('fdp-comments');
+  if (!post.comments || !post.comments.length) {
+    el.innerHTML = '<p class="text-xs text-slate-300 font-bold">아직 댓글이 없습니다.</p>';
+    return;
+  }
+  el.innerHTML = post.comments.map(function(c){
+    return '<div class="bg-slate-50 rounded-2xl p-3">' +
+      '<p class="text-xs font-black text-slate-700 mb-1">' + c.author + ' <span class="text-slate-300 font-normal text-[10px]">' + c.date + '</span></p>' +
+      '<p class="text-sm text-slate-600">' + c.text + '</p>' +
     '</div>';
   }).join('');
 }
-function submitPost() {
-  var tt=document.getElementById('postTitle').value.trim(), b=document.getElementById('postBody').value.trim();
-  if(!tt||!b) return;
-  posts.unshift({id:Date.now(),title:tt,body:b,author:'Doctor',views:0});
-  document.getElementById('postTitle').value=''; document.getElementById('postBody').value='';
+function submitComment() {
+  var auth = document.getElementById('commentAuthor').value.trim();
+  var text = document.getElementById('commentInput').value.trim();
+  if (!text) return;
+  var post = posts.find(function(x){ return x.id===currentForumPostId; });
+  if (!post) return;
+  if (!post.comments) post.comments = [];
+  var today = new Date().toISOString().slice(0,10);
+  post.comments.push({author: auth||'익명', text: text, date: today});
+  document.getElementById('commentAuthor').value = '';
+  document.getElementById('commentInput').value  = '';
+  renderComments(post);
   renderForum();
 }
 // ============================================================

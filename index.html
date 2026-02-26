@@ -326,11 +326,26 @@ input[type=number] { -moz-appearance:textfield; }
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
+      <!-- 카테고리 탭 -->
+      <div class="flex gap-2 mb-4">
+        <button onclick="forumTab('implant')"    id="ftab-implant"    class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">🦷 임플란트</button>
+        <button onclick="forumTab('prosthetic')" id="ftab-prosthetic" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">💎 보철</button>
+      </div>
+      <!-- 새 글 쓰기 폼 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3" data-i18n="forum_new_post">New Post</h3>
-        <input id="postTitle"   type="text" data-i18n-ph="forum_title_ph" placeholder="Title"               class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-        <textarea id="postBody" rows="3"    data-i18n-ph="forum_body_ph"  placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none"></textarea>
-        <button onclick="submitPost()" class="mt-3 w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="forum_post_btn">POST</button>
+        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3">New Post</h3>
+        <input id="postTitle"  type="text" placeholder="제목" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <input id="postAuthor" type="text" placeholder="글쓴이" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <!-- 사진 업로드 최대 5장 -->
+        <div class="mb-3">
+          <div id="forumPhotoPreview" class="flex gap-2 flex-wrap mb-2 hidden"></div>
+          <label class="block cursor-pointer">
+            <div class="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs text-center active:bg-slate-50">📷 사진 추가 (최대 5장)</div>
+            <input id="forumPhotos" type="file" accept="image/*" multiple class="hidden" onchange="previewForumPhotos()">
+          </label>
+        </div>
+        <textarea id="postBody" rows="4" placeholder="내용을 입력하세요..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3"></textarea>
+        <button onclick="submitPost()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm">POST</button>
       </div>
       <div id="postList" class="space-y-3"></div>
     </div>
@@ -358,12 +373,27 @@ input[type=number] { -moz-appearance:textfield; }
       </div>
     </div>
     <!-- ==================== FORUM DETAIL PAGE ==================== -->
-    <div id="page-forum-detail" class="page p-5">
-      <h2 id="fdp-title" class="font-black text-slate-800 text-xl mb-4 leading-snug"></h2>
-      <p id="fdp-body" class="text-sm text-slate-600 leading-relaxed mb-6 whitespace-pre-wrap"></p>
-      <div class="flex justify-between items-center border-t pt-4">
-        <p id="fdp-author" class="text-xs text-slate-400 font-bold uppercase"></p>
-        <p class="text-xs text-slate-400 font-bold">👁 <span id="fdp-views">0</span></p>
+    <div id="page-forum-detail" class="page">
+      <!-- 사진 갤러리 -->
+      <div id="fdp-photos" class="hidden overflow-x-auto no-scroll bg-slate-900 flex gap-2 p-3" style="white-space:nowrap"></div>
+      <div class="p-5">
+        <span id="fdp-catBadge" class="inline-block text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 mb-2"></span>
+        <h2 id="fdp-title" class="font-black text-slate-800 text-xl mb-1 leading-snug"></h2>
+        <div class="flex justify-between items-center mb-5">
+          <p id="fdp-author" class="text-xs text-slate-400 font-bold"></p>
+          <p class="text-xs text-slate-400">👁 <span id="fdp-views">0</span></p>
+        </div>
+        <p id="fdp-body" class="text-sm text-slate-600 leading-relaxed mb-6 whitespace-pre-wrap"></p>
+        <!-- 댓글 섹션 -->
+        <div class="border-t pt-5">
+          <h4 class="font-black text-sm text-slate-700 mb-3">💬 댓글</h4>
+          <div id="fdp-comments" class="space-y-3 mb-4"></div>
+          <div class="flex gap-2">
+            <input id="commentAuthor" type="text" placeholder="이름" class="w-20 p-3 bg-slate-50 rounded-xl text-sm outline-none font-bold shrink-0">
+            <input id="commentInput"  type="text" placeholder="댓글을 입력하세요..." class="flex-1 p-3 bg-slate-50 rounded-xl text-sm outline-none min-w-0">
+            <button onclick="submitComment()" class="px-4 py-3 bg-[#001d4a] text-white rounded-xl font-black text-sm shrink-0">등록</button>
+          </div>
+        </div>
       </div>
     </div>
     <!-- ==================== EVENTS ==================== -->
