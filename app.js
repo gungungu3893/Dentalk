@@ -20,6 +20,7 @@ let currentPage  = 'home';
 let prevPage     = 'home';
 let currentLang  = 'en';
 let pendingLang  = null; // 저장 전 선택된 언어
+let currentUser  = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
 let cart         = [];
 let currentProd  = null;
 let tableQtys    = {};
@@ -54,15 +55,19 @@ function openLoginModal(target) {
 }
 function openRegisterModal() {
   closeModal('loginModal');
-  ['regLicense','regName','regClinic','regContact'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['regLicense','regNickname','regName','regClinic','regEmail','regContact'].forEach(function(id){ document.getElementById(id).value=''; });
   openModal('registerModal');
 }
 async function submitRegistration() {
-  var lic     = document.getElementById('regLicense').value.trim();
-  var name    = document.getElementById('regName').value.trim();
-  var clinic  = document.getElementById('regClinic').value.trim();
-  var contact = document.getElementById('regContact').value.trim();
-  if (!lic || !name || !clinic || !contact) { alert(t('reg_error')); return; }
+  var lic      = document.getElementById('regLicense').value.trim();
+  var nickname = document.getElementById('regNickname').value.trim();
+  var name     = document.getElementById('regName').value.trim();
+  var clinic   = document.getElementById('regClinic').value.trim();
+  var email    = document.getElementById('regEmail').value.trim();
+  var contact  = document.getElementById('regContact').value.trim();
+  if (!lic || !nickname || !name || !clinic || !email || !contact) {
+    alert('모든 항목을 입력해 주세요.'); return;
+  }
   var btn = document.getElementById('regSubmitBtn');
   btn.disabled = true;
   btn.textContent = t('reg_submitting');
@@ -81,7 +86,10 @@ async function submitRegistration() {
     btn.textContent = t('reg_submit');
     if (res.status === 409) { alert(t('reg_duplicate')); return; }
     if (!res.ok) { alert(t('reg_network_error')); return; }
-    alert(t('reg_success'));
+    // 로컬에 프로필 저장 (닉네임·이메일·연락처·치과이름)
+    var profile = { nickname:nickname, email:email, phone:contact, address:'', clinicName:clinic, doctorName:name };
+    localStorage.setItem('dentalk_profile_' + lic, JSON.stringify(profile));
+    alert('신청이 완료되었습니다! 관리자 승인 후 로그인 가능합니다.');
     closeModal('registerModal');
   } catch(e) {
     btn.disabled = false;
@@ -124,15 +132,30 @@ async function handleLogin() {
     alert(result.reason === 'network' ? t('login_network_error') : t('login_not_found'));
     return;
   }
-  // 로그인 성공
-  const displayName = result.doctorName || lic;
+  // 로그인 성공 — 로컬 프로필 로드
+  var profileStr = localStorage.getItem('dentalk_profile_' + lic);
+  var profile    = profileStr ? JSON.parse(profileStr) : {};
+  currentUser = {
+    licenseNum: lic,
+    nickname:   profile.nickname   || result.doctorName || lic,
+    email:      profile.email      || '',
+    phone:      profile.phone      || '',
+    address:    profile.address    || '',
+    clinicName: profile.clinicName || result.clinicName || '',
+    doctorName: result.doctorName  || '',
+  };
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
-  document.getElementById('licenseDisplay').textContent = displayName;
-  document.getElementById('sideUserInfo').textContent   = '🔑 ' + displayName;
+  document.getElementById('licenseDisplay').textContent = currentUser.nickname;
+  var sideNick = document.getElementById('sideNickname');
+  if (sideNick) sideNick.textContent = currentUser.nickname;
   document.getElementById('sideLoginArea').classList.add('hidden');
   document.getElementById('sideLoggedArea').classList.remove('hidden');
   document.getElementById('timerWrap').classList.remove('hidden');
+  // 게시판 닉네임 표시 업데이트
+  updateNicknameDisplays();
+  // 프로필 정보 렌더링
+  renderProfileSettings();
   if (sessionTimer) clearInterval(sessionTimer);
   sessionTimer = setInterval(tickSession, 1000);
   tickSession();
@@ -165,21 +188,25 @@ function extendSession() {
 }
 function forceLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
   document.getElementById('timerWrap').classList.add('hidden');
-  document.getElementById('sideUserInfo').textContent = '';
+  renderProfileSettings();
+  updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
   alert(t('session_expired'));
 }
 function doLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
   cart=[]; updateBadge();
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
   document.getElementById('timerWrap').classList.add('hidden');
-  document.getElementById('sideUserInfo').textContent = '';
   document.getElementById('licenseDisplay').textContent = '-';
+  renderProfileSettings();
+  updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
   closeMenu();
 }
@@ -219,11 +246,12 @@ function goPage(id) {
   if (btnMenu) btnMenu.classList.remove('hidden');
   closeMenu();
   window.scrollTo(0, 0);
-  if (id === 'shop')    renderShop();
-  if (id === 'used')    renderUsed();
-  if (id === 'forum')   renderForum();
-  if (id === 'events')  renderEvents();
-  if (id === 'custom')  { customTab('form'); resetCustomForm(); }
+  if (id === 'shop')     renderShop();
+  if (id === 'used')     renderUsed();
+  if (id === 'forum')  { renderForum(); updateNicknameDisplays(); }
+  if (id === 'events')   renderEvents();
+  if (id === 'custom')   { customTab('form'); resetCustomForm(); }
+  if (id === 'settings') renderProfileSettings();
 }
 function goDetailPage(pageId, title, fromPage) {
   prevPage = fromPage || currentPage;
@@ -809,14 +837,13 @@ function previewForumPhotos() {
   });
 }
 function submitPost() {
-  var tt   = document.getElementById('postTitle').value.trim();
-  var auth = document.getElementById('postAuthor').value.trim();
-  var b    = document.getElementById('postBody').value.trim();
+  var tt = document.getElementById('postTitle').value.trim();
+  var b  = document.getElementById('postBody').value.trim();
   if (!tt || !b) return;
+  var auth  = currentUser.nickname || '익명';
   var today = new Date().toISOString().slice(0,10);
-  posts.unshift({id:Date.now(), category:forumCategory, title:tt, body:b, author:auth||'익명', images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
+  posts.unshift({id:Date.now(), category:forumCategory, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
   document.getElementById('postTitle').value  = '';
-  document.getElementById('postAuthor').value = '';
   document.getElementById('postBody').value   = '';
   document.getElementById('forumPhotoPreview').innerHTML = '';
   document.getElementById('forumPhotoPreview').classList.add('hidden');
@@ -838,18 +865,81 @@ function renderComments(post) {
   }).join('');
 }
 function submitComment() {
-  var auth = document.getElementById('commentAuthor').value.trim();
   var text = document.getElementById('commentInput').value.trim();
   if (!text) return;
   var post = posts.find(function(x){ return x.id===currentForumPostId; });
   if (!post) return;
   if (!post.comments) post.comments = [];
+  var auth  = currentUser.nickname || '익명';
   var today = new Date().toISOString().slice(0,10);
-  post.comments.push({author: auth||'익명', text: text, date: today});
-  document.getElementById('commentAuthor').value = '';
-  document.getElementById('commentInput').value  = '';
+  post.comments.push({author: auth, text: text, date: today});
+  document.getElementById('commentInput').value = '';
   renderComments(post);
   renderForum();
+}
+// ============================================================
+// 닉네임 표시 & 프로필
+// ============================================================
+function updateNicknameDisplays() {
+  var nick = currentUser.nickname || '';
+  var pnd  = document.getElementById('postNicknameDisplay');
+  var cnd  = document.getElementById('commentNicknameDisplay');
+  var sn   = document.getElementById('sideNickname');
+  if (pnd) pnd.textContent = nick;
+  if (cnd) cnd.textContent = nick;
+  if (sn)  sn.textContent  = nick;
+}
+function renderProfileSettings() {
+  var el = document.getElementById('profileInfo');
+  if (!el) return;
+  if (!isLoggedIn() || !currentUser.nickname) {
+    el.innerHTML = '<p class="text-sm text-slate-400 font-bold">로그인 후 확인 가능합니다.</p>';
+    return;
+  }
+  var rows = [
+    ['닉네임',  currentUser.nickname,  true],
+    ['의사이름', currentUser.doctorName, true],
+    ['이메일',  currentUser.email,     false],
+    ['전화번호', currentUser.phone,     false],
+    ['주소',    currentUser.address,   false],
+    ['치과이름', currentUser.clinicName,false],
+  ];
+  el.innerHTML = '<div class="space-y-2">' +
+    rows.map(function(r){
+      var val = r[1] || '-';
+      var readonly = r[2] ? ' <span class="text-[9px] text-slate-300 font-bold">(변경불가)</span>' : '';
+      return '<div class="flex justify-between items-center py-1 border-b border-slate-50 last:border-0">' +
+        '<span class="text-xs text-slate-400 font-bold shrink-0 w-20">' + r[0] + readonly + '</span>' +
+        '<span class="text-sm font-black text-slate-800 text-right ml-2 break-all">' + val + '</span>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+function openProfileEdit() {
+  if (!isLoggedIn()) { alert('로그인이 필요합니다.'); return; }
+  document.getElementById('pe-email').value   = currentUser.email   || '';
+  document.getElementById('pe-phone').value   = currentUser.phone   || '';
+  document.getElementById('pe-address').value = currentUser.address || '';
+  document.getElementById('pe-clinic').value  = currentUser.clinicName || '';
+  openModal('profileEditModal');
+}
+function saveProfile() {
+  currentUser.email     = document.getElementById('pe-email').value.trim();
+  currentUser.phone     = document.getElementById('pe-phone').value.trim();
+  currentUser.address   = document.getElementById('pe-address').value.trim();
+  currentUser.clinicName= document.getElementById('pe-clinic').value.trim();
+  // localStorage에 반영
+  var saved = localStorage.getItem('dentalk_profile_' + currentUser.licenseNum);
+  var profile = saved ? JSON.parse(saved) : {};
+  profile.email     = currentUser.email;
+  profile.phone     = currentUser.phone;
+  profile.address   = currentUser.address;
+  profile.clinicName= currentUser.clinicName;
+  localStorage.setItem('dentalk_profile_' + currentUser.licenseNum, JSON.stringify(profile));
+  closeModal('profileEditModal');
+  renderProfileSettings();
+  var msg = document.getElementById('profileSavedMsg');
+  if (msg) { msg.classList.remove('hidden'); setTimeout(function(){ msg.classList.add('hidden'); }, 2500); }
 }
 // ============================================================
 // EVENTS

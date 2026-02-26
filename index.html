@@ -60,14 +60,12 @@ input[type=number] { -moz-appearance:textfield; }
       <p class="font-black text-white text-lg mb-1" data-i18n="reg_title">Request Access</p>
       <p class="text-blue-300 text-[10px] font-bold leading-relaxed" data-i18n="reg_subtitle">Fill in your details. Admin will approve within 24 hours.</p>
     </div>
-    <input id="regLicense" type="text" data-i18n-ph="reg_license_ph" placeholder="License Number (required)"
-      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regName" type="text" data-i18n-ph="reg_name_ph" placeholder="Doctor Name (required)"
-      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regClinic" type="text" data-i18n-ph="reg_clinic_ph" placeholder="Clinic Name (required)"
-      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regContact" type="text" data-i18n-ph="reg_contact_ph" placeholder="Phone or Line ID (required)"
-      class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
+    <input id="regLicense"  type="text"  placeholder="면허번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regNickname" type="text"  placeholder="닉네임 (필수) — 모든 활동에 사용됩니다" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regName"     type="text"  placeholder="의사 이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regClinic"   type="text"  placeholder="치과이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regEmail"    type="email" placeholder="이메일주소 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regContact"  type="text"  placeholder="전화번호 또는 Line ID (필수)" class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
     <button id="regSubmitBtn" onclick="submitRegistration()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="reg_submit">Submit Request</button>
     <button onclick="closeModal('registerModal')" class="w-full text-slate-400 text-xs font-bold py-2" data-i18n="login_cancel">Cancel</button>
   </div>
@@ -137,6 +135,33 @@ input[type=number] { -moz-appearance:textfield; }
     <button onclick="completePayment()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg" data-i18n="qr_complete">PAYMENT COMPLETE</button>
   </div>
 </div>
+<!-- ============================== 프로필 수정 모달 ============================== -->
+<div id="profileEditModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl">
+    <h2 class="font-black text-slate-800 text-xl mb-5">✏️ 내 정보 수정</h2>
+    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">수정 가능 항목</p>
+    <div class="space-y-3">
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">이메일</label>
+        <input id="pe-email" type="email" placeholder="이메일 주소" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">전화번호</label>
+        <input id="pe-phone" type="tel" placeholder="전화번호" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">주소</label>
+        <input id="pe-address" type="text" placeholder="주소" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">치과이름</label>
+        <input id="pe-clinic" type="text" placeholder="치과이름" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-300">
+      </div>
+    </div>
+    <button onclick="saveProfile()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-xl mt-6 active:scale-95 transition">저장</button>
+    <button onclick="closeModal('profileEditModal')" class="w-full text-slate-400 text-xs font-bold py-3 mt-1">취소</button>
+  </div>
+</div>
 <!-- ============================== 중고거래 연락처 모달 ============================== -->
 <div id="usedContactModal" class="modal fixed inset-0 bg-black/70 z-[500] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-7 text-center">
@@ -203,9 +228,11 @@ input[type=number] { -moz-appearance:textfield; }
       </div>
       <div id="sideLoggedArea" class="hidden space-y-2">
         <div class="bg-white/5 rounded-2xl px-4 py-3">
-          <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1" data-i18n="side_logged_label">Logged In</p>
-          <p id="sideTimer" class="text-xs font-black text-white"></p>
+          <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mb-1">Logged In</p>
+          <p id="sideNickname" class="text-sm font-black text-white mb-0.5"></p>
+          <p id="sideTimer" class="text-xs font-black text-blue-300"></p>
         </div>
+        <button onclick="goPage('settings');closeMenu();" class="w-full py-3 rounded-2xl bg-white/10 text-white font-black text-sm">👤 내 정보 수정</button>
         <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-500/20 text-red-300 font-black text-sm" data-i18n="side_logout">Logout</button>
       </div>
     </div>
@@ -333,9 +360,11 @@ input[type=number] { -moz-appearance:textfield; }
       </div>
       <!-- 새 글 쓰기 폼 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3">New Post</h3>
-        <input id="postTitle"  type="text" placeholder="제목" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-        <input id="postAuthor" type="text" placeholder="글쓴이" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">New Post</h3>
+          <span class="text-xs text-slate-400">✍️ <span id="postNicknameDisplay" class="font-black text-[#001d4a]"></span></span>
+        </div>
+        <input id="postTitle" type="text" placeholder="제목" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
         <!-- 사진 업로드 최대 5장 -->
         <div class="mb-3">
           <div id="forumPhotoPreview" class="flex gap-2 flex-wrap mb-2 hidden"></div>
@@ -388,9 +417,9 @@ input[type=number] { -moz-appearance:textfield; }
         <div class="border-t pt-5">
           <h4 class="font-black text-sm text-slate-700 mb-3">💬 댓글</h4>
           <div id="fdp-comments" class="space-y-3 mb-4"></div>
+          <p class="text-[10px] text-slate-400 mb-2">✍️ <span id="commentNicknameDisplay" class="font-black text-[#001d4a]"></span> 으로 댓글 작성</p>
           <div class="flex gap-2">
-            <input id="commentAuthor" type="text" placeholder="이름" class="w-20 p-3 bg-slate-50 rounded-xl text-sm outline-none font-bold shrink-0">
-            <input id="commentInput"  type="text" placeholder="댓글을 입력하세요..." class="flex-1 p-3 bg-slate-50 rounded-xl text-sm outline-none min-w-0">
+            <input id="commentInput" type="text" placeholder="댓글을 입력하세요..." class="flex-1 p-3 bg-slate-50 rounded-xl text-sm outline-none min-w-0">
             <button onclick="submitComment()" class="px-4 py-3 bg-[#001d4a] text-white rounded-xl font-black text-sm shrink-0">등록</button>
           </div>
         </div>
@@ -424,6 +453,17 @@ input[type=number] { -moz-appearance:textfield; }
       <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_account">Account</h3>
         <p class="text-sm font-bold text-slate-600 mt-3"><span data-i18n="settings_license">License:</span> <span id="licenseDisplay" class="text-blue-700 font-mono">-</span></p>
+      </div>
+      <!-- 내 프로필 카드 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-black text-slate-800">👤 내 정보</h3>
+          <button onclick="openProfileEdit()" class="px-4 py-2 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition">수정</button>
+        </div>
+        <div id="profileInfo">
+          <p class="text-sm text-slate-400 font-bold">로그인 후 확인 가능합니다.</p>
+        </div>
+        <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden">✅ 저장되었습니다!</p>
       </div>
     </div>
   </div>
