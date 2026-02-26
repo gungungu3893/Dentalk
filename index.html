@@ -457,13 +457,13 @@ input[type=number] { -moz-appearance:textfield; }
       <!-- 내 프로필 카드 -->
       <div class="bg-white rounded-2xl p-6 shadow-sm">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800">👤 내 정보</h3>
-          <button onclick="openProfileEdit()" class="px-4 py-2 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition">수정</button>
+          <h3 class="font-black text-slate-800" data-i18n="profile_title">👤 내 정보</h3>
+          <button onclick="openProfileEdit()" class="px-4 py-2 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition" data-i18n="profile_edit_btn">수정</button>
         </div>
         <div id="profileInfo">
-          <p class="text-sm text-slate-400 font-bold">로그인 후 확인 가능합니다.</p>
+          <p class="text-sm text-slate-400 font-bold" data-i18n="profile_login_msg">로그인 후 확인 가능합니다.</p>
         </div>
-        <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden">✅ 저장되었습니다!</p>
+        <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="profile_saved_msg">✅ 저장되었습니다!</p>
       </div>
     </div>
   </div>

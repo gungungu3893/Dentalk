@@ -904,21 +904,21 @@ function renderProfileSettings() {
   var el = document.getElementById('profileInfo');
   if (!el) return;
   if (!isLoggedIn() || !currentUser.nickname) {
-    el.innerHTML = '<p class="text-sm text-slate-400 font-bold">로그인 후 확인 가능합니다.</p>';
+    el.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
     return;
   }
   var rows = [
-    ['닉네임',  currentUser.nickname,  true],
-    ['의사이름', currentUser.doctorName, true],
-    ['이메일',  currentUser.email,     false],
-    ['전화번호', currentUser.phone,     false],
-    ['주소',    currentUser.address,   false],
-    ['치과이름', currentUser.clinicName,false],
+    [t('prof_nickname'), currentUser.nickname,   true],
+    [t('prof_doctor'),   currentUser.doctorName, true],
+    [t('pe_email'),      currentUser.email,      false],
+    [t('pe_phone'),      currentUser.phone,      false],
+    [t('pe_address'),    currentUser.address,    false],
+    [t('pe_clinic'),     currentUser.clinicName, false],
   ];
   el.innerHTML = '<div class="space-y-2">' +
     rows.map(function(r){
       var val = r[1] || '-';
-      var readonly = r[2] ? ' <span class="text-[9px] text-slate-300 font-bold">(변경불가)</span>' : '';
+      var readonly = r[2] ? ' <span class="text-[9px] text-slate-300 font-bold">' + t('profile_no_change') + '</span>' : '';
       return '<div class="flex justify-between items-center py-1 border-b border-slate-50 last:border-0">' +
         '<span class="text-xs text-slate-400 font-bold shrink-0 w-20">' + r[0] + readonly + '</span>' +
         '<span class="text-sm font-black text-slate-800 text-right ml-2 break-all">' + val + '</span>' +
@@ -927,7 +927,7 @@ function renderProfileSettings() {
   '</div>';
 }
 function openProfileEdit() {
-  if (!isLoggedIn()) { alert('로그인이 필요합니다.'); return; }
+  if (!isLoggedIn()) { alert(t('login_required')); return; }
   document.getElementById('pe-email').value   = currentUser.email   || '';
   document.getElementById('pe-phone').value   = currentUser.phone   || '';
   document.getElementById('pe-address').value = currentUser.address || '';
@@ -1050,11 +1050,12 @@ function applyLang() {
   var sideLoginTxt = document.getElementById('sideLoginTxt');
   if (sideLoginTxt) sideLoginTxt.textContent = t('side_login_btn');
   // 현재 페이지 동적 콘텐츠 재렌더링
-  if (currentPage === 'shop')   renderShop();
-  if (currentPage === 'used')   renderUsed();
-  if (currentPage === 'forum')  renderForum();
-  if (currentPage === 'events') renderEvents();
-  if (currentPage === 'custom') renderCustomOrders();
+  if (currentPage === 'shop')     renderShop();
+  if (currentPage === 'used')     renderUsed();
+  if (currentPage === 'forum')    renderForum();
+  if (currentPage === 'events')   renderEvents();
+  if (currentPage === 'custom')   renderCustomOrders();
+  if (currentPage === 'settings') renderProfileSettings();
   // 설정 저장 버튼 텍스트
   var saveBtn = document.getElementById('saveLangBtn');
   if (saveBtn) saveBtn.textContent = t('settings_save_btn');
