@@ -17,6 +17,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // 상태
 // ============================================================
 let currentPage  = 'home';
+let prevPage     = 'home';
 let currentLang  = 'en';
 let pendingLang  = null; // 저장 전 선택된 언어
 let cart         = [];
@@ -206,12 +207,34 @@ function goPage(id) {
   if (mb) mb.classList.add('active');
   document.getElementById('pageTitle').textContent = t('pt_' + id);
   currentPage = id;
+  var btnBack = document.getElementById('btnBack');
+  var btnMenu = document.getElementById('btnMenu');
+  if (btnBack) { btnBack.classList.add('hidden'); btnBack.classList.remove('flex'); }
+  if (btnMenu) btnMenu.classList.remove('hidden');
   closeMenu();
+  window.scrollTo(0, 0);
   if (id === 'shop')    renderShop();
   if (id === 'used')    renderUsed();
   if (id === 'forum')   renderForum();
   if (id === 'events')  renderEvents();
   if (id === 'custom')  { customTab('form'); resetCustomForm(); }
+}
+function goDetailPage(pageId, title, fromPage) {
+  prevPage = fromPage || currentPage;
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.menu-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.getElementById('pageTitle').textContent = title;
+  currentPage = pageId;
+  var btnBack = document.getElementById('btnBack');
+  var btnMenu = document.getElementById('btnMenu');
+  if (btnMenu) btnMenu.classList.add('hidden');
+  if (btnBack) { btnBack.classList.remove('hidden'); btnBack.classList.add('flex'); }
+  closeMenu();
+  window.scrollTo(0, 0);
+}
+function goBack() {
+  goPage(prevPage || 'home');
 }
 // ============================================================
 // 제품 DB
@@ -680,31 +703,36 @@ function openUsedDetail(id) {
   renderUsed();
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   var condColor = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
-  document.getElementById('udName').textContent    = item.name;
-  document.getElementById('udCode').textContent    = item.code;
-  document.getElementById('udPrice').textContent   = item.price.toLocaleString() + ' THB';
-  document.getElementById('udCond').textContent    = condLabel[item.cond];
-  document.getElementById('udCond').className      = 'text-xs font-black px-2 py-1 rounded-lg ' + condColor[item.cond];
-  document.getElementById('udDesc').textContent    = item.desc;
-  document.getElementById('udMeta').textContent    = item.seller + ' · ' + item.date;
-  document.getElementById('udViews').textContent   = item.views;
-  document.getElementById('udContactBtn').onclick  = function(){ showContact(item.contact); };
-  var imgWrap = document.getElementById('udImageWrap');
-  var imgEl   = document.getElementById('udImage');
+  document.getElementById('udp-name').textContent   = item.name;
+  document.getElementById('udp-code').textContent   = item.code;
+  document.getElementById('udp-price').textContent  = item.price.toLocaleString() + ' THB';
+  document.getElementById('udp-cond').textContent   = condLabel[item.cond];
+  document.getElementById('udp-cond').className     = 'text-xs font-black px-2 py-1 rounded-lg ' + condColor[item.cond];
+  document.getElementById('udp-desc').textContent   = item.desc;
+  document.getElementById('udp-meta').textContent   = item.seller + ' · ' + item.date;
+  document.getElementById('udp-views').textContent  = item.views;
+  document.getElementById('udp-contactBtn').onclick = function(){ showContact(item.contact); };
+  document.getElementById('udp-deleteBtn').onclick  = function(){
+    var idx = usedItems.findIndex(function(x){ return x.id===id; });
+    if (idx !== -1) usedItems.splice(idx, 1);
+    goBack();
+  };
+  var imgWrap = document.getElementById('udp-imageWrap');
+  var imgEl   = document.getElementById('udp-image');
   if (item.image) { imgEl.src = item.image; imgWrap.classList.remove('hidden'); }
   else { imgWrap.classList.add('hidden'); imgEl.src = ''; }
-  openModal('usedDetailModal');
+  goDetailPage('used-detail', item.name, 'used');
 }
 function openForumDetail(id) {
   var post = posts.find(function(x){ return x.id===id; });
   if (!post) return;
   post.views = (post.views||0) + 1;
   renderForum();
-  document.getElementById('fdTitle').textContent  = post.title;
-  document.getElementById('fdBody').textContent   = post.body;
-  document.getElementById('fdAuthor').textContent = post.author;
-  document.getElementById('fdViews').textContent  = post.views;
-  openModal('forumDetailModal');
+  document.getElementById('fdp-title').textContent  = post.title;
+  document.getElementById('fdp-body').textContent   = post.body;
+  document.getElementById('fdp-author').textContent = post.author;
+  document.getElementById('fdp-views').textContent  = post.views;
+  goDetailPage('forum-detail', post.title, 'forum');
 }
 // ============================================================
 // FORUM

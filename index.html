@@ -146,53 +146,16 @@ input[type=number] { -moz-appearance:textfield; }
     <button onclick="closeModal('usedContactModal')" class="w-full py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-600" data-i18n="used_contact_close">Close</button>
   </div>
 </div>
-<!-- ============================== 중고거래 상세 모달 ============================== -->
-<div id="usedDetailModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[700] items-center justify-center p-5">
-  <div class="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl">
-    <!-- 사진 영역 -->
-    <div id="udImageWrap" class="w-full bg-slate-100 hidden">
-      <img id="udImage" src="" class="w-full max-h-52 object-cover">
-    </div>
-    <div class="p-7">
-      <div class="flex justify-between items-start mb-3">
-        <div class="flex-1 pr-3">
-          <p id="udName" class="font-black text-slate-800 text-base leading-snug"></p>
-          <p id="udCode" class="text-[9px] font-mono text-slate-400 mt-0.5"></p>
-        </div>
-        <span id="udCond" class="text-xs font-black px-2 py-1 rounded-lg shrink-0"></span>
-      </div>
-      <p id="udPrice" class="font-black text-blue-800 text-2xl font-mono mb-3"></p>
-      <p id="udDesc" class="text-sm text-slate-500 leading-relaxed mb-4 whitespace-pre-wrap"></p>
-      <div class="flex justify-between items-center mb-5">
-        <p id="udMeta" class="text-[9px] text-slate-400"></p>
-        <p class="text-[9px] text-slate-400 font-bold">👁 <span id="udViews">0</span></p>
-      </div>
-      <button id="udContactBtn" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-black text-sm mb-3" data-i18n="used_contact_btn">Contact Seller</button>
-      <button onclick="closeModal('usedDetailModal')" class="w-full py-2 text-slate-400 text-xs font-bold" data-i18n="used_contact_close">Close</button>
-    </div>
-  </div>
-</div>
-<!-- ============================== 게시판 상세 모달 ============================== -->
-<div id="forumDetailModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[700] items-center justify-center p-5">
-  <div class="bg-white w-full max-w-sm rounded-3xl p-7 shadow-2xl">
-    <p id="fdTitle" class="font-black text-slate-800 text-base mb-4 leading-snug"></p>
-    <p id="fdBody" class="text-sm text-slate-600 leading-relaxed mb-6 whitespace-pre-wrap"></p>
-    <div class="flex justify-between items-center mb-5 border-t pt-4">
-      <p id="fdAuthor" class="text-[9px] text-slate-400 font-bold uppercase"></p>
-      <p class="text-[9px] text-slate-400 font-bold">👁 <span id="fdViews">0</span></p>
-    </div>
-    <button onclick="closeModal('forumDetailModal')" class="w-full py-2 text-slate-400 text-xs font-bold" data-i18n="used_contact_close">Close</button>
-  </div>
-</div>
 <!-- ============================== 메인 앱 ============================== -->
 <div id="mainApp" class="min-h-screen flex flex-col">
   <!-- 헤더 -->
   <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-[200] shadow-lg">
-    <button onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex flex-col gap-1.5 items-center justify-center active:bg-white/20">
+    <button id="btnMenu" onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex flex-col gap-1.5 items-center justify-center active:bg-white/20">
       <span id="hb1" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
       <span id="hb2" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
       <span id="hb3" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
     </button>
+    <button id="btnBack" onclick="goBack()" class="hidden w-10 h-10 rounded-xl bg-white/10 items-center justify-center active:bg-white/20 text-lg font-black">←</button>
     <div class="flex-1">
       <div class="flex items-baseline" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
         <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
@@ -370,6 +333,38 @@ input[type=number] { -moz-appearance:textfield; }
         <button onclick="submitPost()" class="mt-3 w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="forum_post_btn">POST</button>
       </div>
       <div id="postList" class="space-y-3"></div>
+    </div>
+    <!-- ==================== USED DETAIL PAGE ==================== -->
+    <div id="page-used-detail" class="page">
+      <div id="udp-imageWrap" class="hidden">
+        <img id="udp-image" src="" class="w-full max-h-64 object-cover">
+      </div>
+      <div class="p-5">
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex-1 pr-3">
+            <h2 id="udp-name" class="font-black text-slate-800 text-xl leading-snug"></h2>
+            <p id="udp-code" class="text-[10px] font-mono text-slate-400 mt-0.5"></p>
+          </div>
+          <span id="udp-cond" class="text-xs font-black px-2 py-1 rounded-lg shrink-0 mt-1"></span>
+        </div>
+        <p id="udp-price" class="font-black text-blue-800 text-3xl font-mono mb-4"></p>
+        <p id="udp-desc" class="text-sm text-slate-500 leading-relaxed mb-5 whitespace-pre-wrap"></p>
+        <div class="flex justify-between items-center mb-6">
+          <p id="udp-meta" class="text-xs text-slate-400"></p>
+          <p class="text-xs text-slate-400 font-bold">👁 <span id="udp-views">0</span></p>
+        </div>
+        <button id="udp-contactBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm mb-3" data-i18n="used_contact_btn">Contact Seller</button>
+        <button id="udp-deleteBtn" class="w-full py-3 bg-red-50 text-red-400 rounded-2xl font-black text-sm" data-i18n="used_delete_btn">Delete</button>
+      </div>
+    </div>
+    <!-- ==================== FORUM DETAIL PAGE ==================== -->
+    <div id="page-forum-detail" class="page p-5">
+      <h2 id="fdp-title" class="font-black text-slate-800 text-xl mb-4 leading-snug"></h2>
+      <p id="fdp-body" class="text-sm text-slate-600 leading-relaxed mb-6 whitespace-pre-wrap"></p>
+      <div class="flex justify-between items-center border-t pt-4">
+        <p id="fdp-author" class="text-xs text-slate-400 font-bold uppercase"></p>
+        <p class="text-xs text-slate-400 font-bold">👁 <span id="fdp-views">0</span></p>
+      </div>
     </div>
     <!-- ==================== EVENTS ==================== -->
     <div id="page-events" class="page p-4">
