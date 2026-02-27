@@ -527,8 +527,8 @@ function addCase() {
     '<input type="text" id="cp-' + id + '" placeholder="' + t('case_patient_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-3 border border-slate-100">' +
     '<div class="mb-1"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('case_tooth_hint') + '</p>' + buildToothChart(id) + '</div>' +
     '<div id="teeth-details-' + id + '" class="space-y-2 mt-3 mb-3"></div>' +
-    '<p class="text-sm font-black text-slate-600 mb-1 mt-2">' + t('case_deadline_label') + '</p>' +
-    '<input type="date" id="cd-' + id + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none border border-slate-100 mb-2">' +
+    '<p class="text-sm font-black text-slate-600 mb-2 mt-3">' + t('case_deadline_label') + '</p>' +
+    '<input type="date" id="cd-' + id + '" class="w-full p-4 bg-white rounded-xl text-base font-black outline-none border-2 border-blue-200 mb-3 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;">' +
     '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white">' +
       '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">' + t('stl_label') + '</p><p class="text-[9px] text-slate-400 mt-0.5">' + t('stl_hint') + '</p>' +
     '</div>' +
