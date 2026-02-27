@@ -8,8 +8,7 @@ const ORDER_STAGES   = [
   {key:'received',icon:'[1]'},{key:'stl',icon:'[2]'},{key:'design',icon:'[3]'},
   {key:'cnc',icon:'[4]'},{key:'qc',icon:'[5]'},{key:'shipping',icon:'[6]'},{key:'done',icon:'[7]'},
 ];
-// Cloudflare Worker 배포 후 아래 URL을 교체하세요 (cloudflare-worker.js 참고)
-const LINE_PROXY_URL = 'YOUR_CLOUDFLARE_WORKER_URL';
+const LINE_PROXY_URL = 'https://dentalk-line.gungungu.workers.dev';
 const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
 // ── Supabase 면허 검증 ──────────────────────────────────────────
 // Supabase 프로젝트 생성 후 아래 두 값을 교체하세요.
