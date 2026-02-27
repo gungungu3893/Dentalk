@@ -524,7 +524,7 @@ function addCase() {
     '<div class="flex justify-between items-center mb-3">' +
       '<span class="font-black text-xs text-slate-600">' + t('case_label') + id + '</span>' + delBtn +
     '</div>' +
-    '<input type="text" id="cp-' + id + '" placeholder="' + t('case_patient_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-3 border border-slate-100">' +
+    '<input type="text" id="cp-' + id + '" placeholder="' + t('case_patient_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm font-bold outline-none mb-3 border-2 border-slate-200 focus:border-blue-400">' +
     '<div class="mb-1"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('case_tooth_hint') + '</p>' + buildToothChart(id) + '</div>' +
     '<div id="teeth-details-' + id + '" class="space-y-2 mt-3 mb-3"></div>' +
     '<p class="text-sm font-black text-slate-600 mb-2 mt-3">' + t('case_deadline_label') + '</p>' +
