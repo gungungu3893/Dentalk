@@ -729,12 +729,20 @@ async function sendLine(order, stageKey) {
   var totalTeeth = order.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
   var msg = '[Dentalk Custom] ' + st.icon + ' ' + t('stage_' + st.key) + '\n' + order.id + '\n' + order.clinic + '\n' + order.cases.length + ' / ' + totalTeeth + '\n' + order.phone;
   try {
-    await fetch(LINE_PROXY_URL, {
+    var res = await fetch(LINE_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: msg }] })
     });
-  } catch(e) {}
+    var data = await res.json();
+    if (!res.ok) {
+      console.error('[LINE] status:', res.status, data);
+      alert('[LINE 오류] status: ' + res.status + '\n' + JSON.stringify(data));
+    }
+  } catch(e) {
+    console.error('[LINE] fetch error:', e);
+    alert('[LINE 연결 오류] Worker URL 또는 네트워크를 확인하세요.\n' + e.message);
+  }
 }
 // ============================================================
 // USED MARKET
