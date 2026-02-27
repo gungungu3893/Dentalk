@@ -1,7 +1,7 @@
 // i18n - 다국어 지원
 const LANG = {
   en: {
-    nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CUSTOM',nav_used:'USED MARKET',nav_forum:'FORUM',nav_events:'EVENTS',nav_factory:'FACTORY',nav_settings:'SETTINGS',
+    nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'USED MARKET',nav_forum:'FORUM',nav_events:'EVENTS',nav_factory:'FACTORY',nav_settings:'SETTINGS',
     pt_home:'Home',pt_shop:'Shop',pt_custom:'Custom Abutment',pt_used:'Used Market',pt_forum:'Forum',pt_events:'Events',pt_factory:'Factory',pt_settings:'Settings',
     login_subtitle:'DOCTOR LOGIN',login_ph:'Nickname',login_password_ph:'Password',login_btn:'LOGIN',login_cancel:'Cancel',login_error:'Please enter nickname and password.',login_verifying:'Verifying...',login_not_found:'Nickname not found or incorrect password.',login_network_error:'Network error. Please try again.',login_register_link:'Request Access →',
     reg_title:'Request Access',reg_subtitle:'Fill in your details. Admin will approve within 24 hours.',reg_license_ph:'License Number (required)',reg_name_ph:'Doctor Name (required)',reg_clinic_ph:'Clinic Name (required)',reg_contact_ph:'Phone or Line ID (required)',reg_password_ph:'Password (required)',reg_password_confirm_ph:'Confirm Password (required)',reg_submit:'Submit Request',reg_submitting:'Submitting...',reg_success:'Request submitted!\nWe will contact you within 24 hours after approval.',reg_error:'Please fill in all required fields.',reg_pwd_mismatch:'Passwords do not match.',reg_duplicate:'This nickname is already registered.',reg_network_error:'Network error. Please try again.',
@@ -15,7 +15,7 @@ const LANG = {
     qr_label:'Scan to Pay',qr_summary_title:'Order Summary',qr_total:'TOTAL',qr_complete:'PAYMENT COMPLETE',
     used_contact_title:'Contact Seller',used_contact_close:'Close',
     custom_tab_new:'New Order',custom_tab_list:'My Orders',custom_form_title:'Custom Abutment Order',custom_delivery_title:'Delivery Info',custom_clinic_ph:'Clinic / Lab Name',custom_addr_ph:'Delivery Address',custom_phone_ph:'Contact Number',custom_line_ph:'Line ID (for notifications)',custom_submit:'Submit Order',custom_submit_note:'Order confirmation will be sent via Line',custom_empty:'No orders yet',
-    case_label:'Case #',case_remove:'✕ Remove',case_patient_ph:'Patient ID (anonymous ok, e.g. P001)',case_tooth_hint:'Select teeth · Tap to toggle',upper_jaw:'Upper Jaw',lower_jaw:'Lower Jaw',jaw_border:'Arch Boundary',selected_teeth:'Selected Teeth —',sel_count_suffix:'',brand_ph:'Select implant brand',size_ph:'Size (e.g. Ø4.0 / L10)',color_ph:'Tooth color (VITA)',case_add:'+ Add Case',stl_label:'Upload STL File',stl_hint:'Tap to select .stl file',memo_ph:'Special requests (optional)',anon_patient:'Anonymous',
+    case_label:'Case #',case_remove:'✕ Remove',case_patient_ph:'Patient ID (anonymous ok, e.g. P001)',case_tooth_hint:'Select teeth · Tap to toggle',upper_jaw:'Upper Jaw',lower_jaw:'Lower Jaw',jaw_border:'Arch Boundary',selected_teeth:'Selected Teeth —',sel_count_suffix:'',brand_ph:'Select implant brand',size_ph:'Size (e.g. Ø4.0 / L10)',color_ph:'Tooth color (VITA)',case_add:'+ Add Case',stl_label:'Upload STL File',stl_hint:'Tap to select .stl file',memo_ph:'Special requests (optional)',anon_patient:'Anonymous',case_deadline_label:'납품 기한',
     err_fill_delivery:'Please enter clinic name, address, and phone number.',err_select_tooth:'Case #%: Please select at least 1 tooth.',err_fill_tooth:'Case #% Tooth #%: Please enter implant brand and size.',err_add_case:'Please add at least 1 case.',
     order_success_msg:'✅ Order submitted!\nOrder #: %\nCases: % / Teeth: %',order_success_line:'\nConfirmation sent via Line.',
     status_label:'Progress',case_detail:'Case Details',teeth_count:' teeth',cases_unit:' cases',teeth_total_prefix:'',patient_label:'Patient: ',no_tooth_info:'(no tooth data)',case_nr:'Case #',
@@ -30,7 +30,7 @@ const LANG = {
     stage_received:'Order Received',stage_stl:'STL Review',stage_design:'Designing',stage_cnc:'CNC Production',stage_qc:'Quality Check',stage_shipping:'Shipping',stage_done:'Delivered',
   },
   ko: {
-    nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CUSTOM',nav_used:'중고마켓',nav_forum:'FORUM',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',
+    nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'FORUM',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',
     pt_home:'Home',pt_shop:'Shop',pt_custom:'Custom Abutment',pt_used:'중고마켓',pt_forum:'Forum',pt_events:'Events',pt_factory:'Factory',pt_settings:'설정',
     login_subtitle:'의사 로그인',login_ph:'닉네임',login_password_ph:'비밀번호',login_btn:'로그인',login_cancel:'취소',login_error:'닉네임과 비밀번호를 입력해주세요.',login_verifying:'확인 중...',login_not_found:'닉네임이 없거나 비밀번호가 틀렸습니다.',login_network_error:'네트워크 오류가 발생했습니다. 다시 시도해주세요.',login_register_link:'사용 신청하기 →',
     reg_title:'사용 신청',reg_subtitle:'정보를 입력하시면 24시간 내에 검토 후 승인해 드립니다.',reg_license_ph:'면허 번호 (필수)',reg_name_ph:'의사 이름 (필수)',reg_clinic_ph:'치과명 (필수)',reg_contact_ph:'전화번호 또는 Line ID (필수)',reg_password_ph:'비밀번호 (필수)',reg_password_confirm_ph:'비밀번호 확인 (필수)',reg_submit:'신청하기',reg_submitting:'신청 중...',reg_success:'신청이 접수되었습니다!\n관리자 승인 후 24시간 내에 연락드리겠습니다.',reg_error:'필수 항목을 모두 입력해주세요.',reg_pwd_mismatch:'비밀번호가 일치하지 않습니다.',reg_duplicate:'이미 등록된 닉네임입니다.',reg_network_error:'네트워크 오류가 발생했습니다. 다시 시도해주세요.',
@@ -44,7 +44,7 @@ const LANG = {
     qr_label:'QR로 결제',qr_summary_title:'주문 요약',qr_total:'합계',qr_complete:'결제 완료',
     used_contact_title:'판매자 연락처',used_contact_close:'닫기',
     custom_tab_new:'새 주문',custom_tab_list:'내 주문 현황',custom_form_title:'커스텀 어버트먼트 주문',custom_delivery_title:'납품 정보',custom_clinic_ph:'치과명 / 기공소명',custom_addr_ph:'납품 주소',custom_phone_ph:'연락처',custom_line_ph:'Line ID (알림 수신용)',custom_submit:'주문 제출하기',custom_submit_note:'주문 접수 시 Line으로 확인 메시지가 발송됩니다',custom_empty:'아직 주문 내역이 없어요',
-    case_label:'케이스 #',case_remove:'✕ 삭제',case_patient_ph:'환자 ID (익명 가능, 예: P001)',case_tooth_hint:'치아 선택 · 탭하여 선택/해제',upper_jaw:'상악 (Upper Jaw)',lower_jaw:'하악 (Lower Jaw)',jaw_border:'치열 경계',selected_teeth:'선택된 치아 —',sel_count_suffix:'개',brand_ph:'임플란트 종류 선택',size_ph:'사이즈 (예: Ø4.0 / L10)',color_ph:'치아 색상 (VITA)',case_add:'+ 케이스 추가',stl_label:'STL 파일 업로드',stl_hint:'.stl 파일을 탭하여 선택',memo_ph:'특별 요청사항 (선택)',anon_patient:'익명',
+    case_label:'케이스 #',case_remove:'✕ 삭제',case_patient_ph:'환자 ID (익명 가능, 예: P001)',case_tooth_hint:'치아 선택 · 탭하여 선택/해제',upper_jaw:'상악 (Upper Jaw)',lower_jaw:'하악 (Lower Jaw)',jaw_border:'치열 경계',selected_teeth:'선택된 치아 —',sel_count_suffix:'개',brand_ph:'임플란트 종류 선택',size_ph:'사이즈 (예: Ø4.0 / L10)',color_ph:'치아 색상 (VITA)',case_add:'+ 케이스 추가',stl_label:'STL 파일 업로드',stl_hint:'.stl 파일을 탭하여 선택',memo_ph:'특별 요청사항 (선택)',anon_patient:'익명',case_deadline_label:'납품 기한',
     err_fill_delivery:'치과명, 납품 주소, 연락처를 입력해주세요.',err_select_tooth:'케이스 #%: 치아를 최소 1개 선택해주세요.',err_fill_tooth:'케이스 #% 치아 #%: 임플란트 종류와 사이즈를 입력해주세요.',err_add_case:'케이스를 최소 1개 추가해주세요.',
     order_success_msg:'✅ 주문이 접수되었습니다!\n주문번호: %\n케이스: %개 / 치아: %개',order_success_line:'\nLine으로 확인 메시지를 보내드렸습니다.',
     status_label:'진행 상황',case_detail:'케이스 상세',teeth_count:'개 치아',cases_unit:'개',teeth_total_prefix:'총 ',patient_label:'환자: ',no_tooth_info:'치아 정보 없음',case_nr:'케이스 #',
@@ -59,7 +59,7 @@ const LANG = {
     stage_received:'주문 접수',stage_stl:'STL 검토',stage_design:'디자인 중',stage_cnc:'CNC 생산',stage_qc:'품질 검사',stage_shipping:'배송 중',stage_done:'납품 완료',
   },
   zh: {
-    nav_home:'主页',nav_shop:'商城',nav_custom:'定制',nav_used:'二手市场',nav_forum:'论坛',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',
+    nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'论坛',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',
     pt_home:'主页',pt_shop:'商城',pt_custom:'定制基台',pt_used:'二手市场',pt_forum:'论坛',pt_events:'活动',pt_factory:'工厂',pt_settings:'设置',
     login_subtitle:'医生登录',login_ph:'昵称',login_password_ph:'密码',login_btn:'登录',login_cancel:'取消',login_error:'请输入昵称和密码。',login_verifying:'验证中...',login_not_found:'昵称不存在或密码错误。',login_network_error:'网络错误，请重试。',login_register_link:'申请使用 →',
     reg_title:'申请使用',reg_subtitle:'填写信息后，管理员将在24小时内审核并联系您。',reg_license_ph:'执照号码（必填）',reg_name_ph:'医生姓名（必填）',reg_clinic_ph:'诊所名称（必填）',reg_contact_ph:'电话或 Line ID（必填）',reg_password_ph:'密码（必填）',reg_password_confirm_ph:'确认密码（必填）',reg_submit:'提交申请',reg_submitting:'提交中...',reg_success:'申请已提交！\n审核通过后将在24小时内与您联系。',reg_error:'请填写所有必填项。',reg_pwd_mismatch:'两次密码不一致。',reg_duplicate:'该昵称已被注册。',reg_network_error:'网络错误，请重试。',
@@ -73,7 +73,7 @@ const LANG = {
     qr_label:'扫码支付',qr_summary_title:'订单摘要',qr_total:'合计',qr_complete:'支付完成',
     used_contact_title:'联系卖家',used_contact_close:'关闭',
     custom_tab_new:'新订单',custom_tab_list:'我的订单',custom_form_title:'定制基台订单',custom_delivery_title:'配送信息',custom_clinic_ph:'诊所/技工所名称',custom_addr_ph:'配送地址',custom_phone_ph:'联系电话',custom_line_ph:'Line ID（接收通知）',custom_submit:'提交订单',custom_submit_note:'订单提交后将通过Line发送确认消息',custom_empty:'暂无订单记录',
-    case_label:'病例 #',case_remove:'✕ 删除',case_patient_ph:'患者ID（可匿名，如：P001）',case_tooth_hint:'选择牙齿 · 点击切换',upper_jaw:'上颌 (Upper Jaw)',lower_jaw:'下颌 (Lower Jaw)',jaw_border:'牙弓分界',selected_teeth:'已选牙齿 —',sel_count_suffix:'颗',brand_ph:'选择种植体品牌',size_ph:'尺寸（如：Ø4.0 / L10）',color_ph:'牙色（VITA）',case_add:'+ 添加病例',stl_label:'上传STL文件',stl_hint:'点击选择.stl文件',memo_ph:'特殊要求（选填）',anon_patient:'匿名',
+    case_label:'病例 #',case_remove:'✕ 删除',case_patient_ph:'患者ID（可匿名，如：P001）',case_tooth_hint:'选择牙齿 · 点击切换',upper_jaw:'上颌 (Upper Jaw)',lower_jaw:'下颌 (Lower Jaw)',jaw_border:'牙弓分界',selected_teeth:'已选牙齿 —',sel_count_suffix:'颗',brand_ph:'选择种植体品牌',size_ph:'尺寸（如：Ø4.0 / L10）',color_ph:'牙色（VITA）',case_add:'+ 添加病例',stl_label:'上传STL文件',stl_hint:'点击选择.stl文件',memo_ph:'特殊要求（选填）',anon_patient:'匿名',case_deadline_label:'납품 기한',
     err_fill_delivery:'请填写诊所名称、地址和联系电话。',err_select_tooth:'病例#%：请至少选择1颗牙齿。',err_fill_tooth:'病例#% 牙齿#%：请填写种植体品牌和尺寸。',err_add_case:'请至少添加1个病例。',
     order_success_msg:'✅ 订单已提交！\n订单号：%\n病例：%个 / 牙齿：%颗',order_success_line:'\n确认消息已通过Line发送。',
     status_label:'进度',case_detail:'病例详情',teeth_count:'颗牙',cases_unit:'个',teeth_total_prefix:'共',patient_label:'患者：',no_tooth_info:'（无牙齿信息）',case_nr:'病例 #',
@@ -88,7 +88,7 @@ const LANG = {
     stage_received:'已接收订单',stage_stl:'STL审核',stage_design:'设计中',stage_cnc:'CNC生产',stage_qc:'质量检验',stage_shipping:'配送中',stage_done:'已交付',
   },
   th: {
-    nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'กำหนดเอง',nav_used:'ตลาดมือสอง',nav_forum:'ฟอรัม',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',
+    nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'CNC Custom Abut',nav_used:'ตลาดมือสอง',nav_forum:'ฟอรัม',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',
     pt_home:'หน้าแรก',pt_shop:'ร้านค้า',pt_custom:'Custom Abutment',pt_used:'ตลาดมือสอง',pt_forum:'ฟอรัม',pt_events:'กิจกรรม',pt_factory:'โรงงาน',pt_settings:'ตั้งค่า',
     login_subtitle:'เข้าสู่ระบบทันตแพทย์',login_ph:'ชื่อเล่น',login_password_ph:'รหัสผ่าน',login_btn:'เข้าสู่ระบบ',login_cancel:'ยกเลิก',login_error:'กรุณาใส่ชื่อเล่นและรหัสผ่าน',login_verifying:'กำลังตรวจสอบ...',login_not_found:'ไม่พบชื่อเล่น หรือรหัสผ่านไม่ถูกต้อง',login_network_error:'เกิดข้อผิดพลาดเครือข่าย กรุณาลองใหม่อีกครั้ง',login_register_link:'ขอสิทธิ์เข้าใช้งาน →',
     reg_title:'ขอสิทธิ์เข้าใช้งาน',reg_subtitle:'กรอกข้อมูลแล้วผู้ดูแลจะตรวจสอบและติดต่อกลับภายใน 24 ชั่วโมง',reg_license_ph:'หมายเลขใบอนุญาต (จำเป็น)',reg_name_ph:'ชื่อทันตแพทย์ (จำเป็น)',reg_clinic_ph:'ชื่อคลินิก (จำเป็น)',reg_contact_ph:'โทรศัพท์ หรือ Line ID (จำเป็น)',reg_password_ph:'รหัสผ่าน (จำเป็น)',reg_password_confirm_ph:'ยืนยันรหัสผ่าน (จำเป็น)',reg_submit:'ส่งคำขอ',reg_submitting:'กำลังส่ง...',reg_success:'ส่งคำขอเรียบร้อย!\nเราจะติดต่อกลับภายใน 24 ชั่วโมงหลังการอนุมัติ',reg_error:'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน',reg_pwd_mismatch:'รหัสผ่านไม่ตรงกัน',reg_duplicate:'ชื่อเล่นนี้ถูกลงทะเบียนแล้ว',reg_network_error:'เกิดข้อผิดพลาดเครือข่าย กรุณาลองใหม่อีกครั้ง',
@@ -102,7 +102,7 @@ const LANG = {
     qr_label:'สแกนเพื่อชำระเงิน',qr_summary_title:'สรุปคำสั่งซื้อ',qr_total:'ยอดรวม',qr_complete:'ชำระเงินเรียบร้อย',
     used_contact_title:'ติดต่อผู้ขาย',used_contact_close:'ปิด',
     custom_tab_new:'สั่งใหม่',custom_tab_list:'คำสั่งซื้อของฉัน',custom_form_title:'สั่งซื้อ Custom Abutment',custom_delivery_title:'ข้อมูลจัดส่ง',custom_clinic_ph:'ชื่อคลินิก / ห้องแล็บ',custom_addr_ph:'ที่อยู่จัดส่ง',custom_phone_ph:'เบอร์ติดต่อ',custom_line_ph:'Line ID (สำหรับรับการแจ้งเตือน)',custom_submit:'ส่งคำสั่งซื้อ',custom_submit_note:'เมื่อได้รับคำสั่งซื้อจะส่งข้อความยืนยันทาง Line',custom_empty:'ยังไม่มีคำสั่งซื้อ',
-    case_label:'เคส #',case_remove:'✕ ลบ',case_patient_ph:'ID ผู้ป่วย (ไม่ระบุชื่อได้ เช่น P001)',case_tooth_hint:'เลือกฟัน · แตะเพื่อเลือก/ยกเลิก',upper_jaw:'ขากรรไกรบน (Upper Jaw)',lower_jaw:'ขากรรไกรล่าง (Lower Jaw)',jaw_border:'แนวขอบ',selected_teeth:'ฟันที่เลือก —',sel_count_suffix:' ซี่',brand_ph:'เลือกยี่ห้อ Implant',size_ph:'ขนาด (เช่น Ø4.0 / L10)',color_ph:'สีฟัน (VITA)',case_add:'+ เพิ่มเคส',stl_label:'อัปโหลดไฟล์ STL',stl_hint:'แตะเพื่อเลือกไฟล์ .stl',memo_ph:'คำขอพิเศษ (ไม่บังคับ)',anon_patient:'ไม่ระบุ',
+    case_label:'เคส #',case_remove:'✕ ลบ',case_patient_ph:'ID ผู้ป่วย (ไม่ระบุชื่อได้ เช่น P001)',case_tooth_hint:'เลือกฟัน · แตะเพื่อเลือก/ยกเลิก',upper_jaw:'ขากรรไกรบน (Upper Jaw)',lower_jaw:'ขากรรไกรล่าง (Lower Jaw)',jaw_border:'แนวขอบ',selected_teeth:'ฟันที่เลือก —',sel_count_suffix:' ซี่',brand_ph:'เลือกยี่ห้อ Implant',size_ph:'ขนาด (เช่น Ø4.0 / L10)',color_ph:'สีฟัน (VITA)',case_add:'+ เพิ่มเคส',stl_label:'อัปโหลดไฟล์ STL',stl_hint:'แตะเพื่อเลือกไฟล์ .stl',memo_ph:'คำขอพิเศษ (ไม่บังคับ)',anon_patient:'ไม่ระบุ',case_deadline_label:'납품 기한',
     err_fill_delivery:'กรุณากรอกชื่อคลินิก ที่อยู่ และเบอร์ติดต่อ',err_select_tooth:'เคส #%: กรุณาเลือกอย่างน้อย 1 ซี่ฟัน',err_fill_tooth:'เคส #% ฟัน #%: กรุณากรอกยี่ห้อและขนาด Implant',err_add_case:'กรุณาเพิ่มอย่างน้อย 1 เคส',
     order_success_msg:'✅ ส่งคำสั่งซื้อเรียบร้อย!\nหมายเลขคำสั่งซื้อ: %\nเคส: % / ฟัน: % ซี่',order_success_line:'\nส่งข้อความยืนยันทาง Line แล้ว',
     status_label:'สถานะ',case_detail:'รายละเอียดเคส',teeth_count:' ซี่ฟัน',cases_unit:' เคส',teeth_total_prefix:'รวม ',patient_label:'ผู้ป่วย: ',no_tooth_info:'(ไม่มีข้อมูลฟัน)',case_nr:'เคส #',
