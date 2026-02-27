@@ -771,6 +771,17 @@ async function sendLine(order, stageKey) {
       console.error('[LINE] status:', res.status, data);
       alert('[LINE 오류] status: ' + res.status + '\n' + JSON.stringify(data));
     }
+    if (order.lineId) {
+      var res2 = await fetch(LINE_PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: order.lineId, messages: [{ type: 'text', text: msg }] })
+      });
+      if (!res2.ok) {
+        var data2 = await res2.json();
+        console.error('[LINE 고객] status:', res2.status, data2);
+      }
+    }
   } catch(e) {
     console.error('[LINE] fetch error:', e);
     alert('[LINE 연결 오류] Worker URL 또는 네트워크를 확인하세요.\n' + e.message);
