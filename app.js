@@ -727,7 +727,32 @@ async function sendLine(order, stageKey) {
   if (!LINE_PROXY_URL || LINE_PROXY_URL === 'YOUR_CLOUDFLARE_WORKER_URL') return;
   var st = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
   var totalTeeth = order.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
-  var msg = '[Dentalk Custom] ' + st.icon + ' ' + t('stage_' + st.key) + '\n' + order.id + '\n' + order.clinic + '\n' + order.cases.length + ' / ' + totalTeeth + '\n' + order.phone;
+  var lines = [
+    '━━━━━━━━━━━━━━━━━━━━',
+    st.icon + ' ' + t('stage_' + st.key),
+    '━━━━━━━━━━━━━━━━━━━━',
+    '🆔 ' + order.id,
+    '📅 ' + order.date,
+    '🏥 ' + order.clinic,
+    '📍 ' + order.addr,
+    '📞 ' + order.phone,
+  ];
+  order.cases.forEach(function(cs, i) {
+    lines.push('');
+    lines.push('[ 케이스 ' + (i+1) + '/' + order.cases.length + ' ] ' + cs.patient);
+    if (cs.deadline) lines.push('  납기: ' + cs.deadline);
+    if (cs.teeth && cs.teeth.length) {
+      cs.teeth.forEach(function(th) {
+        lines.push('  #' + th.tooth + ' ' + th.toothName + ' | ' + th.brand + ' ' + th.size + (th.color ? ' / ' + th.color : ''));
+      });
+    }
+    if (cs.memo) lines.push('  메모: ' + cs.memo);
+    if (cs.stl)  lines.push('  STL: ' + cs.stl);
+  });
+  lines.push('');
+  lines.push('총 ' + order.cases.length + '케이스 / ' + totalTeeth + '치아');
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  var msg = lines.join('\n');
   try {
     var res = await fetch(LINE_PROXY_URL, {
       method: 'POST',
