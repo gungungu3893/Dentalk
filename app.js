@@ -664,7 +664,11 @@ function submitCustom() {
   }
   if (!cases.length) { alert(t('err_add_case')); return; }
   var totalTeeth = cases.reduce(function(s,c){ return s+c.teeth.length; },0);
-  var oid = 'CA-' + Date.now().toString().slice(-6);
+  var _now = new Date();
+  var _month = String.fromCharCode(64 + _now.getMonth() + 1);
+  var _day   = String(_now.getDate()).padStart(2,'0');
+  var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
+  var oid = _now.getFullYear() + _month + _day + _hhmm;
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString() };
   customOrders.unshift(order);
   sendLine(order, 'received');
@@ -746,7 +750,7 @@ async function sendLine(order, stageKey) {
     if (cs.deadline) lines.push('  납기: ' + cs.deadline);
     if (cs.teeth && cs.teeth.length) {
       cs.teeth.forEach(function(th) {
-        lines.push('  #' + th.tooth + ' ' + th.toothName + ' | ' + th.brand + ' ' + th.size + (th.color ? ' / ' + th.color : ''));
+        lines.push('  ' + th.toothName + ' | ' + th.brand + ' ' + th.size + (th.color ? ' / ' + th.color : ''));
       });
     }
     if (cs.memo) lines.push('  메모: ' + cs.memo);
