@@ -668,7 +668,7 @@ function submitCustom() {
   var _month = String.fromCharCode(64 + _now.getMonth() + 1);
   var _day   = String(_now.getDate()).padStart(2,'0');
   var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
-  var oid = _now.getFullYear() + _month + _day + _hhmm;
+  var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString() };
   customOrders.unshift(order);
   sendLine(order, 'received');
