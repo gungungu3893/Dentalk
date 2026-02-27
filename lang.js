@@ -28,6 +28,7 @@ const LANG = {
     tooth_11:'Central Incisor',tooth_12:'Lateral Incisor',tooth_13:'Canine',tooth_14:'1st Premolar',tooth_15:'2nd Premolar',tooth_16:'1st Molar',tooth_17:'2nd Molar',
     upper:'Upper',lower:'Lower',
     stage_received:'Order Received',stage_stl:'STL Review',stage_design:'Designing',stage_cnc:'CNC Production',stage_qc:'Quality Check',stage_shipping:'Shipping',stage_done:'Delivered',
+    line_deadline:'Deadline',line_memo:'Memo',line_total_cases:'Total % cases / % teeth',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'FORUM',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',
@@ -57,6 +58,7 @@ const LANG = {
     tooth_11:'중절치',tooth_12:'측절치',tooth_13:'견치',tooth_14:'제1소구치',tooth_15:'제2소구치',tooth_16:'제1대구치',tooth_17:'제2대구치',
     upper:'상악',lower:'하악',
     stage_received:'주문 접수',stage_stl:'STL 검토',stage_design:'디자인 중',stage_cnc:'CNC 생산',stage_qc:'품질 검사',stage_shipping:'배송 중',stage_done:'납품 완료',
+    line_deadline:'납기',line_memo:'메모',line_total_cases:'총 %케이스 / %치아',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'论坛',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',
@@ -86,6 +88,7 @@ const LANG = {
     tooth_11:'中切牙',tooth_12:'侧切牙',tooth_13:'尖牙',tooth_14:'第一前磨牙',tooth_15:'第二前磨牙',tooth_16:'第一磨牙',tooth_17:'第二磨牙',
     upper:'上颌',lower:'下颌',
     stage_received:'已接收订单',stage_stl:'STL审核',stage_design:'设计中',stage_cnc:'CNC生产',stage_qc:'质量检验',stage_shipping:'配送中',stage_done:'已交付',
+    line_deadline:'期限',line_memo:'备注',line_total_cases:'共 %个病例 / %颗牙',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'CNC Custom Abut',nav_used:'ตลาดมือสอง',nav_forum:'ฟอรัม',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',
@@ -115,6 +118,7 @@ const LANG = {
     tooth_11:'ฟันตัดกลาง',tooth_12:'ฟันตัดข้าง',tooth_13:'ฟันเขี้ยว',tooth_14:'ฟันกรามน้อยซี่ที่ 1',tooth_15:'ฟันกรามน้อยซี่ที่ 2',tooth_16:'ฟันกรามซี่ที่ 1',tooth_17:'ฟันกรามซี่ที่ 2',
     upper:'ขากรรไกรบน',lower:'ขากรรไกรล่าง',
     stage_received:'รับคำสั่งซื้อแล้ว',stage_stl:'ตรวจสอบ STL',stage_design:'กำลังออกแบบ',stage_cnc:'ผลิต CNC',stage_qc:'ตรวจสอบคุณภาพ',stage_shipping:'กำลังจัดส่ง',stage_done:'จัดส่งแล้ว',
+    line_deadline:'กำหนดส่ง',line_memo:'หมายเหตุ',line_total_cases:'รวม % เคส / % ซี่',
   },
 };
 
