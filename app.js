@@ -733,10 +733,12 @@ function renderCustomOrders() {
 async function sendLine(order, stageKey) {
   if (!LINE_PROXY_URL || LINE_PROXY_URL === 'YOUR_CLOUDFLARE_WORKER_URL') return;
   var st = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
+  var enStage = LANG.en['stage_' + st.key] || st.key;
+  var toothKeyMap = {1:'tooth_11',2:'tooth_12',3:'tooth_13',4:'tooth_14',5:'tooth_15',6:'tooth_16',7:'tooth_17'};
   var totalTeeth = order.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
   var lines = [
     '━━━━━━━━━━━━━━━━━━━━',
-    st.icon + ' ' + t('stage_' + st.key),
+    st.icon + ' ' + enStage,
     '━━━━━━━━━━━━━━━━━━━━',
     '🆔 ' + order.id,
     '📅 ' + order.date,
@@ -746,18 +748,20 @@ async function sendLine(order, stageKey) {
   ];
   order.cases.forEach(function(cs, i) {
     lines.push('');
-    lines.push('[ 케이스 ' + (i+1) + '/' + order.cases.length + ' ] ' + cs.patient);
-    if (cs.deadline) lines.push('  납기: ' + cs.deadline);
+    lines.push('[ Case ' + (i+1) + '/' + order.cases.length + ' ] ' + cs.patient);
+    if (cs.deadline) lines.push('  Deadline: ' + cs.deadline);
     if (cs.teeth && cs.teeth.length) {
       cs.teeth.forEach(function(th) {
-        lines.push('  ' + th.toothName + ' | ' + th.brand + ' ' + th.size + (th.color ? ' / ' + th.color : ''));
+        var n = parseInt(th.tooth, 10) % 10;
+        var enName = '#' + th.tooth + ' ' + (LANG.en[toothKeyMap[n]] || '');
+        lines.push('  ' + enName + ' | ' + th.brand + ' ' + th.size + (th.color ? ' / ' + th.color : ''));
       });
     }
-    if (cs.memo) lines.push('  메모: ' + cs.memo);
+    if (cs.memo) lines.push('  Memo: ' + cs.memo);
     if (cs.stl)  lines.push('  STL: ' + cs.stl);
   });
   lines.push('');
-  lines.push('총 ' + order.cases.length + '케이스 / ' + totalTeeth + '치아');
+  lines.push('Total ' + order.cases.length + ' cases / ' + totalTeeth + ' teeth');
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   var msg = lines.join('\n');
   try {
