@@ -8,7 +8,8 @@ const ORDER_STAGES   = [
   {key:'received',icon:'[1]'},{key:'stl',icon:'[2]'},{key:'design',icon:'[3]'},
   {key:'cnc',icon:'[4]'},{key:'qc',icon:'[5]'},{key:'shipping',icon:'[6]'},{key:'done',icon:'[7]'},
 ];
-const LINE_TOKEN = 'YOUR_LINE_NOTIFY_TOKEN';
+const LINE_CHANNEL_ACCESS_TOKEN = '/ZN4flK2594gd7p12claNHltTtRT5CqQDpNoqsPO2jesr7/WVvGSSQPswM6ZyKvG8xqmmjXEa4QsqoAHYdqLSUPTakIczQ7ZBT+vOhVNN3IaquxmhlttCr+Gcs5oMi5RWbv1hHoRCCXxLwcbzu+5eAdB04t89/1O/w1cDnyilFU=';
+const LINE_USER_ID = 'U6265c5810e5592b820c224588433c247';
 // ── Supabase 면허 검증 ──────────────────────────────────────────
 // Supabase 프로젝트 생성 후 아래 두 값을 교체하세요.
 const SUPABASE_URL      = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co';
@@ -723,12 +724,20 @@ function renderCustomOrders() {
   }).join('');
 }
 async function sendLine(order, stageKey) {
-  if (!LINE_TOKEN || LINE_TOKEN==='YOUR_LINE_NOTIFY_TOKEN') return;
+  if (!LINE_CHANNEL_ACCESS_TOKEN) return;
   var st = ORDER_STAGES.find(function(s){ return s.key===stageKey; });
   var totalTeeth = order.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
-  var msg = '\n[Dentalk Custom] ' + st.icon + ' ' + t('stage_' + st.key) + '\n' + order.id + '\n' + order.clinic + '\n' + order.cases.length + ' / ' + totalTeeth + '\n' + order.phone;
-  try { await fetch('https://notify-api.line.me/api/notify',{method:'POST',headers:{'Authorization':'Bearer '+LINE_TOKEN,'Content-Type':'application/x-www-form-urlencoded'},body:'message='+encodeURIComponent(msg)}); }
-  catch(e) {}
+  var msg = '[Dentalk Custom] ' + st.icon + ' ' + t('stage_' + st.key) + '\n' + order.id + '\n' + order.clinic + '\n' + order.cases.length + ' / ' + totalTeeth + '\n' + order.phone;
+  try {
+    await fetch('https://api.line.me/v2/bot/message/push', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: msg }] })
+    });
+  } catch(e) {}
 }
 // ============================================================
 // USED MARKET
