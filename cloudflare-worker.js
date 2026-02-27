@@ -1,7 +1,7 @@
 // Cloudflare Worker - LINE Messaging API CORS 프록시
 // 배포 방법: https://dash.cloudflare.com → Workers & Pages → Create → 코드 붙여넣기
 
-const LINE_CHANNEL_ACCESS_TOKEN = '/ZN4flK2594gd7p12claNHltTtRT5CqQDpNoqsPO2jesr7/WVvGSSQPswM6ZyKvG8xqmmjXEa4QsqoAHYdqLSUPTakIczQ7ZBT+vOhVNN3IaquxmhlttCr+Gcs5oMi5RWbv1hHoRCCXxLwcbzu+5eAdB04t89/1O/w1cDnyilFU=';
+const LINE_CHANNEL_ACCESS_TOKEN = 'vVTYd8PJYzKe7+zLZf0nJbPD+WJxYPuWmdB8AaE8Y9fVhc0r590qrP7pvLy4erUn8xqmmjXEa4QsqoAHYdqLSUPTakIczQ7ZBT+vOhVNN3JxmmzGHsEqdkv6A0YsJ4k4GJuChH15tK8OnqDtwoNoLgdB04t89/1O/w1cDnyilFU=';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
