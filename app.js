@@ -311,19 +311,26 @@ const PRODUCTS = [
 // SHOP
 // ============================================================
 const SHOP_CATEGORIES = [
-  { id:'scan-body',   name:'Scan Body',           desc:'Intra-Oral / Model / GeoMedi', icon:'🦷' },
-  { id:'q-base',      name:'Q-Base',              desc:'Zirconia Abutment',            icon:'💎' },
-  { id:'ready-made',  name:'Ready Made',          desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',  icon:'🔩' },
-  { id:'ti-base',     name:'Ti-Base',             desc:'CAD/CAM · Ti+Zr',             icon:'⚙️' },
-  { id:'pre-milled',  name:'Pre-Milled',          desc:'N · H10 / R · H10',           icon:'🔧' },
-  { id:'multi-unit',  name:'Multi Unit',          desc:'All-on-X',                    icon:'🔗' },
-  { id:'3d-analog',   name:'3D Analog',           desc:'GeoMedi',                     icon:'🖨️' },
+  { id:'scan-body',   name:'Scan Body',   desc:'Intra-Oral / Model / GeoMedi', color:'from-blue-500 to-blue-800',
+    svg:'<svg viewBox="0 0 40 70" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="20,3 13,16 27,16" fill="white" opacity=".9"/><rect x="14" y="15" width="12" height="33" rx="2" fill="white" opacity=".88"/><rect x="16" y="21" width="8" height="1.5" rx="1" fill="white" opacity=".45"/><rect x="16" y="27" width="8" height="1.5" rx="1" fill="white" opacity=".45"/><rect x="16" y="33" width="8" height="1.5" rx="1" fill="white" opacity=".45"/><rect x="12" y="47" width="16" height="7" rx="2" fill="white" opacity=".7"/><rect x="10" y="53" width="20" height="7" rx="2.5" fill="white" opacity=".5"/></svg>' },
+  { id:'q-base',      name:'Q-Base',      desc:'Zirconia Abutment',            color:'from-amber-400 to-amber-700',
+    svg:'<svg viewBox="0 0 56 68" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="28" cy="17" rx="22" ry="11" fill="white" opacity=".9"/><rect x="22" y="17" width="12" height="26" rx="2" fill="white" opacity=".82"/><rect x="19" y="42" width="18" height="7" rx="2" fill="white" opacity=".7"/><rect x="17" y="48" width="22" height="7" rx="2.5" fill="white" opacity=".5"/></svg>' },
+  { id:'ready-made',  name:'Ready Made',  desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',  color:'from-slate-500 to-slate-800',
+    svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 4 L13 22 L31 22 Z" fill="white" opacity=".9"/><rect x="13" y="21" width="18" height="27" rx="2" fill="white" opacity=".85"/><rect x="11" y="47" width="22" height="7" rx="2" fill="white" opacity=".7"/><rect x="9" y="53" width="26" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+  { id:'ti-base',     name:'Ti-Base',     desc:'CAD/CAM · Ti+Zr',             color:'from-cyan-500 to-cyan-800',
+    svg:'<svg viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="25" cy="13" rx="15" ry="7" fill="white" opacity=".8"/><rect x="10" y="13" width="30" height="18" rx="2" fill="white" opacity=".85"/><rect x="13" y="30" width="24" height="8" rx="2" fill="white" opacity=".7"/><rect x="11" y="37" width="28" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+  { id:'pre-milled',  name:'Pre-Milled',  desc:'N · H10 / R · H10',           color:'from-indigo-600 to-indigo-900',
+    svg:'<svg viewBox="0 0 58 62" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="29" cy="14" rx="23" ry="11" fill="white" opacity=".9"/><rect x="21" y="14" width="16" height="20" rx="2" fill="white" opacity=".82"/><rect x="17" y="33" width="24" height="8" rx="2" fill="white" opacity=".7"/><rect x="15" y="40" width="28" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+  { id:'multi-unit',  name:'Multi Unit',  desc:'All-on-X',                    color:'from-violet-600 to-violet-900',
+    svg:'<svg viewBox="0 0 62 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="3" width="10" height="16" rx="2" fill="white" opacity=".9"/><rect x="14" y="17" width="34" height="10" rx="3" fill="white" opacity=".78"/><rect x="7" y="25" width="10" height="22" rx="2" fill="white" opacity=".72"/><rect x="22" y="25" width="18" height="22" rx="2" fill="white" opacity=".72"/><rect x="45" y="25" width="10" height="22" rx="2" fill="white" opacity=".72"/></svg>' },
+  { id:'3d-analog',   name:'3D Analog',   desc:'GeoMedi',                     color:'from-teal-500 to-teal-800',
+    svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="5" width="12" height="12" rx="2" fill="white" opacity=".9"/><rect x="12" y="16" width="20" height="30" rx="2" fill="white" opacity=".82"/><rect x="15" y="20" width="5" height="22" rx="1" fill="white" opacity=".4"/><rect x="24" y="20" width="5" height="22" rx="1" fill="white" opacity=".4"/><rect x="13" y="45" width="18" height="7" rx="2" fill="white" opacity=".7"/><rect x="11" y="51" width="22" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
 ];
 function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
     return '<div onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col">' +
-      '<div class="aspect-square bg-slate-50 flex items-center justify-center text-3xl">' + cat.icon + '</div>' +
+      '<div class="aspect-square bg-gradient-to-br ' + cat.color + ' flex items-center justify-center p-3">' + cat.svg + '</div>' +
       '<div class="p-1.5 flex flex-col gap-0.5">' +
         '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full bg-blue-100 text-blue-700 self-start">' + count + ' items</span>' +
         '<p class="font-bold text-slate-800 text-[11px] leading-snug">' + cat.name + '</p>' +
