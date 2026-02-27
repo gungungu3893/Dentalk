@@ -507,7 +507,10 @@ function resetCustomForm() {
   caseTeeth = {};
   document.getElementById('caseList').innerHTML = '';
   addCase();
-  ['cust-clinic','cust-addr','cust-phone','cust-line'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('cust-clinic').value = currentUser.clinicName || '';
+  document.getElementById('cust-addr').value   = currentUser.address   || '';
+  document.getElementById('cust-phone').value  = currentUser.phone     || '';
+  document.getElementById('cust-line').value   = '';
 }
 function addCase() {
   caseCount++;
