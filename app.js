@@ -311,25 +311,23 @@ const PRODUCTS = [
 // SHOP
 // ============================================================
 const SHOP_CATEGORIES = [
-  { id:'scan-body',   name:'Scan Body',           desc:'Intra-Oral / Model / GeoMedi' },
-  { id:'q-base',      name:'Q-Base',              desc:'Zirconia Abutment' },
-  { id:'ready-made',  name:'Ready Made Abutment', desc:'Ø3.0 N · Ø4.5 R · Ø5.5 R · Ø6.5 R' },
-  { id:'ti-base',     name:'Ti-Base Abutment',    desc:'CAD/CAM · Ti+Zr' },
-  { id:'pre-milled',  name:'Pre-Milled Abutment', desc:'N · H10 / R · H10' },
-  { id:'multi-unit',  name:'Multi Unit',          desc:'All-on-X' },
-  { id:'3d-analog',   name:'3D Analog',           desc:'GeoMedi · Stone & 3D printed' },
+  { id:'scan-body',   name:'Scan Body',           desc:'Intra-Oral / Model / GeoMedi', icon:'🦷' },
+  { id:'q-base',      name:'Q-Base',              desc:'Zirconia Abutment',            icon:'💎' },
+  { id:'ready-made',  name:'Ready Made',          desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',  icon:'🔩' },
+  { id:'ti-base',     name:'Ti-Base',             desc:'CAD/CAM · Ti+Zr',             icon:'⚙️' },
+  { id:'pre-milled',  name:'Pre-Milled',          desc:'N · H10 / R · H10',           icon:'🔧' },
+  { id:'multi-unit',  name:'Multi Unit',          desc:'All-on-X',                    icon:'🔗' },
+  { id:'3d-analog',   name:'3D Analog',           desc:'GeoMedi',                     icon:'🖨️' },
 ];
 function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
-    return '<div onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-2xl shadow-sm p-5 flex items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition">' +
-      '<div class="flex-1 pr-3">' +
-        '<h3 class="font-black text-slate-800 text-sm leading-tight">' + cat.name + '</h3>' +
-        '<p class="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-tight">' + cat.desc + '</p>' +
-      '</div>' +
-      '<div class="flex items-center gap-2 shrink-0">' +
-        '<span class="text-[10px] text-slate-400 font-bold">' + count + ' items</span>' +
-        '<span class="text-slate-300 font-black text-lg leading-none">›</span>' +
+    return '<div onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col">' +
+      '<div class="aspect-square bg-slate-50 flex items-center justify-center text-3xl">' + cat.icon + '</div>' +
+      '<div class="p-1.5 flex flex-col gap-0.5">' +
+        '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full bg-blue-100 text-blue-700 self-start">' + count + ' items</span>' +
+        '<p class="font-bold text-slate-800 text-[11px] leading-snug">' + cat.name + '</p>' +
+        '<p class="text-[9px] text-slate-400 leading-tight">' + cat.desc + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
