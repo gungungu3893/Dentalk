@@ -407,6 +407,11 @@ function closeMenu() {
 // ── 전역 네비 드롭다운 (position:fixed — overflow 클리핑 없음) ──────
 function openNavDropdown(type, event) {
   event.stopPropagation();
+  // 잠긴 페이지는 로그인 먼저
+  if (LOCKED.includes(type) && !isLoggedIn()) {
+    openLoginModal(type);
+    return;
+  }
   var drop  = document.getElementById('navDropdown');
   var inner = document.getElementById('navDropdownInner');
   if (!drop || !inner) return;
@@ -415,24 +420,24 @@ function openNavDropdown(type, event) {
     closeNavDropdown(); return;
   }
   drop.dataset.type = type;
-  if (type === 'forum') {
-    var locked = LOCKED.includes('forum') && !isLoggedIn();
+  if (type === 'custom') {
+    // 로그인 된 경우만 여기 도달 — 바로 페이지 이동
+    closeNavDropdown();
+    goPage('custom');
+    return;
+  } else if (type === 'forum') {
     inner.innerHTML =
       '<button class="nav-drop-item" onclick="goForumSub(\'implant\')">' +
         '<span>🦷</span><span data-i18n="forum_tab_implant">Implant</span>' +
-        (locked ? '<span class="nav-lock" style="position:static;opacity:1">🔒</span>' : '') +
       '</button>' +
       '<button class="nav-drop-item" onclick="goForumSub(\'prosthetic\')">' +
         '<span>💎</span><span data-i18n="forum_tab_prosthetic">Prosthetic</span>' +
-        (locked ? '<span class="nav-lock" style="position:static;opacity:1">🔒</span>' : '') +
       '</button>';
   } else if (type === 'shop') {
-    var locked = LOCKED.includes('shop') && !isLoggedIn();
     inner.innerHTML = SHOP_CATEGORIES.map(function(cat) {
       return '<button class="nav-drop-item" onclick="goShopSub(\'' + cat.id + '\')">' +
         '<span>' + cat.name + '</span>' +
         '<span class="sub-desc">' + cat.desc + '</span>' +
-        (locked ? '<span class="nav-lock" style="position:static;opacity:1;margin-left:2px">🔒</span>' : '') +
       '</button>';
     }).join('');
   }
