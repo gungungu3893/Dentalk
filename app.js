@@ -314,6 +314,10 @@ async function handleLogin() {
   document.getElementById('sideLoginArea').classList.add('hidden');
   document.getElementById('sideLoggedArea').classList.remove('hidden');
   document.getElementById('timerWrap').classList.remove('hidden');
+  // 헤더 닉네임 배지
+  var hNick = document.getElementById('headerNickBadge');
+  var hNickTxt = document.getElementById('headerNickText');
+  if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
   // 게시판 닉네임 표시 업데이트
   updateNicknameDisplays();
   // 프로필 정보 렌더링
@@ -354,6 +358,8 @@ function forceLogout() {
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
   document.getElementById('timerWrap').classList.add('hidden');
+  var hNick = document.getElementById('headerNickBadge');
+  if (hNick) hNick.classList.remove('show');
   renderProfileSettings();
   updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
@@ -367,6 +373,8 @@ function doLogout() {
   document.getElementById('sideLoggedArea').classList.add('hidden');
   document.getElementById('timerWrap').classList.add('hidden');
   document.getElementById('licenseDisplay').textContent = '-';
+  var hNick = document.getElementById('headerNickBadge');
+  if (hNick) hNick.classList.remove('show');
   renderProfileSettings();
   updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
@@ -393,6 +401,23 @@ function closeMenu() {
   document.getElementById('hb2').style.cssText = '';
   document.getElementById('hb3').style.cssText = '';
 }
+// ── 포럼 드롭다운 ─────────────────────────────────────
+function toggleForumDropdown(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('forumDropdownMenu');
+  if (menu) menu.classList.toggle('show');
+}
+function closeForumDropdown() {
+  var menu = document.getElementById('forumDropdownMenu');
+  if (menu) menu.classList.remove('show');
+}
+function goForumSub(cat) {
+  closeForumDropdown();
+  forumCategory = cat;
+  goPage('forum');
+}
+document.addEventListener('click', function() { closeForumDropdown(); });
+
 function updateNavTabs(activeId) {
   document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
   var nt = document.getElementById('ntab-' + activeId);
