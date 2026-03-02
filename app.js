@@ -334,6 +334,7 @@ async function handleLogin() {
   sessionTimer = setInterval(tickSession, 1000);
   tickSession();
   closeModal('loginModal');
+  if (isAdmin()) { goPage('factory'); pendingPage = null; return; }
   if (pendingPage) { goPage(pendingPage); pendingPage = null; }
 }
 function tickSession() {
