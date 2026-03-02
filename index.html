@@ -36,11 +36,12 @@ input[type=number] { -moz-appearance:textfield; }
 .nav-tab { color:rgba(255,255,255,0.45); transition:background .15s,color .15s; }
 .nav-tab.active { background:rgba(255,255,255,0.12); color:#D4AF37; }
 .nav-tab:active { transform:scale(.93); }
-.forum-dropdown { position:relative; }
-.forum-dropdown-menu { display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%); min-width:140px; background:#0a1e3d; border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:4px; z-index:210; box-shadow:0 8px 24px rgba(0,0,0,0.35); }
-.forum-dropdown-menu.show { display:block; }
-.forum-dropdown-menu button { display:block; width:100%; text-align:left; padding:8px 12px; border-radius:8px; font-weight:900; font-size:12px; color:rgba(255,255,255,0.7); transition:background .12s; }
-.forum-dropdown-menu button:hover, .forum-dropdown-menu button:active { background:rgba(255,255,255,0.1); color:#D4AF37; }
+#navDropdown { position:fixed; z-index:250; display:none; }
+.nav-drop-inner { background:#0a1e3d; border:1px solid rgba(255,255,255,0.13); border-radius:14px; padding:5px; box-shadow:0 10px 32px rgba(0,0,0,0.45); min-width:170px; }
+.nav-drop-item { display:flex; align-items:center; gap:6px; width:100%; text-align:left; padding:9px 12px; border-radius:9px; font-weight:900; font-size:12px; color:rgba(255,255,255,0.78); transition:background .12s; white-space:nowrap; }
+.nav-drop-item:hover,.nav-drop-item:active { background:rgba(255,255,255,0.1); color:#D4AF37; }
+.nav-drop-item .sub-desc { font-size:9px; font-weight:600; color:rgba(255,255,255,0.38); }
+.nav-lock { position:absolute; top:2px; right:2px; font-size:8px; opacity:0.65; pointer-events:none; }
 #headerNickBadge { display:none; }
 #headerNickBadge.show { display:flex; }
 </style>
@@ -210,11 +211,6 @@ input[type=number] { -moz-appearance:textfield; }
   <div class="sticky top-0 z-[200] shadow-lg">
   <!-- 헤더 -->
   <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3">
-    <button id="btnMenu" onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex flex-col gap-1.5 items-center justify-center active:bg-white/20">
-      <span id="hb1" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
-      <span id="hb2" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
-      <span id="hb3" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
-    </button>
     <button id="btnBack" onclick="goBack()" class="hidden w-10 h-10 rounded-xl bg-white/10 items-center justify-center active:bg-white/20 text-lg font-black">←</button>
     <div class="flex-1">
       <div class="flex items-baseline gap-1" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
@@ -240,46 +236,47 @@ input[type=number] { -moz-appearance:textfield; }
   <!-- 네비게이션 탭 바 -->
   <nav id="navTabBar" class="bg-[#001220] border-t border-white/10 overflow-x-auto no-scroll">
     <div class="flex px-2 py-2 min-w-max gap-1">
-      <button onclick="goPage('home')"     id="ntab-home"     class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="goPage('home')"                  id="ntab-home"     class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">🏠</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_home">HOME</span>
       </button>
-      <button onclick="goPage('shop')"     id="ntab-shop"     class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="openNavDropdown('shop',event)"   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">🦷</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_shop">SHOP</span>
+        <span id="ntab-lock-shop" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="goPage('custom')"   id="ntab-custom"   class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="goPage('custom')"                id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">🔧</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_custom">CUSTOM</span>
+        <span id="ntab-lock-custom" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="goPage('used')"     id="ntab-used"     class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="goPage('used')"                  id="ntab-used"     class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">♻️</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_used">USED</span>
       </button>
-      <div class="forum-dropdown" id="forumDropdownWrap">
-        <button onclick="toggleForumDropdown(event)" id="ntab-forum" class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-          <span class="text-lg leading-none">💬</span>
-          <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_forum">임상토론방</span>
-        </button>
-        <div id="forumDropdownMenu" class="forum-dropdown-menu">
-          <button onclick="goForumSub('implant')">🦷 <span data-i18n="forum_tab_implant">Implant</span></button>
-          <button onclick="goForumSub('prosthetic')">💎 <span data-i18n="forum_tab_prosthetic">Prosthetic</span></button>
-        </div>
-      </div>
-      <button onclick="goPage('events')"   id="ntab-events"   class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="openNavDropdown('forum',event)"  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+        <span class="text-lg leading-none">💬</span>
+        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_forum">임상토론방</span>
+        <span id="ntab-lock-forum" class="nav-lock hidden">🔒</span>
+      </button>
+      <button onclick="goPage('events')"                id="ntab-events"   class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">📅</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_events">EVENTS</span>
       </button>
-      <button onclick="goPage('factory')"  id="ntab-factory"  class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="goPage('factory')"               id="ntab-factory"  class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">🏭</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_factory">FACTORY</span>
       </button>
-      <button onclick="goPage('settings')" id="ntab-settings" class="nav-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
+      <button onclick="goPage('settings')"              id="ntab-settings" class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
         <span class="text-lg leading-none">⚙️</span>
         <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_settings">SETTINGS</span>
       </button>
     </div>
   </nav>
+  <!-- 전역 네비 드롭다운 (overflow 클리핑 방지를 위해 nav 바깥에 위치) -->
+  <div id="navDropdown" onclick="event.stopPropagation()">
+    <div id="navDropdownInner" class="nav-drop-inner"></div>
+  </div>
   </div><!-- /sticky wrapper -->
   <!-- 오버레이 -->
   <div id="sideOverlay" class="fixed inset-0 bg-black/50 z-[300]" onclick="closeMenu()"></div>
@@ -448,7 +445,7 @@ input[type=number] { -moz-appearance:textfield; }
         <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="used_post_btn">POST FOR SALE</button>
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
-      <div id="usedList" class="grid grid-cols-4 gap-2"></div>
+      <div id="usedList" class="grid grid-cols-5 gap-4"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">

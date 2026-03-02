@@ -318,6 +318,7 @@ async function handleLogin() {
   var hNick = document.getElementById('headerNickBadge');
   var hNickTxt = document.getElementById('headerNickText');
   if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
+  updateNavLocks();
   // 게시판 닉네임 표시 업데이트
   updateNicknameDisplays();
   // 프로필 정보 렌더링
@@ -360,6 +361,7 @@ function forceLogout() {
   document.getElementById('timerWrap').classList.add('hidden');
   var hNick = document.getElementById('headerNickBadge');
   if (hNick) hNick.classList.remove('show');
+  updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
@@ -375,6 +377,7 @@ function doLogout() {
   document.getElementById('licenseDisplay').textContent = '-';
   var hNick = document.getElementById('headerNickBadge');
   if (hNick) hNick.classList.remove('show');
+  updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
@@ -401,22 +404,75 @@ function closeMenu() {
   document.getElementById('hb2').style.cssText = '';
   document.getElementById('hb3').style.cssText = '';
 }
-// ── 포럼 드롭다운 ─────────────────────────────────────
-function toggleForumDropdown(e) {
-  e.stopPropagation();
-  var menu = document.getElementById('forumDropdownMenu');
-  if (menu) menu.classList.toggle('show');
+// ── 전역 네비 드롭다운 (position:fixed — overflow 클리핑 없음) ──────
+function openNavDropdown(type, event) {
+  event.stopPropagation();
+  var drop  = document.getElementById('navDropdown');
+  var inner = document.getElementById('navDropdownInner');
+  if (!drop || !inner) return;
+  // 같은 탭 재클릭 시 토글
+  if (drop.style.display === 'block' && drop.dataset.type === type) {
+    closeNavDropdown(); return;
+  }
+  drop.dataset.type = type;
+  if (type === 'forum') {
+    var locked = LOCKED.includes('forum') && !isLoggedIn();
+    inner.innerHTML =
+      '<button class="nav-drop-item" onclick="goForumSub(\'implant\')">' +
+        '<span>🦷</span><span data-i18n="forum_tab_implant">Implant</span>' +
+        (locked ? '<span class="nav-lock" style="position:static;opacity:1">🔒</span>' : '') +
+      '</button>' +
+      '<button class="nav-drop-item" onclick="goForumSub(\'prosthetic\')">' +
+        '<span>💎</span><span data-i18n="forum_tab_prosthetic">Prosthetic</span>' +
+        (locked ? '<span class="nav-lock" style="position:static;opacity:1">🔒</span>' : '') +
+      '</button>';
+  } else if (type === 'shop') {
+    var locked = LOCKED.includes('shop') && !isLoggedIn();
+    inner.innerHTML = SHOP_CATEGORIES.map(function(cat) {
+      return '<button class="nav-drop-item" onclick="goShopSub(\'' + cat.id + '\')">' +
+        '<span>' + cat.name + '</span>' +
+        '<span class="sub-desc">' + cat.desc + '</span>' +
+        (locked ? '<span class="nav-lock" style="position:static;opacity:1;margin-left:2px">🔒</span>' : '') +
+      '</button>';
+    }).join('');
+  }
+  applyLang();
+  var btn  = event.currentTarget;
+  var rect = btn.getBoundingClientRect();
+  drop.style.left = Math.max(4, rect.left) + 'px';
+  drop.style.top  = (rect.bottom + 4) + 'px';
+  drop.style.display = 'block';
+  requestAnimationFrame(function() {
+    var dw = drop.offsetWidth;
+    if (rect.left + dw > window.innerWidth - 4) {
+      drop.style.left = Math.max(4, window.innerWidth - dw - 4) + 'px';
+    }
+  });
 }
-function closeForumDropdown() {
-  var menu = document.getElementById('forumDropdownMenu');
-  if (menu) menu.classList.remove('show');
+function closeNavDropdown() {
+  var drop = document.getElementById('navDropdown');
+  if (drop) { drop.style.display = 'none'; drop.dataset.type = ''; }
 }
 function goForumSub(cat) {
-  closeForumDropdown();
+  closeNavDropdown();
   forumCategory = cat;
   goPage('forum');
 }
-document.addEventListener('click', function() { closeForumDropdown(); });
+function goShopSub(catId) {
+  closeNavDropdown();
+  if (LOCKED.includes('shop') && !isLoggedIn()) { openLoginModal('shop'); return; }
+  var cat = SHOP_CATEGORIES.find(function(c){ return c.id === catId; });
+  renderShopItems(catId);
+  goDetailPage('shop-items', cat ? cat.name : catId, 'shop');
+}
+function updateNavLocks() {
+  var loggedIn = isLoggedIn();
+  ['shop','custom','forum'].forEach(function(id) {
+    var lock = document.getElementById('ntab-lock-' + id);
+    if (lock) lock.classList.toggle('hidden', loggedIn);
+  });
+}
+document.addEventListener('click', function() { closeNavDropdown(); });
 
 function updateNavTabs(activeId) {
   document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
@@ -979,13 +1035,13 @@ function renderUsed() {
       ? '<img src="' + item.image + '" class="w-full h-full object-contain">'
       : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
     var badge = '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>';
-    return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
+    return '<div class="bg-white rounded-lg overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
       '<div class="aspect-square bg-slate-50 overflow-hidden">' + thumb + '</div>' +
-      '<div class="p-1.5 flex flex-col gap-0.5">' +
+      '<div class="p-1 flex flex-col gap-0.5">' +
         badge +
-        '<p class="font-bold text-slate-800 text-[11px] leading-snug line-clamp-2">' + item.name + '</p>' +
-        '<p class="font-black text-blue-700 text-xs">' + item.price.toLocaleString() + ' <span class="text-[9px] font-normal text-slate-500">THB</span></p>' +
-        '<p class="text-[9px] text-slate-400">' + item.date + '</p>' +
+        '<p class="font-bold text-slate-800 text-[9px] leading-snug line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-blue-700 text-[10px]">' + item.price.toLocaleString() + ' <span class="text-[8px] font-normal text-slate-500">THB</span></p>' +
+        '<p class="text-[8px] text-slate-400">' + item.date + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1365,6 +1421,7 @@ window.addEventListener('DOMContentLoaded', function() {
   pendingLang = null;
   document.getElementById('mb-home').classList.add('active');
   updateNavTabs('home');
+  updateNavLocks();
   applyLang();
   renderUsed();
   renderForum();
