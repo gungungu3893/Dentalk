@@ -29,6 +29,8 @@ const LANG = {
     upper:'Upper',lower:'Lower',
     stage_received:'Order Received',stage_stl:'STL Review',stage_design:'Designing',stage_cnc:'CNC Production',stage_qc:'Quality Check',stage_shipping:'Shipping',stage_done:'Delivered',
     line_deadline:'Deadline',line_memo:'Memo',line_total_cases:'Total % cases / % teeth',
+    reg_privacy_agree_prefix:'I have read and agree to the',reg_privacy_link:'Privacy Policy',reg_privacy_agree_suffix:'(Thailand PDPA).',reg_privacy_error:'Please read and agree to the Privacy Policy to continue.',
+    privacy_title:'Privacy Policy',privacy_close:'Close',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'FORUM',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',
@@ -59,6 +61,8 @@ const LANG = {
     upper:'상악',lower:'하악',
     stage_received:'주문 접수',stage_stl:'STL 검토',stage_design:'디자인 중',stage_cnc:'CNC 생산',stage_qc:'품질 검사',stage_shipping:'배송 중',stage_done:'납품 완료',
     line_deadline:'납기',line_memo:'메모',line_total_cases:'총 %케이스 / %치아',
+    reg_privacy_agree_prefix:'다음 약관에 동의합니다:',reg_privacy_link:'개인정보 처리방침',reg_privacy_agree_suffix:'(태국 PDPA)',reg_privacy_error:'개인정보 처리방침에 동의 후 계속할 수 있습니다.',
+    privacy_title:'개인정보 처리방침',privacy_close:'닫기',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'论坛',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',
@@ -89,6 +93,8 @@ const LANG = {
     upper:'上颌',lower:'下颌',
     stage_received:'已接收订单',stage_stl:'STL审核',stage_design:'设计中',stage_cnc:'CNC生产',stage_qc:'质量检验',stage_shipping:'配送中',stage_done:'已交付',
     line_deadline:'期限',line_memo:'备注',line_total_cases:'共 %个病例 / %颗牙',
+    reg_privacy_agree_prefix:'我已阅读并同意',reg_privacy_link:'隐私政策',reg_privacy_agree_suffix:'（泰国PDPA）。',reg_privacy_error:'请阅读并同意隐私政策后继续。',
+    privacy_title:'隐私政策',privacy_close:'关闭',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'CNC Custom Abut',nav_used:'ตลาดมือสอง',nav_forum:'ฟอรัม',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',
@@ -119,6 +125,8 @@ const LANG = {
     upper:'ขากรรไกรบน',lower:'ขากรรไกรล่าง',
     stage_received:'รับคำสั่งซื้อแล้ว',stage_stl:'ตรวจสอบ STL',stage_design:'กำลังออกแบบ',stage_cnc:'ผลิต CNC',stage_qc:'ตรวจสอบคุณภาพ',stage_shipping:'กำลังจัดส่ง',stage_done:'จัดส่งแล้ว',
     line_deadline:'กำหนดส่ง',line_memo:'หมายเหตุ',line_total_cases:'รวม % เคส / % ซี่',
+    reg_privacy_agree_prefix:'ฉันได้อ่านและยอมรับ',reg_privacy_link:'นโยบายความเป็นส่วนตัว',reg_privacy_agree_suffix:'(PDPA ไทย)',reg_privacy_error:'กรุณาอ่านและยอมรับนโยบายความเป็นส่วนตัวเพื่อดำเนินการต่อ',
+    privacy_title:'นโยบายความเป็นส่วนตัว',privacy_close:'ปิด',
   },
 };
 
