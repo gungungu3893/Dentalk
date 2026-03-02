@@ -388,7 +388,7 @@ function doLogout() {
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
-  if (LOCKED.includes(currentPage)) goPage('home');
+  if (LOCKED.includes(currentPage) || currentPage === 'factory') goPage('home');
   closeMenu();
 }
 // ============================================================
@@ -480,10 +480,20 @@ function goShopSub(catId) {
 }
 function updateNavLocks() {
   var loggedIn = isLoggedIn();
+  var admin    = isAdmin();
   ['shop','custom','forum'].forEach(function(id) {
     var lock = document.getElementById('ntab-lock-' + id);
     if (lock) lock.classList.toggle('hidden', loggedIn);
   });
+  // 관리자 전용 탭 show/hide
+  var adminTab = document.getElementById('ntab-factory');
+  if (adminTab) adminTab.classList.toggle('hidden', !admin);
+  // 헤더 로그아웃 버튼 show/hide
+  var logoutBtn = document.getElementById('headerLogoutBtn');
+  if (logoutBtn) {
+    if (loggedIn) { logoutBtn.classList.remove('hidden'); logoutBtn.classList.add('flex'); }
+    else          { logoutBtn.classList.add('hidden');    logoutBtn.classList.remove('flex'); }
+  }
 }
 document.addEventListener('click', function() { closeNavDropdown(); });
 
