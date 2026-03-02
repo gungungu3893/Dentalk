@@ -33,6 +33,9 @@ input[type=number] { -moz-appearance:textfield; }
 .stage-done { background:#2563eb; }
 .stage-current { background:#f59e0b; }
 .stage-todo { background:#e2e8f0; }
+.nav-tab { color:rgba(255,255,255,0.45); transition:background .15s,color .15s; }
+.nav-tab.active { background:rgba(255,255,255,0.12); color:#D4AF37; }
+.nav-tab:active { transform:scale(.93); }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -196,8 +199,10 @@ input[type=number] { -moz-appearance:textfield; }
 </div>
 <!-- ============================== 메인 앱 ============================== -->
 <div id="mainApp" class="min-h-screen flex flex-col">
+  <!-- 헤더 + 네비 탭 바 (sticky wrapper) -->
+  <div class="sticky top-0 z-[200] shadow-lg">
   <!-- 헤더 -->
-  <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-[200] shadow-lg">
+  <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3">
     <button id="btnMenu" onclick="toggleMenu()" class="w-10 h-10 rounded-xl bg-white/10 flex flex-col gap-1.5 items-center justify-center active:bg-white/20">
       <span id="hb1" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
       <span id="hb2" class="block w-5 h-0.5 bg-white rounded transition-all duration-300"></span>
@@ -205,10 +210,10 @@ input[type=number] { -moz-appearance:textfield; }
     </button>
     <button id="btnBack" onclick="goBack()" class="hidden w-10 h-10 rounded-xl bg-white/10 items-center justify-center active:bg-white/20 text-lg font-black">←</button>
     <div class="flex-1">
-      <div class="flex items-baseline" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
+      <div class="flex items-baseline gap-1" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
         <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
+        <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;margin-left:4px;align-self:center">BIOTEM × BIOPLANT</span>
       </div>
-      <p id="pageTitle" class="text-[9px] text-blue-300 font-bold uppercase tracking-widest">Home</p>
     </div>
     <div id="timerWrap" class="hidden">
       <div id="timerBadge" class="flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5">
@@ -221,6 +226,44 @@ input[type=number] { -moz-appearance:textfield; }
       <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
     </button>
   </header>
+  <!-- 네비게이션 탭 바 -->
+  <nav id="navTabBar" class="bg-[#001220] border-t border-white/10 overflow-x-auto no-scroll">
+    <div class="flex px-2 py-1.5 min-w-max gap-0.5">
+      <button onclick="goPage('home')"     id="ntab-home"     class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">🏠</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_home">HOME</span>
+      </button>
+      <button onclick="goPage('shop')"     id="ntab-shop"     class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">🦷</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_shop">SHOP</span>
+      </button>
+      <button onclick="goPage('custom')"   id="ntab-custom"   class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">🔧</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_custom">CUSTOM</span>
+      </button>
+      <button onclick="goPage('used')"     id="ntab-used"     class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">♻️</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_used">USED</span>
+      </button>
+      <button onclick="goPage('forum')"    id="ntab-forum"    class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">💬</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_forum">FORUM</span>
+      </button>
+      <button onclick="goPage('events')"   id="ntab-events"   class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">📅</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_events">EVENTS</span>
+      </button>
+      <button onclick="goPage('factory')"  id="ntab-factory"  class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">🏭</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_factory">FACTORY</span>
+      </button>
+      <button onclick="goPage('settings')" id="ntab-settings" class="nav-tab flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl">
+        <span class="text-base leading-none">⚙️</span>
+        <span class="text-[8px] font-black uppercase tracking-wide" data-i18n="nav_settings">SETTINGS</span>
+      </button>
+    </div>
+  </nav>
+  </div><!-- /sticky wrapper -->
   <!-- 오버레이 -->
   <div id="sideOverlay" class="fixed inset-0 bg-black/50 z-[300]" onclick="closeMenu()"></div>
   <!-- 사이드 메뉴 -->

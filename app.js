@@ -393,6 +393,15 @@ function closeMenu() {
   document.getElementById('hb2').style.cssText = '';
   document.getElementById('hb3').style.cssText = '';
 }
+function updateNavTabs(activeId) {
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  var nt = document.getElementById('ntab-' + activeId);
+  if (nt) nt.classList.add('active');
+  var navBar = document.getElementById('navTabBar');
+  if (navBar) {
+    navBar.style.display = '';
+  }
+}
 function goPage(id) {
   if (LOCKED.includes(id) && !isLoggedIn()) { closeMenu(); openLoginModal(id); return; }
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
@@ -400,7 +409,8 @@ function goPage(id) {
   document.getElementById('page-' + id).classList.add('active');
   var mb = document.getElementById('mb-' + id);
   if (mb) mb.classList.add('active');
-  document.getElementById('pageTitle').textContent = t('pt_' + id);
+  document.getElementById('pageTitle') && (document.getElementById('pageTitle').textContent = t('pt_' + id));
+  updateNavTabs(id);
   currentPage = id;
   var btnBack = document.getElementById('btnBack');
   var btnMenu = document.getElementById('btnMenu');
@@ -420,7 +430,8 @@ function goDetailPage(pageId, title, fromPage) {
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.menu-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('page-' + pageId).classList.add('active');
-  document.getElementById('pageTitle').textContent = title;
+  document.getElementById('pageTitle') && (document.getElementById('pageTitle').textContent = title);
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
   currentPage = pageId;
   var btnBack = document.getElementById('btnBack');
   var btnMenu = document.getElementById('btnMenu');
@@ -1286,7 +1297,8 @@ function applyLang() {
     condSel.options[2].text = t('cond_fair');
   }
   // 페이지 타이틀 업데이트
-  document.getElementById('pageTitle').textContent = t('pt_' + currentPage);
+  var ptEl = document.getElementById('pageTitle');
+  if (ptEl) ptEl.textContent = t('pt_' + currentPage);
   // 커스텀 탭 버튼 텍스트 업데이트
   var fBtn = document.getElementById('ctab-form');
   var lBtn = document.getElementById('ctab-list');
@@ -1327,6 +1339,7 @@ window.addEventListener('DOMContentLoaded', function() {
   currentLang = saved;
   pendingLang = null;
   document.getElementById('mb-home').classList.add('active');
+  updateNavTabs('home');
   applyLang();
   renderUsed();
   renderForum();
