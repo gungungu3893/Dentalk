@@ -1091,7 +1091,8 @@ async function sendLine(order, stageKey) {
 // CNC CUSTOM — 관리자 & 고객 워크플로우
 // ============================================================
 function isAdmin() {
-  return isLoggedIn() && ADMIN_NICKNAMES.includes(currentUser.nickname);
+  var nick = (currentUser.nickname || '').trim().toLowerCase();
+  return isLoggedIn() && ['admin', '관리자'].includes(nick);
 }
 async function sendLineRaw(to, text) {
   if (!LINE_PROXY_URL || !to) return;
