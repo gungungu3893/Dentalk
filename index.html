@@ -205,6 +205,34 @@ input[type=number] { -moz-appearance:textfield; }
     <button onclick="closeModal('usedContactModal')" class="w-full py-3 bg-slate-100 rounded-2xl font-black text-sm text-slate-600" data-i18n="used_contact_close">Close</button>
   </div>
 </div>
+<!-- ============================== 내 활동 모달 ============================== -->
+<div id="myActivityModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[700] items-end">
+  <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
+    <div class="px-5 py-4 border-b flex justify-between items-center shrink-0">
+      <h3 class="font-black text-slate-800 text-base">내 활동</h3>
+      <button onclick="closeModal('myActivityModal')" class="text-slate-400 font-black text-xl leading-none">✕</button>
+    </div>
+    <div class="flex gap-2 px-4 py-3 border-b shrink-0">
+      <button id="atab-msg"   onclick="activityTab('msg')"   class="flex-1 py-2 rounded-xl font-black text-xs bg-[#001d4a] text-white">✉️ 쪽지</button>
+      <button id="atab-posts" onclick="activityTab('posts')" class="flex-1 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📝 내 게시물</button>
+    </div>
+    <div class="flex-1 overflow-y-auto no-scroll">
+      <div id="activity-msg"   class="p-4"></div>
+      <div id="activity-posts" class="p-4 hidden"></div>
+    </div>
+  </div>
+</div>
+<!-- ============================== 쪽지 작성 모달 ============================== -->
+<div id="composeModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+    <h3 class="font-black text-slate-800 text-base mb-4">✉️ 쪽지 보내기</h3>
+    <input id="compose-to"   type="text"     placeholder="받는 사람 (닉네임)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-300">
+    <input id="compose-subj" type="text"     placeholder="제목"             class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-300">
+    <textarea id="compose-body" rows="5"     placeholder="내용을 입력하세요..."  class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-4 border-2 border-transparent focus:border-blue-300"></textarea>
+    <button onclick="sendMsg()" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm mb-2 active:scale-95 transition">보내기</button>
+    <button onclick="closeModal('composeModal')" class="w-full text-slate-400 text-xs font-bold py-2">취소</button>
+  </div>
+</div>
 <!-- ============================== 메인 앱 ============================== -->
 <div id="mainApp" class="min-h-screen flex flex-col">
   <!-- 헤더 + 네비 탭 바 (sticky wrapper) -->
@@ -218,7 +246,7 @@ input[type=number] { -moz-appearance:textfield; }
         <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;margin-left:4px;align-self:center">BIOTEM × BIOPLANT</span>
       </div>
     </div>
-    <div id="headerNickBadge" class="items-center gap-1.5 bg-white/10 rounded-xl px-2.5 py-1.5">
+    <div id="headerNickBadge" class="items-center gap-1.5 bg-white/10 rounded-xl px-2.5 py-1.5 cursor-pointer active:bg-white/20 transition" onclick="openMyActivity()">
       <span class="text-sm">👤</span>
       <span id="headerNickText" class="text-[10px] font-black text-blue-200 truncate max-w-[80px]"></span>
     </div>
@@ -472,7 +500,7 @@ input[type=number] { -moz-appearance:textfield; }
         <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="used_post_btn">POST FOR SALE</button>
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
-      <div id="usedList" class="grid grid-cols-5 gap-4"></div>
+      <div id="usedList" class="grid grid-cols-7 gap-1.5"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
@@ -553,10 +581,18 @@ input[type=number] { -moz-appearance:textfield; }
       <div id="eventList" class="space-y-4"></div>
     </div>
     <!-- ==================== FACTORY ==================== -->
-    <div id="page-factory" class="page p-4 text-center">
-      <div class="bg-white rounded-3xl p-10 shadow-sm">
+    <div id="page-factory" class="page p-4">
+      <div class="bg-white rounded-3xl p-8 shadow-sm text-center mb-4">
         <h2 class="text-xl font-black italic text-blue-900 mb-2">BIOPLANT THAILAND</h2>
         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose" data-i18n="factory_subtitle">Premium fixture manufacturing center in Bangkok</p>
+      </div>
+      <!-- 관리자 패널 (관리자 로그인 시에만 표시) -->
+      <div id="adminPanel" class="hidden">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-base">🔧</span>
+          <h3 class="font-black text-sm text-slate-700">관리자 패널 — CNC Custom 주문 관리</h3>
+        </div>
+        <div id="adminOrderList" class="space-y-4"></div>
       </div>
     </div>
     <!-- ==================== SETTINGS ==================== -->

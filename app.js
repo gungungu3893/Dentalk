@@ -5,9 +5,15 @@ const LOCKED = ['shop','forum','custom'];
 const IMPLANT_BRANDS = ['BIOTEM N','BIOTEM R','Osstem US','Osstem TS','Straumann BL','Straumann TL','Nobel Active','Nobel Replace','Zimmer TSV','Dentium SuperLine','기타'];
 const TOOTH_COLORS   = ['A1','A2','A3','A3.5','A4','B1','B2','B3','C1','C2','C3','D2','D3','BL (Bleach)'];
 const ORDER_STAGES   = [
-  {key:'received',icon:'[1]'},{key:'stl',icon:'[2]'},{key:'design',icon:'[3]'},
-  {key:'cnc',icon:'[4]'},{key:'qc',icon:'[5]'},{key:'shipping',icon:'[6]'},{key:'done',icon:'[7]'},
+  {key:'submitted',   icon:'①'},
+  {key:'confirmed',   icon:'②'},
+  {key:'design_ready',icon:'③'},
+  {key:'approved',    icon:'④'},
+  {key:'milling',     icon:'⑤'},
+  {key:'shipped',     icon:'⑥'},
+  {key:'done',        icon:'⑦'},
 ];
+const ADMIN_NICKNAMES = ['Admin', '관리자', 'admin'];
 const LINE_PROXY_URL = 'https://dentalk-line.gungungu.workers.dev';
 const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
 // ── Supabase 면허 검증 ──────────────────────────────────────────
@@ -38,6 +44,7 @@ let forumPhotos       = [];
 let currentForumPostId = null;
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
 let customOrders = [];
+let messages     = []; // {id,from,to,subject,body,date,read}
 let caseCount    = 0;
 let caseTeeth    = {};
 // Session
@@ -509,6 +516,7 @@ function goPage(id) {
   if (id === 'forum')  { renderForum(); updateNicknameDisplays(); }
   if (id === 'events')   renderEvents();
   if (id === 'custom')   { customTab('form'); resetCustomForm(); }
+  if (id === 'factory')  renderAdminPanel();
   if (id === 'settings') renderProfileSettings();
 }
 function goDetailPage(pageId, title, fromPage) {
@@ -909,9 +917,10 @@ function submitCustom() {
   var _day   = String(_now.getDate()).padStart(2,'0');
   var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
   var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
-  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'received', date:new Date().toLocaleDateString() };
+  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString() };
   customOrders.unshift(order);
-  sendLine(order, 'received');
+  // Notify admin of new order (customer gets LINE notification when admin confirms)
+  sendLineRaw(LINE_USER_ID, '🆕 새 CNC Custom 주문\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + oid + '\n🏥 ' + clinic + '\n📅 ' + order.date + '\n📞 ' + phone + '\n💬 Line: ' + (lineId || '없음') + '\n🦷 ' + totalTeeth + '치아 / ' + cases.length + '케이스\n━━━━━━━━━━━━━━━━━━━━\n관리자 패널에서 접수 확인해 주세요.');
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
   if (lineId) msg += t('order_success_line');
   alert(msg);
@@ -921,13 +930,60 @@ function renderCustomOrders() {
   var c = document.getElementById('customOrdersContainer');
   if (!customOrders.length) { c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('custom_empty') + '</div>'; return; }
   c.innerHTML = customOrders.map(function(o) {
-    var si = ORDER_STAGES.findIndex(function(s){ return s.key===o.stage; });
+    // design_revision maps to design_ready position in progress bar
+    var barKey = (o.stage === 'design_revision') ? 'design_ready' : o.stage;
+    var si = ORDER_STAGES.findIndex(function(s){ return s.key === barKey; });
+    if (si < 0) si = 0;
     var st = ORDER_STAGES[si];
     var bars = ORDER_STAGES.map(function(s,i){
       var cls = i<si ? 'stage-done' : i===si ? 'stage-current' : 'stage-todo';
       return '<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full h-1.5 rounded-full ' + cls + '"></div><span class="text-[7px] font-bold text-center leading-tight">' + s.icon + '</span></div>';
     }).join('');
+    var stageLabel = t('stage_' + o.stage) || o.stage;
     var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
+    // ── Design review section ──────────────────────────────
+    var designHtml = '';
+    if (o.stage === 'design_ready' && o.designVersions && o.designVersions.length) {
+      var latest = o.designVersions[o.designVersions.length - 1];
+      designHtml =
+        '<div class="mt-3 pt-3 border-t border-slate-100">' +
+          '<p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2">📐 디자인 확인 (ver.' + o.designVersions.length + ')</p>' +
+          '<img src="' + latest.url + '" class="w-full rounded-xl mb-2 max-h-52 object-contain bg-slate-50">' +
+          '<p class="text-[8px] text-slate-400 mb-3">' + latest.name + ' · ' + latest.date + '</p>' +
+          '<div class="flex gap-2 mb-2">' +
+            '<button onclick="customerApproveDesign(\'' + o.id + '\')" class="flex-1 py-2.5 bg-green-600 text-white rounded-xl font-black text-xs active:scale-95 transition">✅ 만족</button>' +
+            '<button onclick="showRejectPanel(\'' + o.id + '\')" class="flex-1 py-2.5 bg-red-100 text-red-600 rounded-xl font-black text-xs active:scale-95 transition">❌ 불만족</button>' +
+          '</div>' +
+          '<div id="reject-panel-' + o.id + '" class="hidden mt-2">' +
+            '<textarea id="reject-note-' + o.id + '" rows="3" placeholder="수정 요청사항을 입력해주세요..." class="w-full p-2.5 bg-slate-50 rounded-xl text-xs outline-none resize-none mb-2 border border-slate-200"></textarea>' +
+            '<button onclick="customerRejectDesign(\'' + o.id + '\')" class="w-full py-2 bg-red-500 text-white rounded-xl font-black text-xs active:scale-95 transition">불만족 제출</button>' +
+          '</div>' +
+        '</div>';
+    } else if (o.stage === 'design_revision') {
+      var lastRev = (o.reviewHistory && o.reviewHistory.length) ? o.reviewHistory[o.reviewHistory.length-1] : null;
+      designHtml =
+        '<div class="mt-3 pt-3 border-t border-slate-100">' +
+          '<p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-2">⏳ 디자인 수정 요청됨</p>' +
+          (lastRev ? '<div class="bg-amber-50 rounded-xl p-2.5"><p class="text-[9px] text-slate-600 leading-relaxed">"' + lastRev.note + '"</p></div>' : '') +
+        '</div>';
+    } else if (o.stage === 'confirmed') {
+      designHtml = '<div class="mt-3 pt-3 border-t border-slate-100"><p class="text-[9px] text-slate-400 font-bold">📐 디자인 업로드 대기 중...</p></div>';
+    }
+    // ── Review history ─────────────────────────────────────
+    var histHtml = '';
+    if (o.reviewHistory && o.reviewHistory.length) {
+      histHtml =
+        '<div class="mt-2 pt-2 border-t border-slate-100">' +
+          '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">검토 이력 (' + o.reviewHistory.length + '회)</p>' +
+          o.reviewHistory.map(function(r){
+            return '<div class="flex gap-1 items-start text-[8px] text-slate-400 mb-0.5">' +
+              '<span>' + (r.action==='approved'?'✅':'❌') + '</span>' +
+              '<span>' + r.date + (r.note?' · '+r.note:'') + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+    }
+    // ── Case details ───────────────────────────────────────
     var caseRows = o.cases.map(function(cs, ci) {
       var toothRows = (cs.teeth||[]).map(function(td) {
         var isUpper = td.tooth>=11&&td.tooth<=28;
@@ -957,9 +1013,12 @@ function renderCustomOrders() {
         '<div><p class="font-black text-white text-sm">' + o.clinic + '</p><p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
         '<div class="text-right"><span class="text-xl">' + st.icon + '</span><p class="text-blue-300 text-[9px] font-bold mt-0.5">' + totalTeeth + t('teeth_count') + '</p></div>' +
       '</div>' +
-      '<div class="px-5 py-4"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('status_label') + '</p>' +
+      '<div class="px-5 py-4">' +
+        '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('status_label') + '</p>' +
         '<div class="flex gap-1 mb-2">' + bars + '</div>' +
-        '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + t('stage_' + st.key) + '</p>' +
+        '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + stageLabel + '</p>' +
+        designHtml +
+        histHtml +
       '</div>' +
       '<div class="px-5 pb-5 border-t border-slate-50 pt-4">' +
         '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">' + detailHeader + '</p>' +
@@ -967,7 +1026,8 @@ function renderCustomOrders() {
       '</div>' +
       '<div class="px-5 pb-4 text-[9px] text-slate-400 font-bold space-y-0.5 border-t border-slate-50 pt-3">' +
         '<p>📍 ' + o.addr + '</p><p>📞 ' + o.phone + '</p>' +
-      '</div></div>';
+      '</div>' +
+    '</div>';
   }).join('');
 }
 async function sendLine(order, stageKey) {
@@ -1028,6 +1088,149 @@ async function sendLine(order, stageKey) {
   }
 }
 // ============================================================
+// CNC CUSTOM — 관리자 & 고객 워크플로우
+// ============================================================
+function isAdmin() {
+  return isLoggedIn() && ADMIN_NICKNAMES.includes(currentUser.nickname);
+}
+async function sendLineRaw(to, text) {
+  if (!LINE_PROXY_URL || !to) return;
+  try {
+    await fetch(LINE_PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: to, messages: [{ type: 'text', text: text }] })
+    });
+  } catch(e) { console.error('[LINE]', e); }
+}
+function adminConfirmOrder(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  ord.stage = 'confirmed';
+  renderAdminPanel();
+  renderCustomOrders();
+  sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n✅ 주문 접수\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n주문이 접수되었습니다.\n디자인 완료 후 앱에서 확인하실 수 있습니다.');
+}
+function adminUploadDesign(orderId, input) {
+  var file = input.files[0]; if (!file) return;
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    if (!ord.designVersions) ord.designVersions = [];
+    ord.designVersions.push({ url: e.target.result, date: new Date().toLocaleDateString(), name: file.name });
+    ord.stage = 'design_ready';
+    renderAdminPanel();
+    renderCustomOrders();
+  };
+  reader.readAsDataURL(file);
+}
+function customerApproveDesign(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  ord.stage = 'approved';
+  if (!ord.reviewHistory) ord.reviewHistory = [];
+  ord.reviewHistory.push({ action:'approved', note:'만족', date:new Date().toLocaleDateString() });
+  renderCustomOrders();
+  sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n✅ 고객 만족 (디자인 승인)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n고객이 디자인을 승인하였습니다.\n밀링을 시작해 주세요.');
+}
+function showRejectPanel(orderId) {
+  var panel = document.getElementById('reject-panel-' + orderId);
+  if (panel) panel.classList.toggle('hidden');
+}
+function customerRejectDesign(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  var noteEl = document.getElementById('reject-note-' + orderId);
+  var note = noteEl ? noteEl.value.trim() : '';
+  if (!note) { alert('수정 요청사항을 입력해주세요.'); return; }
+  ord.stage = 'design_revision';
+  if (!ord.reviewHistory) ord.reviewHistory = [];
+  ord.reviewHistory.push({ action:'rejected', note:note, date:new Date().toLocaleDateString() });
+  renderCustomOrders();
+  sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n❌ 고객 불만족 (수정 요청)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n수정 요청사항:\n' + note);
+}
+function adminStartMilling(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  if (!confirm('밀링을 시작하시겠습니까?')) return;
+  ord.stage = 'milling';
+  renderAdminPanel();
+  renderCustomOrders();
+  sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n⚙️ CNC 밀링 중\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\nCNC 밀링 작업이 시작되었습니다.\n완료 후 배송해 드리겠습니다.');
+}
+function adminShipOrder(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  if (!confirm('배송 처리하시겠습니까?')) return;
+  ord.stage = 'shipped';
+  renderAdminPanel();
+  renderCustomOrders();
+  sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n🚚 배송 시작\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n배송이 시작되었습니다.\n곧 받아보실 수 있습니다.');
+}
+function renderAdminPanel() {
+  var panel = document.getElementById('adminPanel');
+  var list  = document.getElementById('adminOrderList');
+  if (!panel || !list) return;
+  if (!isAdmin()) { panel.classList.add('hidden'); return; }
+  panel.classList.remove('hidden');
+  if (!customOrders.length) {
+    list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>';
+    return;
+  }
+  list.innerHTML = customOrders.map(function(o) {
+    var stageLabel = t('stage_' + o.stage) || o.stage;
+    var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
+    var actionHtml = '';
+    if (o.stage === 'submitted') {
+      actionHtml = '<button onclick="adminConfirmOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">✅ 접수 확인 → LINE 발송</button>';
+    } else if (o.stage === 'confirmed' || o.stage === 'design_revision') {
+      var vNote = (o.designVersions && o.designVersions.length) ? ' (ver.'+(o.designVersions.length+1)+')' : '';
+      actionHtml = '<div class="mt-3"><label class="block cursor-pointer">' +
+        '<div class="w-full py-2.5 bg-amber-500 text-white rounded-xl font-black text-xs text-center active:scale-95 transition">📐 디자인 업로드' + vNote + '</div>' +
+        '<input type="file" accept="image/*,.pdf" class="hidden" onchange="adminUploadDesign(\'' + o.id + '\',this)"></label></div>';
+    } else if (o.stage === 'design_ready') {
+      var latest = (o.designVersions && o.designVersions.length) ? o.designVersions[o.designVersions.length-1] : null;
+      actionHtml = '<div class="mt-3 bg-blue-50 rounded-xl p-3">' +
+        '<p class="text-[9px] font-black text-blue-600 mb-2">📐 고객 검토 대기 중 (ver.' + (o.designVersions?o.designVersions.length:1) + ')</p>' +
+        (latest ? '<img src="' + latest.url + '" class="w-full rounded-lg max-h-28 object-contain bg-white mb-1">' : '') +
+        '<p class="text-[8px] text-slate-400">고객이 만족/불만족을 선택할 때까지 대기합니다.</p></div>';
+    } else if (o.stage === 'approved') {
+      actionHtml = '<button onclick="adminStartMilling(\'' + o.id + '\')" class="w-full py-2.5 bg-purple-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">⚙️ 밀링 시작 → LINE 발송</button>';
+    } else if (o.stage === 'milling') {
+      actionHtml = '<button onclick="adminShipOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-green-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>';
+    } else if (o.stage === 'shipped' || o.stage === 'done') {
+      actionHtml = '<div class="mt-3 bg-green-50 rounded-xl p-2 text-center"><p class="text-[9px] font-black text-green-600">🚚 배송 완료</p></div>';
+    }
+    var histHtml = '';
+    if (o.reviewHistory && o.reviewHistory.length) {
+      histHtml = '<div class="mt-2 border-t border-slate-100 pt-2">' +
+        '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">검토 이력 (' + o.reviewHistory.length + '회)</p>' +
+        o.reviewHistory.map(function(r){
+          return '<div class="flex gap-1 items-start text-[8px] text-slate-400 mb-0.5">' +
+            '<span>' + (r.action==='approved'?'✅':'❌') + '</span>' +
+            '<span class="flex-1">' + r.date + (r.note?' · '+r.note:'') + '</span></div>';
+        }).join('') +
+      '</div>';
+    }
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">' +
+      '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
+        '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
+             '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
+        '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stageLabel + '</span>' +
+      '</div>' +
+      '<div class="px-4 py-3">' +
+        '<p class="text-[10px] text-slate-500 font-bold mb-1">' + o.cases.length + '케이스 · ' + totalTeeth + '치아</p>' +
+        '<p class="text-[9px] text-slate-400">📍 ' + o.addr + '</p>' +
+        '<p class="text-[9px] text-slate-400">📞 ' + o.phone + '</p>' +
+        (o.lineId ? '<p class="text-[9px] text-green-500 font-bold">💬 Line: ' + o.lineId + '</p>' : '<p class="text-[9px] text-red-300">⚠️ Line ID 없음</p>') +
+        actionHtml +
+        histHtml +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+// ============================================================
 // USED MARKET
 // ============================================================
 function renderUsed() {
@@ -1040,13 +1243,12 @@ function renderUsed() {
       ? '<img src="' + item.image + '" class="w-full h-full object-contain">'
       : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
     var badge = '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>';
-    return '<div class="bg-white rounded-lg overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
+    return '<div class="bg-white rounded-md overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
       '<div class="aspect-square bg-slate-50 overflow-hidden">' + thumb + '</div>' +
-      '<div class="p-1 flex flex-col gap-0.5">' +
+      '<div class="p-0.5 flex flex-col gap-0">' +
         badge +
-        '<p class="font-bold text-slate-800 text-[9px] leading-snug line-clamp-2">' + item.name + '</p>' +
-        '<p class="font-black text-blue-700 text-[10px]">' + item.price.toLocaleString() + ' <span class="text-[8px] font-normal text-slate-500">THB</span></p>' +
-        '<p class="text-[8px] text-slate-400">' + item.date + '</p>' +
+        '<p class="font-bold text-slate-800 text-[7px] leading-snug line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-blue-700 text-[7px]">' + item.price.toLocaleString() + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1310,6 +1512,109 @@ async function saveProfile() {
   renderProfileSettings();
   var msg = document.getElementById('profileSavedMsg');
   if (msg) { msg.classList.remove('hidden'); setTimeout(function(){ msg.classList.add('hidden'); }, 2500); }
+}
+// ============================================================
+// 쪽지 & 내 활동 모달
+// ============================================================
+function openMyActivity() {
+  if (!isLoggedIn()) { openLoginModal(); return; }
+  messages.forEach(function(m){ if (m.to===currentUser.nickname) m.read=true; });
+  activityTab('msg');
+  openModal('myActivityModal');
+}
+function activityTab(name) {
+  ['msg','posts'].forEach(function(tab){
+    var btn  = document.getElementById('atab-'+tab);
+    var pane = document.getElementById('activity-'+tab);
+    if (btn)  btn.className  = 'flex-1 py-2 rounded-xl font-black text-xs ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
+    if (pane) pane.classList.toggle('hidden', tab!==name);
+  });
+  if (name==='msg')   renderMyMsgs();
+  if (name==='posts') renderMyPosts();
+}
+function renderMyMsgs() {
+  var el = document.getElementById('activity-msg');
+  if (!el) return;
+  var nick  = currentUser.nickname;
+  var inbox = messages.filter(function(m){ return m.to===nick; });
+  var sent  = messages.filter(function(m){ return m.from===nick; });
+  var html = '<button onclick="openCompose()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-xl font-black text-xs mb-4 active:scale-95 transition">✉️ 새 쪽지 보내기</button>';
+  html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">받은 쪽지 (' + inbox.length + ')</p>';
+  if (inbox.length) {
+    html += inbox.slice().reverse().map(function(m){
+      return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm border-l-4 ' + (m.read?'border-slate-100':'border-blue-500') + '">' +
+        '<div class="flex justify-between items-center mb-1">' +
+          '<span class="text-xs font-black text-slate-700">' + m.from + '</span>' +
+          '<span class="text-[9px] text-slate-400">' + m.date + '</span>' +
+        '</div>' +
+        '<p class="text-xs font-bold text-slate-600 mb-1">' + m.subject + '</p>' +
+        '<p class="text-[10px] text-slate-500 leading-relaxed">' + m.body + '</p>' +
+        '<button onclick="openCompose(\'' + m.from + '\')" class="mt-2 text-[9px] text-blue-500 font-black">← 답장</button>' +
+      '</div>';
+    }).join('');
+  } else {
+    html += '<p class="text-[10px] text-slate-300 font-bold py-3 text-center">받은 쪽지가 없습니다.</p>';
+  }
+  html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-4">보낸 쪽지 (' + sent.length + ')</p>';
+  if (sent.length) {
+    html += sent.slice().reverse().map(function(m){
+      return '<div class="bg-slate-50 rounded-xl p-3 mb-2">' +
+        '<div class="flex justify-between items-center mb-1">' +
+          '<span class="text-xs font-bold text-slate-600">→ ' + m.to + '</span>' +
+          '<span class="text-[9px] text-slate-400">' + m.date + '</span>' +
+        '</div>' +
+        '<p class="text-xs font-bold text-slate-500">' + m.subject + '</p>' +
+        '<p class="text-[10px] text-slate-400">' + m.body + '</p>' +
+      '</div>';
+    }).join('');
+  } else {
+    html += '<p class="text-[10px] text-slate-300 font-bold py-3 text-center">보낸 쪽지가 없습니다.</p>';
+  }
+  el.innerHTML = html;
+}
+function renderMyPosts() {
+  var el = document.getElementById('activity-posts');
+  if (!el) return;
+  var nick = currentUser.nickname;
+  var items = [];
+  usedItems.filter(function(x){ return x.seller===nick||x.seller==='Me'; }).forEach(function(x){
+    items.push({ type:'중고마켓', icon:'♻️', title:x.name, sub:x.price.toLocaleString()+' THB', date:x.date });
+  });
+  posts.filter(function(p){ return p.author===nick; }).forEach(function(p){
+    items.push({ type:'임상토론방', icon:'💬', title:p.title, sub:p.category==='implant'?'🦷 임플란트':'💎 보철', date:p.date||'' });
+  });
+  customOrders.forEach(function(o){
+    items.push({ type:'CNC Custom', icon:'⚙️', title:o.clinic+' · '+o.id, sub:t('stage_'+o.stage)||o.stage, date:o.date });
+  });
+  items.sort(function(a,b){ return b.date>a.date?1:b.date<a.date?-1:0; });
+  if (!items.length) { el.innerHTML='<p class="text-sm text-slate-300 font-bold text-center py-10">게시물이 없습니다.</p>'; return; }
+  el.innerHTML = items.map(function(item){
+    return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm">' +
+      '<div class="flex justify-between items-start mb-1">' +
+        '<span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + item.icon + ' ' + item.type + '</span>' +
+        '<span class="text-[9px] text-slate-400">' + item.date + '</span>' +
+      '</div>' +
+      '<p class="text-xs font-black text-slate-700 leading-snug mt-1">' + item.title + '</p>' +
+      '<p class="text-[9px] text-slate-400 mt-0.5">' + item.sub + '</p>' +
+    '</div>';
+  }).join('');
+}
+function openCompose(toNick) {
+  if (!isLoggedIn()) return;
+  document.getElementById('compose-to').value   = toNick || '';
+  document.getElementById('compose-subj').value = '';
+  document.getElementById('compose-body').value = '';
+  openModal('composeModal');
+}
+function sendMsg() {
+  var to      = document.getElementById('compose-to').value.trim();
+  var subject = document.getElementById('compose-subj').value.trim();
+  var body    = document.getElementById('compose-body').value.trim();
+  if (!to||!subject||!body) { alert('받는 사람, 제목, 내용을 모두 입력해주세요.'); return; }
+  messages.push({ id:Date.now(), from:currentUser.nickname, to:to, subject:subject, body:body, date:new Date().toLocaleDateString(), read:false });
+  closeModal('composeModal');
+  renderMyMsgs();
+  alert('쪽지를 보냈습니다!');
 }
 // ============================================================
 // EVENTS
