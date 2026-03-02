@@ -476,7 +476,7 @@ function renderShop() {
     return '<div onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col">' +
       '<div class="aspect-square bg-gradient-to-br ' + cat.color + ' flex items-center justify-center p-3">' + cat.svg + '</div>' +
       '<div class="p-1.5 flex flex-col gap-0.5">' +
-        '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full bg-blue-100 text-blue-700 self-start">' + count + ' items</span>' +
+        '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full bg-blue-100 text-blue-700 self-start">' + count + ' ' + t('shop_items') + '</span>' +
         '<p class="font-bold text-slate-800 text-[11px] leading-snug">' + cat.name + '</p>' +
         '<p class="text-[9px] text-slate-400 leading-tight">' + cat.desc + '</p>' +
       '</div>' +
@@ -973,7 +973,7 @@ function submitUsed() {
     usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10),views:0,image:imgData||null});
     ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('u-photo').value = '';
-    document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">Add Photo</span>';
+    document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">' + t('used_photo_add') + '</span>';
     renderUsed();
   }
   var file = document.getElementById('u-photo').files[0];
@@ -1066,7 +1066,7 @@ function renderForum() {
         '<p class="text-[9px] text-slate-300 font-bold mt-2">' + p.author + ' · ' + (p.date||'') + ' · 👁 ' + (p.views||0) + ' · 💬 ' + (p.comments?p.comments.length:0) + '</p>' +
       '</div>' +
     '</div>';
-  }).join('') : '<p class="text-center text-slate-400 text-sm py-10">게시물이 없습니다.</p>';
+  }).join('') : '<p class="text-center text-slate-400 text-sm py-10">' + t('forum_empty') + '</p>';
 }
 function previewForumPhotos() {
   var input = document.getElementById('forumPhotos');
@@ -1227,8 +1227,9 @@ function renderEvents() {
 // ============================================================
 function selectLang(lang) {
   pendingLang = lang;
-  ['en','ko','zh','th'].forEach(function(l){
+  ['en','ko','zh','th','vi','es'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
+    if (!b) return;
     b.className = l===lang
       ? 'p-4 rounded-2xl font-black text-sm border-2 border-amber-500 bg-amber-50 text-amber-700'
       : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
@@ -1249,8 +1250,9 @@ function saveLang() {
   pendingLang = null;
   localStorage.setItem('dentalk_lang', currentLang);
   // 저장된 언어 버튼 스타일 업데이트
-  ['en','ko','zh','th'].forEach(function(l){
+  ['en','ko','zh','th','vi','es'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
+    if (!b) return;
     b.className = l===currentLang
       ? 'p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700'
       : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
@@ -1293,13 +1295,13 @@ function applyLang() {
   // 사이드 로그인 버튼
   var sideLoginTxt = document.getElementById('sideLoginTxt');
   if (sideLoginTxt) sideLoginTxt.textContent = t('side_login_btn');
-  // 현재 페이지 동적 콘텐츠 재렌더링
-  if (currentPage === 'shop')     renderShop();
-  if (currentPage === 'used')     renderUsed();
-  if (currentPage === 'forum')    renderForum();
-  if (currentPage === 'events')   renderEvents();
-  if (currentPage === 'custom')   renderCustomOrders();
-  if (currentPage === 'settings') renderProfileSettings();
+  // 모든 페이지 동적 콘텐츠 재렌더링 (언어 변경 시 전체 반영)
+  renderShop();
+  renderUsed();
+  renderForum();
+  renderEvents();
+  renderCustomOrders();
+  renderProfileSettings();
   // 설정 저장 버튼 텍스트
   var saveBtn = document.getElementById('saveLangBtn');
   if (saveBtn) saveBtn.textContent = t('settings_save_btn');

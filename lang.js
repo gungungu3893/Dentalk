@@ -31,6 +31,8 @@ const LANG = {
     line_deadline:'Deadline',line_memo:'Memo',line_total_cases:'Total % cases / % teeth',
     reg_privacy_agree_prefix:'I have read and agree to the',reg_privacy_link:'Privacy Policy',reg_privacy_agree_suffix:'(Thailand PDPA).',reg_privacy_error:'Please read and agree to the Privacy Policy to continue.',
     privacy_title:'Privacy Policy',privacy_close:'Close',
+    used_photo_add:'Add Photo',shop_items:'items',
+    forum_tab_implant:'🦷 Implant',forum_tab_prosthetic:'💎 Prosthetic',forum_photo_add:'📷 Add photos (max 5)',forum_empty:'No posts yet.',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'FORUM',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',
@@ -63,6 +65,8 @@ const LANG = {
     line_deadline:'납기',line_memo:'메모',line_total_cases:'총 %케이스 / %치아',
     reg_privacy_agree_prefix:'다음 약관에 동의합니다:',reg_privacy_link:'개인정보 처리방침',reg_privacy_agree_suffix:'(태국 PDPA)',reg_privacy_error:'개인정보 처리방침에 동의 후 계속할 수 있습니다.',
     privacy_title:'개인정보 처리방침',privacy_close:'닫기',
+    used_photo_add:'사진 추가',shop_items:'개',
+    forum_tab_implant:'🦷 Implant',forum_tab_prosthetic:'💎 Prosthetic',forum_photo_add:'📷 사진 추가 (최대 5장)',forum_empty:'게시물이 없습니다.',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'论坛',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',
@@ -95,6 +99,8 @@ const LANG = {
     line_deadline:'期限',line_memo:'备注',line_total_cases:'共 %个病例 / %颗牙',
     reg_privacy_agree_prefix:'我已阅读并同意',reg_privacy_link:'隐私政策',reg_privacy_agree_suffix:'（泰国PDPA）。',reg_privacy_error:'请阅读并同意隐私政策后继续。',
     privacy_title:'隐私政策',privacy_close:'关闭',
+    used_photo_add:'添加照片',shop_items:'件',
+    forum_tab_implant:'🦷 Implant',forum_tab_prosthetic:'💎 Prosthetic',forum_photo_add:'📷 添加照片（最多5张）',forum_empty:'暂无帖子。',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'CNC Custom Abut',nav_used:'ตลาดมือสอง',nav_forum:'ฟอรัม',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',
@@ -127,6 +133,8 @@ const LANG = {
     line_deadline:'กำหนดส่ง',line_memo:'หมายเหตุ',line_total_cases:'รวม % เคส / % ซี่',
     reg_privacy_agree_prefix:'ฉันได้อ่านและยอมรับ',reg_privacy_link:'นโยบายความเป็นส่วนตัว',reg_privacy_agree_suffix:'(PDPA ไทย)',reg_privacy_error:'กรุณาอ่านและยอมรับนโยบายความเป็นส่วนตัวเพื่อดำเนินการต่อ',
     privacy_title:'นโยบายความเป็นส่วนตัว',privacy_close:'ปิด',
+    used_photo_add:'เพิ่มรูปภาพ',shop_items:'ชิ้น',
+    forum_tab_implant:'🦷 Implant',forum_tab_prosthetic:'💎 Prosthetic',forum_photo_add:'📷 เพิ่มรูป (สูงสุด 5 รูป)',forum_empty:'ยังไม่มีโพสต์',
   },
   vi: {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'DIỄN ĐÀN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',
@@ -159,6 +167,8 @@ const LANG = {
     line_deadline:'Hạn chót',line_memo:'Ghi chú',line_total_cases:'Tổng % ca / % chiếc',
     reg_privacy_agree_prefix:'Tôi đã đọc và đồng ý với',reg_privacy_link:'Chính sách bảo mật',reg_privacy_agree_suffix:'(PDPA Thái Lan).',reg_privacy_error:'Vui lòng đọc và đồng ý với Chính sách bảo mật để tiếp tục.',
     privacy_title:'Chính sách bảo mật',privacy_close:'Đóng',
+    used_photo_add:'Thêm ảnh',shop_items:'sản phẩm',
+    forum_tab_implant:'🦷 Implant',forum_tab_prosthetic:'💎 Prosthetic',forum_photo_add:'📷 Thêm ảnh (tối đa 5)',forum_empty:'Chưa có bài đăng.',
   },
   es: {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'FORO',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',
@@ -191,6 +201,8 @@ const LANG = {
     line_deadline:'Plazo',line_memo:'Nota',line_total_cases:'Total % casos / % dientes',
     reg_privacy_agree_prefix:'He leído y acepto la',reg_privacy_link:'Política de privacidad',reg_privacy_agree_suffix:'(PDPA Tailandia).',reg_privacy_error:'Por favor, lee y acepta la Política de privacidad para continuar.',
     privacy_title:'Política de privacidad',privacy_close:'Cerrar',
+    used_photo_add:'Añadir foto',shop_items:'ud.',
+    forum_tab_implant:'🦷 Implant',forum_tab_prosthetic:'💎 Prosthetic',forum_photo_add:'📷 Añadir fotos (máx. 5)',forum_empty:'No hay publicaciones aún.',
   },
 };
 

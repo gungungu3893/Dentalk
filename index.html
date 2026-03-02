@@ -394,26 +394,26 @@ input[type=number] { -moz-appearance:textfield; }
     <div id="page-forum" class="page p-4">
       <!-- 카테고리 탭 -->
       <div class="flex gap-2 mb-4">
-        <button onclick="forumTab('implant')"    id="ftab-implant"    class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">🦷 임플란트</button>
-        <button onclick="forumTab('prosthetic')" id="ftab-prosthetic" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">💎 보철</button>
+        <button onclick="forumTab('implant')"    id="ftab-implant"    class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow" data-i18n="forum_tab_implant">🦷 Implant</button>
+        <button onclick="forumTab('prosthetic')" id="ftab-prosthetic" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500" data-i18n="forum_tab_prosthetic">💎 Prosthetic</button>
       </div>
       <!-- 새 글 쓰기 폼 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest">New Post</h3>
+          <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest" data-i18n="forum_new_post">New Post</h3>
           <span class="text-xs text-slate-400">✍️ <span id="postNicknameDisplay" class="font-black text-[#001d4a]"></span></span>
         </div>
-        <input id="postTitle" type="text" placeholder="제목" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
+        <input id="postTitle" type="text" data-i18n-ph="forum_title_ph" placeholder="Title" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
         <!-- 사진 업로드 최대 5장 -->
         <div class="mb-3">
           <div id="forumPhotoPreview" class="flex gap-2 flex-wrap mb-2 hidden"></div>
           <label class="block cursor-pointer">
-            <div class="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs text-center active:bg-slate-50">📷 사진 추가 (최대 5장)</div>
+            <div class="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-bold text-xs text-center active:bg-slate-50" data-i18n="forum_photo_add">📷 Add photos (max 5)</div>
             <input id="forumPhotos" type="file" accept="image/*" multiple class="hidden" onchange="previewForumPhotos()">
           </label>
         </div>
-        <textarea id="postBody" rows="4" placeholder="내용을 입력하세요..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3"></textarea>
-        <button onclick="submitPost()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm">POST</button>
+        <textarea id="postBody" rows="4" data-i18n-ph="forum_body_ph" placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3"></textarea>
+        <button onclick="submitPost()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="forum_post_btn">POST</button>
       </div>
       <div id="postList" class="space-y-3"></div>
     </div>
