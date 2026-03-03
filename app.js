@@ -1127,7 +1127,7 @@ async function saveOrderToSupabase(order) {
 }
 async function loadOrdersFromSupabase() {
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/orders?order=created_at.desc', {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/orders?order=date.desc', {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
@@ -1250,12 +1250,12 @@ async function renderAdminPanel() {
   var promoEl = document.getElementById('factoryPromoHeader');
   if (!panel || !list) return;
   if (!isAdmin()) {
-    panel.classList.add('hidden');
-    if (promoEl) promoEl.classList.remove('hidden');
+    panel.style.display = 'none';
+    if (promoEl) promoEl.style.display = '';
     return;
   }
-  if (promoEl) promoEl.classList.add('hidden');
-  panel.classList.remove('hidden');
+  if (promoEl) promoEl.style.display = 'none';
+  panel.style.display = 'block';
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
   await loadOrdersFromSupabase();
   if (!customOrders.length) {
