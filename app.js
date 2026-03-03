@@ -930,6 +930,7 @@ function submitCustom() {
   var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString() };
   customOrders.unshift(order);
+  saveOrderToSupabase(order);
   // Notify admin of new order (customer gets LINE notification when admin confirms)
   sendLineRaw(LINE_USER_ID, '🆕 새 CNC Custom 주문\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + oid + '\n🏥 ' + clinic + '\n📅 ' + order.date + '\n📞 ' + phone + '\n💬 Line: ' + (lineId || '없음') + '\n🦷 ' + totalTeeth + '치아 / ' + cases.length + '케이스\n━━━━━━━━━━━━━━━━━━━━\n관리자 패널에서 접수 확인해 주세요.');
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
@@ -1105,6 +1106,63 @@ function isAdmin() {
   var nick = (currentUser.nickname || '').trim().toLowerCase();
   return isLoggedIn() && ['admin', '관리자'].includes(nick);
 }
+async function saveOrderToSupabase(order) {
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/orders', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        id: order.id, clinic: order.clinic, addr: order.addr,
+        phone: order.phone, line_id: order.lineId, cases: order.cases,
+        stage: order.stage, design_versions: order.designVersions,
+        review_history: order.reviewHistory, date: order.date
+      })
+    });
+  } catch(e) { console.error('[Order Save]', e); }
+}
+async function loadOrdersFromSupabase() {
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/orders?order=created_at.desc', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      }
+    });
+    if (!res.ok) return;
+    var rows = await res.json();
+    customOrders = rows.map(function(r) {
+      return {
+        id: r.id, clinic: r.clinic, addr: r.addr, phone: r.phone,
+        lineId: r.line_id, cases: r.cases || [], stage: r.stage,
+        designVersions: r.design_versions || [],
+        reviewHistory: r.review_history || [], date: r.date
+      };
+    });
+  } catch(e) { console.error('[Order Load]', e); }
+}
+async function updateOrderInSupabase(orderId, updates) {
+  try {
+    var body = {};
+    if (updates.stage !== undefined) body.stage = updates.stage;
+    if (updates.designVersions !== undefined) body.design_versions = updates.designVersions;
+    if (updates.reviewHistory !== undefined) body.review_history = updates.reviewHistory;
+    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(body)
+    });
+  } catch(e) { console.error('[Order Update]', e); }
+}
 async function sendLineRaw(to, text) {
   if (!LINE_PROXY_URL || !to) return;
   try {
@@ -1119,6 +1177,7 @@ function adminConfirmOrder(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
   if (!ord) return;
   ord.stage = 'confirmed';
+  updateOrderInSupabase(orderId, { stage: 'confirmed' });
   renderAdminPanel();
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n✅ 주문 접수\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n주문이 접수되었습니다.\n디자인 완료 후 앱에서 확인하실 수 있습니다.');
@@ -1132,6 +1191,7 @@ function adminUploadDesign(orderId, input) {
     if (!ord.designVersions) ord.designVersions = [];
     ord.designVersions.push({ url: e.target.result, date: new Date().toLocaleDateString(), name: file.name });
     ord.stage = 'design_ready';
+    updateOrderInSupabase(orderId, { stage: 'design_ready', designVersions: ord.designVersions });
     renderAdminPanel();
     renderCustomOrders();
   };
@@ -1143,6 +1203,7 @@ function customerApproveDesign(orderId) {
   ord.stage = 'approved';
   if (!ord.reviewHistory) ord.reviewHistory = [];
   ord.reviewHistory.push({ action:'approved', note:'만족', date:new Date().toLocaleDateString() });
+  updateOrderInSupabase(orderId, { stage: 'approved', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
   sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n✅ 고객 만족 (디자인 승인)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n고객이 디자인을 승인하였습니다.\n밀링을 시작해 주세요.');
 }
@@ -1159,6 +1220,7 @@ function customerRejectDesign(orderId) {
   ord.stage = 'design_revision';
   if (!ord.reviewHistory) ord.reviewHistory = [];
   ord.reviewHistory.push({ action:'rejected', note:note, date:new Date().toLocaleDateString() });
+  updateOrderInSupabase(orderId, { stage: 'design_revision', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
   sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n❌ 고객 불만족 (수정 요청)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n수정 요청사항:\n' + note);
 }
@@ -1167,6 +1229,7 @@ function adminStartMilling(orderId) {
   if (!ord) return;
   if (!confirm('밀링을 시작하시겠습니까?')) return;
   ord.stage = 'milling';
+  updateOrderInSupabase(orderId, { stage: 'milling' });
   renderAdminPanel();
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n⚙️ CNC 밀링 중\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\nCNC 밀링 작업이 시작되었습니다.\n완료 후 배송해 드리겠습니다.');
@@ -1176,16 +1239,25 @@ function adminShipOrder(orderId) {
   if (!ord) return;
   if (!confirm('배송 처리하시겠습니까?')) return;
   ord.stage = 'shipped';
+  updateOrderInSupabase(orderId, { stage: 'shipped' });
   renderAdminPanel();
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n🚚 배송 시작\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n배송이 시작되었습니다.\n곧 받아보실 수 있습니다.');
 }
-function renderAdminPanel() {
-  var panel = document.getElementById('adminPanel');
-  var list  = document.getElementById('adminOrderList');
+async function renderAdminPanel() {
+  var panel   = document.getElementById('adminPanel');
+  var list    = document.getElementById('adminOrderList');
+  var promoEl = document.getElementById('factoryPromoHeader');
   if (!panel || !list) return;
-  if (!isAdmin()) { panel.classList.add('hidden'); return; }
+  if (!isAdmin()) {
+    panel.classList.add('hidden');
+    if (promoEl) promoEl.classList.remove('hidden');
+    return;
+  }
+  if (promoEl) promoEl.classList.add('hidden');
   panel.classList.remove('hidden');
+  list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
+  await loadOrdersFromSupabase();
   if (!customOrders.length) {
     list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>';
     return;
