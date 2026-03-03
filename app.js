@@ -254,10 +254,11 @@ async function submitRegistration() {
 // ── Supabase 사용자 검증 (닉네임 + 비밀번호) ─────────────────────
 async function verifyUser(nickname, password) {
   try {
+    var isAdminNick = ['admin', '관리자'].includes(nickname.trim().toLowerCase());
     const url = SUPABASE_URL + '/rest/v1/licenses'
       + '?nickname=eq.' + encodeURIComponent(nickname)
       + '&password=eq.' + encodeURIComponent(password)
-      + '&is_active=eq.true'
+      + (isAdminNick ? '' : '&is_active=eq.true')
       + '&select=license_number,doctor_name,clinic_name,nickname,email,phone,address';
     const res = await fetch(url, {
       headers: {
@@ -759,7 +760,7 @@ function customTab(tab) {
   var lBtn = document.getElementById('ctab-list');
   fBtn.className = fCls; fBtn.textContent = t('custom_tab_new');
   lBtn.className = lCls; lBtn.textContent = t('custom_tab_list');
-  if (!isForm) renderCustomOrders();
+  if (!isForm) { loadOrdersFromSupabase().then(renderCustomOrders); }
 }
 function resetCustomForm() {
   caseCount = 0;
@@ -928,7 +929,7 @@ function submitCustom() {
   var _day   = String(_now.getDate()).padStart(2,'0');
   var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
   var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
-  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString() };
+  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString(), userNickname:currentUser.nickname };
   customOrders.unshift(order);
   saveOrderToSupabase(order);
   // Notify admin of new order (customer gets LINE notification when admin confirms)
@@ -1120,14 +1121,19 @@ async function saveOrderToSupabase(order) {
         id: order.id, clinic: order.clinic, addr: order.addr,
         phone: order.phone, line_id: order.lineId, cases: order.cases,
         stage: order.stage, design_versions: order.designVersions,
-        review_history: order.reviewHistory, date: order.date
+        review_history: order.reviewHistory, date: order.date,
+        user_nickname: order.userNickname
       })
     });
   } catch(e) { console.error('[Order Save]', e); }
 }
 async function loadOrdersFromSupabase() {
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/orders?order=date.desc', {
+    var url = SUPABASE_URL + '/rest/v1/orders?order=date.desc';
+    if (!isAdmin()) {
+      url += '&user_nickname=eq.' + encodeURIComponent(currentUser.nickname);
+    }
+    var res = await fetch(url, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
@@ -1140,7 +1146,8 @@ async function loadOrdersFromSupabase() {
         id: r.id, clinic: r.clinic, addr: r.addr, phone: r.phone,
         lineId: r.line_id, cases: r.cases || [], stage: r.stage,
         designVersions: r.design_versions || [],
-        reviewHistory: r.review_history || [], date: r.date
+        reviewHistory: r.review_history || [], date: r.date,
+        userNickname: r.user_nickname
       };
     });
   } catch(e) { console.error('[Order Load]', e); }
