@@ -1110,6 +1110,28 @@ async function sendLine(order, stageKey) {
 // ============================================================
 // CNC CUSTOM — 관리자 & 고객 워크플로우
 // ============================================================
+var adminCurrentTab = 'orders';
+var productPrices   = JSON.parse(localStorage.getItem('adminProductPrices') || '{}');
+
+function adminShowTab(tab) {
+  adminCurrentTab = tab;
+  ['orders','products','users','events'].forEach(function(t) {
+    var content = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    var btn     = document.getElementById('adminTabBtn-' + t);
+    if (!content || !btn) return;
+    if (t === tab) {
+      content.classList.remove('hidden');
+      btn.className = 'shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-[#001d4a] text-white';
+    } else {
+      content.classList.add('hidden');
+      btn.className = 'shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500';
+    }
+  });
+  if (tab === 'orders')   renderAdminOrders();
+  else if (tab === 'products') renderAdminProducts();
+  else if (tab === 'users')    renderAdminUsers();
+  else if (tab === 'events')   renderAdminEventsTab();
+}
 function isAdmin() {
   var nick = (currentUser.nickname || '').trim().toLowerCase();
   return isLoggedIn() && ['admin', '관리자'].includes(nick);
@@ -1192,7 +1214,7 @@ function adminConfirmOrder(orderId) {
   if (!ord) return;
   ord.stage = 'confirmed';
   updateOrderInSupabase(orderId, { stage: 'confirmed' });
-  renderAdminPanel();
+  renderAdminOrders();
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n✅ 주문 접수\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n주문이 접수되었습니다.\n디자인 완료 후 앱에서 확인하실 수 있습니다.');
 }
@@ -1206,7 +1228,7 @@ function adminUploadDesign(orderId, input) {
     ord.designVersions.push({ url: e.target.result, date: new Date().toLocaleDateString(), name: file.name });
     ord.stage = 'design_ready';
     updateOrderInSupabase(orderId, { stage: 'design_ready', designVersions: ord.designVersions });
-    renderAdminPanel();
+    renderAdminOrders();
     renderCustomOrders();
   };
   reader.readAsDataURL(file);
@@ -1244,7 +1266,7 @@ function adminStartMilling(orderId) {
   if (!confirm('밀링을 시작하시겠습니까?')) return;
   ord.stage = 'milling';
   updateOrderInSupabase(orderId, { stage: 'milling' });
-  renderAdminPanel();
+  renderAdminOrders();
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n⚙️ CNC 밀링 중\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\nCNC 밀링 작업이 시작되었습니다.\n완료 후 배송해 드리겠습니다.');
 }
@@ -1254,20 +1276,20 @@ function adminShipOrder(orderId) {
   if (!confirm('배송 처리하시겠습니까?')) return;
   ord.stage = 'shipped';
   updateOrderInSupabase(orderId, { stage: 'shipped' });
-  renderAdminPanel();
+  renderAdminOrders();
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n🚚 배송 시작\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n배송이 시작되었습니다.\n곧 받아보실 수 있습니다.');
 }
 async function renderAdminPanel() {
-  var panel   = document.getElementById('adminPanel');
-  var list    = document.getElementById('adminOrderList');
-  var promoEl = document.getElementById('factoryPromoHeader');
-  if (!panel || !list) return;
-  if (!isAdmin()) {
-    document.body.classList.remove('is-admin');
-    return;
-  }
+  var panel = document.getElementById('adminPanel');
+  if (!panel) return;
+  if (!isAdmin()) { document.body.classList.remove('is-admin'); return; }
   document.body.classList.add('is-admin');
+  adminShowTab('orders');
+}
+async function renderAdminOrders() {
+  var list = document.getElementById('adminTabOrders');
+  if (!list) return;
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
   await loadOrdersFromSupabase();
   if (!customOrders.length) {
@@ -1325,6 +1347,134 @@ async function renderAdminPanel() {
       '</div>' +
     '</div>';
   }).join('');
+}
+// ── 상품 가격 관리 ──────────────────────────────────────────
+function renderAdminProducts() {
+  var list = document.getElementById('adminTabProducts');
+  if (!list) return;
+  list.innerHTML = PRODUCTS.map(function(p) {
+    var price = productPrices[p.id] !== undefined ? productPrices[p.id] : p.price;
+    return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm flex items-center gap-3">' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="font-black text-slate-800 text-xs truncate">' + p.title + '</p>' +
+        '<p class="text-[9px] text-slate-400 leading-tight">' + p.subtitle + '</p>' +
+      '</div>' +
+      '<div class="flex items-center gap-1.5 shrink-0">' +
+        '<input type="number" value="' + price + '" min="0" ' +
+          'onchange="adminSaveProductPrice(\'' + p.id + '\',this.value)" ' +
+          'class="w-24 text-right font-black text-xs border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-400">' +
+        '<span class="text-[10px] text-slate-400 font-bold">THB</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function adminSaveProductPrice(id, val) {
+  var price = parseInt(val, 10);
+  if (isNaN(price) || price < 0) return;
+  productPrices[id] = price;
+  localStorage.setItem('adminProductPrices', JSON.stringify(productPrices));
+  var p = PRODUCTS.find(function(p){ return p.id === id; });
+  if (p) p.price = price;
+}
+// ── 회원 관리 ──────────────────────────────────────────────
+async function renderAdminUsers() {
+  var list = document.getElementById('adminTabUsers');
+  if (!list) return;
+  list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
+  try {
+    var res = await fetch(
+      SUPABASE_URL + '/rest/v1/licenses?select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active&order=clinic_name.asc',
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+    );
+    if (!res.ok) { list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">로드 실패</p>'; return; }
+    var users = await res.json();
+    if (!users.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">회원이 없습니다.</p>'; return; }
+    list.innerHTML = users.map(function(u) {
+      var isActive  = u.is_active !== false;
+      var isAdminU  = ['admin','관리자'].includes((u.nickname||'').trim().toLowerCase());
+      var statusBadge = '<span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[8px] font-black ' +
+        (isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500') + '">' +
+        (isActive ? '활성' : '비활성') + '</span>';
+      var actionBtn = isAdminU
+        ? '<span class="ml-2 shrink-0 text-[9px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-xl">관리자</span>'
+        : '<button onclick="adminToggleUser(\'' + (u.nickname||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',' + isActive + ')" ' +
+          'class="ml-2 shrink-0 px-3 py-1.5 rounded-xl font-black text-[10px] ' +
+          (isActive ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600') + '">' +
+          (isActive ? '🔒 차단' : '✅ 승인') + '</button>';
+      return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
+        '<div class="flex justify-between items-start">' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="font-black text-slate-800 text-xs truncate">' + (u.clinic_name||'-') + '</p>' +
+            '<p class="text-[10px] text-slate-500 font-bold">' + (u.doctor_name||'-') + ' · ' + (u.nickname||'-') + '</p>' +
+            '<p class="text-[9px] text-slate-400">' + (u.email||'') + '</p>' +
+            '<p class="text-[9px] text-slate-400">' + (u.phone||'') + '</p>' +
+            '<p class="text-[9px] font-mono text-slate-300">' + (u.license_number||'') + '</p>' +
+          '</div>' +
+          actionBtn +
+        '</div>' +
+        statusBadge +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">오류 발생</p>';
+  }
+}
+async function adminToggleUser(nickname, currentActive) {
+  var newActive = !currentActive;
+  if (!confirm(newActive ? nickname + ' 회원을 승인하시겠습니까?' : nickname + ' 회원을 차단하시겠습니까?')) return;
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/licenses?nickname=eq.' + encodeURIComponent(nickname), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ is_active: newActive })
+    });
+    if (res.ok) renderAdminUsers();
+    else alert('업데이트 실패');
+  } catch(e) { alert('오류: ' + e.message); }
+}
+// ── 이벤트 관리 ────────────────────────────────────────────
+function renderAdminEventsTab() {
+  var list = document.getElementById('adminTabEvents');
+  if (!list) return;
+  var evRows = events_.length
+    ? events_.map(function(ev) {
+        return '<div class="bg-white rounded-xl p-4 mb-2 shadow-sm flex items-center gap-3">' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="font-black text-xs text-slate-800 truncate">' + ev.event + '</p>' +
+            '<p class="text-[10px] text-slate-400">' + ev.date + ' · ' + ev.loc + '</p>' +
+          '</div>' +
+          '<button onclick="adminDeleteEvent(' + ev.id + ')" class="shrink-0 px-3 py-1.5 bg-red-50 text-red-500 rounded-xl font-black text-[10px]">삭제</button>' +
+        '</div>';
+      }).join('')
+    : '<p class="text-center text-slate-400 text-sm py-4 font-bold">이벤트가 없습니다.</p>';
+  list.innerHTML =
+    '<div class="bg-white rounded-xl p-4 mb-4 shadow-sm">' +
+      '<p class="font-black text-xs text-slate-700 mb-3">새 이벤트 추가</p>' +
+      '<input id="adminEventDate" type="date" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-2 focus:outline-none focus:border-blue-400">' +
+      '<input id="adminEventName" type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-2 focus:outline-none focus:border-blue-400" placeholder="이벤트명">' +
+      '<input id="adminEventLoc"  type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-3 focus:outline-none focus:border-blue-400" placeholder="장소">' +
+      '<button onclick="adminAddEvent()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition">+ 추가</button>' +
+    '</div>' +
+    evRows;
+}
+function adminAddEvent() {
+  var date = (document.getElementById('adminEventDate').value || '').trim();
+  var name = (document.getElementById('adminEventName').value || '').trim();
+  var loc  = (document.getElementById('adminEventLoc').value  || '').trim();
+  if (!date || !name || !loc) { alert('모든 항목을 입력해주세요.'); return; }
+  var newId = events_.length ? Math.max.apply(null, events_.map(function(e){ return e.id; })) + 1 : 1;
+  events_.push({ id: newId, date: date, event: name, loc: loc });
+  renderAdminEventsTab();
+  renderEvents();
+}
+function adminDeleteEvent(id) {
+  if (!confirm('이벤트를 삭제하시겠습니까?')) return;
+  events_ = events_.filter(function(e){ return e.id !== id; });
+  renderAdminEventsTab();
+  renderEvents();
 }
 // ============================================================
 // USED MARKET

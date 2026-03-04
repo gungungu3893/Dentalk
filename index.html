@@ -597,9 +597,20 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="adminPanel">
         <div class="flex items-center gap-2 mb-3">
           <span class="text-base">🔧</span>
-          <h3 class="font-black text-sm text-slate-700">관리자 패널 — CNC Custom 주문 관리</h3>
+          <h3 class="font-black text-sm text-slate-700">관리자 패널</h3>
         </div>
-        <div id="adminOrderList" class="space-y-4"></div>
+        <!-- 탭 버튼 -->
+        <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+          <button onclick="adminShowTab('orders')" id="adminTabBtn-orders" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-[#001d4a] text-white">📦 CNC주문</button>
+          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품관리</button>
+          <button onclick="adminShowTab('users')" id="adminTabBtn-users" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">👥 회원관리</button>
+          <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📅 이벤트</button>
+        </div>
+        <!-- 탭 콘텐츠 -->
+        <div id="adminTabOrders" class="space-y-4"></div>
+        <div id="adminTabProducts" class="hidden"></div>
+        <div id="adminTabUsers" class="hidden"></div>
+        <div id="adminTabEvents" class="hidden"></div>
       </div>
     </div>
     <!-- ==================== SETTINGS ==================== -->
