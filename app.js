@@ -1241,6 +1241,7 @@ function customerApproveDesign(orderId) {
   ord.reviewHistory.push({ action:'approved', note:'만족', date:new Date().toLocaleDateString() });
   updateOrderInSupabase(orderId, { stage: 'approved', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
+  _renderAdminOrdersList();
   sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n✅ 고객 만족 (디자인 승인)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n고객이 디자인을 승인하였습니다.\n밀링을 시작해 주세요.');
 }
 function showRejectPanel(orderId) {
@@ -1258,6 +1259,7 @@ function customerRejectDesign(orderId) {
   ord.reviewHistory.push({ action:'rejected', note:note, date:new Date().toLocaleDateString() });
   updateOrderInSupabase(orderId, { stage: 'design_revision', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
+  _renderAdminOrdersList();
   sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n❌ 고객 불만족 (수정 요청)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n수정 요청사항:\n' + note);
 }
 function adminStartMilling(orderId) {
@@ -1292,6 +1294,11 @@ async function renderAdminOrders() {
   if (!list) return;
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
   await loadOrdersFromSupabase();
+  _renderAdminOrdersList();
+}
+function _renderAdminOrdersList() {
+  var list = document.getElementById('adminTabOrders');
+  if (!list) return;
   if (!customOrders.length) {
     list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>';
     return;
