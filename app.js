@@ -981,13 +981,24 @@ function renderCustomOrders() {
         '</div>';
     } else if (o.stage === 'design_revision') {
       var lastRev = (o.reviewHistory && o.reviewHistory.length) ? o.reviewHistory[o.reviewHistory.length-1] : null;
+      var lastDesign = (o.designVersions && o.designVersions.length) ? o.designVersions[o.designVersions.length-1] : null;
       designHtml =
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
           '<p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-2">⏳ 디자인 수정 요청됨</p>' +
-          (lastRev ? '<div class="bg-amber-50 rounded-xl p-2.5"><p class="text-[9px] text-slate-600 leading-relaxed">"' + lastRev.note + '"</p></div>' : '') +
+          (lastRev ? '<div class="bg-amber-50 rounded-xl p-2.5 mb-2"><p class="text-[9px] text-slate-600 leading-relaxed">"' + lastRev.note + '"</p></div>' : '') +
+          (lastDesign ? '<img src="' + lastDesign.url + '" class="w-full rounded-xl mb-1 max-h-36 object-contain bg-slate-50 opacity-50">' : '') +
         '</div>';
     } else if (o.stage === 'confirmed') {
       designHtml = '<div class="mt-3 pt-3 border-t border-slate-100"><p class="text-[9px] text-slate-400 font-bold">📐 디자인 업로드 대기 중...</p></div>';
+    }
+    // ── 수령 완료 버튼 (shipped) ────────────────────────────
+    var receiveHtml = '';
+    if (o.stage === 'shipped') {
+      receiveHtml =
+        '<div class="mt-3 pt-3 border-t border-slate-100">' +
+          '<p class="text-[9px] text-green-600 font-bold mb-2">🚚 배송이 출발했습니다. 제품 수령 후 아래 버튼을 눌러주세요.</p>' +
+          '<button onclick="customerReceiveOrder(\'' + o.id + '\')" class="w-full py-3 bg-green-600 text-white rounded-xl font-black text-sm active:scale-95 transition">📦 수령 완료</button>' +
+        '</div>';
     }
     // ── Review history ─────────────────────────────────────
     var histHtml = '';
@@ -1038,6 +1049,7 @@ function renderCustomOrders() {
         '<div class="flex gap-1 mb-2">' + bars + '</div>' +
         '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + stageLabel + '</p>' +
         designHtml +
+        receiveHtml +
         histHtml +
       '</div>' +
       '<div class="px-5 pb-5 border-t border-slate-50 pt-4">' +
@@ -1218,20 +1230,78 @@ function adminConfirmOrder(orderId) {
   renderCustomOrders();
   sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n✅ 주문 접수\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n주문이 접수되었습니다.\n디자인 완료 후 앱에서 확인하실 수 있습니다.');
 }
-function adminUploadDesign(orderId, input) {
+async function adminUploadDesign(orderId, input) {
   var file = input.files[0]; if (!file) return;
   var ord = customOrders.find(function(o){ return o.id===orderId; });
   if (!ord) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    if (!ord.designVersions) ord.designVersions = [];
-    ord.designVersions.push({ url: e.target.result, date: new Date().toLocaleDateString(), name: file.name });
-    ord.stage = 'design_ready';
-    updateOrderInSupabase(orderId, { stage: 'design_ready', designVersions: ord.designVersions });
-    renderAdminOrders();
-    renderCustomOrders();
-  };
-  reader.readAsDataURL(file);
+  var ext = file.name.split('.').pop().toLowerCase();
+  var ver = ((ord.designVersions||[]).length + 1);
+  var fileName = orderId + '_v' + ver + '_' + Date.now() + '.' + ext;
+  var isImg = /^(jpg|jpeg|png|gif|webp)$/.test(ext);
+  var fileUrl = null;
+  // ① Supabase Storage 업로드 시도
+  try {
+    var storageRes = await fetch(SUPABASE_URL + '/storage/v1/object/designs/' + fileName, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if (storageRes.ok) {
+      fileUrl = SUPABASE_URL + '/storage/v1/object/public/designs/' + fileName;
+    }
+  } catch(e) {}
+  // ② Storage 실패 시 base64 fallback
+  if (!fileUrl) {
+    fileUrl = await new Promise(function(resolve) {
+      var r = new FileReader();
+      r.onload = function(e) { resolve(e.target.result); };
+      r.readAsDataURL(file);
+    });
+    isImg = fileUrl.startsWith('data:image');
+  }
+  if (!ord.designVersions) ord.designVersions = [];
+  ord.designVersions.push({ url: fileUrl, date: new Date().toLocaleDateString(), name: file.name });
+  ord.stage = 'design_ready';
+  updateOrderInSupabase(orderId, { stage: 'design_ready', designVersions: ord.designVersions });
+  renderAdminOrders();
+  renderCustomOrders();
+  // ③ 고객에게 LINE 알림 (이미지 + 텍스트)
+  if (ord.lineId) {
+    var msgs = [];
+    var isPublicImg = isImg && fileUrl.startsWith('https');
+    if (isPublicImg) {
+      msgs.push({ type: 'image', originalContentUrl: fileUrl, previewImageUrl: fileUrl });
+    }
+    msgs.push({ type: 'text', text: '━━━━━━━━━━━━━━━━━━━━\n📐 디자인 완료\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n디자인이 완료되었습니다.\n앱에서 확인 후 만족/불만족을 선택해 주세요.' });
+    sendLineMessage(ord.lineId, msgs);
+  }
+}
+// LINE 멀티 메시지 (이미지 + 텍스트 조합 지원)
+async function sendLineMessage(to, messages) {
+  if (!LINE_PROXY_URL || !to) return;
+  try {
+    await fetch(LINE_PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: to, messages: messages })
+    });
+  } catch(e) { console.error('[LINE]', e); }
+}
+// 고객 수령 완료
+function customerReceiveOrder(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  if (!confirm('제품을 수령하셨습니까?')) return;
+  ord.stage = 'done';
+  updateOrderInSupabase(orderId, { stage: 'done' });
+  renderCustomOrders();
+  _renderAdminOrdersList();
+  sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n📦 수령 완료\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n고객이 제품을 수령하였습니다.\n주문이 완료되었습니다. ✅');
 }
 function customerApproveDesign(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
@@ -1280,7 +1350,15 @@ function adminShipOrder(orderId) {
   updateOrderInSupabase(orderId, { stage: 'shipped' });
   renderAdminOrders();
   renderCustomOrders();
-  sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n🚚 배송 시작\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n배송이 시작되었습니다.\n곧 받아보실 수 있습니다.');
+  if (ord.lineId) {
+    var shipMsgs = [];
+    var latestDesign = ord.designVersions && ord.designVersions.length ? ord.designVersions[ord.designVersions.length-1] : null;
+    if (latestDesign && latestDesign.url && latestDesign.url.startsWith('https')) {
+      shipMsgs.push({ type: 'image', originalContentUrl: latestDesign.url, previewImageUrl: latestDesign.url });
+    }
+    shipMsgs.push({ type: 'text', text: '━━━━━━━━━━━━━━━━━━━━\n🚚 배송 시작\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n배송이 시작되었습니다.\n곧 받아보실 수 있습니다.\n앱에서 수령 완료 버튼을 눌러주세요.' });
+    sendLineMessage(ord.lineId, shipMsgs);
+  }
 }
 async function renderAdminPanel() {
   var panel = document.getElementById('adminPanel');
