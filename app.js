@@ -335,7 +335,16 @@ async function handleLogin() {
   sessionTimer = setInterval(tickSession, 1000);
   tickSession();
   closeModal('loginModal');
-  if (isAdmin()) { goPage('factory'); pendingPage = null; return; }
+  if (isAdmin()) {
+    goPage('factory');
+    var _ap = document.getElementById('adminPanel');
+    var _fp = document.getElementById('factoryPromoHeader');
+    if (_ap) { _ap.classList.remove('hidden'); _ap.style.setProperty('display','block','important'); }
+    if (_fp) { _fp.classList.add('hidden'); _fp.style.setProperty('display','none','important'); }
+    renderAdminPanel();
+    pendingPage = null;
+    return;
+  }
   if (pendingPage) { goPage(pendingPage); pendingPage = null; }
 }
 function tickSession() {
@@ -1258,11 +1267,13 @@ async function renderAdminPanel() {
   if (!panel || !list) return;
   if (!isAdmin()) {
     panel.classList.add('hidden');
-    if (promoEl) promoEl.classList.remove('hidden');
+    panel.style.removeProperty('display');
+    if (promoEl) { promoEl.classList.remove('hidden'); promoEl.style.removeProperty('display'); }
     return;
   }
-  if (promoEl) promoEl.classList.add('hidden');
+  if (promoEl) { promoEl.classList.add('hidden'); promoEl.style.setProperty('display','none','important'); }
   panel.classList.remove('hidden');
+  panel.style.setProperty('display','block','important');
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
   await loadOrdersFromSupabase();
   if (!customOrders.length) {
