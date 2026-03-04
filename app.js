@@ -336,11 +336,8 @@ async function handleLogin() {
   tickSession();
   closeModal('loginModal');
   if (isAdmin()) {
+    document.body.classList.add('is-admin');
     goPage('factory');
-    var _ap = document.getElementById('adminPanel');
-    var _fp = document.getElementById('factoryPromoHeader');
-    if (_ap) { _ap.classList.remove('hidden'); _ap.style.setProperty('display','block','important'); }
-    if (_fp) { _fp.classList.add('hidden'); _fp.style.setProperty('display','none','important'); }
     renderAdminPanel();
     pendingPage = null;
     return;
@@ -373,6 +370,7 @@ function extendSession() {
 }
 function forceLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  document.body.classList.remove('is-admin');
   currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
@@ -1266,14 +1264,10 @@ async function renderAdminPanel() {
   var promoEl = document.getElementById('factoryPromoHeader');
   if (!panel || !list) return;
   if (!isAdmin()) {
-    panel.classList.add('hidden');
-    panel.style.removeProperty('display');
-    if (promoEl) { promoEl.classList.remove('hidden'); promoEl.style.removeProperty('display'); }
+    document.body.classList.remove('is-admin');
     return;
   }
-  if (promoEl) { promoEl.classList.add('hidden'); promoEl.style.setProperty('display','none','important'); }
-  panel.classList.remove('hidden');
-  panel.style.setProperty('display','block','important');
+  document.body.classList.add('is-admin');
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
   await loadOrdersFromSupabase();
   if (!customOrders.length) {
