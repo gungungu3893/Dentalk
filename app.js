@@ -1257,12 +1257,12 @@ async function renderAdminPanel() {
   var promoEl = document.getElementById('factoryPromoHeader');
   if (!panel || !list) return;
   if (!isAdmin()) {
-    panel.style.display = 'none';
-    if (promoEl) promoEl.style.display = '';
+    panel.classList.add('hidden');
+    if (promoEl) promoEl.classList.remove('hidden');
     return;
   }
-  if (promoEl) promoEl.style.display = 'none';
-  panel.style.display = 'block';
+  if (promoEl) promoEl.classList.add('hidden');
+  panel.classList.remove('hidden');
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
   await loadOrdersFromSupabase();
   if (!customOrders.length) {
