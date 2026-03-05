@@ -446,9 +446,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== CUSTOM ABUTMENT ==================== -->
     <div id="page-custom" class="page p-4">
-      <div class="flex gap-2 mb-5">
+      <div class="flex gap-1.5 mb-5">
         <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">New Order</button>
-        <button onclick="customTab('list')" id="ctab-list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">My Orders</button>
+        <button onclick="customTab('list')" id="ctab-list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">진행중</button>
+        <button onclick="customTab('done')" id="ctab-done" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">완료</button>
       </div>
       <div id="custom-form">
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
@@ -480,6 +481,36 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <div id="custom-list" class="hidden">
         <div id="customOrdersContainer" class="space-y-4"></div>
+      </div>
+      <div id="custom-done" class="hidden">
+        <div id="doneOrdersContainer" class="space-y-4"></div>
+      </div>
+    </div>
+    <!-- 주문 수정 모달 -->
+    <div id="editOrderModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeEditModal()">
+      <div class="bg-white rounded-t-3xl w-full p-5 max-h-[88vh] overflow-y-auto pb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-black text-slate-800 text-sm">주문 수정</h3>
+          <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 font-black text-sm">✕</button>
+        </div>
+        <div class="mb-3">
+          <p class="text-xs font-black text-slate-600 mb-1">클리닉 / 랩 이름</p>
+          <input id="edit-clinic" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        </div>
+        <div class="mb-3">
+          <p class="text-xs font-black text-slate-600 mb-1">배송 주소</p>
+          <input id="edit-addr" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        </div>
+        <div class="mb-3">
+          <p class="text-xs font-black text-slate-600 mb-1">연락처</p>
+          <input id="edit-phone" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        </div>
+        <div class="mb-4">
+          <p class="text-xs font-black text-slate-600 mb-1">Line ID</p>
+          <input id="edit-line" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        </div>
+        <div id="editCases" class="mb-4 space-y-3"></div>
+        <button onclick="saveEditOrder()" class="w-full py-3.5 bg-[#001d4a] text-white rounded-2xl font-black text-sm active:scale-95 transition">저장</button>
       </div>
     </div>
     <!-- ==================== USED MARKET ==================== -->

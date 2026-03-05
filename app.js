@@ -758,16 +758,24 @@ function completePayment() { cart=[]; updateBadge(); closeModal('qrModal'); goPa
 // CUSTOM ABUTMENT
 // ============================================================
 function customTab(tab) {
-  var isForm = tab==='form';
-  document.getElementById('custom-form').classList.toggle('hidden', !isForm);
-  document.getElementById('custom-list').classList.toggle('hidden', isForm);
-  var fCls = isForm ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow' : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
-  var lCls = !isForm ? 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow' : 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  var activeCls  = 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow';
+  var inactiveCls = 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
+  ['form','list','done'].forEach(function(name) {
+    var section = document.getElementById('custom-' + name);
+    var btn = document.getElementById('ctab-' + name);
+    if (!section || !btn) return;
+    section.classList.toggle('hidden', name !== tab);
+    btn.className = name === tab ? activeCls : inactiveCls;
+  });
   var fBtn = document.getElementById('ctab-form');
   var lBtn = document.getElementById('ctab-list');
-  fBtn.className = fCls; fBtn.textContent = t('custom_tab_new');
-  lBtn.className = lCls; lBtn.textContent = t('custom_tab_list');
-  if (!isForm) { loadOrdersFromSupabase().then(renderCustomOrders); }
+  var dBtn = document.getElementById('ctab-done');
+  if (fBtn) fBtn.textContent = t('custom_tab_new');
+  if (lBtn) lBtn.textContent = '진행중';
+  if (dBtn) dBtn.textContent = '완료';
+  if (tab === 'list' || tab === 'done') {
+    loadOrdersFromSupabase().then(function() { renderCustomOrders(); renderDoneOrders(); });
+  }
 }
 function resetCustomForm() {
   caseCount = 0;
@@ -940,7 +948,14 @@ function submitCustom() {
   customOrders.unshift(order);
   saveOrderToSupabase(order);
   // Notify admin of new order (customer gets LINE notification when admin confirms)
-  sendLineRaw(LINE_USER_ID, '🆕 새 CNC Custom 주문\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + oid + '\n🏥 ' + clinic + '\n📅 ' + order.date + '\n📞 ' + phone + '\n💬 Line: ' + (lineId || '없음') + '\n🦷 ' + totalTeeth + '치아 / ' + cases.length + '케이스\n━━━━━━━━━━━━━━━━━━━━\n관리자 패널에서 접수 확인해 주세요.');
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕', '새 CNC Custom 주문', [
+    {label:'주문번호', value: oid},
+    {label:'클리닉', value: clinic},
+    {label:'날짜', value: order.date},
+    {label:'연락처', value: phone},
+    {label:'Line ID', value: lineId || '없음'},
+    {label:'치아 / 케이스', value: totalTeeth + '치아 / ' + cases.length + '케이스'}
+  ], '관리자 패널에서 접수 확인해 주세요.')]);
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
   if (lineId) msg += t('order_success_line');
   alert(msg);
@@ -948,8 +963,9 @@ function submitCustom() {
 }
 function renderCustomOrders() {
   var c = document.getElementById('customOrdersContainer');
-  if (!customOrders.length) { c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('custom_empty') + '</div>'; return; }
-  c.innerHTML = customOrders.map(function(o) {
+  var activeOrders = customOrders.filter(function(o){ return o.stage !== 'done'; });
+  if (!activeOrders.length) { c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('custom_empty') + '</div>'; return; }
+  c.innerHTML = activeOrders.map(function(o) {
     // design_revision maps to design_ready position in progress bar
     var barKey = (o.stage === 'design_revision') ? 'design_ready' : o.stage;
     var si = ORDER_STAGES.findIndex(function(s){ return s.key === barKey; });
@@ -998,6 +1014,15 @@ function renderCustomOrders() {
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
           '<p class="text-[9px] text-green-600 font-bold mb-2">🚚 배송이 출발했습니다. 제품 수령 후 아래 버튼을 눌러주세요.</p>' +
           '<button onclick="customerReceiveOrder(\'' + o.id + '\')" class="w-full py-3 bg-green-600 text-white rounded-xl font-black text-sm active:scale-95 transition">📦 수령 완료</button>' +
+        '</div>';
+    }
+    // ── 접수 전 수정/삭제 ──────────────────────────────────
+    var editDeleteHtml = '';
+    if (o.stage === 'submitted') {
+      editDeleteHtml =
+        '<div class="flex gap-2 mt-3 pt-3 border-t border-slate-100">' +
+          '<button onclick="editCustomOrder(\'' + o.id + '\')" class="flex-1 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-black text-xs active:scale-95 transition">✏️ 수정</button>' +
+          '<button onclick="deleteCustomOrder(\'' + o.id + '\')" class="flex-1 py-2.5 bg-red-50 text-red-500 rounded-xl font-black text-xs active:scale-95 transition">🗑 삭제</button>' +
         '</div>';
     }
     // ── Review history ─────────────────────────────────────
@@ -1050,6 +1075,7 @@ function renderCustomOrders() {
         '<p class="text-center font-black text-sm text-blue-700">' + st.icon + ' ' + stageLabel + '</p>' +
         designHtml +
         receiveHtml +
+        editDeleteHtml +
         histHtml +
       '</div>' +
       '<div class="px-5 pb-5 border-t border-slate-50 pt-4">' +
@@ -1061,6 +1087,153 @@ function renderCustomOrders() {
       '</div>' +
     '</div>';
   }).join('');
+}
+// ── 완료 주문 페이지 ───────────────────────────────────────
+function renderDoneOrders() {
+  var c = document.getElementById('doneOrdersContainer');
+  if (!c) return;
+  var doneOrders = customOrders.filter(function(o){ return o.stage === 'done'; });
+  if (!doneOrders.length) {
+    c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">완료된 주문이 없습니다.</div>';
+    return;
+  }
+  c.innerHTML = doneOrders.map(function(o) {
+    var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
+    var latestDesign = o.designVersions && o.designVersions.length ? o.designVersions[o.designVersions.length-1] : null;
+    var caseRows = o.cases.map(function(cs, ci) {
+      return '<div class="py-1.5 border-b border-slate-50 last:border-0">' +
+        '<p class="text-[10px] font-black text-slate-600">케이스 ' + (ci+1) + ' · ' + cs.patient + '</p>' +
+        '<p class="text-[9px] text-slate-400">' + (cs.teeth||[]).map(function(td){ return td.tooth + ' ' + td.brand; }).join(' / ') + '</p>' +
+      '</div>';
+    }).join('');
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">' +
+      '<div class="bg-gradient-to-r from-green-700 to-green-600 px-5 py-4 flex justify-between items-center">' +
+        '<div>' +
+          '<p class="font-black text-white text-sm">' + o.clinic + '</p>' +
+          '<p class="text-green-200 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p>' +
+        '</div>' +
+        '<div class="text-right">' +
+          '<span class="text-xl">✅</span>' +
+          '<p class="text-green-200 text-[9px] font-bold mt-0.5">완료</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="px-5 py-4">' +
+        (latestDesign ? '<img src="' + latestDesign.url + '" class="w-full rounded-xl mb-3 max-h-40 object-contain bg-slate-50">' : '') +
+        '<p class="text-[10px] text-slate-500 font-bold mb-2">' + o.cases.length + '케이스 · ' + totalTeeth + '치아</p>' +
+        caseRows +
+        '<p class="text-[9px] text-slate-400 mt-2">📍 ' + o.addr + '</p>' +
+        '<p class="text-[9px] text-slate-400">📞 ' + o.phone + '</p>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+// ── 주문 삭제 ──────────────────────────────────────────────
+async function deleteCustomOrder(orderId) {
+  if (!confirm('접수 전 주문을 삭제하시겠습니까?')) return;
+  customOrders = customOrders.filter(function(o){ return o.id !== orderId; });
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+  } catch(e) { console.error('[Delete Order]', e); }
+  renderCustomOrders();
+}
+// ── 주문 수정 ──────────────────────────────────────────────
+function editCustomOrder(orderId) {
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  document.getElementById('edit-clinic').value = ord.clinic || '';
+  document.getElementById('edit-addr').value   = ord.addr   || '';
+  document.getElementById('edit-phone').value  = ord.phone  || '';
+  document.getElementById('edit-line').value   = ord.lineId || '';
+  var casesDiv = document.getElementById('editCases');
+  casesDiv.innerHTML = ord.cases.map(function(cs, i) {
+    return '<div class="bg-slate-50 rounded-xl p-3">' +
+      '<p class="text-[10px] font-black text-slate-500 mb-2">케이스 ' + (i+1) + ' · 치아: ' +
+        (cs.teeth||[]).map(function(td){ return td.tooth; }).join(', ') + '</p>' +
+      '<input type="text" id="ecp-' + i + '" value="' + (cs.patient||'').replace(/"/g,'&quot;') + '" placeholder="환자명" ' +
+        'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400">' +
+      '<input type="date" id="ecd-' + i + '" value="' + (cs.deadline||'') + '" ' +
+        'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400">' +
+      '<textarea id="ecm-' + i + '" rows="2" placeholder="메모" ' +
+        'class="w-full p-2.5 bg-white rounded-xl text-xs border-2 border-slate-200 resize-none focus:outline-none focus:border-blue-400">' + (cs.memo||'').replace(/</g,'&lt;') + '</textarea>' +
+    '</div>';
+  }).join('');
+  var modal = document.getElementById('editOrderModal');
+  modal.dataset.orderId = orderId;
+  modal.classList.remove('hidden');
+}
+async function saveEditOrder() {
+  var modal = document.getElementById('editOrderModal');
+  var orderId = modal.dataset.orderId;
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord) return;
+  ord.clinic = document.getElementById('edit-clinic').value.trim() || ord.clinic;
+  ord.addr   = document.getElementById('edit-addr').value.trim()   || ord.addr;
+  ord.phone  = document.getElementById('edit-phone').value.trim()  || ord.phone;
+  ord.lineId = document.getElementById('edit-line').value.trim();
+  ord.cases.forEach(function(cs, i) {
+    var pEl = document.getElementById('ecp-' + i);
+    var dEl = document.getElementById('ecd-' + i);
+    var mEl = document.getElementById('ecm-' + i);
+    if (pEl) cs.patient  = pEl.value.trim() || cs.patient;
+    if (dEl) cs.deadline = dEl.value;
+    if (mEl) cs.memo     = mEl.value.trim();
+  });
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ clinic: ord.clinic, addr: ord.addr, phone: ord.phone, line_id: ord.lineId, cases: ord.cases })
+    });
+  } catch(e) { console.error('[Edit Order]', e); }
+  closeEditModal();
+  renderCustomOrders();
+}
+function closeEditModal() {
+  document.getElementById('editOrderModal').classList.add('hidden');
+}
+// ── LINE Flex 메시지 빌더 ───────────────────────────────────
+function buildFlexMessage(icon, title, fields, note) {
+  var bodyContents = [
+    { type: 'text', text: icon + '  ' + title, weight: 'bold', size: 'md', color: '#001d4a', wrap: true },
+    { type: 'separator', margin: 'md', color: '#e2e8f0' }
+  ];
+  fields.forEach(function(f) {
+    bodyContents.push({
+      type: 'box', layout: 'horizontal', margin: 'sm',
+      contents: [
+        { type: 'text', text: f.label, size: 'sm', color: '#94a3b8', flex: 2, wrap: true },
+        { type: 'text', text: String(f.value || '-'), size: 'sm', color: '#1e293b', flex: 3, wrap: true, weight: 'bold' }
+      ]
+    });
+  });
+  if (note) {
+    bodyContents.push({
+      type: 'box', layout: 'vertical', margin: 'lg',
+      backgroundColor: '#eff6ff', paddingAll: '12px', cornerRadius: '8px',
+      contents: [{ type: 'text', text: note, size: 'xs', color: '#1d4ed8', wrap: true }]
+    });
+  }
+  return {
+    type: 'flex',
+    altText: icon + ' ' + title,
+    contents: {
+      type: 'bubble',
+      header: {
+        type: 'box', layout: 'vertical', backgroundColor: '#001d4a', paddingAll: '20px',
+        contents: [
+          { type: 'text', text: 'BIOPLANT', color: '#60a5fa', size: 'xs', weight: 'bold' },
+          { type: 'text', text: 'CNC Custom Order', color: '#93c5fd', size: 'xs' }
+        ]
+      },
+      body: { type: 'box', layout: 'vertical', paddingAll: '20px', spacing: 'sm', contents: bodyContents }
+    }
+  };
 }
 async function sendLine(order, stageKey) {
   if (!LINE_PROXY_URL || LINE_PROXY_URL === 'YOUR_CLOUDFLARE_WORKER_URL') return;
@@ -1228,7 +1401,11 @@ function adminConfirmOrder(orderId) {
   updateOrderInSupabase(orderId, { stage: 'confirmed' });
   renderAdminOrders();
   renderCustomOrders();
-  sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n✅ 주문 접수\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n주문이 접수되었습니다.\n디자인 완료 후 앱에서 확인하실 수 있습니다.');
+  if (ord.lineId) sendLineMessage(ord.lineId, [buildFlexMessage('✅', '주문 접수 완료', [
+    {label:'주문번호', value: ord.id},
+    {label:'클리닉', value: ord.clinic},
+    {label:'날짜', value: ord.date}
+  ], '디자인 완료 후 앱에서 확인하실 수 있습니다.')]);
 }
 async function adminUploadDesign(orderId, input) {
   var file = input.files[0]; if (!file) return;
@@ -1270,14 +1447,18 @@ async function adminUploadDesign(orderId, input) {
   updateOrderInSupabase(orderId, { stage: 'design_ready', designVersions: ord.designVersions });
   renderAdminOrders();
   renderCustomOrders();
-  // ③ 고객에게 LINE 알림 (이미지 + 텍스트)
+  // ③ 고객에게 LINE 알림 (이미지 + Flex)
   if (ord.lineId) {
     var msgs = [];
     var isPublicImg = isImg && fileUrl.startsWith('https');
     if (isPublicImg) {
       msgs.push({ type: 'image', originalContentUrl: fileUrl, previewImageUrl: fileUrl });
     }
-    msgs.push({ type: 'text', text: '━━━━━━━━━━━━━━━━━━━━\n📐 디자인 완료\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n디자인이 완료되었습니다.\n앱에서 확인 후 만족/불만족을 선택해 주세요.' });
+    msgs.push(buildFlexMessage('📐', '디자인 완료', [
+      {label:'주문번호', value: ord.id},
+      {label:'클리닉', value: ord.clinic},
+      {label:'버전', value: 'ver.' + ord.designVersions.length}
+    ], '앱에서 디자인을 확인하고 만족/불만족을 선택해 주세요.'));
     sendLineMessage(ord.lineId, msgs);
   }
 }
@@ -1301,7 +1482,10 @@ function customerReceiveOrder(orderId) {
   updateOrderInSupabase(orderId, { stage: 'done' });
   renderCustomOrders();
   _renderAdminOrdersList();
-  sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n📦 수령 완료\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n고객이 제품을 수령하였습니다.\n주문이 완료되었습니다. ✅');
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('📦', '수령 완료', [
+    {label:'주문번호', value: ord.id},
+    {label:'클리닉', value: ord.clinic}
+  ], '고객이 제품을 수령하였습니다. 주문이 완료되었습니다. ✅')]);
 }
 function customerApproveDesign(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
@@ -1312,7 +1496,10 @@ function customerApproveDesign(orderId) {
   updateOrderInSupabase(orderId, { stage: 'approved', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
   _renderAdminOrdersList();
-  sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n✅ 고객 만족 (디자인 승인)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n고객이 디자인을 승인하였습니다.\n밀링을 시작해 주세요.');
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('✅', '고객 만족 (디자인 승인)', [
+    {label:'주문번호', value: ord.id},
+    {label:'클리닉', value: ord.clinic}
+  ], '고객이 디자인을 승인하였습니다. 밀링을 시작해 주세요.')]);
 }
 function showRejectPanel(orderId) {
   var panel = document.getElementById('reject-panel-' + orderId);
@@ -1330,7 +1517,11 @@ function customerRejectDesign(orderId) {
   updateOrderInSupabase(orderId, { stage: 'design_revision', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
   _renderAdminOrdersList();
-  sendLineRaw(LINE_USER_ID, '━━━━━━━━━━━━━━━━━━━━\n❌ 고객 불만족 (수정 요청)\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n수정 요청사항:\n' + note);
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('❌', '고객 불만족 (수정 요청)', [
+    {label:'주문번호', value: ord.id},
+    {label:'클리닉', value: ord.clinic},
+    {label:'요청사항', value: note}
+  ], '디자인을 수정하여 다시 업로드해 주세요.')]);
 }
 function adminStartMilling(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
@@ -1340,7 +1531,10 @@ function adminStartMilling(orderId) {
   updateOrderInSupabase(orderId, { stage: 'milling' });
   renderAdminOrders();
   renderCustomOrders();
-  sendLineRaw(ord.lineId, '━━━━━━━━━━━━━━━━━━━━\n⚙️ CNC 밀링 중\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\nCNC 밀링 작업이 시작되었습니다.\n완료 후 배송해 드리겠습니다.');
+  if (ord.lineId) sendLineMessage(ord.lineId, [buildFlexMessage('⚙️', 'CNC 밀링 시작', [
+    {label:'주문번호', value: ord.id},
+    {label:'클리닉', value: ord.clinic}
+  ], 'CNC 밀링 작업이 시작되었습니다. 완료 후 배송해 드리겠습니다.')]);
 }
 function adminShipOrder(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
@@ -1356,7 +1550,10 @@ function adminShipOrder(orderId) {
     if (latestDesign && latestDesign.url && latestDesign.url.startsWith('https')) {
       shipMsgs.push({ type: 'image', originalContentUrl: latestDesign.url, previewImageUrl: latestDesign.url });
     }
-    shipMsgs.push({ type: 'text', text: '━━━━━━━━━━━━━━━━━━━━\n🚚 배송 시작\n━━━━━━━━━━━━━━━━━━━━\n🆔 ' + ord.id + '\n🏥 ' + ord.clinic + '\n\n배송이 시작되었습니다.\n곧 받아보실 수 있습니다.\n앱에서 수령 완료 버튼을 눌러주세요.' });
+    shipMsgs.push(buildFlexMessage('🚚', '배송 시작', [
+      {label:'주문번호', value: ord.id},
+      {label:'클리닉', value: ord.clinic}
+    ], '배송이 시작되었습니다. 앱에서 수령 완료 버튼을 눌러주세요.'));
     sendLineMessage(ord.lineId, shipMsgs);
   }
 }
