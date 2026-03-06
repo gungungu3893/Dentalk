@@ -1034,14 +1034,14 @@ async function submitCustom() {
       var stlUrl = null;
       // ① Supabase Storage 업로드 시도
       try {
-        var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
+        var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-file/' + fname, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
             'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
           body: origFile
         });
         if (r.ok) {
-          stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname;
+          stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-file/' + fname;
         } else {
           var errText = await r.text();
           console.warn('[STL Upload] HTTP ' + r.status + ' - ' + errText + ' → base64 fallback 사용');
@@ -1756,14 +1756,14 @@ async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
   var stlUrl = null;
   // Try Supabase Storage
   try {
-    var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
+    var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-file/' + fname, {
       method: 'POST',
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
       body: file
     });
     if (r.ok) {
-      stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname;
+      stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-file/' + fname;
     }
   } catch(e) {}
   // Fallback: base64
