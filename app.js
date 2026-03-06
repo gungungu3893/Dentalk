@@ -2,33 +2,73 @@
 // PWA 설치 — prompt captured early in index.html <head>
 // ============================================================
 function triggerInstall() {
-  if (window._pwaInstallPrompt) {
-    window._pwaInstallPrompt.prompt();
-    window._pwaInstallPrompt.userChoice.then(function(r) {
-      if (r.outcome === 'accepted') window._pwaInstallPrompt = null;
-    });
-    return;
-  }
-  var ua = navigator.userAgent;
-  var isIOS = /iphone|ipad|ipod/i.test(ua);
-  var isSafari = /safari/i.test(ua) && !/chrome/i.test(ua);
-  if (isIOS || isSafari) {
-    showInstallGuide('ios');
-  } else {
-    showInstallGuide('android');
-  }
+  var existing = document.getElementById('installGuidePopup');
+  if (existing) existing.remove();
+  var popup = document.createElement('div');
+  popup.id = 'installGuidePopup';
+  popup.innerHTML =
+    '<div class="fixed inset-0 z-[999] flex items-end" style="background:rgba(0,0,0,.6)" onclick="document.getElementById(\'installGuidePopup\').remove()">' +
+    '<div class="bg-white rounded-t-3xl w-full p-6 pb-10" onclick="event.stopPropagation()">' +
+      '<p class="text-center text-base font-black text-slate-800 mb-6">앱 설치 방법 선택</p>' +
+      '<div class="grid grid-cols-4 gap-3 mb-6">' +
+        '<button onclick="showInstallGuide(\'android\')" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-slate-50 active:bg-slate-200">' +
+          '<svg viewBox="0 0 24 24" class="w-10 h-10" fill="#3DDC84"><path d="M17.523 15.341a.676.676 0 0 1-.676-.676V9.382a.676.676 0 0 1 1.352 0v5.283a.676.676 0 0 1-.676.676zm-11.046 0a.676.676 0 0 1-.676-.676V9.382a.676.676 0 0 1 1.352 0v5.283a.676.676 0 0 1-.676.676zM8.6 17.6a.6.6 0 0 0 .6.6h.9v2.124a.676.676 0 0 0 1.352 0V18.2h1.096v2.124a.676.676 0 0 0 1.352 0V18.2h.9a.6.6 0 0 0 .6-.6V9H8.6v8.6zM14.863 4.487l.807-1.44a.17.17 0 0 0-.298-.163l-.817 1.456A5.3 5.3 0 0 0 12 3.9a5.3 5.3 0 0 0-2.555.44L8.628 2.884a.17.17 0 0 0-.298.163l.807 1.44A5.2 5.2 0 0 0 6.6 8.8h10.8a5.2 5.2 0 0 0-2.537-4.313zM10.5 7a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm3 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/></svg>' +
+          '<span class="text-[10px] font-black text-slate-700">Android</span>' +
+        '</button>' +
+        '<button onclick="showInstallGuide(\'ios\')" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-slate-50 active:bg-slate-200">' +
+          '<svg viewBox="0 0 24 24" class="w-10 h-10" fill="#000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>' +
+          '<span class="text-[10px] font-black text-slate-700">iOS</span>' +
+        '</button>' +
+        '<button onclick="showInstallGuide(\'windows\')" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-slate-50 active:bg-slate-200">' +
+          '<svg viewBox="0 0 24 24" class="w-10 h-10" fill="#0078D4"><path d="M3 12V6.75l6-1.32v6.57H3zm17-9v8.75h-7V4.68L20 3zM3 13h6v6.43l-6-1.29V13zm17 .25V22l-7-1.23V13.25H20z"/></svg>' +
+          '<span class="text-[10px] font-black text-slate-700">Windows</span>' +
+        '</button>' +
+        '<button onclick="showInstallGuide(\'mac\')" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-slate-50 active:bg-slate-200">' +
+          '<svg viewBox="0 0 24 24" class="w-10 h-10" fill="#555"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>' +
+          '<span class="text-[10px] font-black text-slate-700">Mac</span>' +
+        '</button>' +
+      '</div>' +
+      '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="w-full py-3 bg-slate-100 text-slate-600 font-black rounded-2xl text-sm">취소</button>' +
+    '</div></div>';
+  document.body.appendChild(popup);
 }
 function showInstallGuide(type) {
   var existing = document.getElementById('installGuidePopup');
   if (existing) existing.remove();
-  var msg = type === 'ios' ? t('install_ios') : t('install_android');
+  var guides = {
+    android: {
+      icon: '<svg viewBox="0 0 24 24" class="w-8 h-8 mx-auto mb-2" fill="#3DDC84"><path d="M17.523 15.341a.676.676 0 0 1-.676-.676V9.382a.676.676 0 0 1 1.352 0v5.283a.676.676 0 0 1-.676.676zm-11.046 0a.676.676 0 0 1-.676-.676V9.382a.676.676 0 0 1 1.352 0v5.283a.676.676 0 0 1-.676.676zM8.6 17.6a.6.6 0 0 0 .6.6h.9v2.124a.676.676 0 0 0 1.352 0V18.2h1.096v2.124a.676.676 0 0 0 1.352 0V18.2h.9a.6.6 0 0 0 .6-.6V9H8.6v8.6zM14.863 4.487l.807-1.44a.17.17 0 0 0-.298-.163l-.817 1.456A5.3 5.3 0 0 0 12 3.9a5.3 5.3 0 0 0-2.555.44L8.628 2.884a.17.17 0 0 0-.298.163l.807 1.44A5.2 5.2 0 0 0 6.6 8.8h10.8a5.2 5.2 0 0 0-2.537-4.313zM10.5 7a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm3 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/></svg>',
+      title: 'Android 설치',
+      steps: '① 브라우저 주소창 우측 <b>⋮ 메뉴</b> 탭<br>② <b>"앱 설치"</b> 또는 <b>"홈 화면에 추가"</b> 선택<br>③ <b>"설치"</b> 탭'
+    },
+    ios: {
+      icon: '<svg viewBox="0 0 24 24" class="w-8 h-8 mx-auto mb-2" fill="#000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>',
+      title: 'iPhone / iPad 설치',
+      steps: '① Safari 하단 <b>공유 버튼 □↑</b> 탭<br>② <b>"홈 화면에 추가"</b> 선택<br>③ <b>"추가"</b> 탭<br><br>※ Safari 브라우저에서만 가능'
+    },
+    windows: {
+      icon: '<svg viewBox="0 0 24 24" class="w-8 h-8 mx-auto mb-2" fill="#0078D4"><path d="M3 12V6.75l6-1.32v6.57H3zm17-9v8.75h-7V4.68L20 3zM3 13h6v6.43l-6-1.29V13zm17 .25V22l-7-1.23V13.25H20z"/></svg>',
+      title: 'Windows 설치',
+      steps: '① Chrome/Edge 주소창 우측 <b>⊕ 설치 아이콘</b> 클릭<br>② <b>"설치"</b> 클릭<br><br>※ 아이콘 없으면 브라우저 메뉴 <b>⋮</b><br>&nbsp;&nbsp;&nbsp;→ <b>"앱으로 설치"</b> 또는 <b>"Dentalk 설치"</b>'
+    },
+    mac: {
+      icon: '<svg viewBox="0 0 24 24" class="w-8 h-8 mx-auto mb-2" fill="#555"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>',
+      title: 'Mac 설치',
+      steps: '① Chrome/Edge 주소창 우측 <b>⊕ 설치 아이콘</b> 클릭<br>② <b>"설치"</b> 클릭<br><br>※ Safari의 경우 <b>파일 메뉴</b><br>&nbsp;&nbsp;&nbsp;→ <b>"Dock에 추가"</b>'
+    }
+  };
+  var g = guides[type];
   var popup = document.createElement('div');
   popup.id = 'installGuidePopup';
   popup.innerHTML =
-    '<div class="fixed inset-0 z-[999] flex items-end" style="background:rgba(0,0,0,.5)" onclick="document.getElementById(\'installGuidePopup\').remove()">' +
-    '<div class="bg-white rounded-t-3xl w-full p-6 pb-8" onclick="event.stopPropagation()">' +
-      '<p class="text-base font-black text-slate-800 mb-4 leading-relaxed">' + msg + '</p>' +
-      '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="w-full py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">' + t('install_ok') + '</button>' +
+    '<div class="fixed inset-0 z-[999] flex items-end" style="background:rgba(0,0,0,.6)" onclick="document.getElementById(\'installGuidePopup\').remove()">' +
+    '<div class="bg-white rounded-t-3xl w-full p-6 pb-10" onclick="event.stopPropagation()">' +
+      '<div class="text-center mb-4">' + g.icon + '<p class="text-base font-black text-slate-800">' + g.title + '</p></div>' +
+      '<p class="text-sm text-slate-700 leading-relaxed mb-6 bg-slate-50 rounded-2xl p-4">' + g.steps + '</p>' +
+      '<div class="flex gap-3">' +
+        '<button onclick="triggerInstall()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-black rounded-2xl text-sm">← 뒤로</button>' +
+        '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="flex-1 py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">확인</button>' +
+      '</div>' +
     '</div></div>';
   document.body.appendChild(popup);
 }
