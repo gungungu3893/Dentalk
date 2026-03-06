@@ -1,4 +1,35 @@
 // ============================================================
+// PWA 설치
+// ============================================================
+var _pwaInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _pwaInstallPrompt = e;
+  var btn = document.getElementById('installBtn');
+  if (btn) btn.classList.replace('hidden', 'flex');
+});
+window.addEventListener('appinstalled', function() {
+  _pwaInstallPrompt = null;
+  var btn = document.getElementById('installBtn');
+  if (btn) btn.classList.replace('flex', 'hidden');
+});
+function triggerInstall() {
+  if (_pwaInstallPrompt) {
+    _pwaInstallPrompt.prompt();
+    _pwaInstallPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') _pwaInstallPrompt = null;
+    });
+  } else {
+    alert('이미 설치되었거나, 브라우저 주소창 우측의 설치 아이콘을 눌러주세요.\n\nSafari: 공유 버튼 → "홈 화면에 추가"');
+  }
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
+
+// ============================================================
 // 상수 & 데이터
 // ============================================================
 const LOCKED = ['shop','forum','custom'];

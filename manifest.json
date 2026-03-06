@@ -1,0 +1,19 @@
+{
+  "name": "Dentalk · BIOTEM × BIOPLANT",
+  "short_name": "Dentalk",
+  "description": "BIOTEM × BIOPLANT Dental Supply & CNC Custom Orders",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#001d4a",
+  "theme_color": "#001d4a",
+  "orientation": "portrait",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

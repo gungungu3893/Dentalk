@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dentalk</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#001d4a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dentalk">
+<link rel="apple-touch-icon" href="icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -262,6 +269,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
       </div>
     </div>
+    <button id="installBtn" onclick="triggerInstall()" class="hidden items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5 active:bg-white/20 transition" title="앱 설치">
+      <span class="text-sm">📲</span>
+    </button>
     <button onclick="openCart()" class="relative p-2 bg-white/10 rounded-xl">
       <span class="text-xl">🛒</span>
       <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
