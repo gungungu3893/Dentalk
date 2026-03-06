@@ -901,13 +901,13 @@ function onStl(id, input) {
   d.innerHTML = '<p class="text-2xl mb-1">✅</p><p class="text-xs font-black text-green-600">' + f.name + '</p><p class="text-[9px] text-slate-400">' + (f.size/1024).toFixed(1) + ' KB</p>';
   d.className = 'border-2 border-green-200 rounded-xl p-4 text-center mb-2 bg-green-50';
 }
-function submitCustom() {
+async function submitCustom() {
   var clinic = document.getElementById('cust-clinic').value.trim();
   var addr   = document.getElementById('cust-addr').value.trim();
   var phone  = document.getElementById('cust-phone').value.trim();
   var lineId = document.getElementById('cust-line').value.trim();
   if (!clinic||!addr||!phone) { alert(t('err_fill_delivery')); return; }
-  var cases = [];
+  var cases = []; var stlFiles = [];
   for (var i=1; i<=caseCount; i++) {
     if (!document.getElementById('case-'+i)) continue;
     var selectedTeeth = caseTeeth[i] ? Array.from(caseTeeth[i]).sort(function(a,b){return a-b;}) : [];
@@ -928,13 +928,16 @@ function submitCustom() {
       });
     }
     if (!valid) return;
-    var stlFile = document.getElementById('stl-'+i).files[0];
+    var stlEl = document.getElementById('stl-'+i);
+    var stlFile = stlEl && stlEl.files[0] ? stlEl.files[0] : null;
+    stlFiles.push(stlFile);
     cases.push({
       patient:  document.getElementById('cp-'+i).value.trim() || t('anon_patient'),
       teeth:    teethData,
       deadline: document.getElementById('cd-'+i).value,
       memo:     document.getElementById('cm-'+i).value.trim(),
       stl:      stlFile ? stlFile.name : null,
+      stlUrl:   null,
     });
   }
   if (!cases.length) { alert(t('err_add_case')); return; }
@@ -944,6 +947,20 @@ function submitCustom() {
   var _day   = String(_now.getDate()).padStart(2,'0');
   var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
   var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
+  // STL 파일 Supabase Storage 업로드
+  for (var j = 0; j < stlFiles.length; j++) {
+    if (!stlFiles[j]) continue;
+    var fname = oid + '_case' + (j+1) + '_' + Date.now() + '.stl';
+    try {
+      var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
+        body: stlFiles[j]
+      });
+      if (r.ok) cases[j].stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname;
+    } catch(e) { console.error('[STL Upload]', e); }
+  }
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString(), userNickname:currentUser.nickname };
   customOrders.unshift(order);
   saveOrderToSupabase(order);
@@ -1361,7 +1378,8 @@ async function loadOrdersFromSupabase() {
         lineId: r.line_id, cases: r.cases || [], stage: r.stage,
         designVersions: r.design_versions || [],
         reviewHistory: r.review_history || [], date: r.date,
-        userNickname: r.user_nickname
+        userNickname: r.user_nickname,
+        carrier: r.carrier || '', trackingNumber: r.tracking_number || ''
       };
     });
   } catch(e) { console.error('[Order Load]', e); }
@@ -1372,6 +1390,8 @@ async function updateOrderInSupabase(orderId, updates) {
     if (updates.stage !== undefined) body.stage = updates.stage;
     if (updates.designVersions !== undefined) body.design_versions = updates.designVersions;
     if (updates.reviewHistory !== undefined) body.review_history = updates.reviewHistory;
+    if (updates.carrier !== undefined) body.carrier = updates.carrier;
+    if (updates.trackingNumber !== undefined) body.tracking_number = updates.trackingNumber;
     await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
       method: 'PATCH',
       headers: {
@@ -1537,11 +1557,38 @@ function adminStartMilling(orderId) {
   ], 'CNC 밀링 작업이 시작되었습니다. 완료 후 배송해 드리겠습니다.')]);
 }
 function adminShipOrder(orderId) {
+  var modal = document.getElementById('shippingModal');
+  if (!modal) return;
+  modal.dataset.orderId = orderId;
+  document.getElementById('ship-carrier').value = '';
+  document.getElementById('ship-tracking').value = '';
+  document.getElementById('ship-carrier-custom-wrap').classList.add('hidden');
+  modal.classList.remove('hidden');
+}
+function toggleCustomCarrier() {
+  var sel = document.getElementById('ship-carrier');
+  document.getElementById('ship-carrier-custom-wrap').classList.toggle('hidden', sel.value !== 'custom');
+}
+function closeShippingModal() {
+  document.getElementById('shippingModal').classList.add('hidden');
+}
+async function adminConfirmShipping() {
+  var modal = document.getElementById('shippingModal');
+  var orderId = modal.dataset.orderId;
+  var sel = document.getElementById('ship-carrier');
+  var carrier = sel.value === 'custom'
+    ? (document.getElementById('ship-carrier-custom').value.trim())
+    : sel.value;
+  var trackingNumber = document.getElementById('ship-tracking').value.trim();
+  if (!carrier) { alert('배송사를 선택해주세요.'); return; }
+  if (!trackingNumber) { alert('송장번호를 입력해주세요.'); return; }
   var ord = customOrders.find(function(o){ return o.id===orderId; });
   if (!ord) return;
-  if (!confirm('배송 처리하시겠습니까?')) return;
   ord.stage = 'shipped';
-  updateOrderInSupabase(orderId, { stage: 'shipped' });
+  ord.carrier = carrier;
+  ord.trackingNumber = trackingNumber;
+  updateOrderInSupabase(orderId, { stage: 'shipped', carrier: carrier, trackingNumber: trackingNumber });
+  closeShippingModal();
   renderAdminOrders();
   renderCustomOrders();
   if (ord.lineId) {
@@ -1552,7 +1599,9 @@ function adminShipOrder(orderId) {
     }
     shipMsgs.push(buildFlexMessage('🚚', '배송 시작', [
       {label:'주문번호', value: ord.id},
-      {label:'클리닉', value: ord.clinic}
+      {label:'클리닉', value: ord.clinic},
+      {label:'배송사', value: carrier},
+      {label:'송장번호', value: trackingNumber}
     ], '배송이 시작되었습니다. 앱에서 수령 완료 버튼을 눌러주세요.'));
     sendLineMessage(ord.lineId, shipMsgs);
   }
@@ -1571,64 +1620,104 @@ async function renderAdminOrders() {
   await loadOrdersFromSupabase();
   _renderAdminOrdersList();
 }
+var adminOrderSubTab = 'new';
+function adminShowOrderSubTab(tab) {
+  adminOrderSubTab = tab;
+  ['new','active','done'].forEach(function(name) {
+    var el  = document.getElementById('adminOrderSub-' + name);
+    var btn = document.getElementById('adminOrderSubBtn-' + name);
+    if (!el || !btn) return;
+    el.classList.toggle('hidden', name !== tab);
+    btn.className = name === tab
+      ? 'flex-1 py-1.5 rounded-xl font-black text-[10px] bg-[#001d4a] text-white'
+      : 'flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500';
+  });
+}
+function _buildAdminOrderCard(o) {
+  var stageLabel = t('stage_' + o.stage) || o.stage;
+  var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
+  // STL 다운로드 링크
+  var stlHtml = o.cases.map(function(cs, ci) {
+    if (!cs.stl && !cs.stlUrl) return '';
+    return '<div class="flex items-center justify-between py-1">' +
+      '<span class="text-[9px] text-slate-500 font-bold">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + '</span>' +
+      (cs.stlUrl
+        ? '<a href="' + cs.stlUrl + '" download="' + (cs.stl||'file.stl') + '" class="inline-flex items-center gap-1 text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">📥 STL 다운로드</a>'
+        : '<span class="text-[9px] text-slate-300">📎 ' + cs.stl + '</span>') +
+    '</div>';
+  }).join('');
+  var actionHtml = '';
+  if (o.stage === 'submitted') {
+    actionHtml = '<button onclick="adminConfirmOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">✅ 접수 확인 → LINE 발송</button>';
+  } else if (o.stage === 'confirmed' || o.stage === 'design_revision') {
+    var vNote = (o.designVersions && o.designVersions.length) ? ' (ver.'+(o.designVersions.length+1)+')' : '';
+    actionHtml = '<div class="mt-3"><label class="block cursor-pointer">' +
+      '<div class="w-full py-2.5 bg-amber-500 text-white rounded-xl font-black text-xs text-center active:scale-95 transition">📐 디자인 업로드' + vNote + '</div>' +
+      '<input type="file" accept="image/*,.pdf" class="hidden" onchange="adminUploadDesign(\'' + o.id + '\',this)"></label></div>';
+  } else if (o.stage === 'design_ready') {
+    var latest = (o.designVersions && o.designVersions.length) ? o.designVersions[o.designVersions.length-1] : null;
+    actionHtml = '<div class="mt-3 bg-blue-50 rounded-xl p-3">' +
+      '<p class="text-[9px] font-black text-blue-600 mb-2">📐 고객 검토 대기 중 (ver.' + (o.designVersions?o.designVersions.length:1) + ')</p>' +
+      (latest ? '<img src="' + latest.url + '" class="w-full rounded-lg max-h-28 object-contain bg-white mb-1">' : '') +
+      '<p class="text-[8px] text-slate-400">고객이 만족/불만족을 선택할 때까지 대기합니다.</p></div>';
+  } else if (o.stage === 'approved') {
+    actionHtml = '<button onclick="adminStartMilling(\'' + o.id + '\')" class="w-full py-2.5 bg-purple-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">⚙️ 밀링 시작 → LINE 발송</button>';
+  } else if (o.stage === 'milling') {
+    actionHtml = '<button onclick="adminShipOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-green-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>';
+  } else if (o.stage === 'shipped') {
+    actionHtml = '<div class="mt-3 bg-green-50 rounded-xl p-3">' +
+      '<p class="text-[9px] font-black text-green-600 mb-1">🚚 배송 완료</p>' +
+      (o.carrier ? '<p class="text-[9px] text-slate-500">배송사: ' + o.carrier + '</p>' : '') +
+      (o.trackingNumber ? '<p class="text-[9px] font-mono text-slate-600 font-bold">송장: ' + o.trackingNumber + '</p>' : '') +
+    '</div>';
+  } else if (o.stage === 'done') {
+    actionHtml = '<div class="mt-3 bg-slate-50 rounded-xl p-2 text-center"><p class="text-[9px] font-black text-slate-400">✅ 수령 완료</p></div>';
+  }
+  var histHtml = '';
+  if (o.reviewHistory && o.reviewHistory.length) {
+    histHtml = '<div class="mt-2 border-t border-slate-100 pt-2">' +
+      '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">검토 이력 (' + o.reviewHistory.length + '회)</p>' +
+      o.reviewHistory.map(function(r){
+        return '<div class="flex gap-1 items-start text-[8px] text-slate-400 mb-0.5">' +
+          '<span>' + (r.action==='approved'?'✅':'❌') + '</span>' +
+          '<span class="flex-1">' + r.date + (r.note?' · '+r.note:'') + '</span></div>';
+      }).join('') +
+    '</div>';
+  }
+  return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">' +
+    '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
+      '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
+           '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
+      '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stageLabel + '</span>' +
+    '</div>' +
+    '<div class="px-4 py-3">' +
+      '<p class="text-[10px] text-slate-500 font-bold mb-1">' + o.cases.length + '케이스 · ' + totalTeeth + '치아</p>' +
+      '<p class="text-[9px] text-slate-400">📍 ' + o.addr + '</p>' +
+      '<p class="text-[9px] text-slate-400">📞 ' + o.phone + '</p>' +
+      (o.lineId ? '<p class="text-[9px] text-green-500 font-bold">💬 Line: ' + o.lineId + '</p>' : '<p class="text-[9px] text-red-300">⚠️ Line ID 없음</p>') +
+      (stlHtml ? '<div class="mt-2 pt-2 border-t border-slate-100">' + stlHtml + '</div>' : '') +
+      actionHtml +
+      histHtml +
+    '</div>' +
+  '</div>';
+}
 function _renderAdminOrdersList() {
   var list = document.getElementById('adminTabOrders');
   if (!list) return;
-  if (!customOrders.length) {
-    list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>';
-    return;
-  }
-  list.innerHTML = customOrders.map(function(o) {
-    var stageLabel = t('stage_' + o.stage) || o.stage;
-    var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
-    var actionHtml = '';
-    if (o.stage === 'submitted') {
-      actionHtml = '<button onclick="adminConfirmOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">✅ 접수 확인 → LINE 발송</button>';
-    } else if (o.stage === 'confirmed' || o.stage === 'design_revision') {
-      var vNote = (o.designVersions && o.designVersions.length) ? ' (ver.'+(o.designVersions.length+1)+')' : '';
-      actionHtml = '<div class="mt-3"><label class="block cursor-pointer">' +
-        '<div class="w-full py-2.5 bg-amber-500 text-white rounded-xl font-black text-xs text-center active:scale-95 transition">📐 디자인 업로드' + vNote + '</div>' +
-        '<input type="file" accept="image/*,.pdf" class="hidden" onchange="adminUploadDesign(\'' + o.id + '\',this)"></label></div>';
-    } else if (o.stage === 'design_ready') {
-      var latest = (o.designVersions && o.designVersions.length) ? o.designVersions[o.designVersions.length-1] : null;
-      actionHtml = '<div class="mt-3 bg-blue-50 rounded-xl p-3">' +
-        '<p class="text-[9px] font-black text-blue-600 mb-2">📐 고객 검토 대기 중 (ver.' + (o.designVersions?o.designVersions.length:1) + ')</p>' +
-        (latest ? '<img src="' + latest.url + '" class="w-full rounded-lg max-h-28 object-contain bg-white mb-1">' : '') +
-        '<p class="text-[8px] text-slate-400">고객이 만족/불만족을 선택할 때까지 대기합니다.</p></div>';
-    } else if (o.stage === 'approved') {
-      actionHtml = '<button onclick="adminStartMilling(\'' + o.id + '\')" class="w-full py-2.5 bg-purple-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">⚙️ 밀링 시작 → LINE 발송</button>';
-    } else if (o.stage === 'milling') {
-      actionHtml = '<button onclick="adminShipOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-green-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>';
-    } else if (o.stage === 'shipped' || o.stage === 'done') {
-      actionHtml = '<div class="mt-3 bg-green-50 rounded-xl p-2 text-center"><p class="text-[9px] font-black text-green-600">🚚 배송 완료</p></div>';
-    }
-    var histHtml = '';
-    if (o.reviewHistory && o.reviewHistory.length) {
-      histHtml = '<div class="mt-2 border-t border-slate-100 pt-2">' +
-        '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">검토 이력 (' + o.reviewHistory.length + '회)</p>' +
-        o.reviewHistory.map(function(r){
-          return '<div class="flex gap-1 items-start text-[8px] text-slate-400 mb-0.5">' +
-            '<span>' + (r.action==='approved'?'✅':'❌') + '</span>' +
-            '<span class="flex-1">' + r.date + (r.note?' · '+r.note:'') + '</span></div>';
-        }).join('') +
-      '</div>';
-    }
-    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">' +
-      '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
-        '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
-             '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
-        '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stageLabel + '</span>' +
-      '</div>' +
-      '<div class="px-4 py-3">' +
-        '<p class="text-[10px] text-slate-500 font-bold mb-1">' + o.cases.length + '케이스 · ' + totalTeeth + '치아</p>' +
-        '<p class="text-[9px] text-slate-400">📍 ' + o.addr + '</p>' +
-        '<p class="text-[9px] text-slate-400">📞 ' + o.phone + '</p>' +
-        (o.lineId ? '<p class="text-[9px] text-green-500 font-bold">💬 Line: ' + o.lineId + '</p>' : '<p class="text-[9px] text-red-300">⚠️ Line ID 없음</p>') +
-        actionHtml +
-        histHtml +
-      '</div>' +
-    '</div>';
-  }).join('');
+  var newOrders    = customOrders.filter(function(o){ return o.stage === 'submitted'; });
+  var activeOrders = customOrders.filter(function(o){ return ['confirmed','design_revision','design_ready','approved','milling','shipped'].indexOf(o.stage) !== -1; });
+  var doneOrders   = customOrders.filter(function(o){ return o.stage === 'done'; });
+  var emptyMsg = '<p class="text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>';
+  list.innerHTML =
+    '<div class="flex gap-1 mb-3">' +
+      '<button onclick="adminShowOrderSubTab(\'new\')" id="adminOrderSubBtn-new" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-[#001d4a] text-white">새 주문 (' + newOrders.length + ')</button>' +
+      '<button onclick="adminShowOrderSubTab(\'active\')" id="adminOrderSubBtn-active" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">진행중 (' + activeOrders.length + ')</button>' +
+      '<button onclick="adminShowOrderSubTab(\'done\')" id="adminOrderSubBtn-done" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">완료 (' + doneOrders.length + ')</button>' +
+    '</div>' +
+    '<div id="adminOrderSub-new">'    + (newOrders.length    ? newOrders.map(_buildAdminOrderCard).join('')    : emptyMsg) + '</div>' +
+    '<div id="adminOrderSub-active" class="hidden">' + (activeOrders.length ? activeOrders.map(_buildAdminOrderCard).join('') : emptyMsg) + '</div>' +
+    '<div id="adminOrderSub-done"   class="hidden">' + (doneOrders.length   ? doneOrders.map(_buildAdminOrderCard).join('')   : emptyMsg) + '</div>';
+  adminShowOrderSubTab(adminOrderSubTab);
 }
 // ── 상품 가격 관리 ──────────────────────────────────────────
 function renderAdminProducts() {
