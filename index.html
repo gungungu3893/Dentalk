@@ -10,7 +10,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Dentalk">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -57,6 +59,23 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
+<!-- ============================== STL 3D 뷰어 모달 ============================== -->
+<div id="stlViewerModal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm z-[900] items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col" style="max-height:88vh">
+    <div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center flex-shrink-0">
+      <p class="font-black text-white text-sm">🧊 STL 3D 미리보기</p>
+      <button onclick="closeStlViewer()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
+    </div>
+    <div id="stlViewerContainer" class="flex-1 relative bg-slate-900" style="min-height:320px">
+      <canvas id="stlCanvas" class="w-full h-full block" style="min-height:320px"></canvas>
+      <div id="stlViewerMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-bold">불러오는 중...</div>
+    </div>
+    <div class="px-4 py-3 bg-slate-50 flex gap-2 flex-shrink-0">
+      <p class="text-[9px] text-slate-400 flex-1 self-center font-bold">드래그: 회전 · 스크롤: 줌</p>
+      <a id="stlDownloadBtn" href="#" download class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-black text-xs active:scale-95 transition">📥 다운로드</a>
+    </div>
+  </div>
+</div>
 <!-- ============================== 로그인 모달 ============================== -->
 <div id="loginModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
   <div class="bg-[#001d4a] w-full max-w-sm rounded-3xl p-8 text-white shadow-2xl">
@@ -720,5 +739,121 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 </div>
 <script src="lang.js" defer></script>
 <script src="app.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+// ── STL 3D Viewer ──────────────────────────────────────────────────────
+var _stlRenderer, _stlScene, _stlCamera, _stlAnimId;
+var _stlDragging = false, _stlPrevX = 0, _stlPrevY = 0;
+
+function openStlViewer(url) {
+  document.getElementById('stlViewerModal').classList.add('open');
+  document.getElementById('stlViewerMsg').style.display = 'flex';
+  document.getElementById('stlDownloadBtn').href = url;
+  _initStlScene();
+  fetch(url)
+    .then(function(r){ return r.arrayBuffer(); })
+    .then(function(buf){ _loadStlBuffer(buf); })
+    .catch(function(){ document.getElementById('stlViewerMsg').textContent = '파일을 불러올 수 없습니다.'; });
+}
+
+function closeStlViewer() {
+  document.getElementById('stlViewerModal').classList.remove('open');
+  if (_stlAnimId) cancelAnimationFrame(_stlAnimId);
+  if (_stlRenderer) { _stlRenderer.dispose(); _stlRenderer = null; }
+}
+
+function _initStlScene() {
+  if (_stlRenderer) { _stlRenderer.dispose(); _stlRenderer = null; }
+  if (_stlAnimId) cancelAnimationFrame(_stlAnimId);
+  var canvas = document.getElementById('stlCanvas');
+  var w = canvas.clientWidth || 480, h = canvas.clientHeight || 320;
+  _stlScene = new THREE.Scene();
+  _stlScene.background = new THREE.Color(0x1a2744);
+  _stlCamera = new THREE.PerspectiveCamera(45, w/h, 0.1, 10000);
+  _stlCamera.position.set(0, 0, 200);
+  _stlScene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  var dl = new THREE.DirectionalLight(0xffffff, 1.0);
+  dl.position.set(1, 2, 3);
+  _stlScene.add(dl);
+  _stlRenderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  _stlRenderer.setSize(w, h, false);
+  _stlRenderer.setPixelRatio(window.devicePixelRatio);
+  // Mouse/touch rotate
+  canvas.onmousedown = function(e){ _stlDragging=true; _stlPrevX=e.clientX; _stlPrevY=e.clientY; };
+  canvas.onmousemove = function(e){ if(!_stlDragging||!_stlScene.userData.mesh) return;
+    var dx=(e.clientX-_stlPrevX)*0.01, dy=(e.clientY-_stlPrevY)*0.01;
+    _stlScene.userData.mesh.rotation.y+=dx; _stlScene.userData.mesh.rotation.x+=dy;
+    _stlPrevX=e.clientX; _stlPrevY=e.clientY; };
+  canvas.onmouseup = canvas.onmouseleave = function(){ _stlDragging=false; };
+  canvas.ontouchstart = function(e){ _stlDragging=true; _stlPrevX=e.touches[0].clientX; _stlPrevY=e.touches[0].clientY; e.preventDefault(); };
+  canvas.ontouchmove = function(e){ if(!_stlDragging||!_stlScene.userData.mesh) return;
+    var dx=(e.touches[0].clientX-_stlPrevX)*0.01, dy=(e.touches[0].clientY-_stlPrevY)*0.01;
+    _stlScene.userData.mesh.rotation.y+=dx; _stlScene.userData.mesh.rotation.x+=dy;
+    _stlPrevX=e.touches[0].clientX; _stlPrevY=e.touches[0].clientY; e.preventDefault(); };
+  canvas.ontouchend = function(){ _stlDragging=false; };
+  canvas.onwheel = function(e){ _stlCamera.position.z=Math.max(10,Math.min(2000,_stlCamera.position.z+e.deltaY*0.5)); e.preventDefault(); };
+}
+
+function _loadStlBuffer(buf) {
+  var loader = new THREE.STLLoader ? new THREE.STLLoader() : null;
+  if (!loader) {
+    // STLLoader not bundled in three.min; parse manually (binary STL)
+    var geometry = _parseBinaryStl(buf) || _parseAsciiStl(buf);
+    if (!geometry) { document.getElementById('stlViewerMsg').textContent = '파싱 오류'; return; }
+    _showStlGeometry(geometry);
+  } else {
+    var geometry = loader.parse(buf);
+    _showStlGeometry(geometry);
+  }
+}
+
+function _parseBinaryStl(buf) {
+  try {
+    var dv = new DataView(buf), offset = 80, numTri = dv.getUint32(offset, true); offset += 4;
+    if (numTri === 0 || numTri > 2000000) return null;
+    var verts = new Float32Array(numTri * 9), norms = new Float32Array(numTri * 9);
+    for (var i = 0; i < numTri; i++) {
+      var nx=dv.getFloat32(offset,true),ny=dv.getFloat32(offset+4,true),nz=dv.getFloat32(offset+8,true); offset+=12;
+      for (var v=0;v<3;v++) {
+        verts[i*9+v*3]=dv.getFloat32(offset,true); verts[i*9+v*3+1]=dv.getFloat32(offset+4,true); verts[i*9+v*3+2]=dv.getFloat32(offset+8,true); offset+=12;
+        norms[i*9+v*3]=nx; norms[i*9+v*3+1]=ny; norms[i*9+v*3+2]=nz;
+      }
+      offset+=2;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(verts,3));
+    geo.setAttribute('normal', new THREE.BufferAttribute(norms,3));
+    return geo;
+  } catch(e) { return null; }
+}
+
+function _parseAsciiStl(buf) {
+  try {
+    var text = new TextDecoder().decode(buf);
+    var verts = [], re = /vertex\s+([\d.\-eE+]+)\s+([\d.\-eE+]+)\s+([\d.\-eE+]+)/g, m;
+    while ((m=re.exec(text))!==null) { verts.push(+m[1],+m[2],+m[3]); }
+    if (!verts.length) return null;
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts),3));
+    geo.computeVertexNormals();
+    return geo;
+  } catch(e) { return null; }
+}
+
+function _showStlGeometry(geometry) {
+  document.getElementById('stlViewerMsg').style.display = 'none';
+  geometry.computeBoundingBox();
+  var box = geometry.boundingBox;
+  var cx=(box.max.x+box.min.x)/2, cy=(box.max.y+box.min.y)/2, cz=(box.max.z+box.min.z)/2;
+  geometry.translate(-cx,-cy,-cz);
+  var size = Math.max(box.max.x-box.min.x, box.max.y-box.min.y, box.max.z-box.min.z);
+  _stlCamera.position.z = size * 1.8;
+  var mat = new THREE.MeshPhongMaterial({ color: 0xD4AF37, shininess: 60, specular: 0x444444 });
+  var mesh = new THREE.Mesh(geometry, mat);
+  _stlScene.userData.mesh = mesh;
+  _stlScene.add(mesh);
+  (function loop(){ _stlAnimId=requestAnimationFrame(loop); if(_stlRenderer) _stlRenderer.render(_stlScene,_stlCamera); })();
+}
+</script>
 </body>
 </html>

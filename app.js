@@ -1689,11 +1689,20 @@ function _buildAdminOrderCard(o) {
   // STL 다운로드 링크
   var stlHtml = o.cases.map(function(cs, ci) {
     if (!cs.stl && !cs.stlUrl) return '';
-    return '<div class="flex flex-col gap-0.5 py-1.5">' +
-      '<span class="text-[27px] text-slate-600 font-black">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + '</span>' +
-      (cs.stlUrl
-        ? '<a href="' + cs.stlUrl + '" target="_blank" rel="noopener" download="' + (cs.stl||'file.stl') + '" class="inline-flex items-center gap-1 text-[27px] font-black text-blue-600 underline">📥 ' + (cs.stl||'STL 다운로드') + '</a>'
-        : '<span class="text-[27px] text-red-400 font-bold">⚠️ 업로드 실패 · ' + cs.stl + '</span>') +
+    return '<div class="flex items-center justify-between gap-2 py-1.5">' +
+      '<div class="flex items-center gap-1.5 min-w-0">' +
+        '<span class="text-base">🧊</span>' +
+        '<div class="min-w-0">' +
+          '<p class="text-[10px] font-black text-slate-500">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + '</p>' +
+          '<p class="text-[9px] text-slate-400 truncate max-w-[140px]">' + (cs.stl||'') + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex gap-1 flex-shrink-0">' +
+        (cs.stlUrl
+          ? '<button onclick="openStlViewer(\'' + cs.stlUrl + '\')" class="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg font-black text-[9px] active:scale-95 transition">🧊 3D 보기</button>' +
+            '<a href="' + cs.stlUrl + '" download="' + (cs.stl||'file.stl') + '" class="px-2.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-black text-[9px] active:scale-95 transition inline-flex items-center">📥 다운로드</a>'
+          : '<span class="text-[9px] text-red-400 font-bold">⚠️ 업로드 실패</span>') +
+      '</div>' +
     '</div>';
   }).join('');
   var actionHtml = '';
