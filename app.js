@@ -1,19 +1,11 @@
 // ============================================================
-// PWA 설치
+// PWA 설치 — prompt captured early in index.html <head>
 // ============================================================
-var _pwaInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  _pwaInstallPrompt = e;
-});
-window.addEventListener('appinstalled', function() {
-  _pwaInstallPrompt = null;
-});
 function triggerInstall() {
-  if (_pwaInstallPrompt) {
-    _pwaInstallPrompt.prompt();
-    _pwaInstallPrompt.userChoice.then(function(r) {
-      if (r.outcome === 'accepted') _pwaInstallPrompt = null;
+  if (window._pwaInstallPrompt) {
+    window._pwaInstallPrompt.prompt();
+    window._pwaInstallPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') window._pwaInstallPrompt = null;
     });
     return;
   }
