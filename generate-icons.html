@@ -41,21 +41,23 @@ function draw(id) {
   ctx.fill();
 
   // "dentalk" text  — den + t(gold) + alk
+  // Auto-fit: shrink font until total width fits within 82% of canvas
+  var maxWidth = s * 0.82;
   var fs = Math.round(s * 0.30);
-  ctx.font = '900 ' + fs + 'px "Arial Black", Arial, sans-serif';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
+  var wDen, wT, wAlk, total;
+  do {
+    ctx.font = '900 ' + fs + 'px "Arial Black", Arial, sans-serif';
+    wDen  = ctx.measureText('den').width;
+    wT    = ctx.measureText('t').width;
+    wAlk  = ctx.measureText('alk').width;
+    total = wDen + wT + wAlk;
+    if (total > maxWidth) fs -= 1;
+  } while (total > maxWidth && fs > 8);
 
   var y = s * 0.5;
-  var x = s * 0.09;
-
-  // Measure full word to center
-  ctx.fillStyle = '#ffffff';
-  var wDen = ctx.measureText('den').width;
-  var wT   = ctx.measureText('t').width;
-  var wAlk = ctx.measureText('alk').width;
-  var total = wDen + wT + wAlk;
-  x = (s - total) / 2;
+  var x = (s - total) / 2;
 
   ctx.fillStyle = '#ffffff';
   ctx.fillText('den', x, y);
