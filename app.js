@@ -1627,7 +1627,7 @@ function adminShowOrderSubTab(tab) {
     var el  = document.getElementById('adminOrderSub-' + name);
     var btn = document.getElementById('adminOrderSubBtn-' + name);
     if (!el || !btn) return;
-    el.classList.toggle('hidden', name !== tab);
+    if (name === tab) { el.classList.remove('hidden'); } else { el.classList.add('hidden'); }
     btn.className = name === tab
       ? 'flex-1 py-1.5 rounded-xl font-black text-[10px] bg-[#001d4a] text-white'
       : 'flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500';
@@ -1639,11 +1639,11 @@ function _buildAdminOrderCard(o) {
   // STL 다운로드 링크
   var stlHtml = o.cases.map(function(cs, ci) {
     if (!cs.stl && !cs.stlUrl) return '';
-    return '<div class="flex items-center justify-between py-1">' +
-      '<span class="text-[9px] text-slate-500 font-bold">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + '</span>' +
+    return '<div class="flex flex-col gap-0.5 py-1.5">' +
+      '<span class="text-[27px] text-slate-600 font-black">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + '</span>' +
       (cs.stlUrl
-        ? '<a href="' + cs.stlUrl + '" download="' + (cs.stl||'file.stl') + '" class="inline-flex items-center gap-1 text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">📥 STL 다운로드</a>'
-        : '<span class="text-[9px] text-slate-300">📎 ' + cs.stl + '</span>') +
+        ? '<a href="' + cs.stlUrl + '" target="_blank" rel="noopener" download="' + (cs.stl||'file.stl') + '" class="inline-flex items-center gap-1 text-[27px] font-black text-blue-600 underline">📥 ' + (cs.stl||'STL 다운로드') + '</a>'
+        : '<span class="text-[27px] text-red-400 font-bold">⚠️ 업로드 실패 · ' + cs.stl + '</span>') +
     '</div>';
   }).join('');
   var actionHtml = '';
@@ -1714,9 +1714,9 @@ function _renderAdminOrdersList() {
       '<button onclick="adminShowOrderSubTab(\'active\')" id="adminOrderSubBtn-active" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">진행중 (' + activeOrders.length + ')</button>' +
       '<button onclick="adminShowOrderSubTab(\'done\')" id="adminOrderSubBtn-done" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">완료 (' + doneOrders.length + ')</button>' +
     '</div>' +
-    '<div id="adminOrderSub-new">'    + (newOrders.length    ? newOrders.map(_buildAdminOrderCard).join('')    : emptyMsg) + '</div>' +
-    '<div id="adminOrderSub-active" class="hidden">' + (activeOrders.length ? activeOrders.map(_buildAdminOrderCard).join('') : emptyMsg) + '</div>' +
-    '<div id="adminOrderSub-done"   class="hidden">' + (doneOrders.length   ? doneOrders.map(_buildAdminOrderCard).join('')   : emptyMsg) + '</div>';
+    '<div id="adminOrderSub-new" class="grid grid-cols-2 gap-3">'    + (newOrders.length    ? newOrders.map(_buildAdminOrderCard).join('')    : '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>') + '</div>' +
+    '<div id="adminOrderSub-active" class="hidden grid grid-cols-2 gap-3">' + (activeOrders.length ? activeOrders.map(_buildAdminOrderCard).join('') : '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>') + '</div>' +
+    '<div id="adminOrderSub-done"   class="hidden grid grid-cols-2 gap-3">' + (doneOrders.length   ? doneOrders.map(_buildAdminOrderCard).join('')   : '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>') + '</div>';
   adminShowOrderSubTab(adminOrderSubTab);
 }
 // ── 상품 가격 관리 ──────────────────────────────────────────
