@@ -854,7 +854,7 @@ function addCase() {
     '<div id="teeth-details-' + id + '" class="space-y-2 mt-3 mb-3"></div>' +
     '<p class="text-sm font-black text-slate-600 mb-2 mt-3">' + t('case_deadline_label') + '</p>' +
     '<input type="date" id="cd-' + id + '" class="w-full p-4 bg-white rounded-xl text-base font-black outline-none border-2 border-blue-200 mb-3 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;">' +
-    '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white">' +
+    '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" ondragover="onStlDragOver(' + id + ',event)" ondragleave="onStlDragLeave(' + id + ',event)" ondrop="onStlDrop(' + id + ',event)" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white transition-colors">' +
       '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">' + t('stl_label') + '</p><p class="text-[9px] text-slate-400 mt-0.5">' + t('stl_hint') + '</p>' +
     '</div>' +
     '<input type="file" id="stl-' + id + '" accept=".stl,.STL" class="hidden" multiple onchange="onStl(' + id + ',this)">' +
@@ -945,6 +945,34 @@ function getToothName(num) {
   var keyMap = {1:'tooth_11',2:'tooth_12',3:'tooth_13',4:'tooth_14',5:'tooth_15',6:'tooth_16',7:'tooth_17'};
   return '#' + num + ' ' + (t(keyMap[n]) || '');
 }
+function onStlDragOver(id, e) {
+  e.preventDefault(); e.stopPropagation();
+  var d = document.getElementById('stl-drop-'+id);
+  d.style.borderColor = '#3b82f6';
+  d.style.background  = '#eff6ff';
+}
+function onStlDragLeave(id, e) {
+  e.preventDefault(); e.stopPropagation();
+  var d = document.getElementById('stl-drop-'+id);
+  d.style.borderColor = '';
+  d.style.background  = '';
+}
+function onStlDrop(id, e) {
+  e.preventDefault(); e.stopPropagation();
+  var d = document.getElementById('stl-drop-'+id);
+  d.style.borderColor = ''; d.style.background = '';
+  var dropped = Array.from(e.dataTransfer.files).filter(function(f){
+    return f.name.toLowerCase().endsWith('.stl');
+  });
+  if (!dropped.length) return;
+  var inputEl = document.getElementById('stl-'+id);
+  var existing = inputEl.files ? Array.from(inputEl.files) : [];
+  var merged = existing.concat(dropped).slice(0, 10);
+  var dt = new DataTransfer();
+  merged.forEach(function(f){ dt.items.add(f); });
+  inputEl.files = dt.files;
+  onStl(id, inputEl);
+}
 function onStl(id, input) {
   var files = Array.from(input.files).slice(0, 10); if(!files.length) return;
   var d = document.getElementById('stl-drop-'+id);
@@ -954,8 +982,10 @@ function onStl(id, input) {
   }).join('');
   d.innerHTML = '<p class="text-xl mb-1">✅</p>' +
     '<p class="text-xs font-black text-green-600 mb-1">' + files.length + '개 파일 선택됨 · ' + totalKB.toFixed(0) + 'KB</p>' +
-    '<div class="text-left">' + listHtml + '</div>';
-  d.className = 'border-2 border-green-200 rounded-xl p-3 mb-2 bg-green-50 cursor-pointer';
+    '<div class="text-left">' + listHtml + '</div>' +
+    '<p class="text-[8px] text-slate-400 mt-1">여기에 파일을 추가로 드래그하거나 탭하여 더 추가</p>';
+  d.style.borderColor = ''; d.style.background = '';
+  d.className = 'border-2 border-green-200 rounded-xl p-3 mb-2 bg-green-50 cursor-pointer transition-colors';
 }
 async function submitCustom() {
   var clinic = document.getElementById('cust-clinic').value.trim();
