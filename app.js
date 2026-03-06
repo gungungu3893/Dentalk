@@ -356,6 +356,7 @@ async function handleLogin() {
   localStorage.setItem('dentalk_profile_' + lic, JSON.stringify(sync));
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
+  localStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
   document.getElementById('licenseDisplay').textContent = currentUser.nickname;
   var sideNick = document.getElementById('sideNickname');
   if (sideNick) sideNick.textContent = currentUser.nickname;
@@ -406,10 +407,12 @@ function tickSession() {
 function extendSession() {
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
+  localStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
   closeModal('extendModal');
 }
 function forceLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  localStorage.removeItem('dentalk_session');
   document.body.classList.remove('is-admin');
   currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
   document.getElementById('sideLoginArea').classList.remove('hidden');
@@ -425,6 +428,7 @@ function forceLogout() {
 }
 function doLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
+  localStorage.removeItem('dentalk_session');
   currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
   cart=[]; updateBadge();
   document.getElementById('sideLoginArea').classList.remove('hidden');
@@ -2550,9 +2554,40 @@ window.addEventListener('DOMContentLoaded', function() {
   pendingLang = null;
   document.getElementById('mb-home').classList.add('active');
   updateNavTabs('home');
+
+  // 세션 복원
+  var savedSession = localStorage.getItem('dentalk_session');
+  if (savedSession) {
+    try {
+      var s = JSON.parse(savedSession);
+      if (s.sessionEnd && Date.now() < s.sessionEnd) {
+        currentUser = s.user;
+        sessionEnd  = s.sessionEnd;
+        extShown    = false;
+        document.getElementById('licenseDisplay').textContent = currentUser.nickname;
+        var sideNick = document.getElementById('sideNickname');
+        if (sideNick) sideNick.textContent = currentUser.nickname;
+        document.getElementById('sideLoginArea').classList.add('hidden');
+        document.getElementById('sideLoggedArea').classList.remove('hidden');
+        document.getElementById('timerWrap').classList.remove('hidden');
+        var hNick = document.getElementById('headerNickBadge');
+        var hNickTxt = document.getElementById('headerNickText');
+        if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
+        if (isAdmin()) { document.body.classList.add('is-admin'); renderAdminPanel(); }
+        if (sessionTimer) clearInterval(sessionTimer);
+        sessionTimer = setInterval(tickSession, 1000);
+        tickSession();
+      } else {
+        localStorage.removeItem('dentalk_session');
+      }
+    } catch(e) { localStorage.removeItem('dentalk_session'); }
+  }
+
   updateNavLocks();
   applyLang();
   renderUsed();
   renderForum();
   renderEvents();
+  renderProfileSettings();
+  updateNicknameDisplays();
 });
