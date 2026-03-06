@@ -1033,6 +1033,8 @@ async function submitCustom() {
       var origFile = caseStlFiles[j][k];
       var origExt = origFile.name.substring(origFile.name.lastIndexOf('.')).toLowerCase() || '.stl';
       var fname = oid + '_case' + (j+1) + '_' + k + '_' + Date.now() + origExt;
+      var stlUrl = null;
+      // ① Supabase Storage 업로드 시도
       try {
         var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
           method: 'POST',
@@ -1041,12 +1043,21 @@ async function submitCustom() {
           body: origFile
         });
         if (r.ok) {
-          cases[j].stlUrls.push(SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname);
+          stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname;
         } else {
           var errText = await r.text();
-          console.error('[STL Upload] HTTP ' + r.status + ' - ' + errText);
+          console.warn('[STL Upload] HTTP ' + r.status + ' - ' + errText + ' → base64 fallback 사용');
         }
-      } catch(e) { console.error('[STL Upload]', e); }
+      } catch(e) { console.warn('[STL Upload]', e, '→ base64 fallback 사용'); }
+      // ② Storage 실패 시 base64 fallback
+      if (!stlUrl) {
+        stlUrl = await new Promise(function(resolve) {
+          var reader = new FileReader();
+          reader.onload = function(ev) { resolve(ev.target.result); };
+          reader.readAsDataURL(origFile);
+        });
+      }
+      cases[j].stlUrls.push(stlUrl);
     }
   }
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString(), userNickname:currentUser.nickname };
@@ -1740,7 +1751,7 @@ function _buildAdminOrderCard(o) {
         '</div>' +
         '<div class="flex gap-1 flex-shrink-0">' +
           (url
-            ? '<button onclick="openStlViewer(\'' + url + '\')" class="px-2 py-1 bg-blue-600 text-white rounded-lg font-black text-[8px] active:scale-95 transition">3D</button>' +
+            ? (url.startsWith('http') ? '<button onclick="openStlViewer(\'' + url + '\')" class="px-2 py-1 bg-blue-600 text-white rounded-lg font-black text-[8px] active:scale-95 transition">3D</button>' : '') +
               '<a href="' + url + '" download="' + name + '" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg font-black text-[8px] active:scale-95 transition inline-flex items-center">📥</a>'
             : '<span class="text-[8px] text-red-400 font-bold">⚠️ 실패</span>') +
         '</div>' +
