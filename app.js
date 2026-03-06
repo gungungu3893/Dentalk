@@ -58,6 +58,10 @@ function showInstallGuide(type) {
     }
   };
   var g = guides[type];
+  var canDirectInstall = (type === 'android' || type === 'windows' || type === 'mac') && window._pwaInstallPrompt;
+  var installBtn = canDirectInstall
+    ? '<button onclick="document.getElementById(\'installGuidePopup\').remove();window._pwaInstallPrompt.prompt();window._pwaInstallPrompt.userChoice.then(function(r){if(r.outcome===\'accepted\')window._pwaInstallPrompt=null;})" class="flex-1 py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">⬇ 지금 설치</button>'
+    : '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="flex-1 py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">확인</button>';
   var popup = document.createElement('div');
   popup.id = 'installGuidePopup';
   popup.innerHTML =
@@ -67,7 +71,7 @@ function showInstallGuide(type) {
       '<p class="text-sm text-slate-700 leading-relaxed mb-6 bg-slate-50 rounded-2xl p-4">' + g.steps + '</p>' +
       '<div class="flex gap-3">' +
         '<button onclick="triggerInstall()" class="flex-1 py-3 bg-slate-100 text-slate-600 font-black rounded-2xl text-sm">← 뒤로</button>' +
-        '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="flex-1 py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">확인</button>' +
+        installBtn +
       '</div>' +
     '</div></div>';
   document.body.appendChild(popup);
