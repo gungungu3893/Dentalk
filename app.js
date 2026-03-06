@@ -857,7 +857,7 @@ function addCase() {
     '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white">' +
       '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">' + t('stl_label') + '</p><p class="text-[9px] text-slate-400 mt-0.5">' + t('stl_hint') + '</p>' +
     '</div>' +
-    '<input type="file" id="stl-' + id + '" accept=".stl,.STL" class="hidden" onchange="onStl(' + id + ',this)">' +
+    '<input type="file" id="stl-' + id + '" accept=".stl,.STL" class="hidden" multiple onchange="onStl(' + id + ',this)">' +
     '<textarea id="cm-' + id + '" rows="2" placeholder="' + t('memo_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border-2 border-slate-200"></textarea>';
   document.getElementById('caseList').appendChild(div);
 }
@@ -946,10 +946,16 @@ function getToothName(num) {
   return '#' + num + ' ' + (t(keyMap[n]) || '');
 }
 function onStl(id, input) {
-  var f = input.files[0]; if(!f) return;
+  var files = Array.from(input.files).slice(0, 10); if(!files.length) return;
   var d = document.getElementById('stl-drop-'+id);
-  d.innerHTML = '<p class="text-2xl mb-1">✅</p><p class="text-xs font-black text-green-600">' + f.name + '</p><p class="text-[9px] text-slate-400">' + (f.size/1024).toFixed(1) + ' KB</p>';
-  d.className = 'border-2 border-green-200 rounded-xl p-4 text-center mb-2 bg-green-50';
+  var totalKB = files.reduce(function(s,f){ return s + f.size/1024; }, 0);
+  var listHtml = files.map(function(f,i){
+    return '<p class="text-[9px] text-green-700 font-bold truncate">' + (i+1) + '. ' + f.name + ' <span class="text-slate-400 font-normal">(' + (f.size/1024).toFixed(0) + 'KB)</span></p>';
+  }).join('');
+  d.innerHTML = '<p class="text-xl mb-1">✅</p>' +
+    '<p class="text-xs font-black text-green-600 mb-1">' + files.length + '개 파일 선택됨 · ' + totalKB.toFixed(0) + 'KB</p>' +
+    '<div class="text-left">' + listHtml + '</div>';
+  d.className = 'border-2 border-green-200 rounded-xl p-3 mb-2 bg-green-50 cursor-pointer';
 }
 async function submitCustom() {
   var clinic = document.getElementById('cust-clinic').value.trim();
@@ -957,7 +963,7 @@ async function submitCustom() {
   var phone  = document.getElementById('cust-phone').value.trim();
   var lineId = document.getElementById('cust-line').value.trim();
   if (!clinic||!addr||!phone) { alert(t('err_fill_delivery')); return; }
-  var cases = []; var stlFiles = [];
+  var cases = []; var caseStlFiles = [];
   for (var i=1; i<=caseCount; i++) {
     if (!document.getElementById('case-'+i)) continue;
     var selectedTeeth = caseTeeth[i] ? Array.from(caseTeeth[i]).sort(function(a,b){return a-b;}) : [];
@@ -979,15 +985,15 @@ async function submitCustom() {
     }
     if (!valid) return;
     var stlEl = document.getElementById('stl-'+i);
-    var stlFile = stlEl && stlEl.files[0] ? stlEl.files[0] : null;
-    stlFiles.push(stlFile);
+    var stlFilesForCase = stlEl && stlEl.files.length ? Array.from(stlEl.files).slice(0,10) : [];
+    caseStlFiles.push(stlFilesForCase);
     cases.push({
       patient:  document.getElementById('cp-'+i).value.trim() || t('anon_patient'),
       teeth:    teethData,
       deadline: document.getElementById('cd-'+i).value,
       memo:     document.getElementById('cm-'+i).value.trim(),
-      stl:      stlFile ? stlFile.name : null,
-      stlUrl:   null,
+      stls:     stlFilesForCase.map(function(f){ return f.name; }),
+      stlUrls:  [],
     });
   }
   if (!cases.length) { alert(t('err_add_case')); return; }
@@ -997,19 +1003,20 @@ async function submitCustom() {
   var _day   = String(_now.getDate()).padStart(2,'0');
   var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
   var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
-  // STL 파일 Supabase Storage 업로드
-  for (var j = 0; j < stlFiles.length; j++) {
-    if (!stlFiles[j]) continue;
-    var fname = oid + '_case' + (j+1) + '_' + Date.now() + '.stl';
-    try {
-      var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-          'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
-        body: stlFiles[j]
-      });
-      if (r.ok) cases[j].stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname;
-    } catch(e) { console.error('[STL Upload]', e); }
+  // STL 파일 Supabase Storage 업로드 (케이스당 최대 10개)
+  for (var j = 0; j < caseStlFiles.length; j++) {
+    for (var k = 0; k < caseStlFiles[j].length; k++) {
+      var fname = oid + '_case' + (j+1) + '_' + k + '_' + Date.now() + '.stl';
+      try {
+        var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
+          body: caseStlFiles[j][k]
+        });
+        if (r.ok) cases[j].stlUrls.push(SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname);
+      } catch(e) { console.error('[STL Upload]', e); }
+    }
   }
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString(), userNickname:currentUser.nickname };
   customOrders.unshift(order);
@@ -1126,7 +1133,7 @@ function renderCustomOrders() {
           '<span class="text-[9px] bg-blue-50 text-blue-600 font-black px-2 py-0.5 rounded-lg">' + nTeeth + t('teeth_count') + '</span>' +
         '</div>' +
         (toothRows || '<p class="text-[9px] text-slate-300 font-bold">' + t('no_tooth_info') + '</p>') +
-        (cs.stl ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '') +
+        ((cs.stls && cs.stls.length) ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 STL ' + cs.stls.length + '개</p>' : (cs.stl ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '')) +
         (cs.deadline ? '<p class="text-[9px] text-slate-400 font-bold mt-1">📅 ' + cs.deadline + '</p>' : '') +
       '</div>';
     }).join('');
@@ -1326,7 +1333,8 @@ async function sendLine(order, stageKey) {
       });
     }
     if (cs.memo) lines.push('  ' + t('line_memo') + ': ' + cs.memo);
-    if (cs.stl)  lines.push('  STL: ' + cs.stl);
+    if (cs.stls && cs.stls.length) lines.push('  STL: ' + cs.stls.join(', '));
+    else if (cs.stl) lines.push('  STL: ' + cs.stl);
   });
   lines.push('');
   lines.push(t('line_total_cases', order.cases.length, totalTeeth));
@@ -1686,23 +1694,30 @@ function adminShowOrderSubTab(tab) {
 function _buildAdminOrderCard(o) {
   var stageLabel = t('stage_' + o.stage) || o.stage;
   var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
-  // STL 다운로드 링크
+  // STL 다운로드 링크 (케이스당 최대 10개)
   var stlHtml = o.cases.map(function(cs, ci) {
-    if (!cs.stl && !cs.stlUrl) return '';
-    return '<div class="flex items-center justify-between gap-2 py-1.5">' +
-      '<div class="flex items-center gap-1.5 min-w-0">' +
-        '<span class="text-base">🧊</span>' +
-        '<div class="min-w-0">' +
-          '<p class="text-[10px] font-black text-slate-500">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + '</p>' +
-          '<p class="text-[9px] text-slate-400 truncate max-w-[140px]">' + (cs.stl||'') + '</p>' +
+    // 신규 배열 형식 또는 구버전 단일 필드 모두 처리
+    var names = (cs.stls && cs.stls.length) ? cs.stls : (cs.stl ? [cs.stl] : []);
+    var urls  = (cs.stlUrls && cs.stlUrls.length) ? cs.stlUrls : (cs.stlUrl ? [cs.stlUrl] : []);
+    if (!names.length) return '';
+    var filesHtml = names.map(function(name, fi) {
+      var url = urls[fi] || null;
+      return '<div class="flex items-center justify-between gap-1 py-1 border-b border-slate-50 last:border-0">' +
+        '<div class="flex items-center gap-1 min-w-0">' +
+          '<span class="text-xs">🧊</span>' +
+          '<p class="text-[9px] text-slate-500 truncate max-w-[120px] font-bold">' + name + '</p>' +
         '</div>' +
-      '</div>' +
-      '<div class="flex gap-1 flex-shrink-0">' +
-        (cs.stlUrl
-          ? '<button onclick="openStlViewer(\'' + cs.stlUrl + '\')" class="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg font-black text-[9px] active:scale-95 transition">🧊 3D 보기</button>' +
-            '<a href="' + cs.stlUrl + '" download="' + (cs.stl||'file.stl') + '" class="px-2.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-black text-[9px] active:scale-95 transition inline-flex items-center">📥 다운로드</a>'
-          : '<span class="text-[9px] text-red-400 font-bold">⚠️ 업로드 실패</span>') +
-      '</div>' +
+        '<div class="flex gap-1 flex-shrink-0">' +
+          (url
+            ? '<button onclick="openStlViewer(\'' + url + '\')" class="px-2 py-1 bg-blue-600 text-white rounded-lg font-black text-[8px] active:scale-95 transition">3D</button>' +
+              '<a href="' + url + '" download="' + name + '" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg font-black text-[8px] active:scale-95 transition inline-flex items-center">📥</a>'
+            : '<span class="text-[8px] text-red-400 font-bold">⚠️ 실패</span>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="py-1">' +
+      '<p class="text-[9px] font-black text-slate-400 mb-1">케이스 ' + (ci+1) + ' · ' + (cs.patient||'-') + ' · STL ' + names.length + '개</p>' +
+      filesHtml +
     '</div>';
   }).join('');
   var actionHtml = '';
