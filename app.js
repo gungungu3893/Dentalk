@@ -5,13 +5,9 @@ var _pwaInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   _pwaInstallPrompt = e;
-  var btn = document.getElementById('installBtn');
-  if (btn) btn.classList.replace('hidden', 'flex');
 });
 window.addEventListener('appinstalled', function() {
   _pwaInstallPrompt = null;
-  var btn = document.getElementById('installBtn');
-  if (btn) btn.classList.replace('flex', 'hidden');
 });
 function triggerInstall() {
   if (_pwaInstallPrompt) {
@@ -19,9 +15,32 @@ function triggerInstall() {
     _pwaInstallPrompt.userChoice.then(function(r) {
       if (r.outcome === 'accepted') _pwaInstallPrompt = null;
     });
-  } else {
-    alert('이미 설치되었거나, 브라우저 주소창 우측의 설치 아이콘을 눌러주세요.\n\nSafari: 공유 버튼 → "홈 화면에 추가"');
+    return;
   }
+  var ua = navigator.userAgent;
+  var isIOS = /iphone|ipad|ipod/i.test(ua);
+  var isSafari = /safari/i.test(ua) && !/chrome/i.test(ua);
+  if (isIOS || isSafari) {
+    showInstallGuide('ios');
+  } else {
+    showInstallGuide('android');
+  }
+}
+function showInstallGuide(type) {
+  var existing = document.getElementById('installGuidePopup');
+  if (existing) existing.remove();
+  var msg = type === 'ios'
+    ? '📱 <b>iPhone / Safari 설치 방법</b><br><br>① 하단 공유 버튼 <b>□↑</b> 탭<br>② <b>"홈 화면에 추가"</b> 선택<br>③ <b>"추가"</b> 탭'
+    : '💻 <b>PC / Android 설치 방법</b><br><br>① 브라우저 주소창 우측의<br>&nbsp;&nbsp;&nbsp;<b>설치 아이콘 ⊕</b> 클릭<br>② <b>"설치"</b> 클릭<br><br>※ 아이콘이 없으면 브라우저 메뉴<br>&nbsp;&nbsp;&nbsp;→ "앱으로 설치"';
+  var popup = document.createElement('div');
+  popup.id = 'installGuidePopup';
+  popup.innerHTML =
+    '<div class="fixed inset-0 z-[999] flex items-end" style="background:rgba(0,0,0,.5)" onclick="document.getElementById(\'installGuidePopup\').remove()">' +
+    '<div class="bg-white rounded-t-3xl w-full p-6 pb-8" onclick="event.stopPropagation()">' +
+      '<p class="text-base font-black text-slate-800 mb-4 leading-relaxed">' + msg + '</p>' +
+      '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="w-full py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">확인</button>' +
+    '</div></div>';
+  document.body.appendChild(popup);
 }
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
