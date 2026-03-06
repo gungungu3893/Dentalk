@@ -849,7 +849,7 @@ function addCase() {
     '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" ondragover="onStlDragOver(' + id + ',event)" ondragleave="onStlDragLeave(' + id + ',event)" ondrop="onStlDrop(' + id + ',event)" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white transition-colors">' +
       '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">' + t('stl_label') + '</p><p class="text-[9px] text-slate-400 mt-0.5">' + t('stl_hint') + '</p>' +
     '</div>' +
-    '<input type="file" id="stl-' + id + '" accept=".stl,.STL" class="hidden" multiple onchange="onStl(' + id + ',this)">' +
+    '<input type="file" id="stl-' + id + '" accept=".stl,.STL,.ply,.PLY,.obj,.OBJ,.3mf,.3MF" class="hidden" multiple onchange="onStl(' + id + ',this)">' +
     '<textarea id="cm-' + id + '" rows="2" placeholder="' + t('memo_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border-2 border-slate-200"></textarea>';
   document.getElementById('caseList').appendChild(div);
 }
@@ -953,8 +953,10 @@ function onStlDrop(id, e) {
   e.preventDefault(); e.stopPropagation();
   var d = document.getElementById('stl-drop-'+id);
   d.style.borderColor = ''; d.style.background = '';
+  var allowed3d = ['.stl', '.ply', '.obj', '.3mf'];
   var dropped = Array.from(e.dataTransfer.files).filter(function(f){
-    return f.name.toLowerCase().endsWith('.stl');
+    var lower = f.name.toLowerCase();
+    return allowed3d.some(function(ext){ return lower.endsWith(ext); });
   });
   if (!dropped.length) return;
   var inputEl = document.getElementById('stl-'+id);
@@ -1028,15 +1030,22 @@ async function submitCustom() {
   // STL 파일 Supabase Storage 업로드 (케이스당 최대 10개)
   for (var j = 0; j < caseStlFiles.length; j++) {
     for (var k = 0; k < caseStlFiles[j].length; k++) {
-      var fname = oid + '_case' + (j+1) + '_' + k + '_' + Date.now() + '.stl';
+      var origFile = caseStlFiles[j][k];
+      var origExt = origFile.name.substring(origFile.name.lastIndexOf('.')).toLowerCase() || '.stl';
+      var fname = oid + '_case' + (j+1) + '_' + k + '_' + Date.now() + origExt;
       try {
         var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
           method: 'POST',
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
             'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
-          body: caseStlFiles[j][k]
+          body: origFile
         });
-        if (r.ok) cases[j].stlUrls.push(SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname);
+        if (r.ok) {
+          cases[j].stlUrls.push(SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname);
+        } else {
+          var errText = await r.text();
+          console.error('[STL Upload] HTTP ' + r.status + ' - ' + errText);
+        }
       } catch(e) { console.error('[STL Upload]', e); }
     }
   }
