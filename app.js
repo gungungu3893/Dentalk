@@ -21,16 +21,14 @@ function triggerInstall() {
 function showInstallGuide(type) {
   var existing = document.getElementById('installGuidePopup');
   if (existing) existing.remove();
-  var msg = type === 'ios'
-    ? '📱 <b>iPhone / Safari 설치 방법</b><br><br>① 하단 공유 버튼 <b>□↑</b> 탭<br>② <b>"홈 화면에 추가"</b> 선택<br>③ <b>"추가"</b> 탭'
-    : '💻 <b>PC / Android 설치 방법</b><br><br>① 브라우저 주소창 우측의<br>&nbsp;&nbsp;&nbsp;<b>설치 아이콘 ⊕</b> 클릭<br>② <b>"설치"</b> 클릭<br><br>※ 아이콘이 없으면 브라우저 메뉴<br>&nbsp;&nbsp;&nbsp;→ "앱으로 설치"';
+  var msg = type === 'ios' ? t('install_ios') : t('install_android');
   var popup = document.createElement('div');
   popup.id = 'installGuidePopup';
   popup.innerHTML =
     '<div class="fixed inset-0 z-[999] flex items-end" style="background:rgba(0,0,0,.5)" onclick="document.getElementById(\'installGuidePopup\').remove()">' +
     '<div class="bg-white rounded-t-3xl w-full p-6 pb-8" onclick="event.stopPropagation()">' +
       '<p class="text-base font-black text-slate-800 mb-4 leading-relaxed">' + msg + '</p>' +
-      '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="w-full py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">확인</button>' +
+      '<button onclick="document.getElementById(\'installGuidePopup\').remove()" class="w-full py-3 bg-[#001d4a] text-white font-black rounded-2xl text-sm">' + t('install_ok') + '</button>' +
     '</div></div>';
   document.body.appendChild(popup);
 }
@@ -813,8 +811,8 @@ function customTab(tab) {
   var lBtn = document.getElementById('ctab-list');
   var dBtn = document.getElementById('ctab-done');
   if (fBtn) fBtn.textContent = t('custom_tab_new');
-  if (lBtn) lBtn.textContent = '진행중';
-  if (dBtn) dBtn.textContent = '완료';
+  if (lBtn) lBtn.textContent = t('custom_tab_list');
+  if (dBtn) dBtn.textContent = t('custom_tab_done');
   if (tab === 'list' || tab === 'done') {
     loadOrdersFromSupabase().then(function() { renderCustomOrders(); renderDoneOrders(); });
   }
@@ -1121,15 +1119,15 @@ function renderCustomOrders() {
           (lastDesign ? '<img src="' + lastDesign.url + '" class="w-full rounded-xl mb-1 max-h-36 object-contain bg-slate-50 opacity-50">' : '') +
         '</div>';
     } else if (o.stage === 'confirmed') {
-      designHtml = '<div class="mt-3 pt-3 border-t border-slate-100"><p class="text-[9px] text-slate-400 font-bold">📐 디자인 업로드 대기 중...</p></div>';
+      designHtml = '<div class="mt-3 pt-3 border-t border-slate-100"><p class="text-[9px] text-slate-400 font-bold">📐 ' + t('design_waiting') + '</p></div>';
     }
     // ── 수령 완료 버튼 (shipped) ────────────────────────────
     var receiveHtml = '';
     if (o.stage === 'shipped') {
       receiveHtml =
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
-          '<p class="text-[9px] text-green-600 font-bold mb-2">🚚 배송이 출발했습니다. 제품 수령 후 아래 버튼을 눌러주세요.</p>' +
-          '<button onclick="customerReceiveOrder(\'' + o.id + '\')" class="w-full py-3 bg-green-600 text-white rounded-xl font-black text-sm active:scale-95 transition">📦 수령 완료</button>' +
+          '<p class="text-[9px] text-green-600 font-bold mb-2">' + t('shipped_msg') + '</p>' +
+          '<button onclick="customerReceiveOrder(\'' + o.id + '\')" class="w-full py-3 bg-green-600 text-white rounded-xl font-black text-sm active:scale-95 transition">' + t('receive_btn') + '</button>' +
         '</div>';
     }
     // ── 접수 전 수정/삭제 ──────────────────────────────────
@@ -1137,8 +1135,8 @@ function renderCustomOrders() {
     if (o.stage === 'submitted') {
       editDeleteHtml =
         '<div class="flex gap-2 mt-3 pt-3 border-t border-slate-100">' +
-          '<button onclick="editCustomOrder(\'' + o.id + '\')" class="flex-1 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-black text-xs active:scale-95 transition">✏️ 수정</button>' +
-          '<button onclick="deleteCustomOrder(\'' + o.id + '\')" class="flex-1 py-2.5 bg-red-50 text-red-500 rounded-xl font-black text-xs active:scale-95 transition">🗑 삭제</button>' +
+          '<button onclick="editCustomOrder(\'' + o.id + '\')" class="flex-1 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-black text-xs active:scale-95 transition">' + t('edit_order_btn') + '</button>' +
+          '<button onclick="deleteCustomOrder(\'' + o.id + '\')" class="flex-1 py-2.5 bg-red-50 text-red-500 rounded-xl font-black text-xs active:scale-95 transition">' + t('delete_order_btn') + '</button>' +
         '</div>';
     }
     // ── Review history ─────────────────────────────────────
@@ -1146,7 +1144,7 @@ function renderCustomOrders() {
     if (o.reviewHistory && o.reviewHistory.length) {
       histHtml =
         '<div class="mt-2 pt-2 border-t border-slate-100">' +
-          '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">검토 이력 (' + o.reviewHistory.length + '회)</p>' +
+          '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">' + tf('review_history_label', o.reviewHistory.length) + '</p>' +
           o.reviewHistory.map(function(r){
             return '<div class="flex gap-1 items-start text-[8px] text-slate-400 mb-0.5">' +
               '<span>' + (r.action==='approved'?'✅':'❌') + '</span>' +
@@ -1210,7 +1208,7 @@ function renderDoneOrders() {
   if (!c) return;
   var doneOrders = customOrders.filter(function(o){ return o.stage === 'done'; });
   if (!doneOrders.length) {
-    c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">완료된 주문이 없습니다.</div>';
+    c.innerHTML = '<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('done_orders_empty') + '</div>';
     return;
   }
   c.innerHTML = doneOrders.map(function(o) {
@@ -1218,7 +1216,7 @@ function renderDoneOrders() {
     var latestDesign = o.designVersions && o.designVersions.length ? o.designVersions[o.designVersions.length-1] : null;
     var caseRows = o.cases.map(function(cs, ci) {
       return '<div class="py-1.5 border-b border-slate-50 last:border-0">' +
-        '<p class="text-[10px] font-black text-slate-600">케이스 ' + (ci+1) + ' · ' + cs.patient + '</p>' +
+        '<p class="text-[10px] font-black text-slate-600">' + t('case_nr').replace('#', (ci+1).toString()) + ' · ' + cs.patient + '</p>' +
         '<p class="text-[9px] text-slate-400">' + (cs.teeth||[]).map(function(td){ return td.tooth + ' ' + td.brand; }).join(' / ') + '</p>' +
       '</div>';
     }).join('');
@@ -1230,12 +1228,12 @@ function renderDoneOrders() {
         '</div>' +
         '<div class="text-right">' +
           '<span class="text-xl">✅</span>' +
-          '<p class="text-green-200 text-[9px] font-bold mt-0.5">완료</p>' +
+          '<p class="text-green-200 text-[9px] font-bold mt-0.5">' + t('done_status_label') + '</p>' +
         '</div>' +
       '</div>' +
       '<div class="px-5 py-4">' +
         (latestDesign ? '<img src="' + latestDesign.url + '" class="w-full rounded-xl mb-3 max-h-40 object-contain bg-slate-50">' : '') +
-        '<p class="text-[10px] text-slate-500 font-bold mb-2">' + o.cases.length + '케이스 · ' + totalTeeth + '치아</p>' +
+        '<p class="text-[10px] text-slate-500 font-bold mb-2">' + tf('done_cases_teeth_fmt', o.cases.length, totalTeeth) + '</p>' +
         caseRows +
         '<p class="text-[9px] text-slate-400 mt-2">📍 ' + o.addr + '</p>' +
         '<p class="text-[9px] text-slate-400">📞 ' + o.phone + '</p>' +
@@ -1266,13 +1264,13 @@ function editCustomOrder(orderId) {
   var casesDiv = document.getElementById('editCases');
   casesDiv.innerHTML = ord.cases.map(function(cs, i) {
     return '<div class="bg-slate-50 rounded-xl p-3">' +
-      '<p class="text-[10px] font-black text-slate-500 mb-2">케이스 ' + (i+1) + ' · 치아: ' +
+      '<p class="text-[10px] font-black text-slate-500 mb-2">' + t('case_nr').replace('#', (i+1).toString()) + ' · ' + t('teeth_colon_label') + ' ' +
         (cs.teeth||[]).map(function(td){ return td.tooth; }).join(', ') + '</p>' +
-      '<input type="text" id="ecp-' + i + '" value="' + (cs.patient||'').replace(/"/g,'&quot;') + '" placeholder="환자명" ' +
+      '<input type="text" id="ecp-' + i + '" value="' + (cs.patient||'').replace(/"/g,'&quot;') + '" placeholder="' + t('case_patient_ph') + '" ' +
         'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400">' +
       '<input type="date" id="ecd-' + i + '" value="' + (cs.deadline||'') + '" ' +
         'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400">' +
-      '<textarea id="ecm-' + i + '" rows="2" placeholder="메모" ' +
+      '<textarea id="ecm-' + i + '" rows="2" placeholder="' + t('memo_ph') + '" ' +
         'class="w-full p-2.5 bg-white rounded-xl text-xs border-2 border-slate-200 resize-none focus:outline-none focus:border-blue-400">' + (cs.memo||'').replace(/</g,'&lt;') + '</textarea>' +
     '</div>';
   }).join('');
@@ -1782,17 +1780,17 @@ function _buildAdminOrderCard(o) {
     actionHtml = '<button onclick="adminShipOrder(\'' + o.id + '\')" class="w-full py-2.5 bg-green-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>';
   } else if (o.stage === 'shipped') {
     actionHtml = '<div class="mt-3 bg-green-50 rounded-xl p-3">' +
-      '<p class="text-[9px] font-black text-green-600 mb-1">🚚 배송 완료</p>' +
-      (o.carrier ? '<p class="text-[9px] text-slate-500">배송사: ' + o.carrier + '</p>' : '') +
-      (o.trackingNumber ? '<p class="text-[9px] font-mono text-slate-600 font-bold">송장: ' + o.trackingNumber + '</p>' : '') +
+      '<p class="text-[9px] font-black text-green-600 mb-1">🚚 ' + t('shipped_status') + '</p>' +
+      (o.carrier ? '<p class="text-[9px] text-slate-500">' + t('carrier_label') + ': ' + o.carrier + '</p>' : '') +
+      (o.trackingNumber ? '<p class="text-[9px] font-mono text-slate-600 font-bold">' + t('tracking_label') + ': ' + o.trackingNumber + '</p>' : '') +
     '</div>';
   } else if (o.stage === 'done') {
-    actionHtml = '<div class="mt-3 bg-slate-50 rounded-xl p-2 text-center"><p class="text-[9px] font-black text-slate-400">✅ 수령 완료</p></div>';
+    actionHtml = '<div class="mt-3 bg-slate-50 rounded-xl p-2 text-center"><p class="text-[9px] font-black text-slate-400">✅ ' + t('received_status') + '</p></div>';
   }
   var histHtml = '';
   if (o.reviewHistory && o.reviewHistory.length) {
     histHtml = '<div class="mt-2 border-t border-slate-100 pt-2">' +
-      '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">검토 이력 (' + o.reviewHistory.length + '회)</p>' +
+      '<p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">' + tf('review_history_label', o.reviewHistory.length) + '</p>' +
       o.reviewHistory.map(function(r){
         return '<div class="flex gap-1 items-start text-[8px] text-slate-400 mb-0.5">' +
           '<span>' + (r.action==='approved'?'✅':'❌') + '</span>' +
@@ -1823,16 +1821,16 @@ function _renderAdminOrdersList() {
   var newOrders    = customOrders.filter(function(o){ return o.stage === 'submitted'; });
   var activeOrders = customOrders.filter(function(o){ return ['confirmed','design_revision','design_ready','approved','milling','shipped'].indexOf(o.stage) !== -1; });
   var doneOrders   = customOrders.filter(function(o){ return o.stage === 'done'; });
-  var emptyMsg = '<p class="text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>';
+  var emptyMsg = '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_orders_empty') + '</p>';
   list.innerHTML =
     '<div class="flex gap-1 mb-3">' +
-      '<button onclick="adminShowOrderSubTab(\'new\')" id="adminOrderSubBtn-new" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-[#001d4a] text-white">새 주문 (' + newOrders.length + ')</button>' +
-      '<button onclick="adminShowOrderSubTab(\'active\')" id="adminOrderSubBtn-active" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">진행중 (' + activeOrders.length + ')</button>' +
-      '<button onclick="adminShowOrderSubTab(\'done\')" id="adminOrderSubBtn-done" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">완료 (' + doneOrders.length + ')</button>' +
+      '<button onclick="adminShowOrderSubTab(\'new\')" id="adminOrderSubBtn-new" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-[#001d4a] text-white">' + t('admin_orders_new') + ' (' + newOrders.length + ')</button>' +
+      '<button onclick="adminShowOrderSubTab(\'active\')" id="adminOrderSubBtn-active" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">' + t('admin_orders_active') + ' (' + activeOrders.length + ')</button>' +
+      '<button onclick="adminShowOrderSubTab(\'done\')" id="adminOrderSubBtn-done" class="flex-1 py-1.5 rounded-xl font-black text-[10px] bg-slate-100 text-slate-500">' + t('admin_orders_done') + ' (' + doneOrders.length + ')</button>' +
     '</div>' +
-    '<div id="adminOrderSub-new" class="grid grid-cols-2 gap-3">'    + (newOrders.length    ? newOrders.map(_buildAdminOrderCard).join('')    : '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>') + '</div>' +
-    '<div id="adminOrderSub-active" class="hidden grid grid-cols-2 gap-3">' + (activeOrders.length ? activeOrders.map(_buildAdminOrderCard).join('') : '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>') + '</div>' +
-    '<div id="adminOrderSub-done"   class="hidden grid grid-cols-2 gap-3">' + (doneOrders.length   ? doneOrders.map(_buildAdminOrderCard).join('')   : '<p class="col-span-2 text-center text-slate-400 text-sm py-8 font-bold">주문이 없습니다.</p>') + '</div>';
+    '<div id="adminOrderSub-new" class="grid grid-cols-2 gap-3">'    + (newOrders.length    ? newOrders.map(_buildAdminOrderCard).join('')    : emptyMsg) + '</div>' +
+    '<div id="adminOrderSub-active" class="hidden grid grid-cols-2 gap-3">' + (activeOrders.length ? activeOrders.map(_buildAdminOrderCard).join('') : emptyMsg) + '</div>' +
+    '<div id="adminOrderSub-done"   class="hidden grid grid-cols-2 gap-3">' + (doneOrders.length   ? doneOrders.map(_buildAdminOrderCard).join('')   : emptyMsg) + '</div>';
   adminShowOrderSubTab(adminOrderSubTab);
 }
 // ── 상품 가격 관리 ──────────────────────────────────────────
@@ -1939,11 +1937,11 @@ function renderAdminEventsTab() {
     : '<p class="text-center text-slate-400 text-sm py-4 font-bold">이벤트가 없습니다.</p>';
   list.innerHTML =
     '<div class="bg-white rounded-xl p-4 mb-4 shadow-sm">' +
-      '<p class="font-black text-xs text-slate-700 mb-3">새 이벤트 추가</p>' +
+      '<p class="font-black text-xs text-slate-700 mb-3">' + t('admin_new_event_title') + '</p>' +
       '<input id="adminEventDate" type="date" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-2 focus:outline-none focus:border-blue-400">' +
-      '<input id="adminEventName" type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-2 focus:outline-none focus:border-blue-400" placeholder="이벤트명">' +
-      '<input id="adminEventLoc"  type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-3 focus:outline-none focus:border-blue-400" placeholder="장소">' +
-      '<button onclick="adminAddEvent()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition">+ 추가</button>' +
+      '<input id="adminEventName" type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-2 focus:outline-none focus:border-blue-400" placeholder="' + t('admin_event_name_ph') + '">' +
+      '<input id="adminEventLoc"  type="text" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold mb-3 focus:outline-none focus:border-blue-400" placeholder="' + t('admin_event_loc_ph') + '">' +
+      '<button onclick="adminAddEvent()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition">' + t('admin_event_add_btn') + '</button>' +
     '</div>' +
     evRows;
 }
@@ -1951,7 +1949,7 @@ function adminAddEvent() {
   var date = (document.getElementById('adminEventDate').value || '').trim();
   var name = (document.getElementById('adminEventName').value || '').trim();
   var loc  = (document.getElementById('adminEventLoc').value  || '').trim();
-  if (!date || !name || !loc) { alert('모든 항목을 입력해주세요.'); return; }
+  if (!date || !name || !loc) { alert(t('admin_event_fill_alert')); return; }
   var newId = events_.length ? Math.max.apply(null, events_.map(function(e){ return e.id; })) + 1 : 1;
   events_.push({ id: newId, date: date, event: name, loc: loc });
   renderAdminEventsTab();
@@ -2426,8 +2424,10 @@ function applyLang() {
   // 커스텀 탭 버튼 텍스트 업데이트
   var fBtn = document.getElementById('ctab-form');
   var lBtn = document.getElementById('ctab-list');
+  var dBtn2 = document.getElementById('ctab-done');
   if (fBtn) fBtn.textContent = t('custom_tab_new');
   if (lBtn) lBtn.textContent = t('custom_tab_list');
+  if (dBtn2) dBtn2.textContent = t('custom_tab_done');
   // 사이드 로그인 버튼
   var sideLoginTxt = document.getElementById('sideLoginTxt');
   if (sideLoginTxt) sideLoginTxt.textContent = t('side_login_btn');

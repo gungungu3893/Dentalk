@@ -115,11 +115,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <p class="font-black text-white text-lg mb-1" data-i18n="reg_title">Request Access</p>
       <p class="text-blue-300 text-[10px] font-bold leading-relaxed" data-i18n="reg_subtitle">Fill in your details. Admin will approve within 24 hours.</p>
     </div>
-    <input id="regLicense"  type="text"  placeholder="면허번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regNickname" type="text"  placeholder="닉네임 (필수) — 모든 활동에 사용됩니다" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regName"     type="text"  placeholder="의사 이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regClinic"   type="text"  placeholder="치과이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regEmail"    type="email" placeholder="이메일주소 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regLicense"  type="text"  data-i18n-ph="reg_license_ph" placeholder="면허번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regNickname" type="text"  data-i18n-ph="reg_nick_ph" placeholder="닉네임 (필수) — 모든 활동에 사용됩니다" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regName"     type="text"  data-i18n-ph="reg_name_ph" placeholder="의사 이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regClinic"   type="text"  data-i18n-ph="reg_clinic_ph" placeholder="치과이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
+    <input id="regEmail"    type="email" data-i18n-ph="reg_email_ph" placeholder="이메일주소 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
     <input id="regContact"  type="text"  placeholder="전화번호 또는 Line ID (필수)" data-i18n-ph="reg_contact_ph" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
     <input id="regPassword" type="password" data-i18n-ph="reg_password_ph" placeholder="비밀번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
     <input id="regPasswordConfirm" type="password" data-i18n-ph="reg_password_confirm_ph" placeholder="비밀번호 확인 (필수)" class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
@@ -267,12 +267,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <!-- ============================== 쪽지 작성 모달 ============================== -->
 <div id="composeModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-    <h3 class="font-black text-slate-800 text-base mb-4">✉️ 쪽지 보내기</h3>
-    <input id="compose-to"   type="text"     placeholder="받는 사람 (닉네임)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-300">
-    <input id="compose-subj" type="text"     placeholder="제목"             class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-300">
-    <textarea id="compose-body" rows="5"     placeholder="내용을 입력하세요..."  class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-4 border-2 border-transparent focus:border-blue-300"></textarea>
-    <button onclick="sendMsg()" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm mb-2 active:scale-95 transition">보내기</button>
-    <button onclick="closeModal('composeModal')" class="w-full text-slate-400 text-xs font-bold py-2">취소</button>
+    <h3 data-i18n="compose_title" class="font-black text-slate-800 text-base mb-4">✉️ 쪽지 보내기</h3>
+    <input id="compose-to"   type="text"     data-i18n-ph="compose_to_ph"   placeholder="받는 사람 (닉네임)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-300">
+    <input id="compose-subj" type="text"     data-i18n-ph="compose_subj_ph" placeholder="제목"             class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-300">
+    <textarea id="compose-body" rows="5"     data-i18n-ph="compose_body_ph" placeholder="내용을 입력하세요..."  class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-4 border-2 border-transparent focus:border-blue-300"></textarea>
+    <button onclick="sendMsg()" data-i18n="compose_send" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm mb-2 active:scale-95 transition">보내기</button>
+    <button onclick="closeModal('composeModal')" data-i18n="login_cancel" class="w-full text-slate-400 text-xs font-bold py-2">취소</button>
   </div>
 </div>
 <!-- ============================== 메인 앱 ============================== -->
@@ -490,8 +490,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="page-custom" class="page p-4">
       <div class="flex gap-1.5 mb-5">
         <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">New Order</button>
-        <button onclick="customTab('list')" id="ctab-list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">진행중</button>
-        <button onclick="customTab('done')" id="ctab-done" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">완료</button>
+        <button onclick="customTab('list')" id="ctab-list" data-i18n="custom_tab_list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">진행중</button>
+        <button onclick="customTab('done')" id="ctab-done" data-i18n="custom_tab_done" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">완료</button>
       </div>
       <div id="custom-form">
         <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
@@ -559,30 +559,30 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="shippingModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeShippingModal()">
       <div class="bg-white rounded-t-3xl w-full p-5 pb-8">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800 text-sm">🚚 배송 정보 입력</h3>
+          <h3 data-i18n="ship_process_btn" class="font-black text-slate-800 text-sm">🚚 배송 정보 입력</h3>
           <button onclick="closeShippingModal()" class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 font-black text-sm">✕</button>
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-2">배송사</p>
+          <p data-i18n="carrier_label" class="text-xs font-black text-slate-600 mb-2">배송사</p>
           <select id="ship-carrier" onchange="toggleCustomCarrier()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
-            <option value="">선택...</option>
+            <option value="">Select...</option>
             <option>Kerry Express</option>
             <option>Flash Express</option>
             <option>J&amp;T Express</option>
             <option>DHL</option>
             <option>FedEx</option>
             <option>Thailand Post</option>
-            <option value="custom">직접 입력</option>
+            <option id="ship-carrier-custom-opt" data-i18n="ship_carrier_custom_opt" value="custom">직접 입력</option>
           </select>
         </div>
         <div id="ship-carrier-custom-wrap" class="mb-3 hidden">
-          <input id="ship-carrier-custom" type="text" placeholder="배송사 이름 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <input id="ship-carrier-custom" type="text" data-i18n-ph="ship_carrier_ph" placeholder="배송사 이름 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-4">
-          <p class="text-xs font-black text-slate-600 mb-2">송장번호</p>
-          <input id="ship-tracking" type="text" placeholder="송장번호 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <p data-i18n="ship_tracking_label" class="text-xs font-black text-slate-600 mb-2">송장번호</p>
+          <input id="ship-tracking" type="text" data-i18n-ph="ship_tracking_ph" placeholder="송장번호 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
-        <button onclick="adminConfirmShipping()" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>
+        <button onclick="adminConfirmShipping()" data-i18n="ship_process_btn" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>
       </div>
     </div>
     <!-- ==================== USED MARKET ==================== -->
