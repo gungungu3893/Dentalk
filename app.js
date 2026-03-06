@@ -1051,7 +1051,18 @@ async function submitCustom() {
       if (!stlUrl) {
         stlUrl = await new Promise(function(resolve) {
           var reader = new FileReader();
-          reader.onload = function(ev) { resolve(ev.target.result); };
+          reader.onload = function(ev) {
+            var result = ev.target.result;
+            // base64 data URI가 너무 크면 (>3MB) Supabase 저장이 어려우므로 경고
+            if (result && result.length > 3 * 1024 * 1024) {
+              console.warn('[STL Base64] File too large for inline storage:', Math.round(result.length/1024) + 'KB');
+            }
+            resolve(result);
+          };
+          reader.onerror = function(e) {
+            console.error('[STL FileReader] Error reading file:', origFile.name, e);
+            resolve(null);
+          };
           reader.readAsDataURL(origFile);
         });
       }
@@ -1437,23 +1448,45 @@ function isAdmin() {
   return isLoggedIn() && ['admin', '관리자'].includes(nick);
 }
 async function saveOrderToSupabase(order) {
-  try {
-    await fetch(SUPABASE_URL + '/rest/v1/orders', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        id: order.id, clinic: order.clinic, addr: order.addr,
-        phone: order.phone, line_id: order.lineId, cases: order.cases,
-        stage: order.stage, design_versions: order.designVersions,
-        review_history: order.reviewHistory, date: order.date,
-        user_nickname: order.userNickname
-      })
+  var buildBody = function(casesData) {
+    return JSON.stringify({
+      id: order.id, clinic: order.clinic, addr: order.addr,
+      phone: order.phone, line_id: order.lineId, cases: casesData,
+      stage: order.stage, design_versions: order.designVersions,
+      review_history: order.reviewHistory, date: order.date,
+      user_nickname: order.userNickname
     });
+  };
+  var headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+  try {
+    // ① 전체 데이터(stlUrls 포함) 저장 시도
+    var body = buildBody(order.cases);
+    var res = await fetch(SUPABASE_URL + '/rest/v1/orders', { method: 'POST', headers: headers, body: body });
+    if (res.ok) return; // 성공
+    var errText = await res.text();
+    console.warn('[Order Save] HTTP', res.status, errText);
+    // ② 용량 문제(413)이면 stlUrls에서 대용량 base64 제거 후 재시도
+    var casesNoLargeBase64 = order.cases.map(function(cs) {
+      return Object.assign({}, cs, {
+        stlUrls: (cs.stlUrls || []).map(function(u) {
+          // http URL은 유지, 대용량 base64(1MB 초과)는 null로 대체
+          return (u && (u.startsWith('http') || u.length < 1024 * 1024)) ? u : null;
+        })
+      });
+    });
+    var body2 = buildBody(casesNoLargeBase64);
+    var res2 = await fetch(SUPABASE_URL + '/rest/v1/orders', { method: 'POST', headers: headers, body: body2 });
+    if (!res2.ok) {
+      var err2 = await res2.text();
+      console.error('[Order Save] Retry failed:', res2.status, err2);
+    } else {
+      console.warn('[Order Save] Saved without large STL data. Files may not be visible to admin.');
+    }
   } catch(e) { console.error('[Order Save]', e); }
 }
 async function loadOrdersFromSupabase() {
@@ -1711,6 +1744,59 @@ async function renderAdminPanel() {
   document.body.classList.add('is-admin');
   adminShowTab('orders');
 }
+async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var ord = customOrders.find(function(o){ return o.id===orderId; });
+  if (!ord || !ord.cases[caseIdx]) return;
+  var btn = input.previousElementSibling;
+  if (btn) btn.textContent = '⏳';
+  var origExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase() || '.stl';
+  var fname = orderId + '_case' + (caseIdx+1) + '_' + fileIdx + '_' + Date.now() + origExt;
+  var stlUrl = null;
+  // Try Supabase Storage
+  try {
+    var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-files/' + fname, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/octet-stream', 'x-upsert': 'true' },
+      body: file
+    });
+    if (r.ok) {
+      stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-files/' + fname;
+    }
+  } catch(e) {}
+  // Fallback: base64
+  if (!stlUrl) {
+    stlUrl = await new Promise(function(resolve) {
+      var reader = new FileReader();
+      reader.onload = function(ev) { resolve(ev.target.result); };
+      reader.onerror = function() { resolve(null); };
+      reader.readAsDataURL(file);
+    });
+  }
+  if (!stlUrl) { if (btn) btn.textContent = '❌'; return; }
+  if (!ord.cases[caseIdx].stlUrls) ord.cases[caseIdx].stlUrls = [];
+  while (ord.cases[caseIdx].stlUrls.length <= fileIdx) ord.cases[caseIdx].stlUrls.push(null);
+  ord.cases[caseIdx].stlUrls[fileIdx] = stlUrl;
+  // Save updated cases to Supabase
+  try {
+    var casesNoLargeBase64 = ord.cases.map(function(cs) {
+      return Object.assign({}, cs, {
+        stlUrls: (cs.stlUrls || []).map(function(u) {
+          return (u && (u.startsWith('http') || u.length < 1024 * 1024)) ? u : null;
+        })
+      });
+    });
+    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ cases: casesNoLargeBase64 })
+    });
+  } catch(e) { console.error('[Reupload Save]', e); }
+  renderAdminOrders();
+}
 async function renderAdminOrders() {
   var list = document.getElementById('adminTabOrders');
   if (!list) return;
@@ -1751,7 +1837,7 @@ function _buildAdminOrderCard(o) {
           (url
             ? (url.startsWith('http') ? '<button onclick="openStlViewer(\'' + url + '\')" class="px-2 py-1 bg-blue-600 text-white rounded-lg font-black text-[8px] active:scale-95 transition">3D</button>' : '') +
               '<a href="' + url + '" download="' + name + '" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg font-black text-[8px] active:scale-95 transition inline-flex items-center">📥</a>'
-            : '<span class="text-[8px] text-red-400 font-bold">⚠️ 실패</span>') +
+            : '<label class="cursor-pointer"><span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg font-black text-[8px]">📎 재업로드</span><input type="file" class="hidden" accept=".stl,.ply,.obj,.3mf" onchange="adminReuploadStl(\'' + o.id + '\',' + ci + ',' + fi + ',\'' + name + '\',this)"></label>') +
         '</div>' +
       '</div>';
     }).join('');
