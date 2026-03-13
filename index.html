@@ -283,7 +283,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3">
     <button id="btnBack" onclick="goBack()" class="hidden w-10 h-10 rounded-xl bg-white/10 items-center justify-center active:bg-white/20 text-lg font-black">←</button>
     <div class="flex-1">
-      <div class="flex items-baseline gap-1" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
+      <div onclick="goPage('home')" class="flex items-baseline gap-1 cursor-pointer active:opacity-70 transition" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
         <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
         <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;margin-left:4px;align-self:center">BIOTEM × BIOPLANT</span>
       </div>
@@ -301,8 +301,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
       </div>
     </div>
-    <button id="installBtn" onclick="triggerInstall()" class="flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5 active:bg-white/20 transition" title="앱 설치">
-      <span class="text-sm">📲</span>
+    <button id="installBtn" onclick="triggerInstall()" class="relative p-2 bg-white/10 rounded-xl active:bg-white/20 transition" title="앱 설치">
+      <span class="text-xl">⬇️</span>
+      <span class="absolute -top-1 -right-1 bg-blue-400 text-white text-[8px] font-black px-1 py-0.5 rounded-full leading-none">APP</span>
     </button>
     <button onclick="openCart()" class="relative p-2 bg-white/10 rounded-xl">
       <span class="text-xl">🛒</span>
@@ -414,9 +415,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <p class="text-lg font-black leading-snug text-blue-300" data-i18n="home_title2">Ordering System</p>
             <p class="text-xs text-blue-200/70 mt-3 leading-relaxed" data-i18n="home_desc">Providing premium BIOTEM implant components directly to dental clinics across Thailand.</p>
           </div>
-          <div class="fade-up-3 mt-7">
+          <div class="fade-up-3 mt-7 flex gap-3 items-center">
             <button onclick="goPage('shop')" class="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
               <span>🦷</span> <span data-i18n="home_goto_shop">Go to Shop</span> <span class="text-blue-200">›</span>
+            </button>
+            <button onclick="openLoginModal(null)" class="bg-white/15 border border-white/30 text-white px-6 py-3.5 rounded-2xl font-black text-sm active:scale-95 transition flex items-center gap-2">
+              <span>🔐</span> <span data-i18n="nav_login">Login</span>
             </button>
           </div>
         </div>
@@ -474,6 +478,14 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <span class="text-white/20">·</span>
             <span class="text-[10px] text-blue-300">🌐 biotemplant.com</span>
           </div>
+        </div>
+        <!-- 개인정보 처리방침 버튼 -->
+        <div class="mt-4 text-center">
+          <button onclick="openPrivacyModal(event)" class="w-full py-3.5 bg-white rounded-2xl shadow-sm font-black text-xs text-slate-500 flex items-center justify-center gap-2 active:bg-slate-50 transition">
+            <span>🔒</span>
+            <span data-i18n="privacy_btn">개인정보 처리방침</span>
+            <span class="text-slate-300">›</span>
+          </button>
         </div>
       </div>
     </div>

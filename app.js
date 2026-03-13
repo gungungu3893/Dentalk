@@ -398,7 +398,7 @@ async function handleLogin() {
   // Supabase에서 받은 최신 데이터를 localStorage에도 동기화
   var sync = { nickname:currentUser.nickname, email:currentUser.email, phone:currentUser.phone, address:currentUser.address, clinicName:currentUser.clinicName, doctorName:currentUser.doctorName };
   localStorage.setItem('dentalk_profile_' + lic, JSON.stringify(sync));
-  sessionEnd = Date.now() + 30*60*1000;
+  sessionEnd = Date.now() + 365*24*60*60*1000;
   extShown   = false;
   localStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
   document.getElementById('licenseDisplay').textContent = currentUser.nickname;
@@ -406,7 +406,6 @@ async function handleLogin() {
   if (sideNick) sideNick.textContent = currentUser.nickname;
   document.getElementById('sideLoginArea').classList.add('hidden');
   document.getElementById('sideLoggedArea').classList.remove('hidden');
-  document.getElementById('timerWrap').classList.remove('hidden');
   // 헤더 닉네임 배지
   var hNick = document.getElementById('headerNickBadge');
   var hNickTxt = document.getElementById('headerNickText');
@@ -416,9 +415,6 @@ async function handleLogin() {
   updateNicknameDisplays();
   // 프로필 정보 렌더링
   renderProfileSettings();
-  if (sessionTimer) clearInterval(sessionTimer);
-  sessionTimer = setInterval(tickSession, 1000);
-  tickSession();
   closeModal('loginModal');
   if (isAdmin()) {
     document.body.classList.add('is-admin');
@@ -2613,14 +2609,10 @@ window.addEventListener('DOMContentLoaded', function() {
         if (sideNick) sideNick.textContent = currentUser.nickname;
         document.getElementById('sideLoginArea').classList.add('hidden');
         document.getElementById('sideLoggedArea').classList.remove('hidden');
-        document.getElementById('timerWrap').classList.remove('hidden');
         var hNick = document.getElementById('headerNickBadge');
         var hNickTxt = document.getElementById('headerNickText');
         if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
         if (isAdmin()) { document.body.classList.add('is-admin'); renderAdminPanel(); }
-        if (sessionTimer) clearInterval(sessionTimer);
-        sessionTimer = setInterval(tickSession, 1000);
-        tickSession();
       } else {
         localStorage.removeItem('dentalk_session');
       }
