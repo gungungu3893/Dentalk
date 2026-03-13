@@ -866,15 +866,19 @@ function completePayment() {
   var saved = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
   saved.unshift(order);
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(saved));
-  // 관리자에게 LINE 발송
-  var adminMsg = '🛒 새 쇼핑몰 주문\n━━━━━━━━━━━━━━━━━━━━\n' +
-    '🆔 ' + order.id + '\n📅 ' + order.date + '\n🏥 ' + order.clinic +
-    '\n📞 ' + order.phone + '\n📍 ' + order.address + '\n' +
-    (order.lineId ? '💬 ' + order.lineId + '\n' : '') +
-    '━━━━━━━━━━━━━━━━━━━━\n' +
-    order.items.map(function(i){ return '  ' + i.name + ' [' + i.code + '] ×' + i.qty + ' = ' + (i.price*i.qty).toLocaleString() + ' THB'; }).join('\n') +
-    '\n━━━━━━━━━━━━━━━━━━━━\n💰 합계: ' + order.totalAmount.toLocaleString() + ' THB';
-  sendLineRaw(LINE_USER_ID, adminMsg);
+  // 관리자에게 LINE flex 발송
+  var itemFields = order.items.map(function(i){
+    return { label: i.name, value: '[' + i.code + '] ×' + i.qty + '  ' + (i.price*i.qty).toLocaleString() + ' THB' };
+  });
+  itemFields.push({ label: '합계', value: order.totalAmount.toLocaleString() + ' THB' });
+  var adminFields = [
+    { label: '주문번호', value: order.id },
+    { label: '클리닉', value: order.clinic },
+    { label: '날짜', value: order.date },
+    { label: '연락처', value: order.phone },
+    { label: '주소', value: order.address },
+  ].concat(order.lineId ? [{ label: 'Line ID', value: order.lineId }] : []).concat(itemFields);
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🛒', '새 쇼핑몰 주문', adminFields, '고객이 QR 결제를 완료하였습니다.', 'Shop Order')]);
   // 결제완료 팝업
   document.getElementById('payCompleteSummary').innerHTML =
     '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">주문번호: ' + order.id + '</p>' +
@@ -1413,7 +1417,7 @@ function closeEditModal() {
   document.getElementById('editOrderModal').classList.add('hidden');
 }
 // ── LINE Flex 메시지 빌더 ───────────────────────────────────
-function buildFlexMessage(icon, title, fields, note) {
+function buildFlexMessage(icon, title, fields, note, subtitle) {
   var bodyContents = [
     { type: 'text', text: icon + '  ' + title, weight: 'bold', size: 'md', color: '#001d4a', wrap: true },
     { type: 'separator', margin: 'md', color: '#e2e8f0' }
@@ -1442,8 +1446,8 @@ function buildFlexMessage(icon, title, fields, note) {
       header: {
         type: 'box', layout: 'vertical', backgroundColor: '#001d4a', paddingAll: '20px',
         contents: [
-          { type: 'text', text: 'BIOPLANT', color: '#60a5fa', size: 'xs', weight: 'bold' },
-          { type: 'text', text: 'CNC Custom Order', color: '#93c5fd', size: 'xs' }
+          { type: 'text', text: 'BIOPLANT · Dentalk', color: '#60a5fa', size: 'xs', weight: 'bold' },
+          { type: 'text', text: subtitle || 'CNC Custom Order', color: '#93c5fd', size: 'xs' }
         ]
       },
       body: { type: 'box', layout: 'vertical', paddingAll: '20px', spacing: 'sm', contents: bodyContents }
@@ -1516,7 +1520,7 @@ var productPrices   = JSON.parse(localStorage.getItem('adminProductPrices') || '
 
 function adminShowTab(tab) {
   adminCurrentTab = tab;
-  ['orders','shopOrders','products','users','events'].forEach(function(t) {
+  ['orders','shopOrders','products','used','forum','users','events'].forEach(function(t) {
     var key = t.charAt(0).toUpperCase() + t.slice(1);
     var content = document.getElementById('adminTab' + key);
     var btn     = document.getElementById('adminTabBtn-' + t);
@@ -1529,11 +1533,13 @@ function adminShowTab(tab) {
       btn.className = 'shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500';
     }
   });
-  if (tab === 'orders')        renderAdminOrders();
+  if (tab === 'orders')          renderAdminOrders();
   else if (tab === 'shopOrders') renderAdminShopOrders();
-  else if (tab === 'products') renderAdminProducts();
-  else if (tab === 'users')    renderAdminUsers();
-  else if (tab === 'events')   renderAdminEventsTab();
+  else if (tab === 'products')   renderAdminProducts();
+  else if (tab === 'used')       renderAdminUsed();
+  else if (tab === 'forum')      renderAdminForum();
+  else if (tab === 'users')      renderAdminUsers();
+  else if (tab === 'events')     renderAdminEventsTab();
 }
 function isAdmin() {
   var nick = (currentUser.nickname || '').trim().toLowerCase();
@@ -1946,16 +1952,80 @@ function adminAdvanceShopOrder(orderId) {
   o.stage = stage.next;
   var nextStage = SHOP_STAGES.find(function(s){ return s.key===o.stage; });
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
-  // 고객에게 LINE 발송
+  // 고객에게 LINE flex 발송
   if (o.lineId) {
-    var msg = nextStage.icon + ' [Dentalk] 주문 상태 업데이트\n━━━━━━━━━━━━━━━━━━━━\n' +
-      '🆔 ' + o.id + '\n🏥 ' + o.clinic + '\n\n상태: ' + nextStage.label + '\n' +
-      '━━━━━━━━━━━━━━━━━━━━\n감사합니다 · dentalk.com';
-    sendLineRaw(o.lineId, msg);
+    sendLineMessage(o.lineId, [buildFlexMessage(nextStage.icon, nextStage.label, [
+      { label: '주문번호', value: o.id },
+      { label: '클리닉', value: o.clinic },
+      { label: '날짜', value: o.date },
+      { label: '합계', value: o.totalAmount.toLocaleString() + ' THB' }
+    ], '문의: Line @bioplant_th', 'Shop Order')]);
   }
-  // 관리자에게도 알림
-  sendLineRaw(LINE_USER_ID, '🔄 쇼핑주문 상태변경\n' + o.id + ' → ' + nextStage.label);
+  // 관리자에게도 flex 알림
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', '쇼핑주문 상태변경', [
+    { label: '주문번호', value: o.id },
+    { label: '클리닉', value: o.clinic },
+    { label: '변경상태', value: nextStage.icon + ' ' + nextStage.label }
+  ], null, 'Shop Order')]);
   renderAdminShopOrders();
+}
+function renderAdminUsed() {
+  var list = document.getElementById('adminTabUsed');
+  if (!list) return;
+  if (!usedItems.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">중고 게시물이 없습니다.</p>'; return; }
+  var condLabel = {new:'Like New', good:'Good', fair:'Fair'};
+  var condColor = {new:'bg-green-100 text-green-700', good:'bg-blue-100 text-blue-700', fair:'bg-yellow-100 text-yellow-700'};
+  list.innerHTML = usedItems.map(function(item, i) {
+    return '<div class="bg-white rounded-2xl shadow-sm p-4">' +
+      '<div class="flex justify-between items-start gap-3">' +
+        (item.image ? '<img src="' + item.image + '" class="w-14 h-14 rounded-xl object-cover shrink-0">' : '<div class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0">📦</div>') +
+        '<div class="flex-1 min-w-0">' +
+          '<p class="font-black text-slate-800 text-sm truncate">' + item.name + '</p>' +
+          '<p class="text-[9px] font-mono text-slate-400">' + item.code + '</p>' +
+          '<p class="font-black text-blue-700 text-xs mt-0.5">' + item.price.toLocaleString() + ' THB</p>' +
+          '<span class="inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-full mt-1 ' + condColor[item.cond] + '">' + condLabel[item.cond] + '</span>' +
+        '</div>' +
+        '<button onclick="adminDeleteUsed(' + i + ')" class="shrink-0 px-2 py-1 bg-red-50 text-red-500 rounded-lg font-black text-[10px] active:scale-95 transition">🗑 삭제</button>' +
+      '</div>' +
+      '<div class="mt-2 pt-2 border-t border-slate-100 flex justify-between text-[9px] text-slate-400">' +
+        '<span>' + item.seller + ' · ' + item.date + '</span>' +
+        '<span>👁 ' + (item.views||0) + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function adminDeleteUsed(i) {
+  if (!confirm('이 게시물을 삭제하시겠습니까?')) return;
+  usedItems.splice(i, 1);
+  renderUsed();
+  renderAdminUsed();
+}
+function renderAdminForum() {
+  var list = document.getElementById('adminTabForum');
+  if (!list) return;
+  if (!posts.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">게시물이 없습니다.</p>'; return; }
+  list.innerHTML = posts.map(function(post, i) {
+    var catBadge = post.category === 'implant'
+      ? '<span class="bg-blue-100 text-blue-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">🦷 임플란트</span>'
+      : '<span class="bg-purple-100 text-purple-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">💎 보철</span>';
+    return '<div class="bg-white rounded-2xl shadow-sm p-4">' +
+      '<div class="flex justify-between items-start gap-2">' +
+        '<div class="flex-1 min-w-0">' +
+          '<div class="flex items-center gap-2 mb-1">' + catBadge + '</div>' +
+          '<p class="font-black text-slate-800 text-sm leading-snug">' + post.title + '</p>' +
+          '<p class="text-[10px] text-slate-400 mt-1 line-clamp-2">' + post.body + '</p>' +
+          '<p class="text-[9px] text-slate-300 mt-1">' + post.author + ' · ' + (post.date||'') + ' · 👁 ' + (post.views||0) + ' · 💬 ' + (post.comments?post.comments.length:0) + '</p>' +
+        '</div>' +
+        '<button onclick="adminDeletePost(' + i + ')" class="shrink-0 px-2 py-1 bg-red-50 text-red-500 rounded-lg font-black text-[10px] active:scale-95 transition">🗑 삭제</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function adminDeletePost(i) {
+  if (!confirm('이 게시물을 삭제하시겠습니까?')) return;
+  posts.splice(i, 1);
+  renderForum();
+  renderAdminForum();
 }
 async function renderAdminOrders() {
   var list = document.getElementById('adminTabOrders');
@@ -2711,12 +2781,15 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('mb-home').classList.add('active');
   updateNavTabs('home');
 
-  // 세션 복원
+  // 세션 복원 (관리자는 매번 직접 로그인 필요)
   var savedSession = localStorage.getItem('dentalk_session');
   if (savedSession) {
     try {
       var s = JSON.parse(savedSession);
-      if (s.sessionEnd && Date.now() < s.sessionEnd) {
+      var isAdminSession = ['admin','관리자'].includes((s.user && s.user.nickname || '').trim().toLowerCase());
+      if (isAdminSession) {
+        localStorage.removeItem('dentalk_session');
+      } else if (s.sessionEnd && Date.now() < s.sessionEnd) {
         currentUser = s.user;
         sessionEnd  = s.sessionEnd;
         extShown    = false;
@@ -2736,6 +2809,7 @@ window.addEventListener('DOMContentLoaded', function() {
       }
     } catch(e) { localStorage.removeItem('dentalk_session'); }
   }
+
 
   updateNavLocks();
   applyLang();
