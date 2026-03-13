@@ -687,14 +687,10 @@ const SHOP_CATEGORIES = [
 function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
-    return '<div onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col">' +
-      '<div class="aspect-square bg-gradient-to-br ' + cat.color + ' flex items-center justify-center p-3">' + cat.svg + '</div>' +
-      '<div class="p-1.5 flex flex-col gap-0.5">' +
-        '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full bg-blue-100 text-blue-700 self-start">' + count + ' ' + t('shop_items') + '</span>' +
-        '<p class="font-bold text-slate-800 text-[11px] leading-snug">' + cat.name + '</p>' +
-        '<p class="text-[9px] text-slate-400 leading-tight">' + cat.desc + '</p>' +
-      '</div>' +
-    '</div>';
+    return '<button onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-xl shadow-sm py-3 px-1 cursor-pointer active:scale-95 transition text-center border-2 border-transparent active:border-blue-300">' +
+      '<p class="font-black text-slate-800 text-[11px] leading-tight">' + cat.name + '</p>' +
+      '<p class="text-[8px] text-slate-400 mt-0.5 font-bold">' + count + 'item</p>' +
+    '</button>';
   }).join('');
 }
 function openShopCategory(catId) {
@@ -734,7 +730,7 @@ function renderOrderTable() {
       p.colLabels.forEach(function(col, ci) {
         var code = p.codeMatrix[ri][ci];
         html += code
-          ? '<td class="py-3 px-1"><div class="flex flex-col items-center gap-1"><span class="text-[8px] text-slate-400 font-mono text-center leading-tight">' + code + '</span><input type="number" min="0" value="0" class="qty-input" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0"></div></td>'
+          ? '<td class="py-2 px-1"><div class="flex flex-col items-center gap-1"><span class="text-[10px] text-slate-600 font-mono text-center font-bold leading-tight">' + code + '</span><div class="flex items-center gap-0.5"><button onclick="stepQ(\'' + code.replace(/'/g,"\\'") + '\',-1)" class="w-5 h-5 rounded-full bg-slate-200 font-black text-[10px] flex items-center justify-center leading-none">−</button><input type="number" min="0" value="0" class="qty-input" id="qi-' + code.replace(/\s/g,'_') + '" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0"><button onclick="stepQ(\'' + code.replace(/'/g,"\\'") + '\',1)" class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 font-black text-[10px] flex items-center justify-center leading-none">+</button></div></div></td>'
           : '<td class="py-3 px-1 text-center text-slate-200">-</td>';
       });
       html += '</tr>';
@@ -748,7 +744,7 @@ function renderOrderTable() {
       html += '<tr class="border-t border-slate-100"><td class="py-3 pr-2 whitespace-nowrap"><div class="flex items-center gap-1.5"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + conn.type + '">' + conn.type + '</span><span class="font-black text-xs text-slate-700">' + conn.label + '</span></div></td>';
       p.heights.forEach(function(h, hi) {
         var code = p.codes[ci][hi];
-        html += '<td class="py-3 px-1"><div class="flex flex-col items-center gap-1"><span class="text-[8px] text-slate-400 font-mono text-center">' + code + '</span><input type="number" min="0" value="0" class="qty-input" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0"></div></td>';
+        html += '<td class="py-2 px-1"><div class="flex flex-col items-center gap-1"><span class="text-[10px] text-slate-600 font-mono text-center font-bold leading-tight">' + code + '</span><div class="flex items-center gap-0.5"><button onclick="stepQ(\'' + code.replace(/'/g,"\\'") + '\',-1)" class="w-5 h-5 rounded-full bg-slate-200 font-black text-[10px] flex items-center justify-center leading-none">−</button><input type="number" min="0" value="0" class="qty-input" id="qi-' + code.replace(/\s/g,'_') + '" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0"><button onclick="stepQ(\'' + code.replace(/'/g,"\\'") + '\',1)" class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 font-black text-[10px] flex items-center justify-center leading-none">+</button></div></div></td>';
       });
       html += '</tr>';
     });
@@ -758,7 +754,7 @@ function renderOrderTable() {
     p.rows.forEach(function(row) {
       row.items.forEach(function(item) {
         html += '<div class="bg-slate-50 rounded-2xl p-4 flex justify-between items-center">' +
-          '<div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + row.type + '">' + row.type + '</span><span class="font-black text-xs text-slate-700">' + row.label + '</span><span class="text-[9px] text-slate-400 font-bold">' + item.size + '</span></div><p class="text-[9px] text-slate-500 font-mono font-bold">' + item.code + '</p></div>' +
+          '<div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + row.type + '">' + row.type + '</span><span class="font-black text-xs text-slate-700">' + row.label + '</span><span class="text-[9px] text-slate-400 font-bold">' + item.size + '</span></div><p class="text-xs text-slate-700 font-mono font-black">' + item.code + '</p></div>' +
           '<div class="flex items-center gap-2 ml-3">' +
             '<button onclick="stepQ(\'' + item.code + '\',-1)" class="w-7 h-7 rounded-full bg-slate-200 font-black text-sm flex items-center justify-center">−</button>' +
             '<input type="number" min="0" value="0" class="qty-input" id="qi-' + item.code.replace(/\s/g,'_') + '" oninput="tableQtys[\'' + item.code + '\']=parseInt(this.value)||0">' +
@@ -822,19 +818,38 @@ function renderCart() {
 }
 function removeCart(i) { cart.splice(i,1); updateBadge(); if(!cart.length) closeModal('cartModal'); else renderCart(); }
 function cartQty(i,n)  { cart[i].qty = Math.max(1, cart[i].qty+n); updateBadge(); renderCart(); }
-function openAddressForm() { closeModal('cartModal'); openModal('addressModal'); }
+function openAddressForm() {
+  document.getElementById('clinicName').value  = currentUser.clinicName || '';
+  document.getElementById('clinicPhone').value = currentUser.phone      || '';
+  document.getElementById('fullAddress').value = currentUser.address    || '';
+  document.getElementById('clinicLineId').value = '';
+  closeModal('cartModal');
+  openModal('addressModal');
+}
+var pendingShopOrder = null;
 async function requestPay() {
-  var clinic=document.getElementById('clinicName').value.trim();
-  var phone=document.getElementById('clinicPhone').value.trim();
-  var addr=document.getElementById('fullAddress').value.trim();
+  var clinic  = document.getElementById('clinicName').value.trim();
+  var phone   = document.getElementById('clinicPhone').value.trim();
+  var addr    = document.getElementById('fullAddress').value.trim();
+  var lineId  = document.getElementById('clinicLineId').value.trim();
   if (!clinic||!phone||!addr) { alert(t('addr_fill_error')); return; }
   var amt = cart.reduce(function(s,c){ return s+c.price*c.qty; },0);
+  var oid = 'SP-' + Date.now();
+  pendingShopOrder = {
+    id: oid,
+    date: new Date().toLocaleDateString('ko-KR'),
+    clinic: clinic, phone: phone, address: addr, lineId: lineId,
+    nickname: currentUser.nickname || '',
+    items: cart.map(function(c){ return {name:c.name,code:c.code,qty:c.qty,price:c.price}; }),
+    totalAmount: amt,
+    stage: 'submitted'
+  };
   var qrUrl;
   try {
     var res = await fetch('http://localhost:3000/pay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart,address:clinic,phone,detailAddress:addr})});
     qrUrl = (await res.json()).qr_image;
   } catch(e) {
-    qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DENTALK_' + Date.now() + '_' + amt + 'THB';
+    qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DENTALK_' + oid + '_' + amt + 'THB';
   }
   document.getElementById('qrSummary').innerHTML =
     '<p class="font-black text-slate-500 uppercase text-[9px] mb-2">' + t('qr_summary_title') + '</p>' +
@@ -843,7 +858,32 @@ async function requestPay() {
   document.getElementById('qrImg').src = qrUrl;
   closeModal('addressModal'); openModal('qrModal');
 }
-function completePayment() { cart=[]; updateBadge(); closeModal('qrModal'); goPage('shop'); }
+function completePayment() {
+  if (!pendingShopOrder) { cart=[]; updateBadge(); closeModal('qrModal'); goPage('shop'); return; }
+  var order = pendingShopOrder;
+  pendingShopOrder = null;
+  // localStorage에 저장
+  var saved = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  saved.unshift(order);
+  localStorage.setItem('dentalk_shop_orders', JSON.stringify(saved));
+  // 관리자에게 LINE 발송
+  var adminMsg = '🛒 새 쇼핑몰 주문\n━━━━━━━━━━━━━━━━━━━━\n' +
+    '🆔 ' + order.id + '\n📅 ' + order.date + '\n🏥 ' + order.clinic +
+    '\n📞 ' + order.phone + '\n📍 ' + order.address + '\n' +
+    (order.lineId ? '💬 ' + order.lineId + '\n' : '') +
+    '━━━━━━━━━━━━━━━━━━━━\n' +
+    order.items.map(function(i){ return '  ' + i.name + ' [' + i.code + '] ×' + i.qty + ' = ' + (i.price*i.qty).toLocaleString() + ' THB'; }).join('\n') +
+    '\n━━━━━━━━━━━━━━━━━━━━\n💰 합계: ' + order.totalAmount.toLocaleString() + ' THB';
+  sendLineRaw(LINE_USER_ID, adminMsg);
+  // 결제완료 팝업
+  document.getElementById('payCompleteSummary').innerHTML =
+    '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">주문번호: ' + order.id + '</p>' +
+    order.items.map(function(i){ return '<div class="flex justify-between text-xs gap-2"><span class="flex-1 font-bold">' + i.name + '</span><span class="font-mono text-slate-500">' + i.code + '</span><span class="font-black ml-1">×' + i.qty + '</span><span class="font-mono font-black ml-1">' + (i.price*i.qty).toLocaleString() + '</span></div>'; }).join('') +
+    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-blue-800"><span>합계</span><span class="font-mono">' + order.totalAmount.toLocaleString() + ' THB</span></div>';
+  cart=[]; updateBadge(); closeModal('qrModal');
+  openModal('payCompleteModal');
+}
+function closePayComplete() { closeModal('payCompleteModal'); goPage('shop'); }
 // ============================================================
 // CUSTOM ABUTMENT
 // ============================================================
@@ -1476,8 +1516,9 @@ var productPrices   = JSON.parse(localStorage.getItem('adminProductPrices') || '
 
 function adminShowTab(tab) {
   adminCurrentTab = tab;
-  ['orders','products','users','events'].forEach(function(t) {
-    var content = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+  ['orders','shopOrders','products','users','events'].forEach(function(t) {
+    var key = t.charAt(0).toUpperCase() + t.slice(1);
+    var content = document.getElementById('adminTab' + key);
     var btn     = document.getElementById('adminTabBtn-' + t);
     if (!content || !btn) return;
     if (t === tab) {
@@ -1488,7 +1529,8 @@ function adminShowTab(tab) {
       btn.className = 'shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500';
     }
   });
-  if (tab === 'orders')   renderAdminOrders();
+  if (tab === 'orders')        renderAdminOrders();
+  else if (tab === 'shopOrders') renderAdminShopOrders();
   else if (tab === 'products') renderAdminProducts();
   else if (tab === 'users')    renderAdminUsers();
   else if (tab === 'events')   renderAdminEventsTab();
@@ -1846,6 +1888,74 @@ async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
     });
   } catch(e) { console.error('[Reupload Save]', e); }
   renderAdminOrders();
+}
+// ============================================================
+// 쇼핑몰 주문 관리
+// ============================================================
+var SHOP_STAGES = [
+  { key:'submitted', label:'주문접수',   icon:'📥', next:'paid' },
+  { key:'paid',      label:'결제완료',   icon:'💳', next:'preparing' },
+  { key:'preparing', label:'제품준비중', icon:'📦', next:'shipped' },
+  { key:'shipped',   label:'배송중',     icon:'🚚', next:'delivered' },
+  { key:'delivered', label:'배송완료',   icon:'✅', next:null },
+];
+function renderAdminShopOrders() {
+  var list = document.getElementById('adminTabShopOrders');
+  if (!list) return;
+  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  if (!orders.length) {
+    list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">쇼핑몰 주문이 없습니다.</p>';
+    return;
+  }
+  list.innerHTML = orders.map(function(o) {
+    var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; }) || SHOP_STAGES[0];
+    var nextStage = stage.next ? SHOP_STAGES.find(function(s){ return s.key===stage.next; }) : null;
+    var stageBarHtml = '<div class="flex gap-1 mb-3">' + SHOP_STAGES.map(function(s){
+      var isDone = SHOP_STAGES.indexOf(s) <= SHOP_STAGES.indexOf(stage);
+      return '<div class="flex-1 text-center"><div class="h-1 rounded-full mb-1 ' + (isDone ? 'bg-blue-500' : 'bg-slate-200') + '"></div><p class="text-[7px] font-bold ' + (s.key===o.stage ? 'text-blue-600' : 'text-slate-300') + '">' + s.label + '</p></div>';
+    }).join('') + '</div>';
+    var itemsHtml = o.items.map(function(i){
+      return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
+    }).join('');
+    var actionHtml = nextStage
+      ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-3 py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + nextStage.label + '로 변경 → LINE 발송</button>'
+      : '<div class="mt-3 text-center"><p class="text-[10px] font-black text-green-500">✅ 배송 완료</p></div>';
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
+      '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
+        '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
+             '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
+        '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stage.icon + ' ' + stage.label + '</span>' +
+      '</div>' +
+      '<div class="px-4 pt-3 pb-4">' +
+        stageBarHtml +
+        '<p class="text-[9px] text-slate-400 mb-1">📞 ' + o.phone + ' · 📍 ' + o.address + '</p>' +
+        (o.lineId ? '<p class="text-[9px] text-green-500 font-bold mb-2">💬 Line: ' + o.lineId + '</p>' : '') +
+        '<div class="bg-slate-50 rounded-xl p-2 space-y-0.5 mb-1">' + itemsHtml + '</div>' +
+        '<p class="text-xs font-black text-blue-800 text-right">합계 ' + o.totalAmount.toLocaleString() + ' THB</p>' +
+        actionHtml +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function adminAdvanceShopOrder(orderId) {
+  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  var o = orders.find(function(x){ return x.id===orderId; });
+  if (!o) return;
+  var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; });
+  if (!stage || !stage.next) return;
+  o.stage = stage.next;
+  var nextStage = SHOP_STAGES.find(function(s){ return s.key===o.stage; });
+  localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
+  // 고객에게 LINE 발송
+  if (o.lineId) {
+    var msg = nextStage.icon + ' [Dentalk] 주문 상태 업데이트\n━━━━━━━━━━━━━━━━━━━━\n' +
+      '🆔 ' + o.id + '\n🏥 ' + o.clinic + '\n\n상태: ' + nextStage.label + '\n' +
+      '━━━━━━━━━━━━━━━━━━━━\n감사합니다 · dentalk.com';
+    sendLineRaw(o.lineId, msg);
+  }
+  // 관리자에게도 알림
+  sendLineRaw(LINE_USER_ID, '🔄 쇼핑주문 상태변경\n' + o.id + ' → ' + nextStage.label);
+  renderAdminShopOrders();
 }
 async function renderAdminOrders() {
   var list = document.getElementById('adminTabOrders');
