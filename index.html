@@ -612,6 +612,36 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <button onclick="adminConfirmShipping()" data-i18n="ship_process_btn" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>
       </div>
     </div>
+    <!-- 쇼핑몰 배송 정보 모달 -->
+    <div id="shopShippingModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeShopShippingModal()">
+      <div class="bg-white rounded-t-3xl w-full p-5 pb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-black text-slate-800 text-sm">🚚 쇼핑몰 배송 정보 입력</h3>
+          <button onclick="closeShopShippingModal()" class="text-slate-400 font-black text-lg leading-none">✕</button>
+        </div>
+        <div class="mb-3">
+          <p class="text-xs font-black text-slate-600 mb-2">배송사</p>
+          <select id="sship-carrier" onchange="toggleShopCustomCarrier()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+            <option value="">Select...</option>
+            <option>Kerry Express</option>
+            <option>Flash Express</option>
+            <option>J&amp;T Express</option>
+            <option>DHL</option>
+            <option>FedEx</option>
+            <option>Thailand Post</option>
+            <option value="custom">직접 입력</option>
+          </select>
+        </div>
+        <div id="sship-carrier-custom-wrap" class="mb-3 hidden">
+          <input id="sship-carrier-custom" type="text" placeholder="배송사 이름 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        </div>
+        <div class="mb-4">
+          <p class="text-xs font-black text-slate-600 mb-2">송장번호</p>
+          <input id="sship-tracking" type="text" placeholder="송장번호 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        </div>
+        <button onclick="adminConfirmShopShipping()" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>
+      </div>
+    </div>
     <!-- ==================== USED MARKET ==================== -->
     <div id="page-used" class="page p-4">
       <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">

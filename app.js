@@ -702,9 +702,16 @@ function openShopCategory(catId) {
 function renderShopItems(catId) {
   var items = PRODUCTS.filter(function(p){ return p.category === catId; });
   document.getElementById('shopItemsList').innerHTML = items.map(function(p) {
-    return '<div onclick="openOrder(\'' + p.id + '\')" class="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition">' +
-      '<div class="flex-1 pr-3"><h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-tight">' + p.subtitle + '</p></div>' +
-      '<div class="text-right shrink-0"><p class="font-black text-blue-700 text-xs font-mono">' + p.price.toLocaleString() + ' THB</p><p class="text-[10px] text-blue-500 font-black mt-1">' + t('shop_select') + '</p></div>' +
+    var inStock = isInStock(p.id);
+    var stockBadge = inStock
+      ? '<span class="text-[9px] font-black text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full mt-1 inline-block">✅ In Stock</span>'
+      : '<span class="text-[9px] font-black text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full mt-1 inline-block">❌ Out of Stock</span>';
+    var clickAttr = inStock
+      ? 'onclick="openOrder(\'' + p.id + '\')"'
+      : 'onclick="alert(\'현재 품절된 제품입니다.\')"';
+    return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition' + (!inStock ? ' opacity-60' : '') + '">' +
+      '<div class="flex-1 pr-3"><h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-tight">' + p.subtitle + '</p>' + stockBadge + '</div>' +
+      '<div class="text-right shrink-0"><p class="font-black text-blue-700 text-xs font-mono">' + p.price.toLocaleString() + ' THB</p>' + (inStock ? '<p class="text-[10px] text-blue-500 font-black mt-1">' + t('shop_select') + '</p>' : '') + '</div>' +
     '</div>';
   }).join('');
 }
@@ -1517,6 +1524,8 @@ async function sendLine(order, stageKey) {
 // ============================================================
 var adminCurrentTab = 'orders';
 var productPrices   = JSON.parse(localStorage.getItem('adminProductPrices') || '{}');
+var productStock    = JSON.parse(localStorage.getItem('adminProductStock') || '{}');
+
 
 function adminShowTab(tab) {
   adminCurrentTab = tab;
@@ -1949,24 +1958,77 @@ function adminAdvanceShopOrder(orderId) {
   if (!o) return;
   var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; });
   if (!stage || !stage.next) return;
-  o.stage = stage.next;
-  var nextStage = SHOP_STAGES.find(function(s){ return s.key===o.stage; });
+  // 배송 단계는 배송사/송장번호 입력 모달을 먼저 표시
+  if (stage.next === 'shipped') {
+    openShopShippingModal(orderId);
+    return;
+  }
+  _doAdvanceShopOrder(orderId, stage.next, null, null);
+}
+function openShopShippingModal(orderId) {
+  var modal = document.getElementById('shopShippingModal');
+  if (!modal) return;
+  modal.dataset.orderId = orderId;
+  document.getElementById('sship-carrier').value = '';
+  document.getElementById('sship-tracking').value = '';
+  document.getElementById('sship-carrier-custom-wrap').classList.add('hidden');
+  modal.classList.remove('hidden');
+}
+function closeShopShippingModal() {
+  document.getElementById('shopShippingModal').classList.add('hidden');
+}
+function toggleShopCustomCarrier() {
+  var sel = document.getElementById('sship-carrier');
+  document.getElementById('sship-carrier-custom-wrap').classList.toggle('hidden', sel.value !== 'custom');
+}
+function adminConfirmShopShipping() {
+  var modal = document.getElementById('shopShippingModal');
+  var orderId = modal.dataset.orderId;
+  var sel = document.getElementById('sship-carrier');
+  var carrier = sel.value === 'custom'
+    ? document.getElementById('sship-carrier-custom').value.trim()
+    : sel.value;
+  var tracking = document.getElementById('sship-tracking').value.trim();
+  if (!carrier) { alert('배송사를 선택해주세요.'); return; }
+  if (!tracking) { alert('송장번호를 입력해주세요.'); return; }
+  closeShopShippingModal();
+  _doAdvanceShopOrder(orderId, 'shipped', carrier, tracking);
+}
+function _doAdvanceShopOrder(orderId, nextKey, carrier, tracking) {
+  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  var o = orders.find(function(x){ return x.id===orderId; });
+  if (!o) return;
+  o.stage = nextKey;
+  if (carrier) o.carrier = carrier;
+  if (tracking) o.tracking = tracking;
+  var nextStage = SHOP_STAGES.find(function(s){ return s.key===nextKey; });
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
-  // 고객에게 LINE flex 발송
+  // 고객에게 LINE flex 발송 (주문 상세 포함)
+  // ※ lineId는 고객이 입력한 LINE User ID(U로 시작)여야 전달 가능
   if (o.lineId) {
-    sendLineMessage(o.lineId, [buildFlexMessage(nextStage.icon, nextStage.label, [
+    var itemRows = (o.items || []).map(function(i) {
+      return { label: i.name, value: '[' + i.code + '] ×' + i.qty + '  ' + (i.price * i.qty).toLocaleString() + ' THB' };
+    });
+    var fields = [
       { label: '주문번호', value: o.id },
       { label: '클리닉', value: o.clinic },
       { label: '날짜', value: o.date },
-      { label: '합계', value: o.totalAmount.toLocaleString() + ' THB' }
-    ], '문의: Line @bioplant_th', 'Shop Order')]);
+    ];
+    if (carrier)  fields.push({ label: '배송사', value: carrier });
+    if (tracking) fields.push({ label: '송장번호', value: tracking });
+    fields = fields.concat(itemRows);
+    fields.push({ label: '합계', value: (o.totalAmount || 0).toLocaleString() + ' THB' });
+    sendLineMessage(o.lineId, [buildFlexMessage(nextStage.icon, nextStage.label, fields, '문의: Line @bioplant_th', 'Shop Order')]);
   }
   // 관리자에게도 flex 알림
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', '쇼핑주문 상태변경', [
+  var adminFields = [
     { label: '주문번호', value: o.id },
     { label: '클리닉', value: o.clinic },
-    { label: '변경상태', value: nextStage.icon + ' ' + nextStage.label }
-  ], null, 'Shop Order')]);
+    { label: '변경상태', value: nextStage.icon + ' ' + nextStage.label },
+  ];
+  if (carrier)  adminFields.push({ label: '배송사', value: carrier });
+  if (tracking) adminFields.push({ label: '송장번호', value: tracking });
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', '쇼핑주문 상태변경', adminFields, null, 'Shop Order')]);
   renderAdminShopOrders();
 }
 function renderAdminUsed() {
@@ -2149,21 +2211,31 @@ function _renderAdminOrdersList() {
     '<div id="adminOrderSub-done"   class="hidden grid grid-cols-2 gap-3">' + (doneOrders.length   ? doneOrders.map(_buildAdminOrderCard).join('')   : emptyMsg) + '</div>';
   adminShowOrderSubTab(adminOrderSubTab);
 }
-// ── 상품 가격 관리 ──────────────────────────────────────────
+// ── 상품 가격 + 재고 관리 ───────────────────────────────────
+function isInStock(productId) {
+  return productStock[productId] !== false; // 기본값: 재고 있음
+}
 function renderAdminProducts() {
   var list = document.getElementById('adminTabProducts');
   if (!list) return;
   list.innerHTML = PRODUCTS.map(function(p) {
-    var price = productPrices[p.id] !== undefined ? productPrices[p.id] : p.price;
-    return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm flex items-center gap-3">' +
-      '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-slate-800 text-xs truncate">' + p.title + '</p>' +
-        '<p class="text-[9px] text-slate-400 leading-tight">' + p.subtitle + '</p>' +
+    var price   = productPrices[p.id] !== undefined ? productPrices[p.id] : p.price;
+    var inStock = isInStock(p.id);
+    var stockBtn = inStock
+      ? '<button onclick="adminToggleStock(\'' + p.id + '\')" class="shrink-0 px-2 py-1 bg-green-50 text-green-600 border border-green-200 rounded-xl font-black text-[10px] active:scale-95 transition whitespace-nowrap">✅ 재고 있음</button>'
+      : '<button onclick="adminToggleStock(\'' + p.id + '\')" class="shrink-0 px-2 py-1 bg-red-50 text-red-500 border border-red-200 rounded-xl font-black text-[10px] active:scale-95 transition whitespace-nowrap">❌ 품절</button>';
+    return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
+      '<div class="flex items-start gap-3">' +
+        '<div class="flex-1 min-w-0">' +
+          '<p class="font-black text-slate-800 text-xs truncate">' + p.title + '</p>' +
+          '<p class="text-[9px] text-slate-400 leading-tight">' + p.subtitle + '</p>' +
+        '</div>' +
+        stockBtn +
       '</div>' +
-      '<div class="flex items-center gap-1.5 shrink-0">' +
+      '<div class="flex items-center gap-1.5 mt-2">' +
         '<input type="number" value="' + price + '" min="0" ' +
           'onchange="adminSaveProductPrice(\'' + p.id + '\',this.value)" ' +
-          'class="w-24 text-right font-black text-xs border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-400">' +
+          'class="flex-1 text-right font-black text-xs border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-400">' +
         '<span class="text-[10px] text-slate-400 font-bold">THB</span>' +
       '</div>' +
     '</div>';
@@ -2176,6 +2248,13 @@ function adminSaveProductPrice(id, val) {
   localStorage.setItem('adminProductPrices', JSON.stringify(productPrices));
   var p = PRODUCTS.find(function(p){ return p.id === id; });
   if (p) p.price = price;
+}
+function adminToggleStock(id) {
+  productStock[id] = !isInStock(id);
+  localStorage.setItem('adminProductStock', JSON.stringify(productStock));
+  renderAdminProducts();
+  // 쇼핑몰 목록도 즉시 반영
+  if (currentPage === 'shop-items' || currentPage === 'shop') renderShop();
 }
 // ── 회원 관리 ──────────────────────────────────────────────
 async function renderAdminUsers() {
