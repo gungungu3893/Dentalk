@@ -410,6 +410,8 @@ async function handleLogin() {
   var hNick = document.getElementById('headerNickBadge');
   var hNickTxt = document.getElementById('headerNickText');
   if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
+  var hLoginBtn = document.getElementById('headerLoginBtn');
+  if (hLoginBtn) hLoginBtn.classList.add('hide');
   updateNavLocks();
   // 게시판 닉네임 표시 업데이트
   updateNicknameDisplays();
@@ -460,6 +462,8 @@ function forceLogout() {
   document.getElementById('timerWrap').classList.add('hidden');
   var hNick = document.getElementById('headerNickBadge');
   if (hNick) hNick.classList.remove('show');
+  var hLoginBtn = document.getElementById('headerLoginBtn');
+  if (hLoginBtn) hLoginBtn.classList.remove('hide');
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
@@ -477,6 +481,8 @@ function doLogout() {
   document.getElementById('licenseDisplay').textContent = '-';
   var hNick = document.getElementById('headerNickBadge');
   if (hNick) hNick.classList.remove('show');
+  var hLoginBtn = document.getElementById('headerLoginBtn');
+  if (hLoginBtn) hLoginBtn.classList.remove('hide');
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
@@ -2612,6 +2618,8 @@ window.addEventListener('DOMContentLoaded', function() {
         var hNick = document.getElementById('headerNickBadge');
         var hNickTxt = document.getElementById('headerNickText');
         if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
+        var hLoginBtn2 = document.getElementById('headerLoginBtn');
+        if (hLoginBtn2) hLoginBtn2.classList.add('hide');
         if (isAdmin()) { document.body.classList.add('is-admin'); renderAdminPanel(); }
       } else {
         localStorage.removeItem('dentalk_session');

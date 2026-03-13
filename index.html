@@ -64,6 +64,8 @@ input[type=number] { -moz-appearance:textfield; }
 .nav-lock { position:absolute; top:2px; right:2px; font-size:8px; opacity:0.65; pointer-events:none; }
 #headerNickBadge { display:none; }
 #headerNickBadge.show { display:flex; }
+#headerLoginBtn { display:flex; }
+#headerLoginBtn.hide { display:none; }
 #adminPanel { display:none !important; }
 body.is-admin #adminPanel { display:block !important; }
 body.is-admin #factoryPromoHeader { display:none !important; }
@@ -288,6 +290,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;margin-left:4px;align-self:center">BIOTEM × BIOPLANT</span>
       </div>
     </div>
+    <button id="headerLoginBtn" onclick="openLoginModal(null)" class="flex items-center gap-1.5 bg-white/10 rounded-xl px-2.5 py-1.5 active:bg-white/20 transition">
+      <span class="text-sm">🔐</span>
+      <span class="text-[10px] font-black text-blue-200" data-i18n="nav_login">Login</span>
+    </button>
     <div id="headerNickBadge" class="items-center gap-1.5 bg-white/10 rounded-xl px-2.5 py-1.5 cursor-pointer active:bg-white/20 transition" onclick="openMyActivity()">
       <span class="text-sm">👤</span>
       <span id="headerNickText" class="text-[10px] font-black text-blue-200 truncate max-w-[80px]"></span>
@@ -415,12 +421,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <p class="text-lg font-black leading-snug text-blue-300" data-i18n="home_title2">Ordering System</p>
             <p class="text-xs text-blue-200/70 mt-3 leading-relaxed" data-i18n="home_desc">Providing premium BIOTEM implant components directly to dental clinics across Thailand.</p>
           </div>
-          <div class="fade-up-3 mt-7 flex gap-3 items-center">
+          <div class="fade-up-3 mt-7">
             <button onclick="goPage('shop')" class="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
               <span>🦷</span> <span data-i18n="home_goto_shop">Go to Shop</span> <span class="text-blue-200">›</span>
-            </button>
-            <button onclick="openLoginModal(null)" class="bg-white/15 border border-white/30 text-white px-6 py-3.5 rounded-2xl font-black text-sm active:scale-95 transition flex items-center gap-2">
-              <span>🔐</span> <span data-i18n="nav_login">Login</span>
             </button>
           </div>
         </div>
