@@ -515,7 +515,15 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <!-- ==================== SHOP ==================== -->
     <div id="page-shop" class="page p-4">
       <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1" data-i18n="shop_hint">Select a category to order</p>
-      <div id="shopCategoryList" class="grid grid-cols-4 gap-2"></div>
+      <div id="shopCategoryList" class="grid grid-cols-4 gap-2 mb-6"></div>
+      <!-- 내 쇼핑 주문 현황 -->
+      <div class="mt-2">
+        <div class="flex items-center gap-2 mb-3 px-1">
+          <span class="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
+          <h3 class="font-black text-slate-700 text-xs">내 쇼핑 주문 현황</h3>
+        </div>
+        <div id="myShopOrdersList"></div>
+      </div>
     </div>
     <!-- ==================== SHOP ITEMS ==================== -->
     <div id="page-shop-items" class="page p-4">

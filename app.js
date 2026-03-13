@@ -692,6 +692,46 @@ function renderShop() {
       '<p class="text-[8px] text-slate-400 mt-0.5 font-bold">' + count + 'item</p>' +
     '</button>';
   }).join('');
+  renderMyShopOrders();
+}
+function renderMyShopOrders() {
+  var container = document.getElementById('myShopOrdersList');
+  if (!container) return;
+  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  if (currentUser && currentUser.nickname) {
+    orders = orders.filter(function(o){ return o.nickname === currentUser.nickname; });
+  }
+  if (!orders.length) {
+    container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">주문 내역이 없습니다.</p>';
+    return;
+  }
+  var html = SHOP_STAGES.map(function(stage){
+    var stageOrders = orders.filter(function(o){ return o.stage === stage.key; });
+    if (!stageOrders.length) return '';
+    var ordersHtml = stageOrders.map(function(o){
+      var itemsHtml = o.items.map(function(i){
+        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
+      }).join('');
+      return '<div class="bg-slate-50 rounded-xl p-3 mb-2">' +
+        '<div class="flex justify-between items-center mb-1">' +
+          '<p class="font-black text-slate-700 text-xs">' + o.clinic + '</p>' +
+          '<p class="text-[8px] font-bold text-slate-400 font-mono">' + o.id + '</p>' +
+        '</div>' +
+        '<p class="text-[9px] text-slate-400 mb-2">📅 ' + o.date + (o.carrier ? ' · 🚚 ' + o.carrier + (o.tracking ? ' ' + o.tracking : '') : '') + '</p>' +
+        '<div class="space-y-0.5 mb-2">' + itemsHtml + '</div>' +
+        '<p class="text-xs font-black text-blue-800 text-right">합계 ' + o.totalAmount.toLocaleString() + ' THB</p>' +
+      '</div>';
+    }).join('');
+    return '<div class="mb-4">' +
+      '<div class="flex items-center gap-2 mb-2">' +
+        '<span>' + stage.icon + '</span>' +
+        '<span class="font-black text-slate-700 text-xs">' + stage.label + '</span>' +
+        '<span class="bg-blue-100 text-blue-700 font-black text-[9px] px-2 py-0.5 rounded-full">' + stageOrders.length + '건</span>' +
+      '</div>' +
+      ordersHtml +
+    '</div>';
+  }).join('');
+  container.innerHTML = html || '<p class="text-center text-slate-400 text-xs py-3 font-bold">주문 내역이 없습니다.</p>';
 }
 function openShopCategory(catId) {
   var cat = SHOP_CATEGORIES.find(function(c){ return c.id === catId; });
@@ -1914,43 +1954,62 @@ var SHOP_STAGES = [
   { key:'shipped',   label:'배송중',     icon:'🚚', next:'delivered' },
   { key:'delivered', label:'배송완료',   icon:'✅', next:null },
 ];
+var currentShopStageTab = 'submitted';
+function adminShopStageTab(stageKey) {
+  currentShopStageTab = stageKey;
+  renderAdminShopOrders();
+}
 function renderAdminShopOrders() {
   var list = document.getElementById('adminTabShopOrders');
   if (!list) return;
   var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
-  if (!orders.length) {
-    list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">쇼핑몰 주문이 없습니다.</p>';
-    return;
-  }
-  list.innerHTML = orders.map(function(o) {
-    var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; }) || SHOP_STAGES[0];
-    var nextStage = stage.next ? SHOP_STAGES.find(function(s){ return s.key===stage.next; }) : null;
-    var stageBarHtml = '<div class="flex gap-1 mb-3">' + SHOP_STAGES.map(function(s){
-      var isDone = SHOP_STAGES.indexOf(s) <= SHOP_STAGES.indexOf(stage);
-      return '<div class="flex-1 text-center"><div class="h-1 rounded-full mb-1 ' + (isDone ? 'bg-blue-500' : 'bg-slate-200') + '"></div><p class="text-[7px] font-bold ' + (s.key===o.stage ? 'text-blue-600' : 'text-slate-300') + '">' + s.label + '</p></div>';
+  // 단계별 카운트
+  var counts = {};
+  SHOP_STAGES.forEach(function(s){ counts[s.key] = 0; });
+  orders.forEach(function(o){ if (counts[o.stage] !== undefined) counts[o.stage]++; });
+  // 단계 탭 버튼
+  var tabsHtml = '<div class="flex gap-1 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5">' +
+    SHOP_STAGES.map(function(s){
+      var active = s.key === currentShopStageTab;
+      var hasOrders = counts[s.key] > 0;
+      return '<button onclick="adminShopStageTab(\'' + s.key + '\')" class="shrink-0 px-3 py-2 rounded-xl font-black text-xs transition ' +
+        (active ? 'bg-[#001d4a] text-white shadow' : 'bg-slate-100 text-slate-500') + '">' +
+        s.icon + ' ' + s.label +
+        '<span class="ml-1 font-mono ' + (hasOrders ? 'text-amber-400' : (active ? 'text-slate-300' : 'text-slate-400')) + '">(' + counts[s.key] + ')</span>' +
+      '</button>';
     }).join('') + '</div>';
-    var itemsHtml = o.items.map(function(i){
-      return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
+  var filtered = orders.filter(function(o){ return o.stage === currentShopStageTab; });
+  var contentHtml;
+  if (!filtered.length) {
+    contentHtml = '<p class="text-center text-slate-400 text-sm py-8 font-bold">해당 단계의 주문이 없습니다.</p>';
+  } else {
+    contentHtml = filtered.map(function(o){
+      var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; }) || SHOP_STAGES[0];
+      var nextStage = stage.next ? SHOP_STAGES.find(function(s){ return s.key===stage.next; }) : null;
+      var itemsHtml = o.items.map(function(i){
+        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
+      }).join('');
+      var actionHtml = nextStage
+        ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-3 py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + nextStage.label + '로 변경 → LINE 발송</button>'
+        : '<div class="mt-3 text-center"><p class="text-[10px] font-black text-green-500">✅ 배송 완료</p></div>';
+      return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
+        '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
+          '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
+               '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
+          '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stage.icon + ' ' + stage.label + '</span>' +
+        '</div>' +
+        '<div class="px-4 pt-3 pb-4">' +
+          '<p class="text-[9px] text-slate-400 mb-1">📞 ' + o.phone + ' · 📍 ' + o.address + '</p>' +
+          (o.lineId ? '<p class="text-[9px] text-green-500 font-bold mb-2">💬 Line: ' + o.lineId + '</p>' : '') +
+          (o.carrier ? '<p class="text-[9px] text-blue-500 font-bold mb-2">🚚 ' + o.carrier + (o.tracking ? ' · ' + o.tracking : '') + '</p>' : '') +
+          '<div class="bg-slate-50 rounded-xl p-2 space-y-0.5 mb-1">' + itemsHtml + '</div>' +
+          '<p class="text-xs font-black text-blue-800 text-right">합계 ' + o.totalAmount.toLocaleString() + ' THB</p>' +
+          actionHtml +
+        '</div>' +
+      '</div>';
     }).join('');
-    var actionHtml = nextStage
-      ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-3 py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + nextStage.label + '로 변경 → LINE 발송</button>'
-      : '<div class="mt-3 text-center"><p class="text-[10px] font-black text-green-500">✅ 배송 완료</p></div>';
-    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
-      '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
-        '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
-             '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
-        '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stage.icon + ' ' + stage.label + '</span>' +
-      '</div>' +
-      '<div class="px-4 pt-3 pb-4">' +
-        stageBarHtml +
-        '<p class="text-[9px] text-slate-400 mb-1">📞 ' + o.phone + ' · 📍 ' + o.address + '</p>' +
-        (o.lineId ? '<p class="text-[9px] text-green-500 font-bold mb-2">💬 Line: ' + o.lineId + '</p>' : '') +
-        '<div class="bg-slate-50 rounded-xl p-2 space-y-0.5 mb-1">' + itemsHtml + '</div>' +
-        '<p class="text-xs font-black text-blue-800 text-right">합계 ' + o.totalAmount.toLocaleString() + ' THB</p>' +
-        actionHtml +
-      '</div>' +
-    '</div>';
-  }).join('');
+  }
+  list.innerHTML = tabsHtml + '<div class="space-y-3">' + contentHtml + '</div>';
 }
 function adminAdvanceShopOrder(orderId) {
   var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
