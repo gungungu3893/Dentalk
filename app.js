@@ -2919,34 +2919,8 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('mb-home').classList.add('active');
   updateNavTabs('home');
 
-  // 세션 복원 (관리자는 매번 직접 로그인 필요)
-  var savedSession = localStorage.getItem('dentalk_session');
-  if (savedSession) {
-    try {
-      var s = JSON.parse(savedSession);
-      var isAdminSession = ['admin','관리자'].includes((s.user && s.user.nickname || '').trim().toLowerCase());
-      if (isAdminSession) {
-        localStorage.removeItem('dentalk_session');
-      } else if (s.sessionEnd && Date.now() < s.sessionEnd) {
-        currentUser = s.user;
-        sessionEnd  = s.sessionEnd;
-        extShown    = false;
-        document.getElementById('licenseDisplay').textContent = currentUser.nickname;
-        var sideNick = document.getElementById('sideNickname');
-        if (sideNick) sideNick.textContent = currentUser.nickname;
-        document.getElementById('sideLoginArea').classList.add('hidden');
-        document.getElementById('sideLoggedArea').classList.remove('hidden');
-        var hNick = document.getElementById('headerNickBadge');
-        var hNickTxt = document.getElementById('headerNickText');
-        if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
-        var hLoginBtn2 = document.getElementById('headerLoginBtn');
-        if (hLoginBtn2) hLoginBtn2.classList.add('hide');
-        if (isAdmin()) { document.body.classList.add('is-admin'); renderAdminPanel(); }
-      } else {
-        localStorage.removeItem('dentalk_session');
-      }
-    } catch(e) { localStorage.removeItem('dentalk_session'); }
-  }
+  // 페이지 로드 시 항상 로그아웃 상태로 시작
+  localStorage.removeItem('dentalk_session');
 
 
   updateNavLocks();
