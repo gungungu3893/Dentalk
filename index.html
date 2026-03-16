@@ -13,7 +13,9 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <!-- Capture beforeinstallprompt BEFORE defer scripts load -->
 <script>
 window._pwaInstallPrompt = null;
@@ -27,8 +29,112 @@ window.addEventListener('appinstalled', function() {
 </script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
+/* ============================================================
+   DESIGN TOKENS — CSS Custom Properties
+   ============================================================ */
+:root {
+  /* --- Typography --- */
+  --font-sans: 'Inter', 'Noto Sans Thai', sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* --- Brand / Primary palette --- */
+  --color-primary-darkest: #001220;
+  --color-primary-dark:    #001d4a;
+  --color-primary:         #0a1e3d;
+  --color-primary-mid:     #0a3072;
+  --color-primary-light:   #0d3880;
+
+  /* --- Accent --- */
+  --color-accent:          #D4AF37;
+  --color-accent-hover:    #b8952e;
+
+  /* --- Surface / Background --- */
+  --color-bg-app:          #f1f5f9;   /* slate-100 */
+  --color-surface:         #ffffff;
+  --color-surface-subtle:  #f8fafc;   /* slate-50 */
+
+  /* --- Border --- */
+  --color-border:          #e2e8f0;   /* slate-200 */
+  --color-border-strong:   #cbd5e1;   /* slate-300 */
+
+  /* --- Text (dark surface) --- */
+  --color-text-body:       #1e293b;   /* slate-800 */
+  --color-text-muted:      #64748b;   /* slate-500 */
+  --color-text-on-dark:    rgba(255, 255, 255, 0.92);
+  --color-text-on-dark-muted: rgba(255, 255, 255, 0.55);
+  --color-text-on-dark-dim:   rgba(255, 255, 255, 0.35);
+
+  /* --- Navigation --- */
+  --color-nav-bg:          var(--color-primary-dark);
+  --color-nav-active-bg:   rgba(255, 255, 255, 0.12);
+  --color-nav-active-text: var(--color-accent);
+  --color-nav-inactive:    rgba(255, 255, 255, 0.45);
+
+  /* --- Dropdown --- */
+  --color-dropdown-bg:     #0a1e3d;
+  --color-dropdown-border: rgba(255, 255, 255, 0.13);
+
+  /* --- Status / Stage pipeline --- */
+  --color-stage-done:      #2563eb;
+  --color-stage-current:   #f59e0b;
+  --color-stage-todo:      #e2e8f0;
+
+  /* --- Tag variants --- */
+  --color-tag-n-bg:        #dbeafe;
+  --color-tag-n-text:      #1e40af;
+  --color-tag-r-bg:        #fce7f3;
+  --color-tag-r-text:      #9d174d;
+
+  /* --- Menu active --- */
+  --color-menu-active-bg:  #1e3a8a;
+
+  /* --- Third-party brand colors --- */
+  --color-line-green:      #06C755;
+  --color-android-green:   #3DDC84;
+  --color-windows-blue:    #0078D4;
+
+  /* --- Border radius scale --- */
+  --radius-xs:   6px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   14px;
+  --radius-xl:   16px;
+  --radius-2xl:  20px;
+  --radius-3xl:  24px;
+  --radius-full: 9999px;
+
+  /* --- Shadow scale --- */
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.10);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.22);
+  --shadow-xl:   0 12px 40px rgba(0, 0, 0, 0.32);
+  --shadow-nav:  0 10px 32px rgba(0, 0, 0, 0.45);
+
+  /* --- Spacing scale (base 4px) --- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* --- Transition --- */
+  --transition-fast:   0.12s ease;
+  --transition-base:   0.15s ease;
+  --transition-slow:   0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-reveal: 0.45s ease;
+}
+
 * { -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Nunito', sans-serif; }
+body { font-family: var(--font-sans); }
 .page { display: none; }
 .page.active { display: block; }
 .modal { display: none !important; }
