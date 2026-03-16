@@ -688,9 +688,15 @@ const SHOP_CATEGORIES = [
 function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
-    return '<button onclick="openShopCategory(\'' + cat.id + '\')" class="bg-white rounded-xl shadow-sm py-3 px-1 cursor-pointer active:scale-95 transition text-center border-2 border-transparent active:border-blue-300">' +
-      '<p class="font-black text-slate-800 text-[11px] leading-tight">' + cat.name + '</p>' +
-      '<p class="text-[8px] text-slate-400 mt-0.5 font-bold">' + count + 'item</p>' +
+    return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
+      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' flex items-center gap-4 px-4 py-4 text-left shadow-sm active:scale-[.97] transition">' +
+      '<div class="w-12 h-12 shrink-0 flex items-center justify-center">' + cat.svg + '</div>' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="font-black text-white text-sm leading-tight">' + cat.name + '</p>' +
+        '<p class="text-[9px] font-medium mt-0.5 leading-snug" style="color:rgba(255,255,255,0.6)">' + cat.desc + '</p>' +
+        '<p class="text-[9px] font-black mt-2" style="color:rgba(255,255,255,0.45)">' + count + ' ' + t('shop_product_count') + '</p>' +
+      '</div>' +
+      '<span class="text-lg leading-none shrink-0" style="color:rgba(255,255,255,0.35)">›</span>' +
     '</button>';
   }).join('');
   renderMyShopOrders();
@@ -742,30 +748,168 @@ function openShopCategory(catId) {
   goDetailPage('shop-items', cat.name, 'shop');
 }
 function renderShopItems(catId) {
+  var cat = SHOP_CATEGORIES.find(function(c){ return c.id === catId; });
   var items = PRODUCTS.filter(function(p){ return p.category === catId; });
   document.getElementById('shopItemsList').innerHTML = items.map(function(p) {
     var inStock = isInStock(p.id);
-    var stockBadge = inStock
-      ? '<span class="text-[9px] font-black text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full mt-1 inline-block">✅ In Stock</span>'
-      : '<span class="text-[9px] font-black text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full mt-1 inline-block">❌ Out of Stock</span>';
-    var clickAttr = inStock
-      ? 'onclick="openOrder(\'' + p.id + '\')"'
-      : 'onclick="alert(\'현재 품절된 제품입니다.\')"';
-    return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm p-5 flex justify-between items-center cursor-pointer border border-transparent active:border-blue-200 active:scale-[.98] transition' + (!inStock ? ' opacity-60' : '') + '">' +
-      '<div class="flex-1 pr-3"><h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3><p class="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-tight">' + p.subtitle + '</p>' + stockBadge + '</div>' +
-      '<div class="text-right shrink-0"><p class="font-black text-blue-700 text-xs font-mono">' + p.price.toLocaleString() + ' THB</p>' + (inStock ? '<p class="text-[10px] text-blue-500 font-black mt-1">' + t('shop_select') + '</p>' : '') + '</div>' +
+    var stockHtml = inStock
+      ? '<span class="text-[9px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full">✅ ' + t('shop_in_stock') + '</span>'
+      : '<span class="text-[9px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full">❌ ' + t('shop_out_of_stock') + '</span>';
+    var clickAttr = inStock ? 'onclick="openOrder(\'' + p.id + '\')"' : '';
+    return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
+      '<div class="h-1 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
+      '<div class="p-4 flex items-center gap-3">' +
+        '<div class="flex-1 min-w-0">' +
+          '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
+          '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
+          '<div class="mt-2">' + stockHtml + '</div>' +
+        '</div>' +
+        '<div class="text-right shrink-0 pl-2">' +
+          '<p class="text-[10px] text-slate-400 font-bold leading-none">฿</p>' +
+          '<p class="font-black text-blue-700 text-base font-mono leading-tight">' + p.price.toLocaleString() + '</p>' +
+          (inStock ? '<p class="text-[9px] text-blue-400 font-black mt-1.5 uppercase">' + t('shop_select') + '</p>' : '') +
+        '</div>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
 function openOrder(pid) {
   currentProd = PRODUCTS.find(function(p){ return p.id === pid; });
   if (!currentProd) return;
-  tableQtys   = {};
-  document.getElementById('orderModalTitle').textContent = currentProd.title;
-  document.getElementById('orderModalDesc').textContent  = currentProd.subtitle;
-  document.getElementById('orderError').classList.add('hidden');
-  renderOrderTable();
-  openModal('orderModal');
+  tableQtys = {};
+  renderProductPage();
+  goDetailPage('shop-product', currentProd.title, 'shop-items');
+}
+
+// ── Product detail page ───────────────────────────────────────
+var _catGrads = {
+  'scan-body':  'linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%)',
+  'q-base':     'linear-gradient(135deg,#f59e0b 0%,#92400e 100%)',
+  'ready-made': 'linear-gradient(135deg,#64748b 0%,#1e293b 100%)',
+  'ti-base':    'linear-gradient(135deg,#06b6d4 0%,#164e63 100%)',
+  'pre-milled': 'linear-gradient(135deg,#4f46e5 0%,#312e81 100%)',
+  'multi-unit': 'linear-gradient(135deg,#7c3aed 0%,#4c1d95 100%)',
+  '3d-analog':  'linear-gradient(135deg,#14b8a6 0%,#134e4a 100%)',
+};
+function renderProductPage() {
+  var p = currentProd;
+  var cat = SHOP_CATEGORIES.find(function(c){ return c.id === p.category; });
+  var inStock = isInStock(p.id);
+  var hero = document.getElementById('shopProductHero');
+  if (hero) hero.style.background = _catGrads[p.category] || _catGrads['scan-body'];
+  var iconArea = document.getElementById('shopProductIconArea');
+  if (iconArea && cat) iconArea.innerHTML = cat.svg;
+  var badge = document.getElementById('shopProductStockBadge');
+  if (badge) {
+    badge.textContent = (inStock ? '✅ ' : '❌ ') + t(inStock ? 'shop_in_stock' : 'shop_out_of_stock');
+    badge.className = 'inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-full mb-3 ' +
+      (inStock ? 'bg-green-500/20 text-green-200' : 'bg-red-500/20 text-red-200');
+  }
+  var titleEl = document.getElementById('shopProductTitle');
+  if (titleEl) titleEl.textContent = p.title;
+  var subEl = document.getElementById('shopProductSub');
+  if (subEl) subEl.textContent = p.subtitle;
+  var priceEl = document.getElementById('shopProductPrice');
+  if (priceEl) priceEl.textContent = p.price.toLocaleString();
+  var errEl = document.getElementById('productOrderError');
+  if (errEl) errEl.classList.add('hidden');
+  var addBtn = document.getElementById('shopProductAddBtn');
+  if (addBtn) { addBtn.disabled = !inStock; addBtn.style.opacity = inStock ? '1' : '0.5'; addBtn.textContent = t('order_add_cart'); }
+  renderProductTable();
+}
+function renderProductTable() {
+  var p = currentProd;
+  var qCell = function(code) {
+    var safe = code.replace(/\s/g,'_');
+    return '<div class="flex flex-col items-center gap-1">' +
+      '<p class="text-[8px] font-mono text-slate-400 leading-none whitespace-nowrap">' + code + '</p>' +
+      '<div class="flex items-center gap-0.5">' +
+        '<button onclick="stepQ(\'' + code + '\',-1)" class="w-6 h-6 rounded-full bg-slate-100 font-black text-xs leading-none flex items-center justify-center active:bg-slate-200" type="button">−</button>' +
+        '<input type="number" min="0" value="0" class="qty-input w-10 h-7 rounded-lg bg-slate-50 text-xs font-black text-center border border-slate-200 outline-none focus:border-blue-400" id="qi-' + safe + '" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0">' +
+        '<button onclick="stepQ(\'' + code + '\',1)" class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 font-black text-xs leading-none flex items-center justify-center active:bg-blue-100" type="button">+</button>' +
+      '</div>' +
+    '</div>';
+  };
+  var html = '';
+  if (p.tableType2 === 'hxc') {
+    html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr>' +
+      '<th class="text-left pb-3 text-[10px] font-bold text-slate-400 pr-3 whitespace-nowrap sticky left-0 bg-white">H / C</th>';
+    p.colLabels.forEach(function(c){ html += '<th class="pb-3 text-[10px] font-black text-slate-500 px-2 whitespace-nowrap">' + c + '</th>'; });
+    html += '</tr></thead><tbody>';
+    p.rowLabels.forEach(function(row, ri) {
+      html += '<tr class="border-t border-slate-100"><td class="py-2 pr-3 font-black text-xs text-slate-700 whitespace-nowrap sticky left-0 bg-white">' + row + '</td>';
+      p.colLabels.forEach(function(col, ci) {
+        var code = p.codeMatrix[ri][ci];
+        html += '<td class="py-2 px-1 text-center">' + (code ? qCell(code) : '<span class="text-slate-200">—</span>') + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else if (p.tableType === 'dh') {
+    html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr>' +
+      '<th class="text-left pb-3 text-[10px] font-bold text-slate-400 pr-3 whitespace-nowrap sticky left-0 bg-white">D / H</th>';
+    p.heights.forEach(function(h){ html += '<th class="pb-3 text-[10px] font-black text-slate-500 px-2">' + h + '</th>'; });
+    html += '</tr></thead><tbody>';
+    p.connections.forEach(function(conn, ci) {
+      html += '<tr class="border-t border-slate-100">' +
+        '<td class="py-2 pr-3 whitespace-nowrap sticky left-0 bg-white">' +
+          '<div class="flex items-center gap-1.5"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + conn.type + '">' + conn.type + '</span>' +
+          '<span class="font-black text-xs text-slate-700">' + conn.label + '</span></div>' +
+        '</td>';
+      p.heights.forEach(function(h, hi) {
+        var code = p.codes[ci][hi];
+        html += '<td class="py-2 px-1 text-center">' + (code ? qCell(code) : '<span class="text-slate-200">—</span>') + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  } else if (p.tableType === 'simple') {
+    html = '<div class="space-y-3">';
+    p.rows.forEach(function(row) {
+      html += '<div class="bg-slate-50 rounded-xl p-3.5">' +
+        '<div class="flex items-center gap-2 mb-3">' +
+          '<span class="text-[9px] font-black px-2 py-0.5 rounded-md tag-' + row.type + '">' + row.type + '</span>' +
+          '<span class="font-black text-xs text-slate-700">' + row.label + '</span>' +
+        '</div>' +
+        '<div class="space-y-2">';
+      row.items.forEach(function(item) {
+        html += '<div class="flex items-center justify-between gap-2">' +
+          '<div class="min-w-0">' +
+            '<p class="text-[10px] font-black text-slate-700 font-mono">' + item.code + '</p>' +
+            '<p class="text-[9px] text-slate-400 font-medium">' + (item.size||'') + '</p>' +
+          '</div>' +
+          '<div class="flex items-center gap-0.5 shrink-0">' +
+            '<button onclick="stepQ(\'' + item.code + '\',-1)" class="w-6 h-6 rounded-full bg-slate-200 font-black text-xs leading-none flex items-center justify-center active:bg-slate-300" type="button">−</button>' +
+            '<input type="number" min="0" value="0" class="qty-input w-10 h-7 rounded-lg bg-white text-xs font-black text-center border border-slate-200 outline-none" id="qi-' + item.code.replace(/\s/g,'_') + '" oninput="tableQtys[\'' + item.code + '\']=parseInt(this.value)||0">' +
+            '<button onclick="stepQ(\'' + item.code + '\',1)" class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 font-black text-xs leading-none flex items-center justify-center active:bg-blue-100" type="button">+</button>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  var tableEl = document.getElementById('shopProductTable');
+  if (tableEl) tableEl.innerHTML = html;
+}
+function addProductToCart() {
+  var items = Object.entries(tableQtys).filter(function(e){ return e[1] > 0; });
+  if (!items.length) {
+    var errEl = document.getElementById('productOrderError');
+    if (errEl) errEl.classList.remove('hidden');
+    return;
+  }
+  items.forEach(function(e) {
+    var code = e[0], qty = e[1];
+    var ex = cart.find(function(c){ return c.code === code; });
+    if (ex) ex.qty += qty;
+    else cart.push({name:currentProd.title, code:code, price:currentProd.price, qty:qty});
+  });
+  updateBadge();
+  tableQtys = {};
+  document.querySelectorAll('#shopProductTable .qty-input').forEach(function(inp){ inp.value = 0; });
+  var btn = document.getElementById('shopProductAddBtn');
+  if (btn) { btn.textContent = '✅ ' + t('cart_added'); setTimeout(function(){ btn.textContent = t('order_add_cart'); }, 1800); }
 }
 function renderOrderTable() {
   var p = currentProd;
@@ -837,11 +981,24 @@ function addTableToCart() {
 // ============================================================
 // 장바구니
 // ============================================================
+function updateFloatingCart() {
+  var inner = document.getElementById('floatingCartInner');
+  if (!inner) return;
+  var count = cart.reduce(function(s,c){ return s+c.qty; }, 0);
+  var total = cart.reduce(function(s,c){ return s+c.price*c.qty; }, 0);
+  inner.classList.toggle('hidden', count === 0);
+  if (count > 0) {
+    var countEl = document.getElementById('floatingCartCountText');
+    var totalEl = document.getElementById('floatingCartTotalText');
+    if (countEl) countEl.textContent = count + ' ' + t('cart_bar_items');
+    if (totalEl) totalEl.textContent = total.toLocaleString();
+  }
+}
 function updateBadge() {
   var tot = cart.reduce(function(s,c){ return s+c.qty; }, 0);
   var b = document.getElementById('cartBadge');
-  b.textContent = tot;
-  b.classList.toggle('hidden', tot===0);
+  if (b) { b.textContent = tot; b.classList.toggle('hidden', tot===0); }
+  updateFloatingCart();
 }
 function openCart() {
   if (!cart.length) { alert(t('cart_empty')); return; }

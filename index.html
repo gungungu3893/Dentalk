@@ -521,7 +521,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
   <!-- 페이지 콘텐츠 -->
-  <div class="flex-1 overflow-y-auto pb-8">
+  <div class="flex-1 overflow-y-auto pb-6">
     <!-- ==================== HOME ==================== -->
     <div id="page-home" class="page active">
 
@@ -649,21 +649,47 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 
     </div>
     <!-- ==================== SHOP ==================== -->
-    <div id="page-shop" class="page p-4">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1" data-i18n="shop_hint">Select a category to order</p>
-      <div id="shopCategoryList" class="grid grid-cols-4 gap-2 mb-6"></div>
-      <!-- 내 쇼핑 주문 현황 -->
-      <div class="mt-2">
+    <div id="page-shop" class="page px-4 pt-5 pb-4">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-1" data-i18n="shop_hint">Select a category to order</p>
+      <div id="shopCategoryList" class="flex flex-col gap-3 mb-6"></div>
+      <!-- My Orders section -->
+      <div class="mt-4">
         <div class="flex items-center gap-2 mb-3 px-1">
-          <span class="w-1 h-4 bg-blue-500 rounded-full inline-block"></span>
-          <h3 class="font-black text-slate-700 text-xs">내 쇼핑 주문 현황</h3>
+          <span class="w-1 h-4 rounded-full inline-block" style="background:var(--color-primary-mid)"></span>
+          <h3 class="font-black text-slate-700 text-xs" data-i18n="shop_my_orders">My Orders</h3>
         </div>
         <div id="myShopOrdersList"></div>
       </div>
     </div>
     <!-- ==================== SHOP ITEMS ==================== -->
-    <div id="page-shop-items" class="page p-4">
-      <div id="shopItemsList" class="space-y-3"></div>
+    <div id="page-shop-items" class="page px-4 pt-5 pb-28">
+      <div id="shopItemsList" class="space-y-2.5"></div>
+    </div>
+    <!-- ==================== SHOP PRODUCT DETAIL ==================== -->
+    <div id="page-shop-product" class="page">
+      <!-- Hero: gradient + icon + title -->
+      <div id="shopProductHero" class="relative text-white overflow-hidden" style="padding:28px 22px 30px;background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 100%)">
+        <div id="shopProductIconArea" class="w-14 h-14 mb-3 flex items-center justify-center opacity-90"></div>
+        <div id="shopProductStockBadge" class="inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-full mb-3"></div>
+        <h2 id="shopProductTitle" class="text-xl font-black leading-tight text-white"></h2>
+        <p id="shopProductSub" class="text-[10px] font-bold uppercase tracking-wide mt-1" style="color:rgba(255,255,255,0.55)"></p>
+      </div>
+      <!-- Price bar -->
+      <div class="bg-white border-b border-slate-100 px-5 py-4 flex items-baseline gap-1.5">
+        <span class="text-sm font-bold text-slate-400">฿</span>
+        <span id="shopProductPrice" class="text-2xl font-black text-blue-700 font-mono leading-none"></span>
+        <span class="text-xs text-slate-400 font-medium" data-i18n="shop_each">/each</span>
+      </div>
+      <!-- Spec table -->
+      <div class="px-4 pt-5 pb-3">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="shop_specs">Specifications & Qty</p>
+        <div id="shopProductTable" class="overflow-x-auto -mx-1 px-1"></div>
+      </div>
+      <!-- Error + Add to cart -->
+      <p id="productOrderError" class="text-red-400 text-xs font-bold text-center px-4 mb-2 hidden" data-i18n="order_qty_error">Please enter at least 1 quantity.</p>
+      <div class="px-4 pt-2 pb-28">
+        <button id="shopProductAddBtn" onclick="addProductToCart()" class="w-full py-4 rounded-2xl font-black text-sm shadow-lg text-white active:scale-[.98] transition" style="background:var(--color-primary-dark)" data-i18n="order_add_cart">Add to Cart</button>
+      </div>
     </div>
     <!-- ==================== CUSTOM ABUTMENT ==================== -->
     <div id="page-custom" class="page p-4">
@@ -961,6 +987,27 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <p class="text-sm text-slate-400 font-bold" data-i18n="profile_login_msg">로그인 후 확인 가능합니다.</p>
         </div>
         <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="profile_saved_msg">✅ 저장되었습니다!</p>
+      </div>
+    </div>
+  </div>
+  <!-- ── Floating Cart Bar ───────────────────────────────────── -->
+  <div id="floatingCartBar" class="fixed bottom-0 left-0 right-0 z-[150] pointer-events-none">
+    <div class="px-4 pb-4 pt-1">
+      <div id="floatingCartInner" class="hidden pointer-events-auto" onclick="openCart()">
+        <div class="rounded-2xl px-5 py-3.5 flex items-center justify-between shadow-2xl cursor-pointer active:scale-[.98] transition" style="background:var(--color-primary-dark)">
+          <div class="flex items-center gap-3">
+            <span class="text-xl leading-none">🛒</span>
+            <div>
+              <p id="floatingCartCountText" class="font-black text-white text-sm leading-none"></p>
+              <p class="text-[9px] font-medium mt-0.5" style="color:rgba(255,255,255,0.45)" data-i18n="cart_bar_tap">Tap to view cart</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-xs font-bold" style="color:rgba(255,255,255,0.55)">฿</span>
+            <span id="floatingCartTotalText" class="font-black text-white text-xl font-mono leading-none"></span>
+            <span class="text-lg ml-1.5" style="color:rgba(255,255,255,0.35)">›</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
