@@ -504,11 +504,11 @@ function openMenu() {
 }
 function closeMenu() {
   menuOpen = false;
-  document.getElementById('sideMenu').classList.remove('open');
-  document.getElementById('sideOverlay').classList.remove('open');
-  document.getElementById('hb1').style.cssText = '';
-  document.getElementById('hb2').style.cssText = '';
-  document.getElementById('hb3').style.cssText = '';
+  var sm = document.getElementById('sideMenu');    if (sm) sm.classList.remove('open');
+  var so = document.getElementById('sideOverlay'); if (so) so.classList.remove('open');
+  var h1 = document.getElementById('hb1'); if (h1) h1.style.cssText = '';
+  var h2 = document.getElementById('hb2'); if (h2) h2.style.cssText = '';
+  var h3 = document.getElementById('hb3'); if (h3) h3.style.cssText = '';
 }
 // ── 전역 네비 드롭다운 (position:fixed — overflow 클리핑 없음) ──────
 function openNavDropdown(type, event) {
