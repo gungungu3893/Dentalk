@@ -147,26 +147,26 @@ input[type=number] { -moz-appearance:textfield; }
 #sideMenu.open { transform:translateX(0); }
 #sideOverlay { opacity:0; pointer-events:none; transition:opacity .28s; }
 #sideOverlay.open { opacity:1; pointer-events:auto; }
-.menu-btn { transition:background .15s; }
-.menu-btn.active { background:#1e3a8a; color:white; }
-.qty-input { width:44px; text-align:center; font-weight:900; border:2px solid #e2e8f0; border-radius:8px; padding:3px 0; background:#f8fafc; font-size:13px; }
-.tag-N { background:#dbeafe; color:#1e40af; }
-.tag-R { background:#fce7f3; color:#9d174d; }
+.menu-btn { transition:background var(--transition-base); }
+.menu-btn.active { background:var(--color-menu-active-bg); color:white; }
+.qty-input { width:44px; text-align:center; font-weight:var(--font-weight-black); border:2px solid var(--color-border); border-radius:var(--radius-sm); padding:3px 0; background:var(--color-surface-subtle); font-size:13px; }
+.tag-N { background:var(--color-tag-n-bg); color:var(--color-tag-n-text); }
+.tag-R { background:var(--color-tag-r-bg); color:var(--color-tag-r-text); }
 @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-.fade-up { animation:fadeUp .45s ease forwards; }
-.fade-up-2 { animation:fadeUp .45s .08s ease both; }
-.fade-up-3 { animation:fadeUp .45s .16s ease both; }
-.stage-done { background:#2563eb; }
-.stage-current { background:#f59e0b; }
-.stage-todo { background:#e2e8f0; }
-.nav-tab { color:rgba(255,255,255,0.45); transition:background .15s,color .15s; }
-.nav-tab.active { background:rgba(255,255,255,0.12); color:#D4AF37; }
+.fade-up { animation:fadeUp var(--transition-reveal) ease forwards; }
+.fade-up-2 { animation:fadeUp var(--transition-reveal) .08s ease both; }
+.fade-up-3 { animation:fadeUp var(--transition-reveal) .16s ease both; }
+.stage-done { background:var(--color-stage-done); }
+.stage-current { background:var(--color-stage-current); }
+.stage-todo { background:var(--color-stage-todo); }
+.nav-tab { color:var(--color-nav-inactive); transition:background var(--transition-base),color var(--transition-base); }
+.nav-tab.active { background:var(--color-nav-active-bg); color:var(--color-nav-active-text); }
 .nav-tab:active { transform:scale(.93); }
 #navDropdown { position:fixed; z-index:250; display:none; }
-.nav-drop-inner { background:#0a1e3d; border:1px solid rgba(255,255,255,0.13); border-radius:14px; padding:5px; box-shadow:0 10px 32px rgba(0,0,0,0.45); min-width:170px; }
-.nav-drop-item { display:flex; align-items:center; gap:6px; width:100%; text-align:left; padding:9px 12px; border-radius:9px; font-weight:900; font-size:12px; color:rgba(255,255,255,0.78); transition:background .12s; white-space:nowrap; }
-.nav-drop-item:hover,.nav-drop-item:active { background:rgba(255,255,255,0.1); color:#D4AF37; }
-.nav-drop-item .sub-desc { font-size:9px; font-weight:600; color:rgba(255,255,255,0.38); }
+.nav-drop-inner { background:var(--color-dropdown-bg); border:1px solid var(--color-dropdown-border); border-radius:var(--radius-lg); padding:var(--space-1); box-shadow:var(--shadow-nav); min-width:170px; }
+.nav-drop-item { display:flex; align-items:center; gap:var(--space-2); width:100%; text-align:left; padding:9px 12px; border-radius:9px; font-weight:var(--font-weight-black); font-size:12px; color:var(--color-text-on-dark); transition:background var(--transition-fast); white-space:nowrap; }
+.nav-drop-item:hover,.nav-drop-item:active { background:rgba(255,255,255,0.1); color:var(--color-accent); }
+.nav-drop-item .sub-desc { font-size:9px; font-weight:var(--font-weight-semibold); color:var(--color-text-on-dark-dim); }
 .nav-lock { position:absolute; top:2px; right:2px; font-size:8px; opacity:0.65; pointer-events:none; }
 #headerNickBadge { display:none; }
 #headerNickBadge.show { display:flex; }
@@ -400,78 +400,79 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   <!-- 헤더 + 네비 탭 바 (sticky wrapper) -->
   <div class="sticky top-0 z-[200] shadow-lg">
   <!-- 헤더 -->
-  <header class="bg-[#001d4a] text-white px-4 py-3 flex items-center gap-3">
-    <button id="btnBack" onclick="goBack()" class="hidden w-10 h-10 rounded-xl bg-white/10 items-center justify-center active:bg-white/20 text-lg font-black">←</button>
-    <div class="flex-1">
-      <div onclick="goPage('home')" class="flex items-baseline gap-1 cursor-pointer active:opacity-70 transition" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1">
-        <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
-        <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:2px;margin-left:4px;align-self:center">BIOTEM × BIOPLANT</span>
+  <header class="text-white px-4 py-3 flex items-center gap-2.5 border-b border-white/[0.07]" style="background:var(--color-primary-dark)">
+    <button id="btnBack" onclick="goBack()" class="hidden w-9 h-9 rounded-xl bg-white/[0.08] items-center justify-center active:bg-white/20 transition shrink-0">
+      <span class="text-base font-black leading-none">←</span>
+    </button>
+    <div class="flex-1 min-w-0">
+      <div onclick="goPage('home')" class="flex items-baseline gap-1 cursor-pointer active:opacity-70 transition select-none" style="font-size:22px;font-weight:900;letter-spacing:-0.8px;line-height:1">
+        <span style="color:white">den</span><span style="color:var(--color-accent)">t</span><span style="color:white">alk</span>
+        <span style="font-size:8px;font-weight:600;color:rgba(255,255,255,0.28);letter-spacing:2.5px;margin-left:5px;align-self:center;text-transform:uppercase">BIOTEM × BIOPLANT</span>
       </div>
     </div>
-    <button id="headerLoginBtn" onclick="openLoginModal(null)" class="flex items-center gap-1.5 bg-white/10 rounded-xl px-2.5 py-1.5 active:bg-white/20 transition">
-      <span class="text-sm">🔐</span>
-      <span class="text-[10px] font-black text-blue-200" data-i18n="nav_login">Login</span>
+    <button id="headerLoginBtn" onclick="openLoginModal(null)" class="flex items-center gap-1.5 bg-white/[0.08] rounded-full px-3 py-1.5 active:bg-white/20 transition shrink-0">
+      <span class="text-xs">🔐</span>
+      <span class="text-[10px] font-bold tracking-wide" style="color:rgba(180,205,255,0.9)" data-i18n="nav_login">Login</span>
     </button>
-    <div id="headerNickBadge" class="items-center gap-1.5 bg-white/10 rounded-xl px-2.5 py-1.5 cursor-pointer active:bg-white/20 transition" onclick="openMyActivity()">
-      <span class="text-sm">👤</span>
-      <span id="headerNickText" class="text-[10px] font-black text-blue-200 truncate max-w-[80px]"></span>
+    <div id="headerNickBadge" class="items-center gap-1.5 bg-white/[0.08] rounded-full px-3 py-1.5 cursor-pointer active:bg-white/20 transition shrink-0" onclick="openMyActivity()">
+      <span class="text-xs">👤</span>
+      <span id="headerNickText" class="text-[10px] font-bold truncate max-w-[72px]" style="color:rgba(180,205,255,0.9)"></span>
     </div>
-    <button id="headerLogoutBtn" onclick="doLogout()" class="hidden items-center gap-1 bg-red-500/20 rounded-xl px-2 py-1.5 active:bg-red-500/40 transition">
-      <span class="text-[10px] font-black text-red-300" data-i18n="side_logout">Logout</span>
+    <button id="headerLogoutBtn" onclick="doLogout()" class="hidden items-center gap-1 bg-red-500/[0.18] rounded-full px-2.5 py-1.5 active:bg-red-500/40 transition shrink-0">
+      <span class="text-[10px] font-bold text-red-300" data-i18n="side_logout">Logout</span>
     </button>
-    <div id="timerWrap" class="hidden">
-      <div id="timerBadge" class="flex items-center gap-1 bg-white/10 rounded-xl px-2 py-1.5">
-        <span class="text-sm">🔑</span>
+    <div id="timerWrap" class="hidden shrink-0">
+      <div id="timerBadge" class="flex items-center gap-1 bg-white/[0.08] rounded-full px-2.5 py-1.5">
+        <span class="text-xs">🔑</span>
         <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
       </div>
     </div>
-    <button id="installBtn" onclick="triggerInstall()" class="relative p-2 bg-white/10 rounded-xl active:bg-white/20 transition" title="앱 설치">
-      <span class="text-xl">⬇️</span>
-      <span class="absolute -top-1 -right-1 bg-blue-400 text-white text-[8px] font-black px-1 py-0.5 rounded-full leading-none">APP</span>
+    <button id="installBtn" onclick="triggerInstall()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0" title="앱 설치">
+      <span class="text-lg leading-none">⬇️</span>
+      <span class="absolute -top-0.5 -right-0.5 bg-blue-400 text-white text-[7px] font-black px-1 py-0.5 rounded-full leading-none">APP</span>
     </button>
-    <button onclick="openCart()" class="relative p-2 bg-white/10 rounded-xl">
-      <span class="text-xl">🛒</span>
-      <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+    <button onclick="openCart()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0">
+      <span class="text-lg leading-none">🛒</span>
+      <span id="cartBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden leading-none">0</span>
     </button>
   </header>
   <!-- 네비게이션 탭 바 -->
-  <nav id="navTabBar" class="bg-[#001220] border-t border-white/10 overflow-x-auto no-scroll">
-    <div class="flex px-2 py-2 min-w-max gap-1">
-      <button onclick="goPage('home')"                  id="ntab-home"     class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">🏠</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_home">HOME</span>
+  <nav id="navTabBar" class="border-t border-white/[0.06] overflow-x-auto no-scroll" style="background:var(--color-primary-darkest)">
+    <div class="flex px-2 py-1.5 min-w-max gap-0.5">
+      <button onclick="goPage('home')"                  id="ntab-home"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">🏠</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_home">HOME</span>
       </button>
-      <button onclick="openNavDropdown('shop',event)"   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">🦷</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_shop">SHOP</span>
+      <button onclick="openNavDropdown('shop',event)"   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">🦷</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_shop">SHOP</span>
         <span id="ntab-lock-shop" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="openNavDropdown('custom',event)"  id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">🔧</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_custom">CUSTOM</span>
+      <button onclick="openNavDropdown('custom',event)"  id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">🔧</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_custom">CUSTOM</span>
         <span id="ntab-lock-custom" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="goPage('used')"                  id="ntab-used"     class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">♻️</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_used">USED</span>
+      <button onclick="goPage('used')"                  id="ntab-used"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">♻️</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_used">USED</span>
       </button>
-      <button onclick="openNavDropdown('forum',event)"  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">💬</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_forum">임상토론방</span>
+      <button onclick="openNavDropdown('forum',event)"  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">💬</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_forum">토론방</span>
         <span id="ntab-lock-forum" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="goPage('events')"                id="ntab-events"   class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">📅</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_events">EVENTS</span>
+      <button onclick="goPage('events')"                id="ntab-events"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">📅</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_events">EVENTS</span>
       </button>
-
-      <button onclick="goPage('settings')"              id="ntab-settings" class="nav-tab relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl">
-        <span class="text-lg leading-none">⚙️</span>
-        <span class="text-[10px] font-black uppercase tracking-wide" data-i18n="nav_settings">SETTINGS</span>
+      <button onclick="goPage('settings')"              id="ntab-settings" class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">⚙️</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_settings">SET</span>
       </button>
-      <button onclick="goPage('factory')" id="ntab-factory" class="nav-tab hidden relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl bg-amber-500/20">
-        <span class="text-lg leading-none">🔧</span>
-        <span class="text-[10px] font-black uppercase tracking-wide text-amber-400">ADMIN</span>
+      <button onclick="goPage('factory')" id="ntab-factory" class="nav-tab hidden relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px] bg-amber-500/[0.15]">
+        <span class="text-base leading-none">🔧</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider text-amber-400">ADMIN</span>
       </button>
     </div>
   </nav>
@@ -523,54 +524,70 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   <div class="flex-1 overflow-y-auto pb-8">
     <!-- ==================== HOME ==================== -->
     <div id="page-home" class="page active">
-      <div style="background:linear-gradient(145deg,#001d4a 0%,#0a3072 50%,#1a1a2e 100%)" class="text-white px-6 pt-10 pb-12 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+      <!-- Hero -->
+      <div class="relative overflow-hidden text-white" style="background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 55%,#0f1f3d 100%);padding:36px 24px 52px">
+        <!-- Decorative glows -->
+        <div class="absolute -top-16 -right-16 w-60 h-60 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(79,142,247,0.12) 0%,transparent 70%)"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(212,175,55,0.06) 0%,transparent 70%)"></div>
         <div class="relative">
+          <!-- Brand tag row -->
           <div class="fade-up mb-5">
-            <div class="flex items-center gap-3 mb-1">
-              <span class="text-3xl font-black italic">BIOTEM</span>
-              <span class="text-blue-400 font-black text-xl">×</span>
-              <span class="text-3xl font-black italic text-blue-300">BIOPLANT</span>
+            <div class="inline-flex items-center gap-2 mb-4">
+              <span class="text-[9px] font-semibold uppercase tracking-[3px]" style="color:var(--color-accent)">BIOTEM</span>
+              <span class="w-1 h-1 rounded-full shrink-0" style="background:rgba(255,255,255,0.25)"></span>
+              <span class="text-[9px] font-semibold uppercase tracking-[3px]" style="color:rgba(180,205,255,0.6)">BIOPLANT</span>
             </div>
-            <p class="text-[10px] text-blue-300 font-bold uppercase tracking-[3px]" data-i18n="home_subtitle">Expert of Implant · Thailand</p>
+            <!-- Main headline -->
+            <h1 class="leading-tight mb-1" style="font-size:34px;font-weight:900;letter-spacing:-1.2px;color:white">
+              <span data-i18n="home_title1">Digital Implant Parts</span>
+            </h1>
+            <h1 class="leading-tight mb-4" style="font-size:34px;font-weight:900;letter-spacing:-1.2px;color:rgba(147,197,253,0.88)">
+              <span data-i18n="home_title2">Ordering System</span>
+            </h1>
+            <!-- Gold accent rule -->
+            <div style="width:32px;height:2px;border-radius:99px;background:var(--color-accent);opacity:0.85;margin-bottom:14px"></div>
+            <p class="text-xs leading-relaxed" style="color:rgba(191,219,254,0.6);max-width:290px" data-i18n="home_desc">Providing premium BIOTEM implant components directly to dental clinics across Thailand.</p>
           </div>
-          <div class="fade-up-2 border-t border-white/10 pt-5">
-            <p class="text-lg font-black leading-snug mb-1" data-i18n="home_title1">Digital Implant Parts</p>
-            <p class="text-lg font-black leading-snug text-blue-300" data-i18n="home_title2">Ordering System</p>
-            <p class="text-xs text-blue-200/70 mt-3 leading-relaxed" data-i18n="home_desc">Providing premium BIOTEM implant components directly to dental clinics across Thailand.</p>
+          <!-- Subtitle -->
+          <div class="fade-up-2">
+            <p class="text-[9px] font-medium uppercase tracking-[3px] mb-5" style="color:rgba(255,255,255,0.3)" data-i18n="home_subtitle">Expert of Implant · Thailand</p>
           </div>
-          <div class="fade-up-3 mt-7 flex flex-col gap-3">
-            <button onclick="goPage('shop')" class="bg-blue-500 text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition flex items-center gap-2">
-              <span>🦷</span> <span data-i18n="home_goto_shop">Go to Shop</span> <span class="text-blue-200">›</span>
+          <!-- CTAs -->
+          <div class="fade-up-3 flex flex-col gap-2.5">
+            <button onclick="goPage('shop')" class="flex items-center gap-3 px-5 py-3.5 rounded-2xl font-black text-sm active:scale-95 transition shadow-lg" style="background:var(--color-accent);color:var(--color-primary-dark)">
+              <span>🦷</span>
+              <span data-i18n="home_goto_shop">Go to Shop</span>
+              <span class="ml-auto opacity-60 text-base leading-none">›</span>
             </button>
             <a href="https://line.me/ti/p/@452fshii" target="_blank" rel="noopener"
-               class="bg-[#06C755] text-white px-6 py-3.5 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition flex items-center gap-2 no-underline">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-              <span data-i18n="home_line_add">Add LINE Friend</span> <span class="text-green-100 text-xs font-bold ml-auto">@452fshii</span>
+               class="flex items-center gap-3 px-5 py-3.5 rounded-2xl font-black text-sm active:scale-95 transition shadow-lg no-underline" style="background:var(--color-line-green);color:white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+              <span data-i18n="home_line_add">Add LINE Friend</span>
+              <span class="ml-auto text-xs font-medium opacity-70">@452fshii</span>
             </a>
           </div>
         </div>
       </div>
       <!-- 비전 & 브랜드 섹션 -->
-      <div class="px-4 -mt-6 pb-8">
+      <div class="px-4 -mt-5 pb-8">
         <!-- Vision card -->
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-3">
-          <div style="background:linear-gradient(120deg,#001d4a 0%,#0d3880 100%)" class="px-5 py-4">
-            <p class="text-[9px] text-blue-300 font-bold uppercase tracking-[3px] mb-1" data-i18n="home_vision_label">Our Vision</p>
-            <p class="text-white font-black text-base leading-snug" data-i18n="home_vision">Redefining Implant Precision for Southeast Asia</p>
+          <div class="px-5 py-4" style="background:linear-gradient(120deg,var(--color-primary-dark) 0%,var(--color-primary-light) 100%)">
+            <p class="text-[9px] font-semibold uppercase tracking-[3px] mb-1.5" style="color:var(--color-accent)" data-i18n="home_vision_label">Our Vision</p>
+            <p class="font-black text-base leading-snug text-white" data-i18n="home_vision">Redefining Implant Precision for Southeast Asia</p>
           </div>
           <div class="px-5 py-4 grid grid-cols-3 divide-x divide-slate-100">
             <div class="pr-4 text-center">
               <p class="font-black text-blue-800 text-lg leading-none">ISO</p>
-              <p class="text-[8px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide" data-i18n="home_stat1">Certified</p>
+              <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat1">Certified</p>
             </div>
             <div class="px-4 text-center">
               <p class="font-black text-blue-800 text-lg leading-none">Korea</p>
-              <p class="text-[8px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide" data-i18n="home_stat2">Origin</p>
+              <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat2">Origin</p>
             </div>
             <div class="pl-4 text-center">
               <p class="font-black text-blue-800 text-lg leading-none">SEA</p>
-              <p class="text-[8px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide" data-i18n="home_stat3">Coverage</p>
+              <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat3">Coverage</p>
             </div>
           </div>
         </div>
@@ -586,8 +603,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             </div>
           </div>
           <div class="flex-1 bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-[#001d4a] flex items-center justify-center shrink-0">
-              <span class="text-[#D4AF37] text-xs font-black">BP</span>
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--color-primary-dark)">
+              <span class="text-xs font-black" style="color:var(--color-accent)">BP</span>
             </div>
             <div>
               <p class="font-black text-xs text-slate-800">BIOPLANT</p>
@@ -596,24 +613,24 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           </div>
         </div>
         <!-- Mission statement -->
-        <div class="bg-[#001d4a] rounded-2xl p-5 shadow-sm">
-          <p class="text-[9px] text-blue-300 font-bold uppercase tracking-[3px] mb-2" data-i18n="home_mission_label">Mission</p>
-          <p class="text-white text-xs font-bold leading-relaxed" data-i18n="home_mission">Delivering premium Korean-manufactured dental implant components with fast, reliable service to clinics across Thailand and Southeast Asia.</p>
+        <div class="rounded-2xl p-5 shadow-sm" style="background:var(--color-primary-dark)">
+          <p class="text-[9px] font-semibold uppercase tracking-[3px] mb-2" style="color:var(--color-accent)" data-i18n="home_mission_label">Mission</p>
+          <p class="text-xs font-medium leading-relaxed" style="color:var(--color-text-on-dark-muted)" data-i18n="home_mission">Delivering premium Korean-manufactured dental implant components with fast, reliable service to clinics across Thailand and Southeast Asia.</p>
           <div class="flex items-center gap-2 mt-4 border-t border-white/10 pt-3 flex-wrap">
             <a href="https://line.me/ti/p/@452fshii" target="_blank" rel="noopener"
-               class="flex items-center gap-1.5 bg-[#06C755]/20 hover:bg-[#06C755]/30 active:scale-95 transition px-3 py-1.5 rounded-xl no-underline">
+               class="flex items-center gap-1.5 active:scale-95 transition px-3 py-1.5 rounded-xl no-underline" style="background:rgba(6,199,85,0.18)">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="#06C755"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-              <span class="text-[10px] text-green-300 font-black">친구 추가 @452fshii</span>
+              <span class="text-[10px] font-bold" style="color:var(--color-line-green)">친구 추가 @452fshii</span>
             </a>
-            <span class="text-[10px] text-blue-300">🌐 biotemplant.com</span>
+            <span class="text-[10px]" style="color:rgba(147,197,253,0.5)">🌐 biotemplant.com</span>
           </div>
         </div>
         <!-- 개인정보 처리방침 버튼 -->
-        <div class="mt-4 text-center">
-          <button onclick="openPrivacyModal(event)" class="w-full py-3.5 bg-white rounded-2xl shadow-sm font-black text-xs text-slate-500 flex items-center justify-center gap-2 active:bg-slate-50 transition">
+        <div class="mt-3">
+          <button onclick="openPrivacyModal(event)" class="w-full py-3.5 bg-white rounded-2xl shadow-sm font-medium text-xs flex items-center justify-center gap-2 active:bg-slate-50 transition" style="color:var(--color-text-muted)">
             <span>🔒</span>
             <span data-i18n="privacy_btn">개인정보 처리방침</span>
-            <span class="text-slate-300">›</span>
+            <span style="color:var(--color-border-strong)">›</span>
           </button>
         </div>
       </div>
