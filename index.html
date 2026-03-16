@@ -692,43 +692,115 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
     </div>
     <!-- ==================== CUSTOM ABUTMENT ==================== -->
-    <div id="page-custom" class="page p-4">
+    <div id="page-custom" class="page px-4 pt-5 pb-28">
+      <!-- Tab buttons -->
       <div class="flex gap-1.5 mb-5">
-        <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow">New Order</button>
+        <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow" data-i18n="custom_tab_new">New Order</button>
         <button onclick="customTab('list')" id="ctab-list" data-i18n="custom_tab_list" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">진행중</button>
         <button onclick="customTab('done')" id="ctab-done" data-i18n="custom_tab_done" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500">완료</button>
       </div>
+
+      <!-- Wizard form -->
       <div id="custom-form">
-        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-amber-500 rounded-full inline-block"></span><span data-i18n="custom_form_title">Custom Abutment Order</span></h3>
-          <div id="caseList"></div>
-          <button onclick="addCase()" class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black text-sm active:bg-slate-50" data-i18n="case_add">+ Add Case</button>
-        </div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <h3 class="font-black text-slate-800 text-sm mb-4 flex items-center gap-2"><span class="w-1 h-4 bg-blue-500 rounded-full inline-block"></span><span data-i18n="custom_delivery_title">Delivery Info</span></h3>
-          <div class="mb-3">
-            <p class="text-sm font-black text-slate-700 mb-1" data-i18n="custom_clinic_ph">Clinic / Lab Name</p>
-            <input id="cust-clinic" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+        <!-- Step progress bar (rendered by JS) -->
+        <div id="wizStepBar" class="mb-5"></div>
+
+        <!-- Step 1: Patient info + tooth diagram -->
+        <div id="wiz-step-1">
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_patient_label">Patient ID</p>
+            <input type="text" id="wiz-patient" placeholder="P001" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400 mb-3">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="case_deadline_label">Delivery Deadline</p>
+            <input type="date" id="wiz-deadline" class="w-full p-4 bg-slate-50 rounded-xl text-base font-black outline-none border-2 border-blue-100 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;">
           </div>
-          <div class="mb-3">
-            <p class="text-sm font-black text-slate-700 mb-1" data-i18n="custom_addr_ph">Delivery Address</p>
-            <input id="cust-addr" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
-          </div>
-          <div class="mb-3">
-            <p class="text-sm font-black text-slate-700 mb-1" data-i18n="custom_phone_ph">Contact Number</p>
-            <input id="cust-phone" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
-          </div>
-          <div>
-            <p class="text-sm font-black text-slate-700 mb-1" data-i18n="custom_line_ph">Line ID (for notifications)</p>
-            <input id="cust-line" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="case_tooth_hint">Select teeth</p>
+            <div id="wizToothChart"></div>
+            <div id="wizTeethCount" class="mt-2 text-center text-xs font-black text-blue-600"></div>
           </div>
         </div>
-        <button onclick="submitCustom()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg mb-2" data-i18n="custom_submit">Submit Order</button>
-        <p class="text-[9px] text-slate-400 text-center font-bold" data-i18n="custom_submit_note">Order confirmation will be sent via Line</p>
+
+        <!-- Step 2: Implant brand + sizes per tooth -->
+        <div id="wiz-step-2" class="hidden">
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1" data-i18n="brand_ph">Select implant brand</p>
+            <p class="text-[9px] text-slate-400 font-bold mb-4" data-i18n="wiz_brand_all_hint">Applies to all selected teeth</p>
+            <div id="wizBrandGrid" class="grid grid-cols-2 gap-2"></div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_size_table_title">Size per tooth</p>
+            <div id="wizSizeTable" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Shade + memo -->
+        <div id="wiz-step-3" class="hidden">
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_shade_label">Tooth Shade (VITA)</p>
+            <div id="wizShadeGrid" class="grid grid-cols-4 gap-2 mb-2"></div>
+            <p id="wizShadeSelected" class="text-center text-xs font-black text-blue-700 mt-2"></p>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="memo_ph">Special requests</p>
+            <textarea id="wiz-memo" rows="3" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none border-2 border-slate-200 focus:border-blue-400"></textarea>
+          </div>
+        </div>
+
+        <!-- Step 4: STL upload -->
+        <div id="wiz-step-4" class="hidden">
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_stl_main_label">STL / 3D Files</p>
+            <div id="wiz-stl-drop" onclick="document.getElementById('wiz-stl-input').click()" ondragover="wizOnStlDragOver(event)" ondragleave="wizOnStlDragLeave(event)" ondrop="wizOnStlDrop(event)"
+              class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer bg-slate-50 transition-colors">
+              <p class="text-3xl mb-2">📁</p>
+              <p class="text-xs font-black text-slate-500 mb-1" data-i18n="wiz_stl_main_label">STL / 3D Files</p>
+              <p class="text-[9px] text-slate-400" data-i18n="wiz_stl_main_hint">Drag & drop or tap · Up to 10 files</p>
+            </div>
+            <input type="file" id="wiz-stl-input" accept=".stl,.STL,.ply,.PLY,.obj,.OBJ,.3mf,.3MF" class="hidden" multiple onchange="wizOnStlSelect(this)">
+          </div>
+        </div>
+
+        <!-- Step 5: Confirm + delivery + submit -->
+        <div id="wiz-step-5" class="hidden">
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_confirm_title">Order Summary</p>
+            <div id="wizSummary" class="space-y-2"></div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_delivery_label">Delivery Info</p>
+            <div class="mb-3">
+              <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_clinic_ph">Clinic / Lab Name</p>
+              <input id="cust-clinic" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+            </div>
+            <div class="mb-3">
+              <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_addr_ph">Delivery Address</p>
+              <input id="cust-addr" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+            </div>
+            <div class="mb-3">
+              <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_phone_ph">Contact Number</p>
+              <input id="cust-phone" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+            </div>
+            <div>
+              <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_line_ph">Line ID</p>
+              <input id="cust-line" type="text" placeholder="—" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+            </div>
+          </div>
+          <button onclick="submitWizardOrder()" class="w-full bg-[#001d4a] text-white py-4 rounded-2xl font-black text-sm shadow-lg mb-2" data-i18n="custom_submit">Submit Order</button>
+          <p class="text-[9px] text-slate-400 text-center font-bold" data-i18n="custom_submit_note">Order confirmation will be sent via Line</p>
+        </div>
+
+        <!-- Wizard nav buttons -->
+        <div id="wizNav" class="flex gap-3 mt-4">
+          <button id="wizPrevBtn" onclick="customWizardPrev()" class="flex-1 py-3.5 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 hidden" data-i18n="wiz_prev">← Back</button>
+          <button id="wizNextBtn" onclick="customWizardNext()" class="flex-1 py-3.5 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow active:scale-95 transition" data-i18n="wiz_next">Next →</button>
+        </div>
       </div>
+
+      <!-- Order list tab -->
       <div id="custom-list" class="hidden">
         <div id="customOrdersContainer" class="space-y-4"></div>
       </div>
+      <!-- Done orders tab -->
       <div id="custom-done" class="hidden">
         <div id="doneOrdersContainer" class="space-y-4"></div>
       </div>

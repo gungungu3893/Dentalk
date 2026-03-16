@@ -54,6 +54,7 @@ const LANG = {
     admin_new_event_title:'Add New Event',admin_event_name_ph:'Event name',admin_event_loc_ph:'Location',admin_event_add_btn:'+ Add',admin_event_fill_alert:'Please fill in all fields.',
     admin_orders_new:'New Orders',admin_orders_active:'In Progress',admin_orders_done:'Done',admin_orders_empty:'No orders.',
     shipped_status:'Shipped',carrier_label:'Carrier',tracking_label:'Tracking',received_status:'Received',teeth_colon_label:'Teeth:',
+    wiz_step1:'Patient & Teeth',wiz_step2:'Brand',wiz_step3:'Shade & Note',wiz_step4:'STL',wiz_step5:'Confirm',wiz_next:'Next →',wiz_prev:'← Back',wiz_patient_label:'Patient ID',wiz_no_tooth_err:'Please select at least 1 tooth.',wiz_no_brand_err:'Please select an implant brand.',wiz_brand_all_hint:'Applies to all selected teeth',wiz_size_for_tooth:'Size (e.g. Ø4.0 / L10)',wiz_shade_label:'Tooth Shade (VITA)',wiz_stl_main_label:'STL / 3D Files',wiz_stl_main_hint:'Drag & drop or tap · Up to 10 files',wiz_confirm_title:'Order Summary',wiz_delivery_label:'Delivery Info',wiz_teeth_selected:'teeth selected',wiz_start_over:'Start New Order',wiz_size_table_title:'Size per tooth',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'임상토론방',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',
@@ -109,6 +110,7 @@ const LANG = {
     admin_new_event_title:'새 이벤트 추가',admin_event_name_ph:'이벤트명',admin_event_loc_ph:'장소',admin_event_add_btn:'+ 추가',admin_event_fill_alert:'모든 항목을 입력해주세요.',
     admin_orders_new:'새 주문',admin_orders_active:'진행중',admin_orders_done:'완료',admin_orders_empty:'주문이 없습니다.',
     shipped_status:'배송 완료',carrier_label:'배송사',tracking_label:'송장',received_status:'수령 완료',teeth_colon_label:'치아:',
+    wiz_step1:'환자 & 치아',wiz_step2:'브랜드',wiz_step3:'쉐이드 & 메모',wiz_step4:'STL',wiz_step5:'확인 & 제출',wiz_next:'다음 →',wiz_prev:'← 이전',wiz_patient_label:'환자 ID',wiz_no_tooth_err:'치아를 최소 1개 선택해주세요.',wiz_no_brand_err:'임플란트 브랜드를 선택해주세요.',wiz_brand_all_hint:'선택한 모든 치아에 적용',wiz_size_for_tooth:'사이즈 (예: Ø4.0 / L10)',wiz_shade_label:'치아 색상 (VITA)',wiz_stl_main_label:'STL / 3D 파일',wiz_stl_main_hint:'드래그하거나 탭하여 선택 · 최대 10개',wiz_confirm_title:'주문 확인',wiz_delivery_label:'납품 정보',wiz_teeth_selected:'개 치아 선택',wiz_start_over:'새 주문 시작',wiz_size_table_title:'치아별 사이즈',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'临床讨论',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',
@@ -163,6 +165,7 @@ const LANG = {
     admin_new_event_title:'添加新活动',admin_event_name_ph:'活动名称',admin_event_loc_ph:'地点',admin_event_add_btn:'+ 添加',admin_event_fill_alert:'请填写所有项目。',
     admin_orders_new:'新订单',admin_orders_active:'进行中',admin_orders_done:'已完成',admin_orders_empty:'暂无订单。',
     shipped_status:'已发货',carrier_label:'快递公司',tracking_label:'快递单',received_status:'已收货',teeth_colon_label:'牙齿:',
+    wiz_step1:'患者与牙位',wiz_step2:'品牌',wiz_step3:'色号与备注',wiz_step4:'STL文件',wiz_step5:'确认提交',wiz_next:'下一步 →',wiz_prev:'← 上一步',wiz_patient_label:'患者ID',wiz_no_tooth_err:'请至少选择1颗牙位。',wiz_no_brand_err:'请选择种植体品牌。',wiz_brand_all_hint:'适用于所有已选牙位',wiz_size_for_tooth:'尺寸（例：Ø4.0 / L10）',wiz_shade_label:'牙齿色号（VITA）',wiz_stl_main_label:'STL / 3D文件',wiz_stl_main_hint:'拖拽或点击选择 · 最多10个文件',wiz_confirm_title:'订单确认',wiz_delivery_label:'配送信息',wiz_teeth_selected:'颗牙位已选',wiz_start_over:'新建订单',wiz_size_table_title:'各牙位尺寸',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'CNC Custom Abut',nav_used:'ตลาดมือสอง',nav_forum:'สนทนาคลินิก',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',
@@ -217,6 +220,7 @@ const LANG = {
     admin_new_event_title:'เพิ่มกิจกรรมใหม่',admin_event_name_ph:'ชื่อกิจกรรม',admin_event_loc_ph:'สถานที่',admin_event_add_btn:'+ เพิ่ม',admin_event_fill_alert:'กรุณากรอกข้อมูลให้ครบทุกช่อง',
     admin_orders_new:'คำสั่งซื้อใหม่',admin_orders_active:'กำลังดำเนินการ',admin_orders_done:'เสร็จสิ้น',admin_orders_empty:'ไม่มีคำสั่งซื้อ',
     shipped_status:'จัดส่งแล้ว',carrier_label:'บริษัทขนส่ง',tracking_label:'เลขพัสดุ',received_status:'รับสินค้าแล้ว',teeth_colon_label:'ฟัน:',
+    wiz_step1:'ผู้ป่วย & ฟัน',wiz_step2:'แบรนด์',wiz_step3:'สีฟัน & หมายเหตุ',wiz_step4:'STL',wiz_step5:'ยืนยัน',wiz_next:'ถัดไป →',wiz_prev:'← ย้อนกลับ',wiz_patient_label:'รหัสผู้ป่วย',wiz_no_tooth_err:'กรุณาเลือกฟันอย่างน้อย 1 ซี่',wiz_no_brand_err:'กรุณาเลือกแบรนด์ implant',wiz_brand_all_hint:'ใช้กับฟันที่เลือกทั้งหมด',wiz_size_for_tooth:'ขนาด (เช่น Ø4.0 / L10)',wiz_shade_label:'สีฟัน (VITA)',wiz_stl_main_label:'STL / 3D ไฟล์',wiz_stl_main_hint:'ลากวางหรือแตะเพื่อเลือก · สูงสุด 10 ไฟล์',wiz_confirm_title:'สรุปคำสั่งซื้อ',wiz_delivery_label:'ข้อมูลการจัดส่ง',wiz_teeth_selected:'ซี่ที่เลือก',wiz_start_over:'เริ่มคำสั่งซื้อใหม่',wiz_size_table_title:'ขนาดต่อฟัน',
   },
   vi: {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'THẢO LUẬN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',
@@ -271,6 +275,7 @@ const LANG = {
     admin_new_event_title:'Thêm sự kiện mới',admin_event_name_ph:'Tên sự kiện',admin_event_loc_ph:'Địa điểm',admin_event_add_btn:'+ Thêm',admin_event_fill_alert:'Vui lòng điền tất cả các trường.',
     admin_orders_new:'Đơn mới',admin_orders_active:'Đang xử lý',admin_orders_done:'Hoàn thành',admin_orders_empty:'Không có đơn hàng.',
     shipped_status:'Đã giao',carrier_label:'Đơn vị vận chuyển',tracking_label:'Mã vận đơn',received_status:'Đã nhận',teeth_colon_label:'Răng:',
+    wiz_step1:'Bệnh nhân & Răng',wiz_step2:'Thương hiệu',wiz_step3:'Màu & Ghi chú',wiz_step4:'STL',wiz_step5:'Xác nhận',wiz_next:'Tiếp →',wiz_prev:'← Quay lại',wiz_patient_label:'ID bệnh nhân',wiz_no_tooth_err:'Vui lòng chọn ít nhất 1 răng.',wiz_no_brand_err:'Vui lòng chọn thương hiệu implant.',wiz_brand_all_hint:'Áp dụng cho tất cả răng đã chọn',wiz_size_for_tooth:'Kích thước (vd: Ø4.0 / L10)',wiz_shade_label:'Màu răng (VITA)',wiz_stl_main_label:'File STL / 3D',wiz_stl_main_hint:'Kéo thả hoặc nhấn để chọn · Tối đa 10 file',wiz_confirm_title:'Xác nhận đơn hàng',wiz_delivery_label:'Thông tin giao hàng',wiz_teeth_selected:'răng đã chọn',wiz_start_over:'Tạo đơn mới',wiz_size_table_title:'Kích thước theo răng',
   },
   es: {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'DISCUSIÓN',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',
@@ -325,6 +330,7 @@ const LANG = {
     admin_new_event_title:'Añadir nuevo evento',admin_event_name_ph:'Nombre del evento',admin_event_loc_ph:'Lugar',admin_event_add_btn:'+ Añadir',admin_event_fill_alert:'Por favor, rellena todos los campos.',
     admin_orders_new:'Nuevos',admin_orders_active:'En curso',admin_orders_done:'Completado',admin_orders_empty:'No hay pedidos.',
     shipped_status:'Enviado',carrier_label:'Transportista',tracking_label:'Seguimiento',received_status:'Recibido',teeth_colon_label:'Dientes:',
+    wiz_step1:'Paciente & Dientes',wiz_step2:'Marca',wiz_step3:'Color & Notas',wiz_step4:'STL',wiz_step5:'Confirmar',wiz_next:'Siguiente →',wiz_prev:'← Atrás',wiz_patient_label:'ID paciente',wiz_no_tooth_err:'Por favor selecciona al menos 1 diente.',wiz_no_brand_err:'Por favor selecciona una marca de implante.',wiz_brand_all_hint:'Se aplica a todos los dientes seleccionados',wiz_size_for_tooth:'Talla (ej: Ø4.0 / L10)',wiz_shade_label:'Color dental (VITA)',wiz_stl_main_label:'Archivos STL / 3D',wiz_stl_main_hint:'Arrastra o toca para seleccionar · Máx 10 archivos',wiz_confirm_title:'Resumen del pedido',wiz_delivery_label:'Información de entrega',wiz_teeth_selected:'dientes seleccionados',wiz_start_over:'Nuevo pedido',wiz_size_table_title:'Talla por diente',
   },
 };
 

@@ -1095,8 +1095,11 @@ function completePayment() {
 }
 function closePayComplete() { closeModal('payCompleteModal'); goPage('shop'); }
 // ============================================================
-// CUSTOM ABUTMENT
+// CUSTOM ABUTMENT — Wizard
 // ============================================================
+var wizardStep = 1;
+var wizardData = { patient:'', deadline:'', teethSet: new Set(), brand:'', teethSizes:{}, shade:'', memo:'', stlFiles:[] };
+
 function customTab(tab) {
   var activeCls  = 'flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow';
   var inactiveCls = 'flex-1 py-3 rounded-2xl font-black text-sm bg-slate-200 text-slate-500';
@@ -1113,19 +1116,342 @@ function customTab(tab) {
   if (fBtn) fBtn.textContent = t('custom_tab_new');
   if (lBtn) lBtn.textContent = t('custom_tab_list');
   if (dBtn) dBtn.textContent = t('custom_tab_done');
-  if (tab === 'list' || tab === 'done') {
+  if (tab === 'form') {
+    initWizard();
+  } else {
     loadOrdersFromSupabase().then(function() { renderCustomOrders(); renderDoneOrders(); });
   }
 }
+
+function initWizard() {
+  wizardStep = 1;
+  wizardData = { patient:'', deadline:'', teethSet: new Set(), brand:'', teethSizes:{}, shade:'', memo:'', stlFiles:[] };
+  // Render tooth chart
+  var chartEl = document.getElementById('wizToothChart');
+  if (chartEl) chartEl.innerHTML = buildWizToothChart();
+  // Render brand grid
+  renderWizBrandGrid();
+  // Render shade grid
+  renderWizShadeGrid();
+  // Pre-fill delivery
+  var clinicEl = document.getElementById('cust-clinic');
+  var addrEl   = document.getElementById('cust-addr');
+  var phoneEl  = document.getElementById('cust-phone');
+  if (clinicEl) clinicEl.value = (currentUser && currentUser.clinicName) || '';
+  if (addrEl)   addrEl.value   = (currentUser && currentUser.address)    || '';
+  if (phoneEl)  phoneEl.value  = (currentUser && currentUser.phone)      || '';
+  var lineEl = document.getElementById('cust-line');
+  if (lineEl) lineEl.value = '';
+  showWizardStep(1);
+}
+
+function buildWizToothChart() {
+  var upper = [17,16,15,14,13,12,11,21,22,23,24,25,26,27];
+  var lower = [47,46,45,44,43,42,41,31,32,33,34,35,36,37];
+  function btn(num) {
+    return '<button type="button" id="wiz-tooth-' + num + '" onclick="wizToggleTooth(' + num + ')" ' +
+      'class="w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none">' + num + '</button>';
+  }
+  var html = '<div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">';
+  html += '<p class="text-center text-[8px] font-black text-blue-400 uppercase tracking-widest mb-2">' + t('upper_jaw') + '</p>';
+  html += '<div class="flex justify-center gap-1 mb-2 flex-wrap">';
+  upper.forEach(function(n){ html += btn(n); });
+  html += '</div>';
+  html += '<div class="border-t border-dashed border-slate-200 my-2 relative"><span class="absolute left-1/2 -translate-x-1/2 -top-2 bg-white px-2 text-[8px] text-slate-300 font-bold">' + t('jaw_border') + '</span></div>';
+  html += '<div class="flex justify-center gap-1 mt-2 flex-wrap">';
+  lower.forEach(function(n){ html += btn(n); });
+  html += '</div>';
+  html += '<p class="text-center text-[8px] font-black text-amber-400 uppercase tracking-widest mt-2">' + t('lower_jaw') + '</p>';
+  html += '</div>';
+  return html;
+}
+
+function wizToggleTooth(num) {
+  var btn = document.getElementById('wiz-tooth-' + num);
+  if (wizardData.teethSet.has(num)) {
+    wizardData.teethSet.delete(num);
+    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none';
+  } else {
+    wizardData.teethSet.add(num);
+    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-blue-500 bg-blue-500 text-white transition active:scale-90 leading-none';
+  }
+  var countEl = document.getElementById('wizTeethCount');
+  if (countEl) {
+    var n = wizardData.teethSet.size;
+    countEl.textContent = n > 0 ? n + ' ' + t('wiz_teeth_selected') : '';
+  }
+}
+
+function renderWizBrandGrid() {
+  var el = document.getElementById('wizBrandGrid');
+  if (!el) return;
+  el.innerHTML = IMPLANT_BRANDS.map(function(b) {
+    return '<button type="button" id="wizBrand-' + b.replace(/\s/g,'-') + '" onclick="wizSelectBrand(\'' + b.replace(/'/g,"\\'") + '\')" ' +
+      'class="py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white text-xs font-black text-slate-600 active:scale-95 transition text-center">' + b + '</button>';
+  }).join('');
+}
+
+function wizSelectBrand(brand) {
+  wizardData.brand = brand;
+  document.querySelectorAll('#wizBrandGrid button').forEach(function(btn) {
+    btn.className = 'py-3 px-2 rounded-2xl border-2 border-slate-200 bg-white text-xs font-black text-slate-600 active:scale-95 transition text-center';
+  });
+  var sel = document.getElementById('wizBrand-' + brand.replace(/\s/g,'-'));
+  if (sel) sel.className = 'py-3 px-2 rounded-2xl border-2 border-blue-500 bg-blue-500 text-white text-xs font-black active:scale-95 transition text-center';
+}
+
+function renderWizSizeTable() {
+  var el = document.getElementById('wizSizeTable');
+  if (!el) return;
+  var teeth = Array.from(wizardData.teethSet).sort(function(a,b){return a-b;});
+  el.innerHTML = teeth.map(function(tn) {
+    var jaw = (tn>=11&&tn<=28)
+      ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block mr-1"></span>'
+      : '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block mr-1"></span>';
+    var saved = wizardData.teethSizes[tn] || '';
+    return '<div class="flex items-center gap-2">' +
+      '<span class="w-9 h-9 rounded-xl bg-blue-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">' + tn + '</span>' +
+      '<div class="flex-1"><p class="text-[9px] font-black text-slate-500 mb-0.5">' + jaw + getToothName(tn) + '</p>' +
+        '<input type="text" id="wiz-size-' + tn + '" value="' + saved + '" placeholder="' + t('wiz_size_for_tooth') + '" ' +
+        'oninput="wizardData.teethSizes[' + tn + ']=this.value" ' +
+        'class="w-full p-2 bg-slate-50 rounded-xl text-xs font-bold outline-none border border-slate-200 focus:border-blue-400">' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+var VITA_BG = {
+  'A1':'#f5ede0','A2':'#f2e5d0','A3':'#efdcc0','A3.5':'#ecce9e','A4':'#d4a86a',
+  'B1':'#f7eedf','B2':'#f3e7cd','B3':'#e8d7aa','C1':'#f0e9de','C2':'#dfd3bb',
+  'C3':'#c9b88e','D2':'#f3e4c8','D3':'#d9c298','BL (Bleach)':'#f9f5ee'
+};
+
+function renderWizShadeGrid() {
+  var el = document.getElementById('wizShadeGrid');
+  if (!el) return;
+  el.innerHTML = TOOTH_COLORS.map(function(c) {
+    var bg = VITA_BG[c] || '#f5f5f5';
+    return '<button type="button" id="wizShade-' + c.replace(/[\s().]/g,'-') + '" onclick="wizSelectShade(\'' + c.replace(/'/g,"\\'") + '\')" ' +
+      'style="background:' + bg + '" ' +
+      'class="py-3 rounded-xl border-2 border-slate-200 text-[10px] font-black text-slate-700 active:scale-95 transition">' + c + '</button>';
+  }).join('');
+}
+
+function wizSelectShade(shade) {
+  wizardData.shade = shade;
+  document.querySelectorAll('#wizShadeGrid button').forEach(function(btn) {
+    btn.style.borderColor = '#e2e8f0';
+    btn.style.boxShadow = '';
+  });
+  var sel = document.getElementById('wizShade-' + shade.replace(/[\s().]/g,'-'));
+  if (sel) { sel.style.borderColor = '#3b82f6'; sel.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.3)'; }
+  var lbl = document.getElementById('wizShadeSelected');
+  if (lbl) lbl.textContent = shade;
+}
+
+function wizOnStlDragOver(e) {
+  e.preventDefault(); e.stopPropagation();
+  var d = document.getElementById('wiz-stl-drop');
+  if (d) { d.style.borderColor='#3b82f6'; d.style.background='#eff6ff'; }
+}
+function wizOnStlDragLeave(e) {
+  e.preventDefault(); e.stopPropagation();
+  var d = document.getElementById('wiz-stl-drop');
+  if (d) { d.style.borderColor=''; d.style.background=''; }
+}
+function wizOnStlDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  var d = document.getElementById('wiz-stl-drop');
+  if (d) { d.style.borderColor=''; d.style.background=''; }
+  var allowed = ['.stl','.ply','.obj','.3mf'];
+  var files = Array.from(e.dataTransfer.files).filter(function(f){
+    var low = f.name.toLowerCase();
+    return allowed.some(function(ext){ return low.endsWith(ext); });
+  }).slice(0,10);
+  if (!files.length) return;
+  wizardData.stlFiles = wizardData.stlFiles.concat(files).slice(0,10);
+  updateWizStlDropUI();
+}
+function wizOnStlSelect(input) {
+  wizardData.stlFiles = Array.from(input.files).slice(0,10);
+  updateWizStlDropUI();
+}
+function updateWizStlDropUI() {
+  var d = document.getElementById('wiz-stl-drop');
+  if (!d) return;
+  var files = wizardData.stlFiles;
+  if (!files.length) return;
+  var totalKB = files.reduce(function(s,f){ return s+f.size/1024; },0);
+  var list = files.map(function(f,i){
+    return '<p class="text-[9px] text-green-700 font-bold truncate">' + (i+1) + '. ' + f.name + ' <span class="text-slate-400">(' + (f.size/1024).toFixed(0) + 'KB)</span></p>';
+  }).join('');
+  d.innerHTML = '<p class="text-2xl mb-1">✅</p>' +
+    '<p class="text-xs font-black text-green-600 mb-1">' + files.length + ' files · ' + totalKB.toFixed(0) + 'KB</p>' +
+    '<div class="text-left">' + list + '</div>';
+  d.className = 'border-2 border-green-200 rounded-xl p-4 mb-2 bg-green-50 cursor-pointer transition-colors';
+}
+
+function renderWizSummary() {
+  var el = document.getElementById('wizSummary');
+  if (!el) return;
+  var teeth = Array.from(wizardData.teethSet).sort(function(a,b){return a-b;});
+  var teethHtml = teeth.map(function(tn) {
+    var sz = wizardData.teethSizes[tn] || '—';
+    var isUpper = tn>=11&&tn<=28;
+    var dot = isUpper
+      ? '<span class="w-2 h-2 rounded-full bg-blue-400 inline-block mr-1"></span>'
+      : '<span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-1"></span>';
+    return '<div class="flex items-center gap-2 py-1 border-b border-slate-50 last:border-0">' +
+      '<span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 text-[9px] font-black flex items-center justify-center shrink-0">' + tn + '</span>' +
+      '<span class="flex-1 text-[10px] font-black text-slate-700">' + dot + getToothName(tn) + '</span>' +
+      '<span class="text-[9px] text-slate-500 font-bold">' + sz + '</span>' +
+    '</div>';
+  }).join('');
+  el.innerHTML =
+    '<div class="rounded-xl bg-slate-50 p-3 mb-2">' +
+      '<div class="flex justify-between text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>' + t('case_patient_ph').split(' ')[0] + '</span><span class="text-slate-800">' + (wizardData.patient || t('anon_patient')) + '</span></div>' +
+      '<div class="flex justify-between text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>' + t('brand_ph').split(' ').slice(1).join(' ') + '</span><span class="text-slate-800">' + (wizardData.brand || '—') + '</span></div>' +
+      '<div class="flex justify-between text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2"><span>' + t('wiz_shade_label').split(' ')[0] + '</span><span class="text-slate-800">' + (wizardData.shade || '—') + '</span></div>' +
+      '<div class="flex justify-between text-[9px] font-black text-slate-500 uppercase tracking-widest"><span>STL</span><span class="text-slate-800">' + wizardData.stlFiles.length + ' files</span></div>' +
+    '</div>' +
+    '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('wiz_size_table_title') + '</p>' +
+    '<div class="mb-2">' + teethHtml + '</div>' +
+    (wizardData.memo ? '<div class="bg-amber-50 rounded-xl p-2.5 mt-2"><p class="text-[9px] text-slate-600 leading-relaxed">' + wizardData.memo + '</p></div>' : '');
+}
+
+var _wizStepLabels = ['wiz_step1','wiz_step2','wiz_step3','wiz_step4','wiz_step5'];
+function renderWizStepBar(step) {
+  var el = document.getElementById('wizStepBar');
+  if (!el) return;
+  var html = '<div class="flex items-center">';
+  for (var i=1; i<=5; i++) {
+    var done    = i < step;
+    var current = i === step;
+    var circCls = done    ? 'w-7 h-7 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center shrink-0'
+                : current ? 'w-7 h-7 rounded-full bg-[#001d4a] text-white text-[10px] font-black flex items-center justify-center shrink-0 ring-4 ring-blue-200'
+                          : 'w-7 h-7 rounded-full bg-slate-200 text-slate-400 text-[10px] font-black flex items-center justify-center shrink-0';
+    var labelCls = current ? 'text-[8px] font-black text-[#001d4a] mt-1 text-center leading-tight'
+                 : done    ? 'text-[8px] font-bold text-blue-500 mt-1 text-center leading-tight'
+                           : 'text-[8px] font-bold text-slate-400 mt-1 text-center leading-tight';
+    html += '<div class="flex flex-col items-center" style="min-width:2.2rem">' +
+      '<div class="' + circCls + '">' + (done ? '✓' : i) + '</div>' +
+      '<span class="' + labelCls + '">' + t(_wizStepLabels[i-1]) + '</span>' +
+    '</div>';
+    if (i < 5) {
+      var lineCls = i < step ? 'flex-1 h-0.5 bg-blue-500 mb-4' : 'flex-1 h-0.5 bg-slate-200 mb-4';
+      html += '<div class="' + lineCls + '"></div>';
+    }
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function showWizardStep(step) {
+  wizardStep = step;
+  for (var i=1; i<=5; i++) {
+    var el = document.getElementById('wiz-step-' + i);
+    if (el) el.classList.toggle('hidden', i !== step);
+  }
+  var prevBtn = document.getElementById('wizPrevBtn');
+  var nextBtn = document.getElementById('wizNextBtn');
+  if (prevBtn) prevBtn.classList.toggle('hidden', step === 1);
+  if (nextBtn) {
+    if (step === 5) {
+      nextBtn.classList.add('hidden');
+    } else {
+      nextBtn.classList.remove('hidden');
+      nextBtn.setAttribute('data-i18n', 'wiz_next');
+      nextBtn.textContent = t('wiz_next');
+    }
+  }
+  if (prevBtn) { prevBtn.setAttribute('data-i18n','wiz_prev'); prevBtn.textContent = t('wiz_prev'); }
+  renderWizStepBar(step);
+  if (step === 2) renderWizSizeTable();
+  if (step === 5) renderWizSummary();
+  window.scrollTo(0, 0);
+}
+
+function customWizardNext() {
+  if (wizardStep === 1) {
+    var patEl = document.getElementById('wiz-patient');
+    if (patEl) wizardData.patient = patEl.value.trim();
+    var dlEl = document.getElementById('wiz-deadline');
+    if (dlEl) wizardData.deadline = dlEl.value;
+    if (!wizardData.teethSet.size) { alert(t('wiz_no_tooth_err')); return; }
+  } else if (wizardStep === 2) {
+    // save sizes
+    Array.from(wizardData.teethSet).forEach(function(tn) {
+      var sEl = document.getElementById('wiz-size-' + tn);
+      if (sEl) wizardData.teethSizes[tn] = sEl.value.trim();
+    });
+    if (!wizardData.brand) { alert(t('wiz_no_brand_err')); return; }
+  } else if (wizardStep === 3) {
+    var memoEl = document.getElementById('wiz-memo');
+    if (memoEl) wizardData.memo = memoEl.value.trim();
+  }
+  if (wizardStep < 5) showWizardStep(wizardStep + 1);
+}
+
+function customWizardPrev() {
+  if (wizardStep > 1) showWizardStep(wizardStep - 1);
+}
+
+async function submitWizardOrder() {
+  var _clinicEl = document.getElementById('cust-clinic'); var clinic = _clinicEl ? _clinicEl.value.trim() : '';
+  var _addrEl   = document.getElementById('cust-addr');   var addr   = _addrEl   ? _addrEl.value.trim()   : '';
+  var _phoneEl  = document.getElementById('cust-phone');  var phone  = _phoneEl  ? _phoneEl.value.trim()  : '';
+  var _lineEl   = document.getElementById('cust-line');   var lineId = _lineEl   ? _lineEl.value.trim()   : '';
+  if (!clinic || !addr || !phone) { alert(t('err_fill_delivery')); return; }
+  var teeth = Array.from(wizardData.teethSet).sort(function(a,b){return a-b;});
+  if (!teeth.length) { alert(t('wiz_no_tooth_err')); return; }
+  if (!wizardData.brand) { alert(t('wiz_no_brand_err')); return; }
+  var teethData = teeth.map(function(tn) {
+    return { tooth:tn, toothName:getToothName(tn), brand:wizardData.brand, size:wizardData.teethSizes[tn]||'', color:wizardData.shade||'' };
+  });
+  var caseObj = { patient: wizardData.patient || t('anon_patient'), teeth: teethData, deadline: wizardData.deadline, memo: wizardData.memo, stls: wizardData.stlFiles.map(function(f){return f.name;}), stlUrls:[] };
+  var _now = new Date();
+  var _month = String.fromCharCode(64 + _now.getMonth() + 1);
+  var _day   = String(_now.getDate()).padStart(2,'0');
+  var _hhmm  = String(_now.getHours()).padStart(2,'0') + String(_now.getMinutes()).padStart(2,'0');
+  var oid = 'CA' + _now.getFullYear() + _month + _day + _hhmm;
+  // Upload STL files
+  for (var k = 0; k < wizardData.stlFiles.length; k++) {
+    var origFile = wizardData.stlFiles[k];
+    var origExt = origFile.name.substring(origFile.name.lastIndexOf('.')).toLowerCase() || '.stl';
+    var fname = oid + '_case1_' + k + '_' + Date.now() + origExt;
+    var stlUrl = null;
+    try {
+      var r = await fetch(SUPABASE_URL + '/storage/v1/object/stl-file/' + fname, {
+        method:'POST', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/octet-stream','x-upsert':'true'}, body:origFile
+      });
+      if (r.ok) stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-file/' + fname;
+    } catch(e) { console.warn('[STL]',e); }
+    if (!stlUrl) {
+      stlUrl = await new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.onload = function(ev) { resolve(ev.target.result); };
+        reader.onerror = function() { resolve(null); };
+        reader.readAsDataURL(origFile);
+      });
+    }
+    caseObj.stlUrls.push(stlUrl);
+  }
+  var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId||'', cases:[caseObj], stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString(), userNickname: currentUser ? currentUser.nickname : '' };
+  customOrders.unshift(order);
+  saveOrderToSupabase(order);
+  var totalTeeth = teethData.length;
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕','새 CNC Custom 주문',[
+    {label:'주문번호',value:oid},{label:'클리닉',value:clinic},{label:'날짜',value:order.date},
+    {label:'연락처',value:phone},{label:'Line ID',value:lineId||'없음'},{label:'치아 / 케이스',value:totalTeeth+'치아 / 1케이스'}
+  ],'관리자 패널에서 접수 확인해 주세요.')]);
+  var msg = tf('order_success_msg', oid, 1, totalTeeth);
+  if (lineId) msg += t('order_success_line');
+  alert(msg);
+  customTab('list');
+}
+
 function resetCustomForm() {
-  caseCount = 0;
-  caseTeeth = {};
-  document.getElementById('caseList').innerHTML = '';
-  addCase();
-  document.getElementById('cust-clinic').value = currentUser.clinicName || '';
-  document.getElementById('cust-addr').value   = currentUser.address   || '';
-  document.getElementById('cust-phone').value  = currentUser.phone     || '';
-  document.getElementById('cust-line').value   = '';
+  initWizard();
 }
 function addCase() {
   caseCount++;
@@ -1149,7 +1475,8 @@ function addCase() {
     '</div>' +
     '<input type="file" id="stl-' + id + '" accept=".stl,.STL,.ply,.PLY,.obj,.OBJ,.3mf,.3MF" class="hidden" multiple onchange="onStl(' + id + ',this)">' +
     '<textarea id="cm-' + id + '" rows="2" placeholder="' + t('memo_ph') + '" class="w-full p-3 bg-white rounded-xl text-sm outline-none resize-none border-2 border-slate-200"></textarea>';
-  document.getElementById('caseList').appendChild(div);
+  var cl = document.getElementById('caseList');
+  if (cl) cl.appendChild(div);
 }
 function removeCase(id) {
   var el = document.getElementById('case-'+id);
@@ -1396,10 +1723,26 @@ function renderCustomOrders() {
     var si = ORDER_STAGES.findIndex(function(s){ return s.key === barKey; });
     if (si < 0) si = 0;
     var st = ORDER_STAGES[si];
-    var bars = ORDER_STAGES.map(function(s,i){
-      var cls = i<si ? 'stage-done' : i===si ? 'stage-current' : 'stage-todo';
-      return '<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full h-1.5 rounded-full ' + cls + '"></div><span class="text-[7px] font-bold text-center leading-tight">' + s.icon + '</span></div>';
-    }).join('');
+    var bars = '<div class="flex items-end gap-0.5">' + ORDER_STAGES.map(function(s,i){
+      var done    = i < si;
+      var current = i === si;
+      var dotCls  = done    ? 'w-5 h-5 rounded-full bg-blue-600 text-white text-[8px] font-black flex items-center justify-center shrink-0'
+                  : current ? 'w-5 h-5 rounded-full bg-amber-500 text-white text-[8px] font-black flex items-center justify-center shrink-0 ring-2 ring-amber-200'
+                            : 'w-5 h-5 rounded-full bg-slate-200 text-slate-400 text-[8px] font-black flex items-center justify-center shrink-0';
+      var lbl     = t('stage_' + s.key) || s.key;
+      var lblCls  = current ? 'text-[7px] font-black text-amber-500 mt-0.5 text-center leading-tight'
+                 : done     ? 'text-[7px] font-bold text-blue-500 mt-0.5 text-center leading-tight'
+                            : 'text-[7px] font-bold text-slate-400 mt-0.5 text-center leading-tight';
+      var barCls  = done ? 'stage-done' : current ? 'stage-current' : 'stage-todo';
+      var item = '<div class="flex flex-col items-center" style="flex:1;min-width:0">' +
+        '<div class="' + dotCls + '">' + (done ? '✓' : s.icon) + '</div>' +
+        '<span class="' + lblCls + '" style="word-break:keep-all">' + lbl + '</span>' +
+      '</div>';
+      if (i < ORDER_STAGES.length - 1) {
+        return item + '<div class="flex-shrink-0 w-3 h-0.5 mb-3.5 ' + barCls + '"></div>';
+      }
+      return item;
+    }).join('') + '</div>';
     var stageLabel = t('stage_' + o.stage) || o.stage;
     var totalTeeth = o.cases.reduce(function(s,cs){ return s+(cs.teeth?cs.teeth.length:0); },0);
     // ── Design review section ──────────────────────────────
