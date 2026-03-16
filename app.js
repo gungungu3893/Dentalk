@@ -735,6 +735,7 @@ function renderMyShopOrders() {
   container.innerHTML = html || '<p class="text-center text-slate-400 text-xs py-3 font-bold">주문 내역이 없습니다.</p>';
 }
 function openShopCategory(catId) {
+  if (LOCKED.includes('shop') && !isLoggedIn()) { openLoginModal('shop'); return; }
   var cat = SHOP_CATEGORIES.find(function(c){ return c.id === catId; });
   if (!cat) return;
   renderShopItems(catId);
@@ -2500,6 +2501,7 @@ function openUsedDetail(id) {
   goDetailPage('used-detail', item.name, 'used');
 }
 function openForumDetail(id) {
+  if (LOCKED.includes('forum') && !isLoggedIn()) { openLoginModal('forum'); return; }
   var post = posts.find(function(x){ return x.id===id; });
   if (!post) return;
   post.views = (post.views||0) + 1;
@@ -2961,7 +2963,7 @@ function renderHomeCategories() {
     '3d-analog':  '🖨️'
   };
   el.innerHTML = SHOP_CATEGORIES.map(function(cat) {
-    return '<button onclick="goPage(\'shop\');setTimeout(function(){openShopCategory(\'' + cat.id + '\')},50)" ' +
+    return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="bg-white rounded-2xl px-3.5 py-3 shadow-sm flex items-center gap-3 text-left active:bg-slate-50 transition border border-slate-100/80">' +
       '<span class="text-2xl leading-none shrink-0">' + (catEmoji[cat.id] || '📦') + '</span>' +
       '<div class="flex-1 min-w-0">' +
@@ -2984,7 +2986,7 @@ function renderHomeForumPreview() {
   el.innerHTML = recent.map(function(p) {
     var emoji = p.category === 'prosthetic' ? '💎' : '🦷';
     var commentCount = p.comments ? p.comments.length : 0;
-    return '<div onclick="goDetailPage(\'forum-detail\',\'' + p.title.replace(/'/g, '') + '\',\'home\');renderForumDetail(' + p.id + ')" ' +
+    return '<div onclick="openForumDetail(' + p.id + ')" ' +
       'class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm border border-slate-100 cursor-pointer active:bg-slate-50 transition flex items-start gap-2.5">' +
       '<span class="text-base shrink-0 mt-0.5">' + emoji + '</span>' +
       '<div class="flex-1 min-w-0">' +
