@@ -620,6 +620,7 @@ function goPage(id) {
   if (btnMenu) btnMenu.classList.remove('hidden');
   closeMenu();
   window.scrollTo(0, 0);
+  if (id === 'home')   { renderHomePage(); initHomeBanner(); }
   if (id === 'shop')     renderShop();
   if (id === 'used')     renderUsed();
   if (id === 'forum')  { renderForum(); updateNicknameDisplays(); }
@@ -2886,6 +2887,7 @@ function applyLang() {
   var sideLoginTxt = document.getElementById('sideLoginTxt');
   if (sideLoginTxt) sideLoginTxt.textContent = t('side_login_btn');
   // 모든 페이지 동적 콘텐츠 재렌더링 (언어 변경 시 전체 반영)
+  renderHomePage();
   renderShop();
   renderUsed();
   renderForum();
@@ -2910,6 +2912,117 @@ function applyLang() {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 // ============================================================
+// HOME PAGE — banner + categories + forum/events preview
+// ============================================================
+var _bannerSlide = 0, _bannerInterval = null;
+
+function setBannerSlide(idx) {
+  _bannerSlide = idx;
+  var track = document.getElementById('homeBannerTrack');
+  if (track) track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+  [0, 1].forEach(function(i) {
+    var dot = document.getElementById('bannerDot' + i);
+    if (!dot) return;
+    if (i === idx) {
+      dot.style.width = '8px'; dot.style.height = '8px'; dot.style.background = 'rgba(255,255,255,0.95)';
+    } else {
+      dot.style.width = '6px'; dot.style.height = '6px'; dot.style.background = 'rgba(255,255,255,0.3)';
+    }
+  });
+}
+
+function initHomeBanner() {
+  setBannerSlide(0);
+  if (_bannerInterval) clearInterval(_bannerInterval);
+  _bannerInterval = setInterval(function() {
+    setBannerSlide((_bannerSlide + 1) % 2);
+  }, 4500);
+}
+
+function renderHomeCategories() {
+  var el = document.getElementById('homeCategories');
+  if (!el) return;
+  var catDescKeys = {
+    'scan-body':  'cat_scan_body_desc',
+    'q-base':     'cat_q_base_desc',
+    'ready-made': 'cat_ready_made_desc',
+    'ti-base':    'cat_ti_base_desc',
+    'pre-milled': 'cat_pre_milled_desc',
+    'multi-unit': 'cat_multi_unit_desc',
+    '3d-analog':  'cat_3d_analog_desc'
+  };
+  var catEmoji = {
+    'scan-body':  '🔬',
+    'q-base':     '💎',
+    'ready-made': '🔩',
+    'ti-base':    '⚙️',
+    'pre-milled': '🔧',
+    'multi-unit': '🦷',
+    '3d-analog':  '🖨️'
+  };
+  el.innerHTML = SHOP_CATEGORIES.map(function(cat) {
+    return '<button onclick="goPage(\'shop\');setTimeout(function(){openShopCategory(\'' + cat.id + '\')},50)" ' +
+      'class="bg-white rounded-2xl px-3.5 py-3 shadow-sm flex items-center gap-3 text-left active:bg-slate-50 transition border border-slate-100/80">' +
+      '<span class="text-2xl leading-none shrink-0">' + (catEmoji[cat.id] || '📦') + '</span>' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="font-black text-slate-800 text-xs leading-snug">' + cat.name + '</p>' +
+        '<p class="text-[9px] text-slate-400 font-medium mt-0.5 leading-snug">' + t(catDescKeys[cat.id] || '') + '</p>' +
+      '</div>' +
+      '<span class="text-slate-300 text-sm shrink-0">›</span>' +
+    '</button>';
+  }).join('');
+}
+
+function renderHomeForumPreview() {
+  var el = document.getElementById('homeForumPreview');
+  if (!el) return;
+  var recent = posts.slice().sort(function(a, b) { return b.id - a.id; }).slice(0, 3);
+  if (!recent.length) {
+    el.innerHTML = '<p class="text-center text-slate-400 text-xs py-6 font-medium">' + t('home_forum_empty') + '</p>';
+    return;
+  }
+  el.innerHTML = recent.map(function(p) {
+    var emoji = p.category === 'prosthetic' ? '💎' : '🦷';
+    var commentCount = p.comments ? p.comments.length : 0;
+    return '<div onclick="goDetailPage(\'forum-detail\',\'' + p.title.replace(/'/g, '') + '\',\'home\');renderForumDetail(' + p.id + ')" ' +
+      'class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm border border-slate-100 cursor-pointer active:bg-slate-50 transition flex items-start gap-2.5">' +
+      '<span class="text-base shrink-0 mt-0.5">' + emoji + '</span>' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-1">' + p.title + '</p>' +
+        '<p class="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-1">' + p.body + '</p>' +
+        '<p class="text-[9px] text-slate-300 font-medium mt-1.5">' + p.author + ' · ' + (p.date || '') + ' · 💬 ' + commentCount + '</p>' +
+      '</div>' +
+      '<span class="text-slate-300 text-sm shrink-0 mt-0.5">›</span>' +
+    '</div>';
+  }).join('');
+}
+
+function renderHomeEventsPreview() {
+  var el = document.getElementById('homeEventsPreview');
+  if (!el) return;
+  var upcoming = events_.slice(0, 2);
+  if (!upcoming.length) {
+    el.innerHTML = '<p class="text-center text-slate-400 text-xs py-6 font-medium">' + t('home_events_empty') + '</p>';
+    return;
+  }
+  el.innerHTML = upcoming.map(function(e) {
+    return '<div class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm flex items-start gap-3 border border-slate-100" ' +
+      'style="border-left:4px solid var(--color-primary-dark)">' +
+      '<div class="flex-1 min-w-0">' +
+        '<p class="text-[9px] font-bold text-slate-400 font-mono uppercase mb-0.5">' + e.date + '</p>' +
+        '<p class="font-black text-slate-800 text-xs leading-snug">' + e.event + '</p>' +
+        '<p class="text-[10px] text-slate-400 mt-1">📍 ' + e.loc + '</p>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderHomePage() {
+  renderHomeCategories();
+  renderHomeForumPreview();
+  renderHomeEventsPreview();
+}
+// ============================================================
 // 초기화
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
@@ -2922,7 +3035,6 @@ window.addEventListener('DOMContentLoaded', function() {
   // 페이지 로드 시 항상 로그아웃 상태로 시작
   localStorage.removeItem('dentalk_session');
 
-
   updateNavLocks();
   applyLang();
   renderUsed();
@@ -2930,4 +3042,6 @@ window.addEventListener('DOMContentLoaded', function() {
   renderEvents();
   renderProfileSettings();
   updateNicknameDisplays();
+  renderHomePage();
+  initHomeBanner();
 });

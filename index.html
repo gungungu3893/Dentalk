@@ -524,116 +524,129 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   <div class="flex-1 overflow-y-auto pb-8">
     <!-- ==================== HOME ==================== -->
     <div id="page-home" class="page active">
-      <!-- Hero -->
-      <div class="relative overflow-hidden text-white" style="background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 55%,#0f1f3d 100%);padding:36px 24px 52px">
-        <!-- Decorative glows -->
-        <div class="absolute -top-16 -right-16 w-60 h-60 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(79,142,247,0.12) 0%,transparent 70%)"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(212,175,55,0.06) 0%,transparent 70%)"></div>
-        <div class="relative">
-          <!-- Brand tag row -->
-          <div class="fade-up mb-5">
-            <div class="inline-flex items-center gap-2 mb-4">
-              <span class="text-[9px] font-semibold uppercase tracking-[3px]" style="color:var(--color-accent)">BIOTEM</span>
-              <span class="w-1 h-1 rounded-full shrink-0" style="background:rgba(255,255,255,0.25)"></span>
-              <span class="text-[9px] font-semibold uppercase tracking-[3px]" style="color:rgba(180,205,255,0.6)">BIOPLANT</span>
+
+      <!-- ─── HERO BANNER (2 slides, auto-rotate) ────────────── -->
+      <div class="relative overflow-hidden">
+        <div id="homeBannerTrack" class="flex" style="transition:transform .48s cubic-bezier(.4,0,.2,1)">
+
+          <!-- Slide 1 — BIOPLANT Products -->
+          <div class="shrink-0 w-full relative overflow-hidden text-white" style="background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 55%,#0f1f3d 100%);padding:30px 22px 50px">
+            <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(79,142,247,0.13) 0%,transparent 70%)"></div>
+            <div class="relative fade-up">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(212,175,55,0.16);border:1px solid rgba(212,175,55,0.28)">
+                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--color-accent)" data-i18n="hero_bioplant_tag">BIOPLANT Thailand</span>
+              </div>
+              <h1 class="font-black leading-tight mb-2 text-white" style="font-size:27px;letter-spacing:-0.8px" data-i18n="hero_bioplant_title">Premium Dental Implant Parts</h1>
+              <div style="width:28px;height:2px;border-radius:99px;background:var(--color-accent);opacity:0.85;margin-bottom:10px"></div>
+              <p class="text-xs leading-relaxed mb-5" style="color:rgba(191,219,254,0.62);max-width:280px" data-i18n="hero_bioplant_desc">ISO-certified Korean manufacturing, delivered fast to your clinic.</p>
+              <button onclick="goPage('shop')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:var(--color-accent);color:var(--color-primary-dark)">
+                <span data-i18n="hero_bioplant_cta">Shop Now</span>
+                <span class="opacity-60">›</span>
+              </button>
             </div>
-            <!-- Main headline -->
-            <h1 class="leading-tight mb-1" style="font-size:34px;font-weight:900;letter-spacing:-1.2px;color:white">
-              <span data-i18n="home_title1">Digital Implant Parts</span>
-            </h1>
-            <h1 class="leading-tight mb-4" style="font-size:34px;font-weight:900;letter-spacing:-1.2px;color:rgba(147,197,253,0.88)">
-              <span data-i18n="home_title2">Ordering System</span>
-            </h1>
-            <!-- Gold accent rule -->
-            <div style="width:32px;height:2px;border-radius:99px;background:var(--color-accent);opacity:0.85;margin-bottom:14px"></div>
-            <p class="text-xs leading-relaxed" style="color:rgba(191,219,254,0.6);max-width:290px" data-i18n="home_desc">Providing premium BIOTEM implant components directly to dental clinics across Thailand.</p>
           </div>
-          <!-- Subtitle -->
-          <div class="fade-up-2">
-            <p class="text-[9px] font-medium uppercase tracking-[3px] mb-5" style="color:rgba(255,255,255,0.3)" data-i18n="home_subtitle">Expert of Implant · Thailand</p>
+
+          <!-- Slide 2 — CNC Custom Abutment -->
+          <div class="shrink-0 w-full relative overflow-hidden text-white" style="background:linear-gradient(150deg,#18083a 0%,#2c1860 55%,#0d1535 100%);padding:30px 22px 50px">
+            <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(180,100,255,0.12) 0%,transparent 70%)"></div>
+            <div class="relative fade-up">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(192,132,252,0.18);border:1px solid rgba(192,132,252,0.28)">
+                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:#c084fc" data-i18n="hero_cnc_tag">CNC Custom Abutment</span>
+              </div>
+              <h1 class="font-black leading-tight mb-2 text-white" style="font-size:27px;letter-spacing:-0.8px" data-i18n="hero_cnc_title">Precision-Crafted Custom Solutions</h1>
+              <div style="width:28px;height:2px;border-radius:99px;background:#c084fc;opacity:0.85;margin-bottom:10px"></div>
+              <p class="text-xs leading-relaxed mb-5" style="color:rgba(216,180,254,0.62);max-width:280px" data-i18n="hero_cnc_desc">Made to your exact specs — from scan body to final restoration.</p>
+              <button onclick="goPage('custom')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:#c084fc;color:#18083a">
+                <span data-i18n="hero_cnc_cta">Order Custom</span>
+                <span class="opacity-60">›</span>
+              </button>
+            </div>
           </div>
-          <!-- CTAs -->
-          <div class="fade-up-3 flex flex-col gap-2.5">
-            <button onclick="goPage('shop')" class="flex items-center gap-3 px-5 py-3.5 rounded-2xl font-black text-sm active:scale-95 transition shadow-lg" style="background:var(--color-accent);color:var(--color-primary-dark)">
-              <span>🦷</span>
-              <span data-i18n="home_goto_shop">Go to Shop</span>
-              <span class="ml-auto opacity-60 text-base leading-none">›</span>
-            </button>
-            <a href="https://line.me/ti/p/@452fshii" target="_blank" rel="noopener"
-               class="flex items-center gap-3 px-5 py-3.5 rounded-2xl font-black text-sm active:scale-95 transition shadow-lg no-underline" style="background:var(--color-line-green);color:white">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-              <span data-i18n="home_line_add">Add LINE Friend</span>
-              <span class="ml-auto text-xs font-medium opacity-70">@452fshii</span>
-            </a>
+
+        </div>
+        <!-- Slide dot indicators -->
+        <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+          <button id="bannerDot0" onclick="setBannerSlide(0)" class="w-2 h-2 rounded-full bg-white transition-all pointer-events-auto"></button>
+          <button id="bannerDot1" onclick="setBannerSlide(1)" class="w-1.5 h-1.5 rounded-full transition-all pointer-events-auto" style="background:rgba(255,255,255,0.3)"></button>
+        </div>
+      </div>
+
+      <!-- ─── BRAND STAT BAR ──────────────────────────────────── -->
+      <div class="bg-white border-b border-slate-100 px-4 py-3 grid grid-cols-3 divide-x divide-slate-100">
+        <div class="pr-3 text-center">
+          <p class="font-black text-blue-800 text-base leading-none">ISO</p>
+          <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat1">Certified</p>
+        </div>
+        <div class="px-3 text-center">
+          <p class="font-black text-blue-800 text-base leading-none">Korea</p>
+          <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat2">Origin</p>
+        </div>
+        <div class="pl-3 text-center">
+          <p class="font-black text-blue-800 text-base leading-none">SEA</p>
+          <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat3">Coverage</p>
+        </div>
+      </div>
+
+      <!-- ─── PRODUCT CATEGORIES (2-col grid, 7 items) ─────────── -->
+      <div class="px-4 pt-5 pb-1">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_categories">Product Categories</h2>
+          <button onclick="goPage('shop')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_see_more">See All ›</button>
+        </div>
+        <div id="homeCategories" class="grid grid-cols-2 gap-2.5"></div>
+      </div>
+
+      <!-- ─── FORUM PREVIEW (3 latest posts) ───────────────────── -->
+      <div class="px-4 pt-5 pb-1">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_forum_preview">Clinical Discussion</h2>
+          <button onclick="goPage('forum')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_forum_more">View All ›</button>
+        </div>
+        <div id="homeForumPreview"></div>
+      </div>
+
+      <!-- ─── EVENTS PREVIEW ────────────────────────────────────── -->
+      <div class="px-4 pt-5 pb-1">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_events_preview">Upcoming Events</h2>
+          <button onclick="goPage('events')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_events_more">View All ›</button>
+        </div>
+        <div id="homeEventsPreview"></div>
+      </div>
+
+      <!-- ─── WEBZINE PLACEHOLDER ───────────────────────────────── -->
+      <div class="px-4 pt-5 pb-2">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_webzine">Webzine</h2>
+            <p class="text-[9px] text-slate-400 font-medium mt-0.5" data-i18n="sec_webzine_sub">Clinical cases &amp; product updates</p>
+          </div>
+        </div>
+        <!-- 3 thumbnail placeholder slots + coming soon label -->
+        <div class="rounded-2xl overflow-hidden border-2 border-dashed border-slate-200">
+          <div class="grid grid-cols-3">
+            <div class="aspect-square bg-slate-50 flex items-center justify-center border-r border-b border-dashed border-slate-200">
+              <span class="text-2xl opacity-20">📄</span>
+            </div>
+            <div class="aspect-square bg-slate-50 flex items-center justify-center border-r border-b border-dashed border-slate-200">
+              <span class="text-2xl opacity-20">📄</span>
+            </div>
+            <div class="aspect-square bg-slate-50 flex items-center justify-center border-b border-dashed border-slate-200">
+              <span class="text-2xl opacity-20">📄</span>
+            </div>
+          </div>
+          <div class="bg-slate-50 px-5 py-3.5 text-center">
+            <p class="text-xs font-bold text-slate-400" data-i18n="sec_webzine_coming">Coming Soon — Stay tuned</p>
           </div>
         </div>
       </div>
-      <!-- 비전 & 브랜드 섹션 -->
-      <div class="px-4 -mt-5 pb-8">
-        <!-- Vision card -->
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-3">
-          <div class="px-5 py-4" style="background:linear-gradient(120deg,var(--color-primary-dark) 0%,var(--color-primary-light) 100%)">
-            <p class="text-[9px] font-semibold uppercase tracking-[3px] mb-1.5" style="color:var(--color-accent)" data-i18n="home_vision_label">Our Vision</p>
-            <p class="font-black text-base leading-snug text-white" data-i18n="home_vision">Redefining Implant Precision for Southeast Asia</p>
-          </div>
-          <div class="px-5 py-4 grid grid-cols-3 divide-x divide-slate-100">
-            <div class="pr-4 text-center">
-              <p class="font-black text-blue-800 text-lg leading-none">ISO</p>
-              <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat1">Certified</p>
-            </div>
-            <div class="px-4 text-center">
-              <p class="font-black text-blue-800 text-lg leading-none">Korea</p>
-              <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat2">Origin</p>
-            </div>
-            <div class="pl-4 text-center">
-              <p class="font-black text-blue-800 text-lg leading-none">SEA</p>
-              <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat3">Coverage</p>
-            </div>
-          </div>
-        </div>
-        <!-- Brand pills -->
-        <div class="flex gap-2 mb-3">
-          <div class="flex-1 bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-blue-700 flex items-center justify-center shrink-0">
-              <span class="text-white text-xs font-black">BT</span>
-            </div>
-            <div>
-              <p class="font-black text-xs text-slate-800">BIOTEM</p>
-              <p class="text-[9px] text-slate-400 leading-snug" data-i18n="home_biotem_short">Expert of Implant · Korea</p>
-            </div>
-          </div>
-          <div class="flex-1 bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background:var(--color-primary-dark)">
-              <span class="text-xs font-black" style="color:var(--color-accent)">BP</span>
-            </div>
-            <div>
-              <p class="font-black text-xs text-slate-800">BIOPLANT</p>
-              <p class="text-[9px] text-slate-400 leading-snug" data-i18n="home_bioplant_short">Manufacturing · Bangkok</p>
-            </div>
-          </div>
-        </div>
-        <!-- Mission statement -->
-        <div class="rounded-2xl p-5 shadow-sm" style="background:var(--color-primary-dark)">
-          <p class="text-[9px] font-semibold uppercase tracking-[3px] mb-2" style="color:var(--color-accent)" data-i18n="home_mission_label">Mission</p>
-          <p class="text-xs font-medium leading-relaxed" style="color:var(--color-text-on-dark-muted)" data-i18n="home_mission">Delivering premium Korean-manufactured dental implant components with fast, reliable service to clinics across Thailand and Southeast Asia.</p>
-          <div class="flex items-center gap-2 mt-4 border-t border-white/10 pt-3 flex-wrap">
-            <a href="https://line.me/ti/p/@452fshii" target="_blank" rel="noopener"
-               class="flex items-center gap-1.5 active:scale-95 transition px-3 py-1.5 rounded-xl no-underline" style="background:rgba(6,199,85,0.18)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#06C755"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
-              <span class="text-[10px] font-bold" style="color:var(--color-line-green)">친구 추가 @452fshii</span>
-            </a>
-            <span class="text-[10px]" style="color:rgba(147,197,253,0.5)">🌐 biotemplant.com</span>
-          </div>
-        </div>
-        <!-- 개인정보 처리방침 버튼 -->
-        <div class="mt-3">
-          <button onclick="openPrivacyModal(event)" class="w-full py-3.5 bg-white rounded-2xl shadow-sm font-medium text-xs flex items-center justify-center gap-2 active:bg-slate-50 transition" style="color:var(--color-text-muted)">
-            <span>🔒</span>
-            <span data-i18n="privacy_btn">개인정보 처리방침</span>
-            <span style="color:var(--color-border-strong)">›</span>
-          </button>
-        </div>
+
+      <!-- ─── FOOTER LINKS ──────────────────────────────────────── -->
+      <div class="px-4 pt-4 pb-8 flex items-center justify-between">
+        <button onclick="openPrivacyModal(event)" class="text-[9px] font-medium text-slate-400 underline underline-offset-2 active:opacity-60 transition" data-i18n="privacy_btn">개인정보 처리방침</button>
+        <p class="text-[9px] text-slate-300 font-medium" data-i18n="home_footer">© 2026 Dentalk · BIOTEM × BIOPLANT</p>
       </div>
+
     </div>
     <!-- ==================== SHOP ==================== -->
     <div id="page-shop" class="page p-4">
