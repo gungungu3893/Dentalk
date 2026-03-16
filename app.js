@@ -496,11 +496,11 @@ let menuOpen = false;
 function toggleMenu() { menuOpen ? closeMenu() : openMenu(); }
 function openMenu() {
   menuOpen = true;
-  document.getElementById('sideMenu').classList.add('open');
-  document.getElementById('sideOverlay').classList.add('open');
-  document.getElementById('hb1').style.cssText = 'transform:translateY(8px) rotate(45deg)';
-  document.getElementById('hb2').style.cssText = 'opacity:0';
-  document.getElementById('hb3').style.cssText = 'transform:translateY(-8px) rotate(-45deg)';
+  var sm = document.getElementById('sideMenu');    if (sm) sm.classList.add('open');
+  var so = document.getElementById('sideOverlay'); if (so) so.classList.add('open');
+  var h1 = document.getElementById('hb1'); if (h1) h1.style.cssText = 'transform:translateY(8px) rotate(45deg)';
+  var h2 = document.getElementById('hb2'); if (h2) h2.style.cssText = 'opacity:0';
+  var h3 = document.getElementById('hb3'); if (h3) h3.style.cssText = 'transform:translateY(-8px) rotate(-45deg)';
 }
 function closeMenu() {
   menuOpen = false;
