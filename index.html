@@ -182,15 +182,30 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="stlViewerModal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm z-[900] items-center justify-center p-4">
   <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col" style="max-height:88vh">
     <div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center flex-shrink-0">
-      <p class="font-black text-white text-sm">🧊 STL 3D 미리보기</p>
+      <p id="fileViewerTitle" class="font-black text-white text-sm">🧊 파일 미리보기</p>
       <button onclick="closeStlViewer()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
     </div>
+    <!-- 3D viewer -->
     <div id="stlViewerContainer" class="flex-1 relative bg-slate-900" style="min-height:320px">
       <canvas id="stlCanvas" class="w-full h-full block" style="min-height:320px"></canvas>
       <div id="stlViewerMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-bold">불러오는 중...</div>
     </div>
-    <div class="px-4 py-3 bg-slate-50 flex gap-2 flex-shrink-0">
-      <p class="text-[9px] text-slate-400 flex-1 self-center font-bold">드래그: 회전 · 스크롤: 줌</p>
+    <!-- Image viewer -->
+    <div id="viewerImagePanel" class="hidden flex-1 bg-slate-900 flex items-center justify-center overflow-auto p-2" style="min-height:320px">
+      <img id="viewerImg" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+    </div>
+    <!-- PDF viewer -->
+    <div id="viewerPdfPanel" class="hidden flex-1" style="min-height:320px">
+      <iframe id="viewerPdf" src="" class="w-full h-full border-0" style="min-height:320px"></iframe>
+    </div>
+    <!-- Other files (download only) -->
+    <div id="viewerOtherPanel" class="hidden flex-1 flex flex-col items-center justify-center bg-slate-50 p-8 gap-3" style="min-height:200px">
+      <p class="text-4xl">📎</p>
+      <p id="viewerOtherName" class="text-sm font-black text-slate-700 text-center break-all"></p>
+      <p class="text-xs text-slate-400 font-bold">미리보기를 지원하지 않는 파일 형식입니다</p>
+    </div>
+    <div id="fileViewerFooter" class="px-4 py-3 bg-slate-50 flex gap-2 flex-shrink-0">
+      <p id="fileViewerHint" class="text-[9px] text-slate-400 flex-1 self-center font-bold">드래그: 회전 · 스크롤: 줌</p>
       <a id="stlDownloadBtn" href="#" download class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-black text-xs active:scale-95 transition">📥 다운로드</a>
     </div>
   </div>
@@ -753,10 +768,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <div id="wiz-stl-drop" onclick="document.getElementById('wiz-stl-input').click()" ondragover="wizOnStlDragOver(event)" ondragleave="wizOnStlDragLeave(event)" ondrop="wizOnStlDrop(event)"
               class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer bg-slate-50 transition-colors">
               <p class="text-3xl mb-2">📁</p>
-              <p class="text-xs font-black text-slate-500 mb-1" data-i18n="wiz_stl_main_label">STL / 3D Files</p>
-              <p class="text-[9px] text-slate-400" data-i18n="wiz_stl_main_hint">Drag & drop or tap · Up to 10 files</p>
+              <p class="text-xs font-black text-slate-500 mb-1">모든 파일 형식 지원</p>
+              <p class="text-[9px] text-slate-400">STL · 이미지 · PDF · 기타 · 최대 10개</p>
             </div>
-            <input type="file" id="wiz-stl-input" accept=".stl,.STL,.ply,.PLY,.obj,.OBJ,.3mf,.3MF" class="hidden" multiple onchange="wizOnStlSelect(this)">
+            <input type="file" id="wiz-stl-input" class="hidden" multiple onchange="wizOnStlSelect(this)">
           </div>
         </div>
 
@@ -1092,21 +1107,67 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 var _stlRenderer, _stlScene, _stlCamera, _stlAnimId;
 var _stlDragging = false, _stlPrevX = 0, _stlPrevY = 0;
 
-function openStlViewer(url) {
-  document.getElementById('stlViewerModal').classList.add('open');
-  document.getElementById('stlViewerMsg').style.display = 'flex';
+function _fileViewerType(filename) {
+  var ext = (filename || '').split('.').pop().toLowerCase();
+  if (['stl','ply','obj','3mf'].indexOf(ext) !== -1) return '3d';
+  if (['jpg','jpeg','png','gif','webp','bmp','svg','heic','heif'].indexOf(ext) !== -1) return 'image';
+  if (ext === 'pdf') return 'pdf';
+  return 'other';
+}
+
+function _showViewerPanel(type) {
+  document.getElementById('stlViewerContainer').style.display = type === '3d'    ? '' : 'none';
+  document.getElementById('viewerImagePanel').style.display   = type === 'image'  ? '' : 'none';
+  document.getElementById('viewerPdfPanel').style.display     = type === 'pdf'    ? '' : 'none';
+  document.getElementById('viewerOtherPanel').style.display   = type === 'other'  ? '' : 'none';
+  var hint = document.getElementById('fileViewerHint');
+  if (hint) hint.textContent = type === '3d' ? '드래그: 회전 · 스크롤: 줌' : '';
+}
+
+function openFileViewer(url, filename) {
+  var type = _fileViewerType(filename || url);
+  var titleMap = { '3d':'🧊 3D 미리보기', 'image':'🖼 이미지', 'pdf':'📄 PDF', 'other':'📎 파일' };
+  var titleEl = document.getElementById('fileViewerTitle');
+  if (titleEl) titleEl.textContent = (titleMap[type] || '📎 파일') + ' — ' + (filename || '');
   document.getElementById('stlDownloadBtn').href = url;
-  _initStlScene();
-  fetch(url)
-    .then(function(r){ return r.arrayBuffer(); })
-    .then(function(buf){ _loadStlBuffer(buf); })
-    .catch(function(){ document.getElementById('stlViewerMsg').textContent = '파일을 불러올 수 없습니다.'; });
+  document.getElementById('stlDownloadBtn').download = filename || '';
+  document.getElementById('stlViewerModal').classList.add('open');
+  _showViewerPanel(type);
+  if (type === '3d') {
+    document.getElementById('stlViewerMsg').style.display = 'flex';
+    document.getElementById('stlViewerMsg').textContent = '불러오는 중...';
+    _initStlScene();
+    fetch(url)
+      .then(function(r){ return r.arrayBuffer(); })
+      .then(function(buf){ _loadStlBuffer(buf); })
+      .catch(function(){ document.getElementById('stlViewerMsg').textContent = '파일을 불러올 수 없습니다.'; });
+  } else if (type === 'image') {
+    document.getElementById('viewerImg').src = url;
+  } else if (type === 'pdf') {
+    document.getElementById('viewerPdf').src = url;
+  } else {
+    var nameEl = document.getElementById('viewerOtherName');
+    if (nameEl) nameEl.textContent = filename || url;
+  }
+}
+
+function openStlViewer(url, filename) {
+  openFileViewer(url, filename || url.split('/').pop());
+}
+
+function openFileViewerFromFile(file) {
+  var url = URL.createObjectURL(file);
+  openFileViewer(url, file.name);
 }
 
 function closeStlViewer() {
   document.getElementById('stlViewerModal').classList.remove('open');
   if (_stlAnimId) cancelAnimationFrame(_stlAnimId);
   if (_stlRenderer) { _stlRenderer.dispose(); _stlRenderer = null; }
+  var pdfEl = document.getElementById('viewerPdf');
+  if (pdfEl) pdfEl.src = '';
+  var imgEl = document.getElementById('viewerImg');
+  if (imgEl) imgEl.src = '';
 }
 
 function _initStlScene() {

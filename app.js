@@ -1263,18 +1263,23 @@ function wizOnStlDrop(e) {
   e.preventDefault(); e.stopPropagation();
   var d = document.getElementById('wiz-stl-drop');
   if (d) { d.style.borderColor=''; d.style.background=''; }
-  var allowed = ['.stl','.ply','.obj','.3mf'];
-  var files = Array.from(e.dataTransfer.files).filter(function(f){
-    var low = f.name.toLowerCase();
-    return allowed.some(function(ext){ return low.endsWith(ext); });
-  }).slice(0,10);
+  var files = Array.from(e.dataTransfer.files).slice(0, 10);
   if (!files.length) return;
-  wizardData.stlFiles = wizardData.stlFiles.concat(files).slice(0,10);
+  wizardData.stlFiles = wizardData.stlFiles.concat(files).slice(0, 10);
   updateWizStlDropUI();
 }
 function wizOnStlSelect(input) {
-  wizardData.stlFiles = Array.from(input.files).slice(0,10);
+  wizardData.stlFiles = Array.from(input.files).slice(0, 10);
   updateWizStlDropUI();
+}
+function _wizFileIcon(filename) {
+  var ext = (filename || '').split('.').pop().toLowerCase();
+  if (['stl','ply','obj','3mf'].indexOf(ext) !== -1) return '🧊';
+  if (['jpg','jpeg','png','gif','webp','bmp','svg','heic'].indexOf(ext) !== -1) return '🖼';
+  if (ext === 'pdf') return '📄';
+  if (['doc','docx'].indexOf(ext) !== -1) return '📝';
+  if (['zip','rar','7z'].indexOf(ext) !== -1) return '🗜';
+  return '📎';
 }
 function updateWizStlDropUI() {
   var d = document.getElementById('wiz-stl-drop');
@@ -1282,13 +1287,26 @@ function updateWizStlDropUI() {
   var files = wizardData.stlFiles;
   if (!files.length) return;
   var totalKB = files.reduce(function(s,f){ return s+f.size/1024; },0);
-  var list = files.map(function(f,i){
-    return '<p class="text-[9px] text-green-700 font-bold truncate">' + (i+1) + '. ' + f.name + ' <span class="text-slate-400">(' + (f.size/1024).toFixed(0) + 'KB)</span></p>';
+  // Prevent drop zone click from re-opening file picker when clicking preview
+  d.onclick = null;
+  var list = files.map(function(f, i) {
+    var icon = _wizFileIcon(f.name);
+    return '<div class="flex items-center gap-2 py-1 border-b border-green-100 last:border-0">' +
+      '<span class="text-base shrink-0">' + icon + '</span>' +
+      '<span class="flex-1 text-[9px] text-green-800 font-bold truncate min-w-0">' + f.name + '</span>' +
+      '<span class="text-[8px] text-slate-400 shrink-0">(' + (f.size/1024).toFixed(0) + 'KB)</span>' +
+      '<button type="button" onclick="event.stopPropagation();openFileViewerFromFile(wizardData.stlFiles[' + i + '])" ' +
+        'class="shrink-0 px-1.5 py-0.5 bg-blue-600 text-white rounded-md font-black text-[8px] active:scale-95 transition ml-1">👁</button>' +
+    '</div>';
   }).join('');
-  d.innerHTML = '<p class="text-2xl mb-1">✅</p>' +
-    '<p class="text-xs font-black text-green-600 mb-1">' + files.length + ' files · ' + totalKB.toFixed(0) + 'KB</p>' +
+  d.innerHTML =
+    '<div class="flex items-center justify-between mb-2">' +
+      '<p class="text-xs font-black text-green-700">✅ ' + files.length + ' files · ' + totalKB.toFixed(0) + 'KB</p>' +
+      '<button type="button" onclick="event.stopPropagation();document.getElementById(\'wiz-stl-input\').click()" ' +
+        'class="text-[9px] font-black text-blue-600 px-2 py-1 bg-blue-50 rounded-lg active:scale-95 transition">+ 추가</button>' +
+    '</div>' +
     '<div class="text-left">' + list + '</div>';
-  d.className = 'border-2 border-green-200 rounded-xl p-4 mb-2 bg-green-50 cursor-pointer transition-colors';
+  d.className = 'border-2 border-green-200 rounded-xl p-3 bg-green-50 transition-colors';
 }
 
 function renderWizSummary() {
@@ -2688,9 +2706,9 @@ function _buildAdminOrderCard(o) {
         '</div>' +
         '<div class="flex gap-1 flex-shrink-0">' +
           (url
-            ? (url.startsWith('http') ? '<button onclick="openStlViewer(\'' + url + '\')" class="px-2 py-1 bg-blue-600 text-white rounded-lg font-black text-[8px] active:scale-95 transition">3D</button>' : '') +
+            ? (url.startsWith('http') ? '<button onclick="openStlViewer(\'' + url + '\',\'' + name.replace(/'/g,"\\'") + '\')" class="px-2 py-1 bg-blue-600 text-white rounded-lg font-black text-[8px] active:scale-95 transition">👁</button>' : '') +
               '<a href="' + url + '" download="' + name + '" class="px-2 py-1 bg-slate-100 text-slate-700 rounded-lg font-black text-[8px] active:scale-95 transition inline-flex items-center">📥</a>'
-            : '<label class="cursor-pointer"><span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg font-black text-[8px]">📎 재업로드</span><input type="file" class="hidden" accept=".stl,.ply,.obj,.3mf" onchange="adminReuploadStl(\'' + o.id + '\',' + ci + ',' + fi + ',\'' + name + '\',this)"></label>') +
+            : '<label class="cursor-pointer"><span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg font-black text-[8px]">📎 재업로드</span><input type="file" class="hidden" onchange="adminReuploadStl(\'' + o.id + '\',' + ci + ',' + fi + ',\'' + name + '\',this)"></label>') +
         '</div>' +
       '</div>';
     }).join('');
