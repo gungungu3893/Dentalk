@@ -256,9 +256,11 @@ function openLoginModal(target) {
   openModal('loginModal');
 }
 function openRegisterModal() {
+  clearLoginError();
   closeModal('loginModal');
   ['regLicense','regNickname','regName','regClinic','regEmail','regContact','regPassword','regPasswordConfirm'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('regPrivacyConsent').checked = false;
+  clearRegError();
   openModal('registerModal');
 }
 function openPrivacyModal(e) {
@@ -400,7 +402,19 @@ function getPrivacyHtml() {
     + '<div class="bg-blue-50 rounded-xl p-3"><p class="font-black text-slate-800 text-sm mb-1">' + x.s8t + '</p><p class="text-blue-700">' + x.s8 + '</p></div>'
     + '</div>';
 }
+function showRegError(msg) {
+  var el = document.getElementById('regError');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+function clearRegError() {
+  var el = document.getElementById('regError');
+  if (el) el.classList.add('hidden');
+}
 async function submitRegistration() {
+  clearRegError();
   var lic      = document.getElementById('regLicense').value.trim();
   var nickname = document.getElementById('regNickname').value.trim();
   var name     = document.getElementById('regName').value.trim();
@@ -410,13 +424,13 @@ async function submitRegistration() {
   var password = document.getElementById('regPassword').value.trim();
   var passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
   if (!lic || !nickname || !name || !clinic || !email || !contact || !password || !passwordConfirm) {
-    alert(t('reg_error')); return;
+    showRegError(t('reg_error')); return;
   }
   if (password !== passwordConfirm) {
-    alert(t('reg_pwd_mismatch')); return;
+    showRegError(t('reg_pwd_mismatch')); return;
   }
   if (!document.getElementById('regPrivacyConsent').checked) {
-    alert(t('reg_privacy_error')); return;
+    showRegError(t('reg_privacy_error')); return;
   }
   var btn = document.getElementById('regSubmitBtn');
   btn.disabled = true;
@@ -434,14 +448,14 @@ async function submitRegistration() {
     });
     btn.disabled = false;
     btn.textContent = t('reg_submit');
-    if (res.status === 409) { alert(t('reg_duplicate')); return; }
-    if (!res.ok) { alert(t('reg_network_error')); return; }
+    if (res.status === 409) { showRegError(t('reg_duplicate')); return; }
+    if (!res.ok) { showRegError(t('reg_network_error')); return; }
     alert(t('reg_success'));
     closeModal('registerModal');
   } catch(e) {
     btn.disabled = false;
     btn.textContent = t('reg_submit');
-    alert(t('reg_network_error'));
+    showRegError(t('reg_network_error'));
   }
 }
 // ── Supabase 사용자 검증 (닉네임 + 비밀번호) ─────────────────────
@@ -476,10 +490,21 @@ async function verifyUser(nickname, password) {
     return { ok: false, reason: 'network' };
   }
 }
+function showLoginError(msg) {
+  var el = document.getElementById('loginError');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function clearLoginError() {
+  var el = document.getElementById('loginError');
+  if (el) el.classList.add('hidden');
+}
 async function handleLogin() {
+  clearLoginError();
   const nick = document.getElementById('loginNickname').value.trim();
   const pwd  = document.getElementById('loginPassword').value.trim();
-  if (!nick || !pwd) { alert(t('login_error')); return; }
+  if (!nick || !pwd) { showLoginError(t('login_error')); return; }
   // 로딩 상태
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
@@ -488,7 +513,7 @@ async function handleLogin() {
   btn.disabled = false;
   btn.textContent = t('login_btn');
   if (!result.ok) {
-    alert(result.reason === 'network' ? t('login_network_error') : t('login_not_found'));
+    showLoginError(result.reason === 'network' ? t('login_network_error') : t('login_not_found'));
     return;
   }
   // 로그인 성공 — Supabase 데이터 우선, localStorage 폴백

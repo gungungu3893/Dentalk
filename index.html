@@ -219,49 +219,152 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   </div>
 </div>
 <!-- ============================== 로그인 모달 ============================== -->
-<div id="loginModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
-  <div class="bg-[#001d4a] w-full max-w-sm rounded-3xl p-8 text-white shadow-2xl">
-    <div class="text-center mb-8">
-      <div class="flex items-baseline justify-center" style="font-size:52px;font-weight:900;letter-spacing:-2px;line-height:1">
-        <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
+<div id="loginModal" class="modal fixed inset-0 bg-black/75 backdrop-blur-sm z-[800] items-center justify-center p-5">
+  <div class="bg-[#001220] w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+    <!-- 로고 헤더 -->
+    <div class="text-center px-8 pt-10 pb-7">
+      <div class="flex items-baseline justify-center" style="font-size:50px;font-weight:900;letter-spacing:-2px;line-height:1">
+        <span style="color:#fff">den</span><span style="color:#D4AF37">t</span><span style="color:#fff">alk</span>
       </div>
-      <div style="height:2px;border-radius:99px;background:#D4AF37;opacity:.35;margin:-2px auto 0;width:140px"></div>
-      <p class="text-blue-300 text-[9px] font-bold uppercase tracking-[3px] mt-3" data-i18n="login_subtitle">DOCTOR LOGIN</p>
+      <div style="height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,#D4AF37,transparent);margin:6px auto 0;width:130px;opacity:.6"></div>
+      <p class="text-[10px] font-black uppercase tracking-[3px] mt-3" style="color:#D4AF37;opacity:.75" data-i18n="login_subtitle">DOCTOR LOGIN</p>
     </div>
-    <input id="loginNickname" type="text" data-i18n-ph="login_ph" placeholder="Nickname"
-      onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()"
-      class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold text-center bg-white">
-    <input id="loginPassword" type="password" data-i18n-ph="login_password_ph" placeholder="Password"
-      onkeydown="if(event.key==='Enter')handleLogin()"
-      class="w-full p-4 rounded-2xl text-black mb-4 outline-none font-bold text-center bg-white">
-    <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="login_btn">LOGIN</button>
-    <button onclick="closeModal('loginModal')" class="w-full text-slate-400 text-xs font-bold py-2 mb-1" data-i18n="login_cancel">Cancel</button>
-    <button onclick="openRegisterModal()" class="w-full text-blue-300 text-xs font-bold py-1 underline underline-offset-2" data-i18n="login_register_link">Request Access →</button>
+    <!-- 입력 폼 -->
+    <div class="px-8 pb-8 space-y-3">
+      <div class="space-y-1">
+        <label class="block text-xs font-bold text-slate-400 pl-1" data-i18n="login_ph">Nickname</label>
+        <input id="loginNickname" type="text" data-i18n-ph="login_ph" placeholder="Nickname"
+          onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()"
+          class="w-full px-5 py-3.5 rounded-2xl text-slate-800 font-bold text-sm outline-none bg-white/95 focus:ring-2 focus:ring-[#D4AF37] transition placeholder:text-slate-300">
+      </div>
+      <div class="space-y-1">
+        <label class="block text-xs font-bold text-slate-400 pl-1" data-i18n="login_password_ph">Password</label>
+        <input id="loginPassword" type="password" data-i18n-ph="login_password_ph" placeholder="Password"
+          onkeydown="if(event.key==='Enter')handleLogin()"
+          class="w-full px-5 py-3.5 rounded-2xl text-slate-800 font-bold text-sm outline-none bg-white/95 focus:ring-2 focus:ring-[#D4AF37] transition placeholder:text-slate-300">
+      </div>
+      <!-- 인라인 에러 -->
+      <div id="loginError" class="hidden text-xs font-bold text-center py-2 px-4 rounded-xl" style="background:rgba(239,68,68,.15);color:#fca5a5"></div>
+      <!-- 로그인 버튼 (Gold) -->
+      <button id="loginBtn" onclick="handleLogin()"
+        class="w-full py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition mt-1"
+        style="background:#D4AF37;color:#001220"
+        data-i18n="login_btn">LOGIN</button>
+      <!-- 구분선 -->
+      <div class="flex items-center gap-3 py-0.5">
+        <div class="flex-1 h-px bg-white/10"></div>
+        <div class="flex-1 h-px bg-white/10"></div>
+      </div>
+      <button onclick="closeModal('loginModal')"
+        class="w-full text-slate-500 text-xs font-bold py-1.5 hover:text-slate-300 transition"
+        data-i18n="login_cancel">Cancel</button>
+      <button onclick="openRegisterModal()"
+        class="w-full text-xs font-black py-1 underline underline-offset-2 transition"
+        style="color:#D4AF37;opacity:.8"
+        data-i18n="login_register_link">Request Access →</button>
+    </div>
   </div>
 </div>
 <!-- ============================== 사용 신청 모달 ============================== -->
-<div id="registerModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
-  <div class="bg-[#001d4a] w-full max-w-sm rounded-3xl p-8 text-white shadow-2xl">
-    <div class="text-center mb-6">
-      <p class="font-black text-white text-lg mb-1" data-i18n="reg_title">Request Access</p>
-      <p class="text-blue-300 text-[10px] font-bold leading-relaxed" data-i18n="reg_subtitle">Fill in your details. Admin will approve within 24 hours.</p>
+<div id="registerModal" class="modal fixed inset-0 bg-black/75 backdrop-blur-sm z-[800] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl flex flex-col" style="max-height:92vh">
+    <!-- 헤더 (다크 네이비) -->
+    <div class="bg-[#001220] px-7 pt-7 pb-6 rounded-t-3xl shrink-0">
+      <div class="flex items-baseline mb-1" style="font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1">
+        <span style="color:#fff">den</span><span style="color:#D4AF37">t</span><span style="color:#fff">alk</span>
+      </div>
+      <p class="font-black text-white text-base leading-tight" data-i18n="reg_title">Request Access</p>
+      <p class="text-blue-300 text-[10px] font-bold leading-relaxed mt-1.5" data-i18n="reg_subtitle">Fill in your details. Admin will approve within 24 hours.</p>
     </div>
-    <input id="regLicense"  type="text"  data-i18n-ph="reg_license_ph" placeholder="면허번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regNickname" type="text"  data-i18n-ph="reg_nick_ph" placeholder="닉네임 (필수) — 모든 활동에 사용됩니다" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regName"     type="text"  data-i18n-ph="reg_name_ph" placeholder="의사 이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regClinic"   type="text"  data-i18n-ph="reg_clinic_ph" placeholder="치과이름 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regEmail"    type="email" data-i18n-ph="reg_email_ph" placeholder="이메일주소 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regContact"  type="text"  placeholder="전화번호 또는 Line ID (필수)" data-i18n-ph="reg_contact_ph" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regPassword" type="password" data-i18n-ph="reg_password_ph" placeholder="비밀번호 (필수)" class="w-full p-4 rounded-2xl text-black mb-3 outline-none font-bold bg-white text-sm">
-    <input id="regPasswordConfirm" type="password" data-i18n-ph="reg_password_confirm_ph" placeholder="비밀번호 확인 (필수)" class="w-full p-4 rounded-2xl text-black mb-5 outline-none font-bold bg-white text-sm">
-    <div class="flex items-start gap-3 mb-4 bg-white/10 rounded-2xl p-3">
-      <input type="checkbox" id="regPrivacyConsent" class="mt-0.5 w-4 h-4 shrink-0 accent-blue-400">
-      <p class="text-blue-200 text-xs font-bold leading-relaxed">
-        <span data-i18n="reg_privacy_agree_prefix">I have read and agree to the</span>&nbsp;<button type="button" onclick="openPrivacyModal(event)" class="text-[#D4AF37] underline underline-offset-2" data-i18n="reg_privacy_link">Privacy Policy</button>&nbsp;<span data-i18n="reg_privacy_agree_suffix">(Thailand PDPA).</span>
-      </p>
+    <!-- 폼 본문 (스크롤) -->
+    <div class="flex-1 overflow-y-auto no-scroll px-6 py-5">
+      <!-- ① 계정 정보 -->
+      <div class="mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0" style="background:#001220">1</span>
+          <span class="text-[10px] font-black uppercase tracking-[2px] text-slate-400">Account Info</span>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_license_ph">License Number (required)</label>
+            <input id="regLicense" type="text" data-i18n-ph="reg_license_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_nick_ph">Nickname (required)</label>
+            <input id="regNickname" type="text" data-i18n-ph="reg_nick_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+        </div>
+      </div>
+      <!-- ② 개인 정보 -->
+      <div class="mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0" style="background:#001220">2</span>
+          <span class="text-[10px] font-black uppercase tracking-[2px] text-slate-400">Personal Info</span>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_name_ph">Doctor Name (required)</label>
+            <input id="regName" type="text" data-i18n-ph="reg_name_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_clinic_ph">Clinic Name (required)</label>
+            <input id="regClinic" type="text" data-i18n-ph="reg_clinic_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_email_ph">Email (required)</label>
+            <input id="regEmail" type="email" data-i18n-ph="reg_email_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_contact_ph">Contact (required)</label>
+            <input id="regContact" type="text" data-i18n-ph="reg_contact_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+        </div>
+      </div>
+      <!-- ③ 보안 -->
+      <div class="mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0" style="background:#001220">3</span>
+          <span class="text-[10px] font-black uppercase tracking-[2px] text-slate-400">Security</span>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_password_ph">Password (required)</label>
+            <input id="regPassword" type="password" data-i18n-ph="reg_password_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 mb-1 pl-0.5" data-i18n="reg_password_confirm_ph">Confirm Password (required)</label>
+            <input id="regPasswordConfirm" type="password" data-i18n-ph="reg_password_confirm_ph"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 transition placeholder:text-slate-300">
+          </div>
+        </div>
+      </div>
+      <!-- 개인정보 동의 -->
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-start gap-3 mb-3">
+        <input type="checkbox" id="regPrivacyConsent" class="mt-0.5 w-4 h-4 shrink-0 accent-blue-600 cursor-pointer">
+        <p class="text-slate-600 text-xs font-bold leading-relaxed">
+          <span data-i18n="reg_privacy_agree_prefix">I have read and agree to the</span>&nbsp;<button type="button" onclick="openPrivacyModal(event)" class="font-black underline underline-offset-2" style="color:#001d4a" data-i18n="reg_privacy_link">Privacy Policy</button>&nbsp;<span data-i18n="reg_privacy_agree_suffix">(Thailand PDPA).</span>
+        </p>
+      </div>
+      <!-- 인라인 에러 -->
+      <div id="regError" class="hidden text-xs font-bold text-center py-2.5 px-4 rounded-xl mb-1" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca"></div>
     </div>
-    <button id="regSubmitBtn" onclick="submitRegistration()" class="w-full bg-blue-500 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition mb-3" data-i18n="reg_submit">Submit Request</button>
-    <button onclick="closeModal('registerModal')" class="w-full text-slate-400 text-xs font-bold py-2" data-i18n="login_cancel">Cancel</button>
+    <!-- 하단 버튼 (고정) -->
+    <div class="px-6 py-5 border-t border-slate-100 bg-white rounded-b-3xl shrink-0 space-y-2.5">
+      <button id="regSubmitBtn" onclick="submitRegistration()"
+        class="w-full py-4 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition"
+        style="background:#D4AF37;color:#001220"
+        data-i18n="reg_submit">Submit Request</button>
+      <button onclick="closeModal('registerModal')"
+        class="w-full text-slate-400 text-xs font-bold py-2 hover:text-slate-600 transition"
+        data-i18n="login_cancel">Cancel</button>
+    </div>
   </div>
 </div>
 <!-- ============================== 개인정보 처리방침 모달 ============================== -->
