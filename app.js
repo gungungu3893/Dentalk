@@ -3060,23 +3060,41 @@ function adminDeleteEvent(id) {
 // ============================================================
 function renderUsed() {
   var list = document.getElementById('usedList');
-  if (!usedItems.length) { list.innerHTML='<div class="text-center text-slate-400 font-bold text-sm py-10">' + t('used_empty') + '</div>'; return; }
+  if (!list) return;
+  if (!usedItems.length) {
+    list.innerHTML = '<div class="col-span-2 text-center text-slate-400 font-bold text-sm py-12">' + t('used_empty') + '</div>';
+    return;
+  }
   var condMap   = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
-  list.innerHTML = usedItems.map(function(item,i){
+  list.innerHTML = usedItems.map(function(item) {
     var thumb = item.image
-      ? '<img src="' + item.image + '" class="w-full h-full object-contain">'
-      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
-    var badge = '<span class="inline-block text-[7px] font-bold px-1 py-0.5 rounded-full ' + condMap[item.cond] + '">' + condLabel[item.cond] + '</span>';
-    return '<div class="bg-white rounded-md overflow-hidden shadow-sm cursor-pointer active:scale-95 transition flex flex-col" onclick="openUsedDetail(' + item.id + ')">' +
-      '<div class="aspect-square bg-slate-50 overflow-hidden">' + thumb + '</div>' +
-      '<div class="p-0.5 flex flex-col gap-0">' +
+      ? '<img src="' + item.image + '" class="w-full h-full object-cover">'
+      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-4xl">📷</span></div>';
+    var badge = '<span class="inline-block text-[10px] font-black px-2 py-0.5 rounded-full ' + condMap[item.cond||'fair'] + '">' + condLabel[item.cond||'fair'] + '</span>';
+    var seller = item.seller || 'Me';
+    var date   = (item.date||'').slice(5); // MM-DD
+    return '<div class="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + item.id + ')">' +
+      '<div class="aspect-[4/3] bg-slate-50 overflow-hidden">' + thumb + '</div>' +
+      '<div class="p-3 space-y-1.5">' +
         badge +
-        '<p class="font-bold text-slate-800 text-[7px] leading-snug line-clamp-2">' + item.name + '</p>' +
-        '<p class="font-black text-blue-700 text-[7px]">' + item.price.toLocaleString() + '</p>' +
+        '<p class="font-black text-slate-800 text-sm leading-snug line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-blue-700 text-base font-mono">฿' + item.price.toLocaleString() + '</p>' +
+        '<div class="flex items-center justify-between pt-0.5">' +
+          '<p class="text-[10px] text-slate-400 font-bold truncate">' + seller + '</p>' +
+          '<p class="text-[10px] text-slate-300 font-bold shrink-0 ml-1">' + date + '</p>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
+}
+function usedToggleWrite() {
+  var form = document.getElementById('usedWriteForm');
+  var btn  = document.getElementById('usedWriteBtn');
+  if (!form) return;
+  var hidden = form.classList.contains('hidden');
+  form.classList.toggle('hidden', !hidden);
+  if (btn) btn.classList.toggle('hidden', hidden);
 }
 function previewPhoto() {
   var file = document.getElementById('u-photo').files[0];
@@ -3098,6 +3116,11 @@ function submitUsed() {
     ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('u-photo').value = '';
     document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">' + t('used_photo_add') + '</span>';
+    // 폼 닫기
+    var form = document.getElementById('usedWriteForm');
+    var btn  = document.getElementById('usedWriteBtn');
+    if (form) form.classList.add('hidden');
+    if (btn)  btn.classList.remove('hidden');
     renderUsed();
   }
   var file = document.getElementById('u-photo').files[0];
@@ -3438,30 +3461,81 @@ function updateNicknameDisplays() {
   if (sn)  sn.textContent  = nick;
 }
 function renderProfileSettings() {
-  var el = document.getElementById('profileInfo');
-  if (!el) return;
-  if (!isLoggedIn() || !currentUser.nickname) {
-    el.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
-    return;
+  // 상단 프로필 카드 채우기
+  var nickEl    = document.getElementById('settingsNickname');
+  var licEl     = document.getElementById('settingsLicense');
+  var clinicEl  = document.getElementById('settingsClinic');
+  if (nickEl)   nickEl.textContent   = isLoggedIn() && currentUser.nickname   ? currentUser.nickname   : t('profile_login_msg');
+  if (licEl)    licEl.textContent    = isLoggedIn() && currentUser.licenseNum ? '# ' + currentUser.licenseNum : '-';
+  if (clinicEl) clinicEl.textContent = isLoggedIn() && currentUser.clinicName ? currentUser.clinicName  : '-';
+  // 나의 주문 목록 요약
+  var summaryEl = document.getElementById('settingsOrdersSummary');
+  if (summaryEl) {
+    if (!isLoggedIn()) {
+      summaryEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
+    } else {
+      var myOrders = customOrders.filter(function(o){ return o.user === currentUser.nickname; }).slice(0, 5);
+      if (!myOrders.length) {
+        summaryEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('settings_no_orders') + '</p>';
+      } else {
+        var stageColors = {submitted:'bg-slate-100 text-slate-500',confirmed:'bg-blue-100 text-blue-600',design_ready:'bg-purple-100 text-purple-600',milling:'bg-yellow-100 text-yellow-700',shipped:'bg-green-100 text-green-700',done:'bg-emerald-100 text-emerald-700'};
+        summaryEl.innerHTML = myOrders.map(function(o) {
+          var stageKey = 'stage_' + (o.stage||'submitted');
+          var stageLabel = t(stageKey) || o.stage || '-';
+          var stageColor = stageColors[o.stage||'submitted'] || 'bg-slate-100 text-slate-500';
+          var casesStr = (o.cases||[]).length + t('cases_unit') + ' · ' + ((o.cases||[]).reduce(function(a,c){ return a + (c.teeth||[]).length; }, 0)) + t('teeth_count');
+          return '<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">' +
+            '<div>' +
+              '<p class="text-xs font-black text-slate-700"># ' + o.id + '</p>' +
+              '<p class="text-[10px] text-slate-400 font-bold mt-0.5">' + casesStr + '</p>' +
+            '</div>' +
+            '<span class="text-[10px] font-black px-2 py-1 rounded-full ' + stageColor + '">' + stageLabel + '</span>' +
+          '</div>';
+        }).join('');
+      }
+    }
   }
-  var rows = [
-    [t('prof_nickname'), currentUser.nickname,   true],
-    [t('prof_doctor'),   currentUser.doctorName, true],
-    [t('pe_email'),      currentUser.email,      false],
-    [t('pe_phone'),      currentUser.phone,      false],
-    [t('pe_address'),    currentUser.address,    false],
-    [t('pe_clinic'),     currentUser.clinicName, false],
-  ];
-  el.innerHTML = '<div class="space-y-2">' +
-    rows.map(function(r){
-      var val = r[1] || '-';
-      var readonly = r[2] ? ' <span class="text-[9px] text-slate-300 font-bold">' + t('profile_no_change') + '</span>' : '';
-      return '<div class="flex justify-between items-center py-1 border-b border-slate-50 last:border-0">' +
-        '<span class="text-xs text-slate-400 font-bold shrink-0 w-20">' + r[0] + readonly + '</span>' +
-        '<span class="text-sm font-black text-slate-800 text-right ml-2 break-all">' + val + '</span>' +
-      '</div>';
-    }).join('') +
-  '</div>';
+}
+function toggleProfileEditInline() {
+  var form = document.getElementById('settingsProfileEditForm');
+  if (!form) return;
+  if (form.classList.contains('hidden')) {
+    if (!isLoggedIn()) { openLoginModal(); return; }
+    document.getElementById('si-email').value   = currentUser.email       || '';
+    document.getElementById('si-phone').value   = currentUser.phone       || '';
+    document.getElementById('si-address').value = currentUser.address     || '';
+    document.getElementById('si-clinic').value  = currentUser.clinicName  || '';
+    form.classList.remove('hidden');
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else {
+    form.classList.add('hidden');
+  }
+}
+async function saveProfileInline() {
+  if (!isLoggedIn()) return;
+  currentUser.email      = document.getElementById('si-email').value.trim();
+  currentUser.phone      = document.getElementById('si-phone').value.trim();
+  currentUser.address    = document.getElementById('si-address').value.trim();
+  currentUser.clinicName = document.getElementById('si-clinic').value.trim();
+  var saved = localStorage.getItem('dentalk_profile_' + currentUser.licenseNum);
+  var profile = saved ? JSON.parse(saved) : {};
+  profile.email      = currentUser.email;
+  profile.phone      = currentUser.phone;
+  profile.address    = currentUser.address;
+  profile.clinicName = currentUser.clinicName;
+  localStorage.setItem('dentalk_profile_' + currentUser.licenseNum, JSON.stringify(profile));
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/licenses?license_number=eq.' + encodeURIComponent(currentUser.licenseNum), {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ email: currentUser.email, phone: currentUser.phone, address: currentUser.address, clinic_name: currentUser.clinicName })
+    });
+  } catch(e) { console.warn('Supabase PATCH 실패:', e); }
+  var msg = document.getElementById('profileSavedMsg');
+  if (msg) { msg.classList.remove('hidden'); setTimeout(function(){ msg.classList.add('hidden'); }, 2500); }
+  renderProfileSettings();
+  // 잠시 후 폼 닫기
+  setTimeout(function(){ toggleProfileEditInline(); }, 1500);
 }
 function openProfileEdit() {
   if (!isLoggedIn()) { alert(t('login_required')); return; }
@@ -3614,8 +3688,32 @@ function sendMsg() {
 // EVENTS
 // ============================================================
 function renderEvents() {
-  document.getElementById('eventList').innerHTML = events_.map(function(e){
-    return '<div class="bg-white p-5 rounded-2xl border-l-8 border-blue-900 shadow-sm"><p class="text-xs font-black text-slate-400 font-mono uppercase">' + e.date + '</p><p class="font-black text-sm mt-1 text-slate-800">' + e.event + '</p><p class="text-xs text-slate-400 mt-1">📍 ' + e.loc + '</p></div>';
+  var el = document.getElementById('eventList');
+  if (!el) return;
+  if (!events_.length) {
+    el.innerHTML = '<p class="text-center text-slate-400 font-bold text-sm py-12">' + t('home_events_empty') + '</p>';
+    return;
+  }
+  el.innerHTML = events_.map(function(e) {
+    var parts = (e.date||'').split('-'); // [YYYY, MM, DD]
+    var monthNames = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    var monthIdx = parseInt(parts[1]||1, 10) - 1;
+    var monthStr = monthNames[monthIdx] || (parts[1]||'');
+    var dayStr   = parts[2] ? parseInt(parts[2], 10) : '';
+    var yearStr  = parts[0] || '';
+    var desc     = e.desc || '';
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden flex">' +
+      '<div class="bg-[#001d4a] flex flex-col items-center justify-center px-5 py-5 shrink-0 min-w-[72px]">' +
+        '<span class="text-blue-300 text-[10px] font-black uppercase tracking-widest">' + monthStr + '</span>' +
+        '<span class="text-white text-3xl font-black leading-none mt-0.5">' + dayStr + '</span>' +
+        '<span class="text-blue-400 text-[10px] font-bold mt-0.5">' + yearStr + '</span>' +
+      '</div>' +
+      '<div class="flex-1 p-4 min-w-0">' +
+        '<p class="font-black text-slate-800 text-sm leading-snug">' + e.event + '</p>' +
+        '<p class="text-xs text-slate-400 font-bold mt-1.5">📍 ' + e.loc + '</p>' +
+        (desc ? '<p class="text-xs text-slate-500 mt-2 leading-relaxed">' + desc + '</p>' : '') +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 // ============================================================

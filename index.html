@@ -909,30 +909,40 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== USED MARKET ==================== -->
     <div id="page-used" class="page p-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
-        <h3 class="font-black text-sm text-slate-700 mb-3 flex items-center gap-2"><span>♻️</span><span data-i18n="used_sell_title">Sell Used Parts</span></h3>
+      <!-- 등록 토글 버튼 -->
+      <button onclick="usedToggleWrite()" id="usedWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
+        <span data-i18n="used_post_toggle">📸 List Used Item</span>
+      </button>
+      <!-- 등록 폼 (기본 숨김) -->
+      <div id="usedWriteForm" class="hidden bg-white rounded-2xl p-5 shadow-sm mb-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest" data-i18n="used_sell_title">Sell Used Parts</h3>
+          <button onclick="usedToggleWrite()" class="text-slate-400 font-black text-xs px-2 py-1 bg-slate-100 rounded-lg active:bg-slate-200" data-i18n="used_close_form">✕ Close</button>
+        </div>
         <!-- 사진 업로드 -->
         <label class="block mb-3 cursor-pointer">
-          <div id="u-photo-preview" class="w-full h-36 bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-slate-400 overflow-hidden border-2 border-dashed border-slate-200">
+          <div id="u-photo-preview" class="w-full h-40 bg-slate-50 rounded-2xl flex flex-col items-center justify-center text-slate-400 overflow-hidden border-2 border-dashed border-slate-200">
             <span class="text-3xl mb-1">📷</span>
             <span class="text-xs font-bold" data-i18n="used_photo_add">Add Photo</span>
           </div>
           <input id="u-photo" type="file" accept="image/*" class="hidden" onchange="previewPhoto()">
         </label>
-        <input id="u-name"    type="text"   data-i18n-ph="used_name_ph"    placeholder="Part Name"     class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2">
-        <input id="u-code"    type="text"   data-i18n-ph="used_code_ph"    placeholder="Product Code"  class="w-full p-3 bg-slate-50 rounded-xl text-sm font-mono outline-none mb-2">
+        <input id="u-name"    type="text"   data-i18n-ph="used_name_ph"    placeholder="Part Name"    class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2 border-2 border-transparent focus:border-blue-200">
+        <input id="u-code"    type="text"   data-i18n-ph="used_code_ph"    placeholder="Product Code" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-mono outline-none mb-2 border-2 border-transparent focus:border-blue-200">
         <div class="flex gap-2 mb-2">
-          <input id="u-price" type="number" data-i18n-ph="used_price_ph"   placeholder="Price (THB)"   class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none">
-          <select id="u-cond" class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-none">
-            <option value="new">Like New</option><option value="good">Good</option><option value="fair">Fair</option>
+          <input id="u-price" type="number" data-i18n-ph="used_price_ph"   placeholder="Price (THB)" class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-200">
+          <select id="u-cond" class="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent">
+            <option value="new"  data-i18n="cond_new">Like New</option>
+            <option value="good" data-i18n="cond_good">Good</option>
+            <option value="fair" data-i18n="cond_fair">Fair</option>
           </select>
         </div>
-        <textarea id="u-desc" rows="3" data-i18n-ph="used_desc_ph" placeholder="Condition details..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-2"></textarea>
-        <input id="u-contact" type="text" data-i18n-ph="used_contact_ph" placeholder="Contact (Line ID / Phone)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3">
-        <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3 rounded-2xl font-black text-sm" data-i18n="used_post_btn">POST FOR SALE</button>
+        <textarea id="u-desc" rows="3" data-i18n-ph="used_desc_ph" placeholder="Condition details..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-2 border-2 border-transparent focus:border-blue-200"></textarea>
+        <input id="u-contact" type="text" data-i18n-ph="used_contact_ph" placeholder="Contact (Line ID / Phone)" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-200">
+        <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="used_post_btn">POST FOR SALE</button>
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
-      <div id="usedList" class="grid grid-cols-7 gap-1.5"></div>
+      <div id="usedList" class="grid grid-cols-2 gap-3"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
@@ -1063,7 +1073,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== EVENTS ==================== -->
     <div id="page-events" class="page p-4">
-      <div id="eventList" class="space-y-4"></div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-xl">📅</span>
+        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_events">Events</h2>
+      </div>
+      <div id="eventList" class="space-y-3"></div>
     </div>
     <!-- ==================== FACTORY ==================== -->
     <div id="page-factory" class="page p-4">
@@ -1099,34 +1113,57 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== SETTINGS ==================== -->
     <div id="page-settings" class="page p-4 space-y-4">
-      <div class="bg-white rounded-2xl p-6 shadow-sm">
+      <!-- 프로필 카드 (상단) -->
+      <div class="bg-gradient-to-br from-[#001d4a] to-[#0a3d8f] rounded-3xl p-6 shadow-lg">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl shrink-0">👤</div>
+          <div class="flex-1 min-w-0">
+            <p id="settingsNickname" class="font-black text-white text-lg leading-snug truncate">-</p>
+            <p id="settingsLicense"  class="text-blue-200 text-xs font-mono mt-0.5">-</p>
+            <p id="settingsClinic"   class="text-white/60 text-xs font-bold mt-0.5 truncate">-</p>
+          </div>
+          <button onclick="toggleProfileEditInline()" class="shrink-0 px-3 py-2 bg-white/15 text-white rounded-xl font-black text-xs active:bg-white/30 transition" data-i18n="profile_edit_btn">Edit</button>
+        </div>
+      </div>
+      <!-- 인라인 프로필 수정 폼 (숨김) -->
+      <div id="settingsProfileEditForm" class="hidden bg-white rounded-2xl p-5 shadow-sm">
+        <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-4" data-i18n="pe_title">✏️ Edit My Info</h3>
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1" data-i18n="pe_email">Email</label>
+        <input id="si-email"   type="email" data-i18n-ph="pe_email_ph"   placeholder="Email address" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-200">
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1" data-i18n="pe_phone">Phone</label>
+        <input id="si-phone"   type="tel"   data-i18n-ph="pe_phone_ph"   placeholder="Phone number"  class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-200">
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1" data-i18n="pe_address">Address</label>
+        <input id="si-address" type="text"  data-i18n-ph="pe_address_ph" placeholder="Address"       class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-3 border-2 border-transparent focus:border-blue-200">
+        <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1" data-i18n="pe_clinic">Clinic</label>
+        <input id="si-clinic"  type="text"  data-i18n-ph="pe_clinic_ph"  placeholder="Clinic name"   class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-4 border-2 border-transparent focus:border-blue-200">
+        <div class="flex gap-2">
+          <button onclick="saveProfileInline()" class="flex-1 py-3 bg-[#001d4a] text-white rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="pe_save">Save</button>
+          <button onclick="toggleProfileEditInline()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="pe_cancel">Cancel</button>
+        </div>
+        <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="profile_saved_msg">✅ Saved!</p>
+      </div>
+      <!-- 언어 선택기 -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
         <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_lang">Language</h3>
         <p class="text-[10px] text-amber-600 font-bold mt-2 hidden" id="langPendingNote" data-i18n="settings_pending">Select a language then press Save.</p>
-        <div class="grid grid-cols-2 gap-3 mt-4">
-          <button onclick="selectLang('en')" id="lang-en" class="p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700">🇺🇸 English</button>
-          <button onclick="selectLang('ko')" id="lang-ko" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇰🇷 한국어</button>
-          <button onclick="selectLang('zh')" id="lang-zh" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇨🇳 中文</button>
-          <button onclick="selectLang('th')" id="lang-th" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇹🇭 ภาษาไทย</button>
-          <button onclick="selectLang('vi')" id="lang-vi" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇻🇳 Tiếng Việt</button>
-          <button onclick="selectLang('es')" id="lang-es" class="p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600">🇪🇸 Español</button>
+        <div class="grid grid-cols-3 gap-2 mt-4">
+          <button onclick="selectLang('en')" id="lang-en" class="py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1"><span class="text-xl">🇺🇸</span><span>EN</span></button>
+          <button onclick="selectLang('ko')" id="lang-ko" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇰🇷</span><span>KO</span></button>
+          <button onclick="selectLang('zh')" id="lang-zh" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇨🇳</span><span>ZH</span></button>
+          <button onclick="selectLang('th')" id="lang-th" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇭</span><span>TH</span></button>
+          <button onclick="selectLang('vi')" id="lang-vi" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇻🇳</span><span>VI</span></button>
+          <button onclick="selectLang('es')" id="lang-es" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇪🇸</span><span>ES</span></button>
         </div>
         <button onclick="saveLang()" id="saveLangBtn" class="mt-4 w-full py-3.5 rounded-2xl bg-[#001d4a] text-white font-black text-sm shadow active:scale-95 transition" data-i18n="settings_save_btn">Save Language</button>
         <p id="savedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="settings_saved_msg">Language saved!</p>
       </div>
-      <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_account">Account</h3>
-        <p class="text-sm font-bold text-slate-600 mt-3"><span data-i18n="settings_license">License:</span> <span id="licenseDisplay" class="text-blue-700 font-mono">-</span></p>
-      </div>
-      <!-- 내 프로필 카드 -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800" data-i18n="profile_title">👤 내 정보</h3>
-          <button onclick="openProfileEdit()" class="px-4 py-2 bg-[#001d4a] text-white rounded-xl font-black text-xs active:scale-95 transition" data-i18n="profile_edit_btn">수정</button>
+      <!-- 나의 주문 목록 요약 -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-black text-slate-800" data-i18n="settings_my_orders">📦 My Orders</h3>
+          <button onclick="goTo('custom')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
-        <div id="profileInfo">
-          <p class="text-sm text-slate-400 font-bold" data-i18n="profile_login_msg">로그인 후 확인 가능합니다.</p>
-        </div>
-        <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="profile_saved_msg">✅ 저장되었습니다!</p>
+        <div id="settingsOrdersSummary" class="space-y-2"></div>
       </div>
     </div>
   </div>
