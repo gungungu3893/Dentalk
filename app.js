@@ -126,6 +126,17 @@ let posts        = [
 let forumCategory     = 'implant';
 let forumPhotos       = [];
 let currentForumPostId = null;
+// 포럼 탭 설정 (유연한 구조: 추후 지역별 탭 추가 가능)
+var FORUM_TABS = [
+  { key: 'implant',    labelKey: 'forum_tab_implant' },
+  { key: 'prosthetic', labelKey: 'forum_tab_prosthetic' },
+  // 지역 탭 예시 (추후 활성화):
+  // { key: 'bangkok',    labelKey: 'forum_tab_bangkok' },
+  // { key: 'chiang_mai', labelKey: 'forum_tab_chiang_mai' },
+];
+// 갤러리 슬라이더 상태
+var forumGalleryImages = [];
+var forumGalleryIndex  = 0;
 let events_      = [{id:1,date:'2026-03-15',event:'BIOPLANT Factory Tour',loc:'Bangkok'}];
 let customOrders = [];
 let messages     = []; // {id,from,to,subject,body,date,read}
@@ -2644,7 +2655,7 @@ function adminDeleteUsed(i) {
 function renderAdminForum() {
   var list = document.getElementById('adminTabForum');
   if (!list) return;
-  if (!posts.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">게시물이 없습니다.</p>'; return; }
+  if (!posts.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('forum_empty') + '</p>'; return; }
   list.innerHTML = posts.map(function(post, i) {
     var catBadge = post.category === 'implant'
       ? '<span class="bg-blue-100 text-blue-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">🦷 임플란트</span>'
@@ -3025,26 +3036,54 @@ function openForumDetail(id) {
   post.views = (post.views||0) + 1;
   currentForumPostId = id;
   renderForum();
-  // 카테고리 뱃지
-  document.getElementById('fdp-catBadge').textContent = post.category === 'implant' ? '🦷 임플란트' : '💎 보철';
+  // 카테고리 뱃지 (i18n)
+  var tabCfg = FORUM_TABS.find(function(x){ return x.key === post.category; });
+  var catText = tabCfg ? t(tabCfg.labelKey) : post.category;
+  document.getElementById('fdp-catBadge').textContent = catText;
   document.getElementById('fdp-title').textContent  = post.title;
   document.getElementById('fdp-body').textContent   = post.body;
   document.getElementById('fdp-author').textContent = post.author + ' · ' + (post.date||'');
   document.getElementById('fdp-views').textContent  = post.views;
-  // 사진 갤러리
-  var photosWrap = document.getElementById('fdp-photos');
-  if (post.images && post.images.length) {
-    photosWrap.classList.remove('hidden');
-    photosWrap.innerHTML = post.images.map(function(src){
-      return '<img src="' + src + '" style="display:inline-block;height:180px;border-radius:12px;object-fit:contain;flex-shrink:0">';
-    }).join('');
+  // 이미지 갤러리 슬라이더
+  forumGalleryImages = (post.images && post.images.length) ? post.images : [];
+  forumGalleryIndex  = 0;
+  var gallery = document.getElementById('fdp-gallery');
+  if (forumGalleryImages.length) {
+    gallery.classList.remove('hidden');
+    renderForumGallery();
   } else {
-    photosWrap.classList.add('hidden');
-    photosWrap.innerHTML = '';
+    gallery.classList.add('hidden');
   }
   // 댓글
   renderComments(post);
+  updateNicknameDisplays();
   goDetailPage('forum-detail', post.title, 'forum');
+}
+function renderForumGallery() {
+  var track = document.getElementById('fdp-galleryTrack');
+  var dots  = document.getElementById('fdp-galleryDots');
+  var prev  = document.getElementById('fdp-galleryPrev');
+  var next  = document.getElementById('fdp-galleryNext');
+  if (!track) return;
+  track.innerHTML = forumGalleryImages.map(function(src){
+    return '<div class="shrink-0 w-full h-full flex items-center justify-center" style="flex:0 0 100%">' +
+      '<img src="' + src + '" style="max-width:100%;max-height:240px;object-fit:contain">' +
+    '</div>';
+  }).join('');
+  track.style.transform = 'translateX(-' + (forumGalleryIndex * 100) + '%)';
+  // 닷 인디케이터
+  if (dots) {
+    dots.innerHTML = forumGalleryImages.map(function(_, i){
+      return '<div class="w-1.5 h-1.5 rounded-full transition-all ' + (i === forumGalleryIndex ? 'bg-white scale-125' : 'bg-white/40') + '"></div>';
+    }).join('');
+  }
+  // prev/next 버튼 표시 여부
+  if (prev) prev.classList.toggle('hidden', forumGalleryImages.length <= 1);
+  if (next) next.classList.toggle('hidden', forumGalleryImages.length <= 1);
+}
+function forumGallerySlide(dir) {
+  forumGalleryIndex = (forumGalleryIndex + dir + forumGalleryImages.length) % forumGalleryImages.length;
+  renderForumGallery();
 }
 // ============================================================
 // FORUM
@@ -3053,25 +3092,68 @@ function forumTab(cat) {
   forumCategory = cat;
   renderForum();
 }
-function renderForum() {
-  var implantBtn    = document.getElementById('ftab-implant');
-  var prostheticBtn = document.getElementById('ftab-prosthetic');
-  if (implantBtn && prostheticBtn) {
-    implantBtn.className    = 'flex-1 py-3 rounded-2xl font-black text-sm shadow ' + (forumCategory === 'implant'    ? 'bg-[#001d4a] text-white' : 'bg-slate-200 text-slate-500');
-    prostheticBtn.className = 'flex-1 py-3 rounded-2xl font-black text-sm shadow ' + (forumCategory === 'prosthetic' ? 'bg-[#001d4a] text-white' : 'bg-slate-200 text-slate-500');
+function forumToggleWrite() {
+  var form = document.getElementById('forumWriteForm');
+  var btn  = document.getElementById('forumWriteBtn');
+  if (!form) return;
+  var isHidden = form.classList.contains('hidden');
+  form.classList.toggle('hidden', !isHidden);
+  // 열릴 때 카테고리 select를 현재 탭 카테고리로 설정
+  if (isHidden) {
+    var sel = document.getElementById('postCategory');
+    if (sel) sel.value = forumCategory;
+    updateNicknameDisplays();
   }
+}
+function renderForum() {
+  // 탭 바 동적 렌더링 (FORUM_TABS 배열 기반)
+  var tabsBar = document.getElementById('forumTabsBar');
+  if (tabsBar) {
+    tabsBar.innerHTML = FORUM_TABS.map(function(tab) {
+      var active = forumCategory === tab.key;
+      return '<button onclick="forumTab(\'' + tab.key + '\')" id="ftab-' + tab.key + '" class="shrink-0 px-5 py-2.5 rounded-2xl font-black text-sm transition ' +
+        (active ? 'bg-[#001d4a] text-white shadow' : 'bg-white text-slate-500 border border-slate-200') + '">' +
+        t(tab.labelKey) + '</button>';
+    }).join('');
+  }
+  // 카드형 게시글 목록
   var filtered = posts.filter(function(p){ return p.category === forumCategory; });
   document.getElementById('postList').innerHTML = filtered.length ? filtered.map(function(p){
-    var thumb = (p.images && p.images.length) ? '<img src="' + p.images[0] + '" class="w-14 h-14 rounded-xl object-cover shrink-0">' : '';
-    return '<div class="bg-white p-4 rounded-2xl border shadow-sm cursor-pointer active:bg-slate-50 flex gap-3 items-start" onclick="openForumDetail(' + p.id + ')">' +
-      thumb +
-      '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-slate-800 text-sm mb-0.5 leading-snug">' + p.title + '</p>' +
-        '<p class="text-xs text-slate-500 leading-relaxed line-clamp-2">' + p.body + '</p>' +
-        '<p class="text-[9px] text-slate-300 font-bold mt-2">' + p.author + ' · ' + (p.date||'') + ' · 👁 ' + (p.views||0) + ' · 💬 ' + (p.comments?p.comments.length:0) + '</p>' +
+    var hasImg = p.images && p.images.length;
+    var imgCount = hasImg ? p.images.length : 0;
+    var commentCount = p.comments ? p.comments.length : 0;
+    // 썸네일 영역
+    var thumbHtml = hasImg
+      ? '<div class="relative shrink-0">' +
+          '<img src="' + p.images[0] + '" class="w-[72px] h-[72px] rounded-2xl object-cover">' +
+          (imgCount > 1 ? '<span class="absolute bottom-1 right-1 text-[9px] font-black bg-black/60 text-white px-1.5 py-0.5 rounded-full">+' + (imgCount - 1) + '</span>' : '') +
+        '</div>'
+      : '';
+    // 카테고리 뱃지
+    var tabLabel = (FORUM_TABS.find(function(x){ return x.key === p.category; }) || {});
+    var catIcon  = p.category === 'implant' ? '🦷' : (p.category === 'prosthetic' ? '💎' : '📌');
+    return '<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer active:bg-slate-50 transition" onclick="openForumDetail(' + p.id + ')">' +
+      '<div class="p-4 flex gap-3 items-start">' +
+        '<div class="flex-1 min-w-0">' +
+          '<div class="flex items-center gap-1.5 mb-1.5">' +
+            '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + catIcon + ' ' + (tabLabel.key ? t(tabLabel.labelKey) : p.category) + '</span>' +
+          '</div>' +
+          '<p class="font-black text-slate-800 text-sm leading-snug mb-1 line-clamp-2">' + p.title + '</p>' +
+          '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + p.body + '</p>' +
+          '<div class="flex items-center gap-2 text-[10px] text-slate-300 font-bold">' +
+            '<span class="text-slate-500 font-black">' + p.author + '</span>' +
+            '<span>·</span>' +
+            '<span>' + (p.date||'') + '</span>' +
+            '<span>·</span>' +
+            '<span>👁 ' + (p.views||0) + '</span>' +
+            '<span>·</span>' +
+            '<span>💬 ' + commentCount + '</span>' +
+          '</div>' +
+        '</div>' +
+        thumbHtml +
       '</div>' +
     '</div>';
-  }).join('') : '<p class="text-center text-slate-400 text-sm py-10">' + t('forum_empty') + '</p>';
+  }).join('') : '<p class="text-center text-slate-400 text-sm py-12">' + t('forum_empty') + '</p>';
 }
 function previewForumPhotos() {
   var input = document.getElementById('forumPhotos');
@@ -3088,39 +3170,62 @@ function previewForumPhotos() {
       forumPhotos[i] = e.target.result;
       loaded++;
       if (loaded === files.length) {
-        preview.innerHTML = forumPhotos.filter(Boolean).map(function(src){
-          return '<img src="' + src + '" class="w-16 h-16 rounded-xl object-cover">';
+        preview.innerHTML = forumPhotos.filter(Boolean).map(function(src, idx){
+          return '<div class="relative">' +
+            '<img src="' + src + '" class="w-16 h-16 rounded-xl object-cover">' +
+            '<button onclick="removeForumPhoto(' + idx + ')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-black flex items-center justify-center leading-none">✕</button>' +
+          '</div>';
         }).join('');
       }
     };
     reader.readAsDataURL(file);
   });
 }
+function removeForumPhoto(idx) {
+  forumPhotos[idx] = null;
+  var preview = document.getElementById('forumPhotoPreview');
+  var valid = forumPhotos.filter(Boolean);
+  if (!valid.length) { preview.classList.add('hidden'); preview.innerHTML = ''; return; }
+  preview.innerHTML = forumPhotos.filter(Boolean).map(function(src, i){
+    return '<div class="relative">' +
+      '<img src="' + src + '" class="w-16 h-16 rounded-xl object-cover">' +
+      '<button onclick="removeForumPhoto(' + i + ')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-black flex items-center justify-center leading-none">✕</button>' +
+    '</div>';
+  }).join('');
+}
 function submitPost() {
-  var tt = document.getElementById('postTitle').value.trim();
-  var b  = document.getElementById('postBody').value.trim();
+  var tt  = document.getElementById('postTitle').value.trim();
+  var b   = document.getElementById('postBody').value.trim();
+  var cat = (document.getElementById('postCategory') || {}).value || forumCategory;
   if (!tt || !b) return;
-  var auth  = currentUser.nickname || '익명';
+  var auth  = currentUser.nickname || t('anon_patient');
   var today = new Date().toISOString().slice(0,10);
-  posts.unshift({id:Date.now(), category:forumCategory, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
+  posts.unshift({id:Date.now(), category:cat, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
   document.getElementById('postTitle').value  = '';
   document.getElementById('postBody').value   = '';
   document.getElementById('forumPhotoPreview').innerHTML = '';
   document.getElementById('forumPhotoPreview').classList.add('hidden');
   document.getElementById('forumPhotos').value = '';
   forumPhotos = [];
+  // 글 작성 후 해당 카테고리로 전환 & 폼 닫기
+  forumCategory = cat;
+  var form = document.getElementById('forumWriteForm');
+  if (form) form.classList.add('hidden');
   renderForum();
 }
 function renderComments(post) {
   var el = document.getElementById('fdp-comments');
   if (!post.comments || !post.comments.length) {
-    el.innerHTML = '<p class="text-xs text-slate-300 font-bold">아직 댓글이 없습니다.</p>';
+    el.innerHTML = '<p class="text-xs text-slate-300 font-bold">' + t('forum_no_comments') + '</p>';
     return;
   }
   el.innerHTML = post.comments.map(function(c){
     return '<div class="bg-slate-50 rounded-2xl p-3">' +
-      '<p class="text-xs font-black text-slate-700 mb-1">' + c.author + ' <span class="text-slate-300 font-normal text-[10px]">' + c.date + '</span></p>' +
-      '<p class="text-sm text-slate-600">' + c.text + '</p>' +
+      '<div class="flex items-center gap-2 mb-1">' +
+        '<span class="text-xs font-black text-slate-700">' + c.author + '</span>' +
+        '<span class="text-[10px] text-slate-300">' + c.date + '</span>' +
+      '</div>' +
+      '<p class="text-sm text-slate-600 leading-relaxed">' + c.text + '</p>' +
     '</div>';
   }).join('');
 }
@@ -3130,7 +3235,7 @@ function submitComment() {
   var post = posts.find(function(x){ return x.id===currentForumPostId; });
   if (!post) return;
   if (!post.comments) post.comments = [];
-  var auth  = currentUser.nickname || '익명';
+  var auth  = currentUser.nickname || t('anon_patient');
   var today = new Date().toISOString().slice(0,10);
   post.comments.push({author: auth, text: text, date: today});
   document.getElementById('commentInput').value = '';
