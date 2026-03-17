@@ -135,6 +135,14 @@ window.addEventListener('appinstalled', function() {
 
 * { -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font-sans); }
+/* 태국어 모드: Noto Sans Thai 우선, 영문/숫자는 Inter로 자동 폴백 */
+html[lang="th"] body,
+html[lang="th"] input,
+html[lang="th"] textarea,
+html[lang="th"] select,
+html[lang="th"] button {
+  font-family: 'Noto Sans Thai', 'Inter', sans-serif;
+}
 .page { display: none; }
 .page.active { display: block; }
 .modal { display: none !important; }

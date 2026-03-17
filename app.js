@@ -3844,6 +3844,8 @@ function saveLang() {
 // applyLang - 모든 UI 텍스트 업데이트
 // ============================================================
 function applyLang() {
+  // html lang 속성 업데이트 → CSS :lang(th) 폰트 규칙 자동 적용
+  document.documentElement.lang = currentLang;
   // data-i18n 속성 요소 업데이트
   document.querySelectorAll('[data-i18n]').forEach(function(el) {
     el.textContent = t(el.dataset.i18n);
@@ -4012,8 +4014,9 @@ function renderHomePage() {
 // 초기화
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
-  var saved = localStorage.getItem('dentalk_lang') || 'en';
+  var saved = localStorage.getItem('dentalk_lang') || 'th';
   currentLang = saved;
+  document.documentElement.lang = currentLang; // 폰트 CSS 즉시 적용
   pendingLang = null;
   document.getElementById('mb-home').classList.add('active');
   updateNavTabs('home');
