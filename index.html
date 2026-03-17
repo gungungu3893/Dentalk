@@ -936,8 +936,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
-      <!-- 카테고리 탭 (동적 렌더링 - 추후 지역 탭 추가 가능) -->
-      <div id="forumTabsBar" class="flex gap-2 mb-4 overflow-x-auto pb-1 no-scroll"></div>
+      <!-- 카테고리 탭 -->
+      <div id="forumTabsBar" class="flex gap-2 mb-2 overflow-x-auto pb-1 no-scroll"></div>
+      <!-- 지역 탭 (대분류) -->
+      <div id="forumRegionBar" class="flex gap-2 mb-2 overflow-x-auto pb-1 no-scroll"></div>
+      <!-- 주(province) 서브탭 -->
+      <div id="forumProvinceBar" class="hidden flex gap-2 mb-3 overflow-x-auto pb-1 no-scroll"></div>
       <!-- 글쓰기 버튼 -->
       <button onclick="forumToggleWrite()" id="forumWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
         <span data-i18n="forum_write_btn">✍️ Write Post</span>
@@ -958,6 +962,25 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <select id="postCategory" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-200">
             <option value="implant" data-i18n="forum_tab_implant">🦷 Implant</option>
             <option value="prosthetic" data-i18n="forum_tab_prosthetic">💎 Prosthetic</option>
+          </select>
+        </div>
+        <!-- 지역 선택 -->
+        <div class="mb-2">
+          <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_region_label">Region</label>
+          <select id="postRegion" onchange="_updateProvinceSelect()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-emerald-200">
+            <option value="all" data-i18n="forum_region_all">🌏 All Regions</option>
+            <option value="north" data-i18n="forum_region_north">🏔 North</option>
+            <option value="northeast" data-i18n="forum_region_northeast">🌾 Northeast</option>
+            <option value="east" data-i18n="forum_region_east">🌊 East</option>
+            <option value="south" data-i18n="forum_region_south">🏝 South</option>
+            <option value="central" data-i18n="forum_region_central">🏙 Central</option>
+          </select>
+        </div>
+        <!-- 주(province) 선택 — 지역 선택 시 동적 렌더링 -->
+        <div class="mb-3">
+          <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_province_label">Province</label>
+          <select id="postProvince" disabled class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-emerald-200 disabled:opacity-40">
+            <option value="all">-</option>
           </select>
         </div>
         <!-- 사진 업로드 최대 5장 -->

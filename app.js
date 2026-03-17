@@ -124,15 +124,104 @@ let posts        = [
   {id:2,category:'prosthetic',title:'보철 케이스 공유',body:'보철 제작 시 참고할 만한 케이스입니다.',author:'Dr. Lee',images:[],comments:[],views:0,date:'2026-02-20'},
 ];
 let forumCategory     = 'implant';
+let forumRegion       = 'all';
+let forumProvince     = 'all';
 let forumPhotos       = [];
 let currentForumPostId = null;
-// 포럼 탭 설정 (유연한 구조: 추후 지역별 탭 추가 가능)
+// 카테고리 탭
 var FORUM_TABS = [
   { key: 'implant',    labelKey: 'forum_tab_implant' },
   { key: 'prosthetic', labelKey: 'forum_tab_prosthetic' },
-  // 지역 탭 예시 (추후 활성화):
-  // { key: 'bangkok',    labelKey: 'forum_tab_bangkok' },
-  // { key: 'chiang_mai', labelKey: 'forum_tab_chiang_mai' },
+];
+// 태국 지역 + 주(province) 구조
+var FORUM_REGIONS = [
+  { key: 'all', labelKey: 'forum_region_all', icon: '🌏', provinces: [] },
+  { key: 'north', labelKey: 'forum_region_north', icon: '🏔', provinces: [
+    { key: 'chiang_mai',  label: 'Chiang Mai' },
+    { key: 'chiang_rai',  label: 'Chiang Rai' },
+    { key: 'lampang',     label: 'Lampang' },
+    { key: 'lamphun',     label: 'Lamphun' },
+    { key: 'mae_hong_son',label: 'Mae Hong Son' },
+    { key: 'nan',         label: 'Nan' },
+    { key: 'phayao',      label: 'Phayao' },
+    { key: 'phrae',       label: 'Phrae' },
+    { key: 'uttaradit',   label: 'Uttaradit' },
+  ]},
+  { key: 'northeast', labelKey: 'forum_region_northeast', icon: '🌾', provinces: [
+    { key: 'amnat_charoen',    label: 'Amnat Charoen' },
+    { key: 'bueng_kan',        label: 'Bueng Kan' },
+    { key: 'buri_ram',         label: 'Buri Ram' },
+    { key: 'chaiyaphum',       label: 'Chaiyaphum' },
+    { key: 'kalasin',          label: 'Kalasin' },
+    { key: 'khon_kaen',        label: 'Khon Kaen' },
+    { key: 'loei',             label: 'Loei' },
+    { key: 'maha_sarakham',    label: 'Maha Sarakham' },
+    { key: 'mukdahan',         label: 'Mukdahan' },
+    { key: 'nakhon_phanom',    label: 'Nakhon Phanom' },
+    { key: 'nakhon_ratchasima',label: 'Nakhon Ratchasima' },
+    { key: 'nong_bua_lam_phu', label: 'Nong Bua Lam Phu' },
+    { key: 'nong_khai',        label: 'Nong Khai' },
+    { key: 'roi_et',           label: 'Roi Et' },
+    { key: 'sakon_nakhon',     label: 'Sakon Nakhon' },
+    { key: 'si_sa_ket',        label: 'Si Sa Ket' },
+    { key: 'surin',            label: 'Surin' },
+    { key: 'ubon_ratchathani', label: 'Ubon Ratchathani' },
+    { key: 'udon_thani',       label: 'Udon Thani' },
+    { key: 'yasothon',         label: 'Yasothon' },
+  ]},
+  { key: 'east', labelKey: 'forum_region_east', icon: '🌊', provinces: [
+    { key: 'chachoengsao', label: 'Chachoengsao' },
+    { key: 'chanthaburi',  label: 'Chanthaburi' },
+    { key: 'chon_buri',    label: 'Chon Buri' },
+    { key: 'prachin_buri', label: 'Prachin Buri' },
+    { key: 'rayong',       label: 'Rayong' },
+    { key: 'sa_kaeo',      label: 'Sa Kaeo' },
+    { key: 'trat',         label: 'Trat' },
+  ]},
+  { key: 'south', labelKey: 'forum_region_south', icon: '🏝', provinces: [
+    { key: 'chumphon',            label: 'Chumphon' },
+    { key: 'krabi',               label: 'Krabi' },
+    { key: 'nakhon_si_thammarat', label: 'Nakhon Si Thammarat' },
+    { key: 'narathiwat',          label: 'Narathiwat' },
+    { key: 'pattani',             label: 'Pattani' },
+    { key: 'phang_nga',           label: 'Phang Nga' },
+    { key: 'phatthalung',         label: 'Phatthalung' },
+    { key: 'phuket',              label: 'Phuket' },
+    { key: 'ranong',              label: 'Ranong' },
+    { key: 'satun',               label: 'Satun' },
+    { key: 'songkhla',            label: 'Songkhla' },
+    { key: 'surat_thani',         label: 'Surat Thani' },
+    { key: 'trang',               label: 'Trang' },
+    { key: 'yala',                label: 'Yala' },
+  ]},
+  { key: 'central', labelKey: 'forum_region_central', icon: '🏙', provinces: [
+    { key: 'ang_thong',           label: 'Ang Thong' },
+    { key: 'ayutthaya',           label: 'Ayutthaya' },
+    { key: 'bangkok',             label: 'Bangkok' },
+    { key: 'chai_nat',            label: 'Chai Nat' },
+    { key: 'kanchanaburi',        label: 'Kanchanaburi' },
+    { key: 'lopburi',             label: 'Lopburi' },
+    { key: 'nakhon_nayok',        label: 'Nakhon Nayok' },
+    { key: 'nakhon_pathom',       label: 'Nakhon Pathom' },
+    { key: 'nakhon_sawan',        label: 'Nakhon Sawan' },
+    { key: 'nonthaburi',          label: 'Nonthaburi' },
+    { key: 'pathum_thani',        label: 'Pathum Thani' },
+    { key: 'phetchabun',          label: 'Phetchabun' },
+    { key: 'phetchaburi',         label: 'Phetchaburi' },
+    { key: 'phichit',             label: 'Phichit' },
+    { key: 'phitsanulok',         label: 'Phitsanulok' },
+    { key: 'prachuap_khiri_khan', label: 'Prachuap Khiri Khan' },
+    { key: 'ratchaburi',          label: 'Ratchaburi' },
+    { key: 'samut_prakan',        label: 'Samut Prakan' },
+    { key: 'samut_sakhon',        label: 'Samut Sakhon' },
+    { key: 'samut_songkhram',     label: 'Samut Songkhram' },
+    { key: 'saraburi',            label: 'Saraburi' },
+    { key: 'sing_buri',           label: 'Sing Buri' },
+    { key: 'sukhothai',           label: 'Sukhothai' },
+    { key: 'suphan_buri',         label: 'Suphan Buri' },
+    { key: 'tak',                 label: 'Tak' },
+    { key: 'uthai_thani',         label: 'Uthai Thani' },
+  ]},
 ];
 // 갤러리 슬라이더 상태
 var forumGalleryImages = [];
@@ -2660,10 +2749,21 @@ function renderAdminForum() {
     var catBadge = post.category === 'implant'
       ? '<span class="bg-blue-100 text-blue-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">🦷 임플란트</span>'
       : '<span class="bg-purple-100 text-purple-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">💎 보철</span>';
+    var regionBadge = '';
+    if (post.region && post.region !== 'all') {
+      var rCfg = FORUM_REGIONS.find(function(r){ return r.key === post.region; });
+      var pLabel = '';
+      if (post.province && post.province !== 'all' && rCfg) {
+        var pCfg = rCfg.provinces.find(function(x){ return x.key === post.province; });
+        if (pCfg) pLabel = pCfg.label;
+      }
+      var rLabel = rCfg ? (rCfg.icon + ' ' + t(rCfg.labelKey)) : post.region;
+      regionBadge = '<span class="bg-emerald-100 text-emerald-700 text-[8px] font-black px-1.5 py-0.5 rounded-full">' + rLabel + (pLabel ? ' · ' + pLabel : '') + '</span>';
+    }
     return '<div class="bg-white rounded-2xl shadow-sm p-4">' +
       '<div class="flex justify-between items-start gap-2">' +
         '<div class="flex-1 min-w-0">' +
-          '<div class="flex items-center gap-2 mb-1">' + catBadge + '</div>' +
+          '<div class="flex items-center gap-2 flex-wrap mb-1">' + catBadge + regionBadge + '</div>' +
           '<p class="font-black text-slate-800 text-sm leading-snug">' + post.title + '</p>' +
           '<p class="text-[10px] text-slate-400 mt-1 line-clamp-2">' + post.body + '</p>' +
           '<p class="text-[9px] text-slate-300 mt-1">' + post.author + ' · ' + (post.date||'') + ' · 👁 ' + (post.views||0) + ' · 💬 ' + (post.comments?post.comments.length:0) + '</p>' +
@@ -3092,21 +3192,52 @@ function forumTab(cat) {
   forumCategory = cat;
   renderForum();
 }
+function forumRegionTab(region) {
+  forumRegion   = region;
+  forumProvince = 'all';
+  renderForum();
+}
+function forumProvinceTab(province) {
+  forumProvince = province;
+  renderForum();
+}
 function forumToggleWrite() {
   var form = document.getElementById('forumWriteForm');
   var btn  = document.getElementById('forumWriteBtn');
   if (!form) return;
   var isHidden = form.classList.contains('hidden');
   form.classList.toggle('hidden', !isHidden);
-  // 열릴 때 카테고리 select를 현재 탭 카테고리로 설정
   if (isHidden) {
     var sel = document.getElementById('postCategory');
     if (sel) sel.value = forumCategory;
+    _updateProvinceSelect();
     updateNicknameDisplays();
   }
 }
+// 글쓰기 폼: 지역 변경 시 주(province) 드롭다운 갱신
+function _updateProvinceSelect() {
+  var regionSel   = document.getElementById('postRegion');
+  var provinceSel = document.getElementById('postProvince');
+  if (!regionSel || !provinceSel) return;
+  var regionKey = regionSel.value;
+  var regionCfg = FORUM_REGIONS.find(function(r){ return r.key === regionKey; });
+  var provinces = (regionCfg && regionCfg.provinces) ? regionCfg.provinces : [];
+  if (!provinces.length) {
+    provinceSel.innerHTML = '<option value="all">-</option>';
+    provinceSel.disabled  = true;
+  } else {
+    provinceSel.disabled  = false;
+    provinceSel.innerHTML = provinces.map(function(p){
+      return '<option value="' + p.key + '">' + p.label + '</option>';
+    }).join('');
+  }
+  // 현재 선택된 지역에 맞게 초기화
+  if (regionKey === forumRegion && forumProvince !== 'all') {
+    provinceSel.value = forumProvince;
+  }
+}
 function renderForum() {
-  // 탭 바 동적 렌더링 (FORUM_TABS 배열 기반)
+  // 카테고리 탭
   var tabsBar = document.getElementById('forumTabsBar');
   if (tabsBar) {
     tabsBar.innerHTML = FORUM_TABS.map(function(tab) {
@@ -3116,8 +3247,45 @@ function renderForum() {
         t(tab.labelKey) + '</button>';
     }).join('');
   }
-  // 카드형 게시글 목록
-  var filtered = posts.filter(function(p){ return p.category === forumCategory; });
+  // 지역 탭 (대분류)
+  var regionBar = document.getElementById('forumRegionBar');
+  if (regionBar) {
+    regionBar.innerHTML = FORUM_REGIONS.map(function(r) {
+      var active = forumRegion === r.key;
+      return '<button onclick="forumRegionTab(\'' + r.key + '\')" class="shrink-0 px-4 py-2 rounded-2xl font-black text-xs transition ' +
+        (active ? 'bg-emerald-600 text-white shadow' : 'bg-white text-slate-500 border border-slate-200') + '">' +
+        r.icon + ' ' + t(r.labelKey) + '</button>';
+    }).join('');
+  }
+  // 주(province) 서브탭 — 대분류가 선택된 경우만
+  var provinceBar = document.getElementById('forumProvinceBar');
+  if (provinceBar) {
+    var curRegion = FORUM_REGIONS.find(function(r){ return r.key === forumRegion; });
+    var provinces = (curRegion && curRegion.provinces && curRegion.provinces.length) ? curRegion.provinces : [];
+    if (provinces.length) {
+      provinceBar.classList.remove('hidden');
+      provinceBar.innerHTML =
+        '<button onclick="forumProvinceTab(\'all\')" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-[11px] transition ' +
+        (forumProvince === 'all' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-white text-slate-400 border border-slate-200') + '">' +
+        t('forum_region_all') + '</button>' +
+        provinces.map(function(p) {
+          var active = forumProvince === p.key;
+          return '<button onclick="forumProvinceTab(\'' + p.key + '\')" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-[11px] transition ' +
+            (active ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-white text-slate-400 border border-slate-200') + '">' +
+            p.label + '</button>';
+        }).join('');
+    } else {
+      provinceBar.classList.add('hidden');
+      provinceBar.innerHTML = '';
+    }
+  }
+  // 필터링: 카테고리 + 지역 + 주
+  var filtered = posts.filter(function(p){
+    if (p.category !== forumCategory) return false;
+    if (forumRegion === 'all') return true;
+    if (forumProvince !== 'all') return p.province === forumProvince;
+    return p.region === forumRegion;
+  });
   document.getElementById('postList').innerHTML = filtered.length ? filtered.map(function(p){
     var hasImg = p.images && p.images.length;
     var imgCount = hasImg ? p.images.length : 0;
@@ -3132,11 +3300,25 @@ function renderForum() {
     // 카테고리 뱃지
     var tabLabel = (FORUM_TABS.find(function(x){ return x.key === p.category; }) || {});
     var catIcon  = p.category === 'implant' ? '🦷' : (p.category === 'prosthetic' ? '💎' : '📌');
+    // 지역/주 뱃지
+    var regionBadge = '';
+    if (p.region && p.region !== 'all') {
+      var rCfg = FORUM_REGIONS.find(function(r){ return r.key === p.region; });
+      var pLabel = '';
+      if (p.province && p.province !== 'all' && rCfg) {
+        var pCfg = rCfg.provinces.find(function(x){ return x.key === p.province; });
+        if (pCfg) pLabel = pCfg.label;
+      }
+      var rLabel = rCfg ? (rCfg.icon + ' ' + t(rCfg.labelKey)) : p.region;
+      regionBadge = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">' +
+        rLabel + (pLabel ? ' · ' + pLabel : '') + '</span>';
+    }
     return '<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer active:bg-slate-50 transition" onclick="openForumDetail(' + p.id + ')">' +
       '<div class="p-4 flex gap-3 items-start">' +
         '<div class="flex-1 min-w-0">' +
-          '<div class="flex items-center gap-1.5 mb-1.5">' +
+          '<div class="flex items-center gap-1.5 flex-wrap mb-1.5">' +
             '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + catIcon + ' ' + (tabLabel.key ? t(tabLabel.labelKey) : p.category) + '</span>' +
+            regionBadge +
           '</div>' +
           '<p class="font-black text-slate-800 text-sm leading-snug mb-1 line-clamp-2">' + p.title + '</p>' +
           '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + p.body + '</p>' +
@@ -3198,17 +3380,22 @@ function submitPost() {
   var b   = document.getElementById('postBody').value.trim();
   var cat = (document.getElementById('postCategory') || {}).value || forumCategory;
   if (!tt || !b) return;
-  var auth  = currentUser.nickname || t('anon_patient');
-  var today = new Date().toISOString().slice(0,10);
-  posts.unshift({id:Date.now(), category:cat, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
+  var auth     = currentUser.nickname || t('anon_patient');
+  var today    = new Date().toISOString().slice(0,10);
+  var regionEl   = document.getElementById('postRegion');
+  var provinceEl = document.getElementById('postProvince');
+  var reg = regionEl   ? regionEl.value   : 'all';
+  var prv = provinceEl ? provinceEl.value : 'all';
+  posts.unshift({id:Date.now(), category:cat, region:reg, province:prv, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
   document.getElementById('postTitle').value  = '';
   document.getElementById('postBody').value   = '';
   document.getElementById('forumPhotoPreview').innerHTML = '';
   document.getElementById('forumPhotoPreview').classList.add('hidden');
   document.getElementById('forumPhotos').value = '';
   forumPhotos = [];
-  // 글 작성 후 해당 카테고리로 전환 & 폼 닫기
+  // 글 작성 후 해당 카테고리/지역으로 전환 & 폼 닫기
   forumCategory = cat;
+  if (reg && reg !== 'all') { forumRegion = reg; forumProvince = prv || 'all'; }
   var form = document.getElementById('forumWriteForm');
   if (form) form.classList.add('hidden');
   renderForum();
