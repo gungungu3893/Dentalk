@@ -510,7 +510,8 @@ async function handleLogin() {
   sessionEnd = Date.now() + 365*24*60*60*1000;
   extShown   = false;
   localStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
-  document.getElementById('licenseDisplay').textContent = currentUser.nickname;
+  var licDisp = document.getElementById('licenseDisplay');
+  if (licDisp) licDisp.textContent = currentUser.nickname;
   var sideNick = document.getElementById('sideNickname');
   if (sideNick) sideNick.textContent = currentUser.nickname;
   document.getElementById('sideLoginArea').classList.add('hidden');
@@ -521,6 +522,8 @@ async function handleLogin() {
   if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
   var hLoginBtn = document.getElementById('headerLoginBtn');
   if (hLoginBtn) hLoginBtn.classList.add('hide');
+  var hLogoutBtn = document.getElementById('headerLogoutBtn');
+  if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('flex'); }
   updateNavLocks();
   // 게시판 닉네임 표시 업데이트
   updateNicknameDisplays();
@@ -573,6 +576,8 @@ function forceLogout() {
   if (hNick) hNick.classList.remove('show');
   var hLoginBtn = document.getElementById('headerLoginBtn');
   if (hLoginBtn) hLoginBtn.classList.remove('hide');
+  var hLogoutBtn = document.getElementById('headerLogoutBtn');
+  if (hLogoutBtn) { hLogoutBtn.classList.add('hidden'); hLogoutBtn.classList.remove('flex'); }
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
@@ -587,11 +592,14 @@ function doLogout() {
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
   document.getElementById('timerWrap').classList.add('hidden');
-  document.getElementById('licenseDisplay').textContent = '-';
+  var licDisp = document.getElementById('licenseDisplay');
+  if (licDisp) licDisp.textContent = '-';
   var hNick = document.getElementById('headerNickBadge');
   if (hNick) hNick.classList.remove('show');
   var hLoginBtn = document.getElementById('headerLoginBtn');
   if (hLoginBtn) hLoginBtn.classList.remove('hide');
+  var hLogoutBtn = document.getElementById('headerLogoutBtn');
+  if (hLogoutBtn) { hLogoutBtn.classList.add('hidden'); hLogoutBtn.classList.remove('flex'); }
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
@@ -3062,7 +3070,7 @@ function renderUsed() {
   var list = document.getElementById('usedList');
   if (!list) return;
   if (!usedItems.length) {
-    list.innerHTML = '<div class="col-span-2 text-center text-slate-400 font-bold text-sm py-12">' + t('used_empty') + '</div>';
+    list.innerHTML = '<div class="col-span-5 text-center text-slate-400 font-bold text-sm py-12">' + t('used_empty') + '</div>';
     return;
   }
   var condMap   = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
@@ -3070,20 +3078,16 @@ function renderUsed() {
   list.innerHTML = usedItems.map(function(item) {
     var thumb = item.image
       ? '<img src="' + item.image + '" class="w-full h-full object-cover">'
-      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-4xl">📷</span></div>';
-    var badge = '<span class="inline-block text-[10px] font-black px-2 py-0.5 rounded-full ' + condMap[item.cond||'fair'] + '">' + condLabel[item.cond||'fair'] + '</span>';
-    var seller = item.seller || 'Me';
+      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-2xl">📷</span></div>';
+    var badge = '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full ' + condMap[item.cond||'fair'] + '">' + condLabel[item.cond||'fair'] + '</span>';
     var date   = (item.date||'').slice(5); // MM-DD
-    return '<div class="bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + item.id + ')">' +
-      '<div class="aspect-[4/3] bg-slate-50 overflow-hidden">' + thumb + '</div>' +
-      '<div class="p-3 space-y-1.5">' +
+    return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + item.id + ')">' +
+      '<div class="aspect-square bg-slate-50 overflow-hidden">' + thumb + '</div>' +
+      '<div class="p-1.5 space-y-1">' +
         badge +
-        '<p class="font-black text-slate-800 text-sm leading-snug line-clamp-2">' + item.name + '</p>' +
-        '<p class="font-black text-blue-700 text-base font-mono">฿' + item.price.toLocaleString() + '</p>' +
-        '<div class="flex items-center justify-between pt-0.5">' +
-          '<p class="text-[10px] text-slate-400 font-bold truncate">' + seller + '</p>' +
-          '<p class="text-[10px] text-slate-300 font-bold shrink-0 ml-1">' + date + '</p>' +
-        '</div>' +
+        '<p class="font-black text-slate-800 text-[10px] leading-snug line-clamp-2">' + item.name + '</p>' +
+        '<p class="font-black text-blue-700 text-[10px] font-mono">฿' + item.price.toLocaleString() + '</p>' +
+        '<p class="text-[8px] text-slate-300 font-bold">' + date + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -3150,11 +3154,17 @@ function openUsedDetail(id) {
   document.getElementById('udp-meta').textContent   = item.seller + ' · ' + item.date;
   document.getElementById('udp-views').textContent  = item.views;
   document.getElementById('udp-contactBtn').onclick = function(){ showContact(item.contact); };
-  document.getElementById('udp-deleteBtn').onclick  = function(){
-    var idx = usedItems.findIndex(function(x){ return x.id===id; });
-    if (idx !== -1) usedItems.splice(idx, 1);
-    goBack();
-  };
+  var deleteBtn = document.getElementById('udp-deleteBtn');
+  // 삭제 버튼: 로그인 상태이고 본인 게시물일 때만 표시
+  var canDelete = isLoggedIn() && (item.seller === 'Me' || item.seller === currentUser.nickname);
+  if (deleteBtn) {
+    deleteBtn.style.display = canDelete ? '' : 'none';
+    deleteBtn.onclick = function(){
+      var idx = usedItems.findIndex(function(x){ return x.id===id; });
+      if (idx !== -1) usedItems.splice(idx, 1);
+      goBack();
+    };
+  }
   var imgWrap = document.getElementById('udp-imageWrap');
   var imgEl   = document.getElementById('udp-image');
   if (item.image) { imgEl.src = item.image; imgWrap.classList.remove('hidden'); }
@@ -3495,6 +3505,53 @@ function renderProfileSettings() {
       }
     }
   }
+  // 내가 쓴 게시물
+  var myPostsEl = document.getElementById('settingsMyPosts');
+  if (myPostsEl) {
+    if (!isLoggedIn()) {
+      myPostsEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
+    } else {
+      var myPosts = posts.filter(function(p){ return p.author === currentUser.nickname; }).slice(0, 5);
+      if (!myPosts.length) {
+        myPostsEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">작성한 게시물이 없습니다.</p>';
+      } else {
+        myPostsEl.innerHTML = myPosts.map(function(p) {
+          return '<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 cursor-pointer active:bg-slate-50" onclick="openForumDetail(' + p.id + ')">' +
+            '<div class="flex-1 min-w-0 pr-2">' +
+              '<p class="text-xs font-black text-slate-700 truncate">' + p.title + '</p>' +
+              '<p class="text-[10px] text-slate-400 font-bold mt-0.5">' + (p.date||'') + ' · 💬 ' + (p.comments||[]).length + '</p>' +
+            '</div>' +
+            '<span class="text-slate-300 text-sm font-black shrink-0">›</span>' +
+          '</div>';
+        }).join('');
+      }
+    }
+  }
+  // 내 중고물품
+  var myUsedEl = document.getElementById('settingsMyUsed');
+  if (myUsedEl) {
+    if (!isLoggedIn()) {
+      myUsedEl.innerHTML = '<p class="col-span-3 text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
+    } else {
+      var myUsed = usedItems.filter(function(u){ return u.seller === 'Me' || u.seller === currentUser.nickname; }).slice(0, 6);
+      if (!myUsed.length) {
+        myUsedEl.innerHTML = '<p class="col-span-3 text-sm text-slate-400 font-bold">등록한 중고물품이 없습니다.</p>';
+      } else {
+        myUsedEl.innerHTML = myUsed.map(function(u) {
+          var thumb = u.image
+            ? '<img src="' + u.image + '" class="w-full h-full object-cover">'
+            : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
+          return '<div class="bg-slate-50 rounded-xl overflow-hidden cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + u.id + ')">' +
+            '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
+            '<div class="p-1.5">' +
+              '<p class="text-[9px] font-black text-slate-700 truncate">' + u.name + '</p>' +
+              '<p class="text-[9px] font-black text-blue-700 font-mono">฿' + u.price.toLocaleString() + '</p>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
+  }
 }
 function toggleProfileEditInline() {
   var form = document.getElementById('settingsProfileEditForm');
@@ -3701,20 +3758,43 @@ function renderEvents() {
     var monthStr = monthNames[monthIdx] || (parts[1]||'');
     var dayStr   = parts[2] ? parseInt(parts[2], 10) : '';
     var yearStr  = parts[0] || '';
-    var desc     = e.desc || '';
-    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden flex">' +
+    return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden flex cursor-pointer active:scale-[.98] transition" onclick="openEventDetail(' + e.id + ')">' +
       '<div class="bg-[#001d4a] flex flex-col items-center justify-center px-5 py-5 shrink-0 min-w-[72px]">' +
         '<span class="text-blue-300 text-[10px] font-black uppercase tracking-widest">' + monthStr + '</span>' +
         '<span class="text-white text-3xl font-black leading-none mt-0.5">' + dayStr + '</span>' +
         '<span class="text-blue-400 text-[10px] font-bold mt-0.5">' + yearStr + '</span>' +
       '</div>' +
-      '<div class="flex-1 p-4 min-w-0">' +
-        '<p class="font-black text-slate-800 text-sm leading-snug">' + e.event + '</p>' +
-        '<p class="text-xs text-slate-400 font-bold mt-1.5">📍 ' + e.loc + '</p>' +
-        (desc ? '<p class="text-xs text-slate-500 mt-2 leading-relaxed">' + desc + '</p>' : '') +
+      '<div class="flex-1 p-4 min-w-0 flex items-center">' +
+        '<div class="flex-1 min-w-0">' +
+          '<p class="font-black text-slate-800 text-sm leading-snug">' + e.event + '</p>' +
+          '<p class="text-xs text-slate-400 font-bold mt-1.5">📍 ' + e.loc + '</p>' +
+        '</div>' +
+        '<span class="text-slate-300 text-lg font-black shrink-0 ml-2">›</span>' +
       '</div>' +
     '</div>';
   }).join('');
+}
+function openEventDetail(id) {
+  var ev = events_.find(function(e){ return e.id === id; });
+  if (!ev) return;
+  var parts = (ev.date||'').split('-');
+  var monthNames = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  var monthIdx = parseInt(parts[1]||1, 10) - 1;
+  document.getElementById('edp-month').textContent = monthNames[monthIdx] || (parts[1]||'');
+  document.getElementById('edp-day').textContent   = parts[2] ? parseInt(parts[2], 10) : '';
+  document.getElementById('edp-year').textContent  = parts[0] || '';
+  document.getElementById('edp-title').textContent = ev.event;
+  document.getElementById('edp-locText').textContent = ev.loc;
+  var descWrap = document.getElementById('edp-descWrap');
+  var descEl   = document.getElementById('edp-desc');
+  if (ev.desc) {
+    descEl.textContent = ev.desc;
+    descWrap.classList.remove('hidden');
+  } else {
+    descWrap.classList.add('hidden');
+  }
+  document.getElementById('edp-imageWrap').classList.add('hidden');
+  goDetailPage('event-detail', ev.event, 'events');
 }
 // ============================================================
 // SETTINGS - 언어 선택 (저장 전까지 pendingLang에 보관)
@@ -3725,8 +3805,8 @@ function selectLang(lang) {
     var b = document.getElementById('lang-'+l);
     if (!b) return;
     b.className = l===lang
-      ? 'p-4 rounded-2xl font-black text-sm border-2 border-amber-500 bg-amber-50 text-amber-700'
-      : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
+      ? 'py-3 rounded-2xl font-black text-xs border-2 border-amber-500 bg-amber-50 text-amber-700 flex flex-col items-center gap-1'
+      : 'py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1';
   });
   // 현재 저장된 언어 버튼은 파란색으로 유지
   var saved = document.getElementById('lang-'+currentLang);
@@ -3748,8 +3828,8 @@ function saveLang() {
     var b = document.getElementById('lang-'+l);
     if (!b) return;
     b.className = l===currentLang
-      ? 'p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700'
-      : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
+      ? 'py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1'
+      : 'py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1';
   });
   var pendingNote = document.getElementById('langPendingNote');
   if (pendingNote) pendingNote.classList.add('hidden');
@@ -3808,8 +3888,8 @@ function applyLang() {
     var b = document.getElementById('lang-'+l);
     if (!b) return;
     b.className = l===currentLang
-      ? 'p-4 rounded-2xl font-black text-sm border-2 border-blue-600 bg-blue-50 text-blue-700'
-      : 'p-4 rounded-2xl font-black text-sm border-2 border-transparent bg-slate-50 text-slate-600';
+      ? 'py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1'
+      : 'py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1';
   });
 }
 // ============================================================

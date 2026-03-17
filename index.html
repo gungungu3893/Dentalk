@@ -942,7 +942,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <button onclick="submitUsed()" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="used_post_btn">POST FOR SALE</button>
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
-      <div id="usedList" class="grid grid-cols-2 gap-3"></div>
+      <div id="usedList" class="grid grid-cols-5 gap-2"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
@@ -1079,6 +1079,28 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <div id="eventList" class="space-y-3"></div>
     </div>
+    <!-- ==================== EVENT DETAIL PAGE ==================== -->
+    <div id="page-event-detail" class="page">
+      <div id="edp-imageWrap" class="hidden">
+        <img id="edp-image" src="" class="w-full object-contain">
+      </div>
+      <div class="p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <div id="edp-dateBadge" class="bg-[#001d4a] flex flex-col items-center justify-center px-4 py-3 rounded-2xl shrink-0 min-w-[64px]">
+            <span id="edp-month" class="text-blue-300 text-[10px] font-black uppercase tracking-widest"></span>
+            <span id="edp-day"   class="text-white text-2xl font-black leading-none mt-0.5"></span>
+            <span id="edp-year"  class="text-blue-400 text-[10px] font-bold mt-0.5"></span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 id="edp-title" class="font-black text-slate-800 text-xl leading-snug"></h2>
+            <p id="edp-loc" class="text-sm text-slate-400 font-bold mt-1">📍 <span id="edp-locText"></span></p>
+          </div>
+        </div>
+        <div id="edp-descWrap" class="hidden bg-slate-50 rounded-2xl p-4 mb-4">
+          <p id="edp-desc" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
+        </div>
+      </div>
+    </div>
     <!-- ==================== FACTORY ==================== -->
     <div id="page-factory" class="page p-4">
       <div id="factoryPromoHeader" class="bg-white rounded-3xl p-8 shadow-sm text-center mb-4">
@@ -1147,12 +1169,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_lang">Language</h3>
         <p class="text-[10px] text-amber-600 font-bold mt-2 hidden" id="langPendingNote" data-i18n="settings_pending">Select a language then press Save.</p>
         <div class="grid grid-cols-3 gap-2 mt-4">
-          <button onclick="selectLang('en')" id="lang-en" class="py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1"><span class="text-xl">🇺🇸</span><span>EN</span></button>
-          <button onclick="selectLang('ko')" id="lang-ko" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇰🇷</span><span>KO</span></button>
-          <button onclick="selectLang('zh')" id="lang-zh" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇨🇳</span><span>ZH</span></button>
-          <button onclick="selectLang('th')" id="lang-th" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇭</span><span>TH</span></button>
-          <button onclick="selectLang('vi')" id="lang-vi" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇻🇳</span><span>VI</span></button>
-          <button onclick="selectLang('es')" id="lang-es" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇪🇸</span><span>ES</span></button>
+          <button onclick="selectLang('en')" id="lang-en" class="py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1"><span class="text-xl">🇺🇸</span><span>English</span></button>
+          <button onclick="selectLang('ko')" id="lang-ko" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇰🇷</span><span>한국어</span></button>
+          <button onclick="selectLang('zh')" id="lang-zh" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇨🇳</span><span>中文</span></button>
+          <button onclick="selectLang('th')" id="lang-th" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇭</span><span>ภาษาไทย</span></button>
+          <button onclick="selectLang('vi')" id="lang-vi" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇻🇳</span><span>Tiếng Việt</span></button>
+          <button onclick="selectLang('es')" id="lang-es" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇪🇸</span><span>Español</span></button>
         </div>
         <button onclick="saveLang()" id="saveLangBtn" class="mt-4 w-full py-3.5 rounded-2xl bg-[#001d4a] text-white font-black text-sm shadow active:scale-95 transition" data-i18n="settings_save_btn">Save Language</button>
         <p id="savedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="settings_saved_msg">Language saved!</p>
@@ -1164,6 +1186,22 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <button onclick="goTo('custom')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsOrdersSummary" class="space-y-2"></div>
+      </div>
+      <!-- 내가 쓴 게시물 -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-black text-slate-800">✍️ 내가 쓴 게시물</h3>
+          <button onclick="goPage('forum')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100">모두 보기 ›</button>
+        </div>
+        <div id="settingsMyPosts" class="space-y-2"></div>
+      </div>
+      <!-- 내 중고물품 -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-black text-slate-800">♻️ 내 중고물품</h3>
+          <button onclick="goPage('used')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100">모두 보기 ›</button>
+        </div>
+        <div id="settingsMyUsed" class="grid grid-cols-3 gap-2"></div>
       </div>
     </div>
   </div>
