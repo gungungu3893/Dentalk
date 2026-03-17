@@ -1,4 +1,4 @@
-const CACHE = 'dentalk-v1';
+const CACHE = 'dentalk-v2';
 const ASSETS = ['./', './index.html', './app.js', './lang.js', './icon.svg', './manifest.json'];
 
 self.addEventListener('install', e => {

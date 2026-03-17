@@ -1,31 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><title>Dentalk Icon Generator</title>
-<style>body{font-family:sans-serif;display:flex;gap:20px;padding:20px;background:#f0f0f0}
-canvas{border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Inter',sans-serif;display:flex;gap:20px;padding:20px;background:#f1f5f9}
+canvas{border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
 .col{display:flex;flex-direction:column;align-items:center;gap:8px}
-button{padding:8px 18px;background:#001d4a;color:#fff;border:none;border-radius:8px;font-weight:900;cursor:pointer;font-size:13px}
-p{font-size:12px;color:#555;margin:0}</style>
+button{padding:8px 18px;background:#001220;color:#D4AF37;border:none;border-radius:8px;font-weight:900;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif}
+p{font-size:12px;color:#64748b;margin:0;font-weight:600}
+h2{margin:0 0 4px;font-size:11px;color:#001d4a;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+#status{font-size:12px;color:#0a3072;font-weight:700;padding:8px 16px;background:#dbeafe;border-radius:8px;display:none}
+</style>
 </head>
 <body>
-<div class="col">
-  <canvas id="c192" width="192" height="192"></canvas>
-  <p>192 × 192 px</p>
-  <button onclick="dl('c192','icon-192.png')">📥 icon-192.png 다운로드</button>
-</div>
-<div class="col">
-  <canvas id="c512" width="512" height="512"></canvas>
-  <p>512 × 512 px</p>
-  <button onclick="dl('c512','icon-512.png')">📥 icon-512.png 다운로드</button>
+<div style="display:flex;flex-direction:column;gap:16px;width:100%">
+  <div id="status">⏳ Inter 폰트 로딩 중...</div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <div class="col">
+      <h2>192 × 192 px</h2>
+      <canvas id="c192" width="192" height="192"></canvas>
+      <p>192 × 192 px</p>
+      <button onclick="dl('c192','icon-192.png')">📥 icon-192.png 다운로드</button>
+    </div>
+    <div class="col">
+      <h2>512 × 512 px</h2>
+      <canvas id="c512" width="512" height="512"></canvas>
+      <p>512 × 512 px</p>
+      <button onclick="dl('c512','icon-512.png')">📥 icon-512.png 다운로드</button>
+    </div>
+  </div>
 </div>
 <script>
+/* Design tokens — matches index.html CSS variables */
+var TOKENS = {
+  bgDeepest:  '#001220',   /* --color-primary-darkest */
+  bgDark:     '#001d4a',   /* --color-primary-dark    */
+  accent:     '#D4AF37',   /* --color-accent (gold)   */
+  white:      '#ffffff',
+  fontFamily: '"Inter", "Arial Black", Arial, sans-serif',
+  fontWeight: 900
+};
+
 function draw(id) {
   var cv = document.getElementById(id);
-  var s = cv.width;
+  var s  = cv.width;
   var ctx = cv.getContext('2d');
-  var r = s * 0.14;
+  var r  = s * 0.18;   /* slightly larger corner radius — matches modern card style */
 
-  // Rounded rect background
+  /* ── Background: deep navy gradient ── */
+  var grad = ctx.createLinearGradient(0, 0, s, s);
+  grad.addColorStop(0, TOKENS.bgDark);      /* #001d4a top-left  */
+  grad.addColorStop(1, TOKENS.bgDeepest);   /* #001220 bottom-right */
+
   ctx.beginPath();
   ctx.moveTo(r, 0);
   ctx.lineTo(s - r, 0);
@@ -37,18 +65,20 @@ function draw(id) {
   ctx.lineTo(0, r);
   ctx.quadraticCurveTo(0, 0, r, 0);
   ctx.closePath();
-  ctx.fillStyle = '#001d4a';
+  ctx.fillStyle = grad;
   ctx.fill();
 
-  // "dentalk" text  — den + t(gold) + alk
-  // Auto-fit: shrink font until total width fits within 82% of canvas
+  /* ── Gold accent line (thin bar below text, like login screen) ── */
+  /* drawn after text so we know exact text width */
+
+  /* ── "dentalk" text: den(white) + t(gold) + alk(white) ── */
   var maxWidth = s * 0.82;
-  var fs = Math.round(s * 0.30);
+  var fs = Math.round(s * 0.285);
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   var wDen, wT, wAlk, total;
   do {
-    ctx.font = '900 ' + fs + 'px "Arial Black", Arial, sans-serif';
+    ctx.font = TOKENS.fontWeight + ' ' + fs + 'px ' + TOKENS.fontFamily;
     wDen  = ctx.measureText('den').width;
     wT    = ctx.measureText('t').width;
     wAlk  = ctx.measureText('alk').width;
@@ -56,21 +86,36 @@ function draw(id) {
     if (total > maxWidth) fs -= 1;
   } while (total > maxWidth && fs > 8);
 
-  var y = s * 0.5;
+  var y = s * 0.48;
   var x = (s - total) / 2;
 
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = TOKENS.white;
   ctx.fillText('den', x, y);
   x += wDen;
-  ctx.fillStyle = '#D4AF37';
+  ctx.fillStyle = TOKENS.accent;
   ctx.fillText('t', x, y);
   x += wT;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = TOKENS.white;
   ctx.fillText('alk', x, y);
-}
 
-draw('c192');
-draw('c512');
+  /* ── Gold separator line ── */
+  var lineW   = total * 0.7;
+  var lineX   = (s - lineW) / 2;
+  var lineY   = y + fs * 0.62;
+  var lineH   = Math.max(1.5, s * 0.007);
+
+  var lineGrad = ctx.createLinearGradient(lineX, 0, lineX + lineW, 0);
+  lineGrad.addColorStop(0,   'transparent');
+  lineGrad.addColorStop(0.5, TOKENS.accent);
+  lineGrad.addColorStop(1,   'transparent');
+
+  ctx.beginPath();
+  ctx.rect(lineX, lineY, lineW, lineH);
+  ctx.fillStyle = lineGrad;
+  ctx.globalAlpha = 0.65;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
 
 function dl(id, name) {
   var a = document.createElement('a');
@@ -78,6 +123,19 @@ function dl(id, name) {
   a.download = name;
   a.click();
 }
+
+/* Wait for Google Fonts before drawing so Inter is available */
+var status = document.getElementById('status');
+status.style.display = 'block';
+
+document.fonts.ready.then(function() {
+  status.textContent = '✅ Inter 폰트 로드 완료 — 아이콘 생성 중...';
+  draw('c192');
+  draw('c512');
+  status.textContent = '✅ 아이콘 생성 완료! 아래 버튼으로 다운로드하세요.';
+  status.style.background = '#dcfce7';
+  status.style.color = '#166534';
+});
 </script>
 </body>
 </html>
