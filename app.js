@@ -514,11 +514,11 @@ async function handleLogin() {
   var hLogoutBtn = document.getElementById('headerLogoutBtn');
   if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('flex'); }
   updateNavLocks();
-  // 게시판 닉네임 표시 업데이트
   updateNicknameDisplays();
-  // 프로필 정보 렌더링
-  renderProfileSettings();
   closeModal('loginModal');
+  // 로그인 직후 CNC 주문 로드 → 설정 페이지 요약에 반영
+  loadOrdersFromSupabase().then(function() { renderProfileSettings(); });
+  renderProfileSettings(); // 로딩 전 빈 화면 방지용 즉시 렌더
   if (isAdmin()) {
     document.body.classList.add('is-admin');
     goPage('factory');
@@ -807,13 +807,45 @@ function renderShop() {
   }).join('');
   renderMyShopOrders();
 }
-function renderMyShopOrders() {
+async function renderMyShopOrders() {
   var container = document.getElementById('myShopOrdersList');
   if (!container) return;
-  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
-  if (currentUser && currentUser.nickname) {
-    orders = orders.filter(function(o){ return o.nickname === currentUser.nickname; });
+  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">로딩 중...</p>';
+
+  // Supabase에서 본인 주문만 조회
+  var orders = [];
+  try {
+    var nick = currentUser && currentUser.nickname;
+    var rows  = await sbGetShopOrders(nick, false); // isAdmin=false → 본인 것만
+    orders = rows.map(function(r) {
+      return {
+        id:          r.id,
+        date:        r.date,
+        clinic:      r.clinic,
+        phone:       r.phone,
+        address:     r.addr,
+        lineId:      r.line_id,
+        nickname:    r.user_nickname,
+        items:       r.items || [],
+        stage:       r.stage,
+        carrier:     r.carrier     || '',
+        tracking:    r.tracking_number || '',
+        totalAmount: (r.items || []).reduce(function(s,i){ return s+(i.price||0)*(i.qty||1); }, 0),
+      };
+    });
+    // localStorage 캐시 업데이트
+    localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
+  } catch(e) {
+    console.warn('[MyShopOrders]', e);
+    // 네트워크 오류 시 localStorage 폴백
+    var cached = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+    var nick = currentUser && currentUser.nickname;
+    orders = nick ? cached.filter(function(o){ return o.nickname === nick; }) : cached;
   }
+
+  _renderMyShopOrdersList(container, orders);
+}
+function _renderMyShopOrdersList(container, orders) {
   if (!orders.length) {
     container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">주문 내역이 없습니다.</p>';
     return;
@@ -822,17 +854,18 @@ function renderMyShopOrders() {
     var stageOrders = orders.filter(function(o){ return o.stage === stage.key; });
     if (!stageOrders.length) return '';
     var ordersHtml = stageOrders.map(function(o){
-      var itemsHtml = o.items.map(function(i){
-        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
+      var itemsHtml = (o.items||[]).map(function(i){
+        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + ((i.price||0)*(i.qty||1)).toLocaleString() + '</span></div>';
       }).join('');
+      var total = o.totalAmount || (o.items||[]).reduce(function(s,i){ return s+(i.price||0)*(i.qty||1); }, 0);
       return '<div class="bg-slate-50 rounded-xl p-3 mb-2">' +
         '<div class="flex justify-between items-center mb-1">' +
-          '<p class="font-black text-slate-700 text-xs">' + o.clinic + '</p>' +
+          '<p class="font-black text-slate-700 text-xs">' + (o.clinic||'-') + '</p>' +
           '<p class="text-[8px] font-bold text-slate-400 font-mono">' + o.id + '</p>' +
         '</div>' +
-        '<p class="text-[9px] text-slate-400 mb-2">📅 ' + o.date + (o.carrier ? ' · 🚚 ' + o.carrier + (o.tracking ? ' ' + o.tracking : '') : '') + '</p>' +
+        '<p class="text-[9px] text-slate-400 mb-2">📅 ' + (o.date||'') + (o.carrier ? ' · 🚚 ' + o.carrier + (o.tracking ? ' ' + o.tracking : '') : '') + '</p>' +
         '<div class="space-y-0.5 mb-2">' + itemsHtml + '</div>' +
-        '<p class="text-xs font-black text-blue-800 text-right">합계 ' + o.totalAmount.toLocaleString() + ' THB</p>' +
+        '<p class="text-xs font-black text-blue-800 text-right">합계 ' + total.toLocaleString() + ' THB</p>' +
       '</div>';
     }).join('');
     return '<div class="mb-4">' +
@@ -3652,7 +3685,7 @@ function renderProfileSettings() {
     if (!isLoggedIn()) {
       summaryEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
     } else {
-      var myOrders = customOrders.filter(function(o){ return o.user === currentUser.nickname; }).slice(0, 5);
+      var myOrders = customOrders.filter(function(o){ return o.userNickname === currentUser.nickname; }).slice(0, 5);
       if (!myOrders.length) {
         summaryEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('settings_no_orders') + '</p>';
       } else {
