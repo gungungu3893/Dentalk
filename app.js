@@ -97,13 +97,10 @@ const ORDER_STAGES   = [
   {key:'shipped',     icon:'⑥'},
   {key:'done',        icon:'⑦'},
 ];
-const ADMIN_NICKNAMES = ['Admin', '관리자', 'admin'];
+// ADMIN_NICKNAMES 제거 — isAdmin()은 role='admin' 기준으로 판별 (supabase.js)
 const LINE_PROXY_URL = 'https://dentalk-line.gungungu.workers.dev';
 const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
-// ── Supabase 면허 검증 ──────────────────────────────────────────
-// Supabase 프로젝트 생성 후 아래 두 값을 교체하세요.
-const SUPABASE_URL      = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZGxnbnBqY213YnNyeHZveHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTA0MDYsImV4cCI6MjA4NzU4NjQwNn0.amIky4WslMDFBv30n9hcdJx-CWFBOdRvLR9rqwET-_o';
+// ── Supabase 상수는 supabase.js에서 정의됩니다 ──────────────────
 // ============================================================
 // 상태
 // ============================================================
@@ -111,7 +108,7 @@ let currentPage  = 'home';
 let prevPage     = 'home';
 let currentLang  = 'en';
 let pendingLang  = null; // 저장 전 선택된 언어
-let currentUser  = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
+let currentUser  = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
 let cart         = [];
 let currentProd  = null;
 let tableQtys    = {};
@@ -436,16 +433,7 @@ async function submitRegistration() {
   btn.disabled = true;
   btn.textContent = t('reg_submitting');
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/licenses', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({ license_number:lic, doctor_name:name, clinic_name:clinic, contact:contact, nickname:nickname, email:email, password:password, is_active:false }),
-    });
+    var res = await authRegister({ licenseNumber:lic, doctorName:name, clinicName:clinic, contact:contact, nickname:nickname, email:email, password:password });
     btn.disabled = false;
     btn.textContent = t('reg_submit');
     if (res.status === 409) { showRegError(t('reg_duplicate')); return; }
@@ -458,37 +446,9 @@ async function submitRegistration() {
     showRegError(t('reg_network_error'));
   }
 }
-// ── Supabase 사용자 검증 (닉네임 + 비밀번호) ─────────────────────
+// ── Supabase 사용자 검증 — supabase.js의 authLogin() 사용 ────────
 async function verifyUser(nickname, password) {
-  try {
-    var isAdminNick = ['admin', '관리자'].includes(nickname.trim().toLowerCase());
-    const url = SUPABASE_URL + '/rest/v1/licenses'
-      + '?nickname=eq.' + encodeURIComponent(nickname)
-      + '&password=eq.' + encodeURIComponent(password)
-      + (isAdminNick ? '' : '&is_active=eq.true')
-      + '&select=license_number,doctor_name,clinic_name,nickname,email,phone,address';
-    const res = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      }
-    });
-    if (!res.ok) return { ok: false, reason: 'network' };
-    const data = await res.json();
-    if (!data.length) return { ok: false, reason: 'not_found' };
-    return {
-      ok: true,
-      licenseNum: data[0].license_number || '',
-      doctorName: data[0].doctor_name    || '',
-      clinicName: data[0].clinic_name    || '',
-      nickname:   data[0].nickname       || '',
-      email:      data[0].email          || '',
-      phone:      data[0].phone          || '',
-      address:    data[0].address        || '',
-    };
-  } catch (e) {
-    return { ok: false, reason: 'network' };
-  }
+  return authLogin(nickname, password);
 }
 function showLoginError(msg) {
   var el = document.getElementById('loginError');
@@ -513,7 +473,10 @@ async function handleLogin() {
   btn.disabled = false;
   btn.textContent = t('login_btn');
   if (!result.ok) {
-    showLoginError(result.reason === 'network' ? t('login_network_error') : t('login_not_found'));
+    var errMsg = result.reason === 'network'    ? t('login_network_error')
+               : result.reason === 'not_active' ? t('login_not_found')
+               : t('login_not_found');
+    showLoginError(errMsg);
     return;
   }
   // 로그인 성공 — Supabase 데이터 우선, localStorage 폴백
@@ -528,6 +491,7 @@ async function handleLogin() {
     address:    result.address    || local.address    || '',
     clinicName: result.clinicName || local.clinicName || '',
     doctorName: result.doctorName || '',
+    role:       result.role       || 'user',
   };
   // Supabase에서 받은 최신 데이터를 localStorage에도 동기화
   var sync = { nickname:currentUser.nickname, email:currentUser.email, phone:currentUser.phone, address:currentUser.address, clinicName:currentUser.clinicName, doctorName:currentUser.doctorName };
@@ -593,7 +557,7 @@ function forceLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
   localStorage.removeItem('dentalk_session');
   document.body.classList.remove('is-admin');
-  currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
+  currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
   document.getElementById('timerWrap').classList.add('hidden');
@@ -612,7 +576,7 @@ function forceLogout() {
 function doLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
   localStorage.removeItem('dentalk_session');
-  currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'' };
+  currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
   cart=[]; updateBadge();
   document.getElementById('sideLoginArea').classList.remove('hidden');
   document.getElementById('sideLoggedArea').classList.add('hidden');
@@ -2253,8 +2217,7 @@ function adminShowTab(tab) {
   else if (tab === 'events')     renderAdminEventsTab();
 }
 function isAdmin() {
-  var nick = (currentUser.nickname || '').trim().toLowerCase();
-  return isLoggedIn() && ['admin', '관리자'].includes(nick);
+  return isLoggedIn() && currentUser.role === 'admin';
 }
 async function saveOrderToSupabase(order) {
   var buildBody = function(casesData) {
@@ -2583,12 +2546,9 @@ async function renderAdminSummaryCards() {
   var todaySignups = '—';
   try {
     var today = new Date().toISOString().split('T')[0];
-    var res = await fetch(
-      SUPABASE_URL + '/rest/v1/licenses?select=license_number,created_at',
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-    );
-    if (res.ok) {
-      var users = await res.json();
+    var usersData = await sbGet('users', 'select=license_number,created_at');
+    {
+      var users = usersData;
       totalMembers = users.length;
       todaySignups = users.filter(function(u) {
         return u.created_at && u.created_at.startsWith(today);
@@ -3092,19 +3052,14 @@ async function renderAdminUsers() {
   if (!list) return;
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_loading') + '</p>';
   try {
-    var res = await fetch(
-      SUPABASE_URL + '/rest/v1/licenses?select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active&order=clinic_name.asc',
-      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
-    );
-    if (!res.ok) { list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_load_fail') + '</p>'; return; }
-    var users = await res.json();
+    var users = await authGetAllUsers();
     if (!users.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_no_users') + '</p>'; return; }
 
     var pendingUsers = users.filter(function(u){ return u.is_active === null || u.is_active === undefined; });
     var otherUsers   = users.filter(function(u){ return u.is_active !== null && u.is_active !== undefined; });
 
     var makeUserCard = function(u, isPending) {
-      var isAdminU = ['admin','관리자'].includes((u.nickname||'').trim().toLowerCase());
+      var isAdminU = u.role === 'admin';
       var safeNick = (u.nickname||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       var isActive = u.is_active === true;
       var actionBtns;
@@ -3176,14 +3131,7 @@ async function adminRejectUser(nickname) {
 }
 async function _setUserActiveState(nickname, active) {
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/licenses?nickname=eq.' + encodeURIComponent(nickname), {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ is_active: active })
-    });
+    var res = await authSetUserActive(nickname, active);
     if (res.ok) { renderAdminUsers(); renderAdminSummaryCards(); }
     else alert(t('admin_load_fail'));
   } catch(e) { alert(t('admin_error') + ' ' + e.message); }
@@ -3192,14 +3140,7 @@ async function adminToggleUser(nickname, currentActive) {
   var newActive = !currentActive;
   if (!confirm(newActive ? nickname + ' 회원을 승인하시겠습니까?' : nickname + ' 회원을 차단하시겠습니까?')) return;
   try {
-    var res = await fetch(SUPABASE_URL + '/rest/v1/licenses?nickname=eq.' + encodeURIComponent(nickname), {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ is_active: newActive })
-    });
+    var res = await authSetUserActive(nickname, newActive);
     if (res.ok) renderAdminUsers();
     else alert('업데이트 실패');
   } catch(e) { alert('오류: ' + e.message); }
@@ -3764,11 +3705,7 @@ async function saveProfileInline() {
   profile.clinicName = currentUser.clinicName;
   localStorage.setItem('dentalk_profile_' + currentUser.licenseNum, JSON.stringify(profile));
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/licenses?license_number=eq.' + encodeURIComponent(currentUser.licenseNum), {
-      method: 'PATCH',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ email: currentUser.email, phone: currentUser.phone, address: currentUser.address, clinic_name: currentUser.clinicName })
-    });
+    await authUpdateProfile(currentUser.licenseNum, { email: currentUser.email, phone: currentUser.phone, address: currentUser.address, clinic_name: currentUser.clinicName });
   } catch(e) { console.warn('Supabase PATCH 실패:', e); }
   var msg = document.getElementById('profileSavedMsg');
   if (msg) { msg.classList.remove('hidden'); setTimeout(function(){ msg.classList.add('hidden'); }, 2500); }
@@ -3799,21 +3736,7 @@ async function saveProfile() {
   localStorage.setItem('dentalk_profile_' + currentUser.licenseNum, JSON.stringify(profile));
   // Supabase에 PATCH
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/licenses?license_number=eq.' + encodeURIComponent(currentUser.licenseNum), {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        email:       currentUser.email,
-        phone:       currentUser.phone,
-        address:     currentUser.address,
-        clinic_name: currentUser.clinicName
-      })
-    });
+    await authUpdateProfile(currentUser.licenseNum, { email: currentUser.email, phone: currentUser.phone, address: currentUser.address, clinic_name: currentUser.clinicName });
   } catch(e) { console.warn('Supabase PATCH 실패 (로컬에는 저장됨):', e); }
   closeModal('profileEditModal');
   renderProfileSettings();
