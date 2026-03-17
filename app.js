@@ -1174,10 +1174,12 @@ function completePayment() {
   if (!pendingShopOrder) { cart=[]; updateBadge(); closeModal('qrModal'); goPage('shop'); return; }
   var order = pendingShopOrder;
   pendingShopOrder = null;
-  // localStorage에 저장
+  // localStorage에 저장 (오프라인 폴백)
   var saved = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
   saved.unshift(order);
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(saved));
+  // Supabase에도 저장
+  sbSaveShopOrder(order).catch(function(e){ console.error('[Shop Order Save]', e); });
   // 관리자에게 LINE flex 발송
   var itemFields = order.items.map(function(i){
     return { label: i.name, value: '[' + i.code + '] ×' + i.qty + '  ' + (i.price*i.qty).toLocaleString() + ' THB' };
@@ -2024,10 +2026,7 @@ async function deleteCustomOrder(orderId) {
   if (!confirm('접수 전 주문을 삭제하시겠습니까?')) return;
   customOrders = customOrders.filter(function(o){ return o.id !== orderId; });
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
-    });
+    await sbDelete('custom_orders', 'id=eq.' + encodeURIComponent(orderId));
   } catch(e) { console.error('[Delete Order]', e); }
   renderCustomOrders();
 }
@@ -2074,13 +2073,8 @@ async function saveEditOrder() {
     if (mEl) cs.memo     = mEl.value.trim();
   });
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ clinic: ord.clinic, addr: ord.addr, phone: ord.phone, line_id: ord.lineId, cases: ord.cases })
+    await sbPatch('custom_orders', 'id=eq.' + encodeURIComponent(orderId), {
+      clinic: ord.clinic, addr: ord.addr, phone: ord.phone, line_id: ord.lineId, cases: ord.cases
     });
   } catch(e) { console.error('[Edit Order]', e); }
   closeEditModal();
@@ -2220,61 +2214,34 @@ function isAdmin() {
   return isLoggedIn() && currentUser.role === 'admin';
 }
 async function saveOrderToSupabase(order) {
-  var buildBody = function(casesData) {
-    return JSON.stringify({
-      id: order.id, clinic: order.clinic, addr: order.addr,
-      phone: order.phone, line_id: order.lineId, cases: casesData,
-      stage: order.stage, design_versions: order.designVersions,
-      review_history: order.reviewHistory, date: order.date,
-      user_nickname: order.userNickname
-    });
-  };
-  var headers = {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=minimal'
-  };
-  try {
-    // ① 전체 데이터(stlUrls 포함) 저장 시도
-    var body = buildBody(order.cases);
-    var res = await fetch(SUPABASE_URL + '/rest/v1/orders', { method: 'POST', headers: headers, body: body });
-    if (res.ok) return; // 성공
-    var errText = await res.text();
-    console.warn('[Order Save] HTTP', res.status, errText);
-    // ② 용량 문제(413)이면 stlUrls에서 대용량 base64 제거 후 재시도
-    var casesNoLargeBase64 = order.cases.map(function(cs) {
+  var stripLargeBase64 = function(cases) {
+    return cases.map(function(cs) {
       return Object.assign({}, cs, {
         stlUrls: (cs.stlUrls || []).map(function(u) {
-          // http URL은 유지, 대용량 base64(1MB 초과)는 null로 대체
           return (u && (u.startsWith('http') || u.length < 1024 * 1024)) ? u : null;
         })
       });
     });
-    var body2 = buildBody(casesNoLargeBase64);
-    var res2 = await fetch(SUPABASE_URL + '/rest/v1/orders', { method: 'POST', headers: headers, body: body2 });
+  };
+  try {
+    // ① 전체 데이터(stlUrls 포함) 저장 시도
+    var res = await sbSaveCustomOrder(order, order.cases);
+    if (res.ok) return;
+    var errText = await res.text();
+    console.warn('[Order Save] HTTP', res.status, errText);
+    // ② 용량 문제(413)이면 대용량 base64 제거 후 재시도
+    var res2 = await sbSaveCustomOrder(order, stripLargeBase64(order.cases));
     if (!res2.ok) {
       var err2 = await res2.text();
       console.error('[Order Save] Retry failed:', res2.status, err2);
     } else {
-      console.warn('[Order Save] Saved without large STL data. Files may not be visible to admin.');
+      console.warn('[Order Save] Saved without large STL data.');
     }
   } catch(e) { console.error('[Order Save]', e); }
 }
 async function loadOrdersFromSupabase() {
   try {
-    var url = SUPABASE_URL + '/rest/v1/orders?order=date.desc';
-    if (!isAdmin()) {
-      url += '&user_nickname=eq.' + encodeURIComponent(currentUser.nickname);
-    }
-    var res = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-      }
-    });
-    if (!res.ok) return;
-    var rows = await res.json();
+    var rows = await sbGetCustomOrders(currentUser.nickname, isAdmin());
     customOrders = rows.map(function(r) {
       return {
         id: r.id, clinic: r.clinic, addr: r.addr, phone: r.phone,
@@ -2289,22 +2256,7 @@ async function loadOrdersFromSupabase() {
 }
 async function updateOrderInSupabase(orderId, updates) {
   try {
-    var body = {};
-    if (updates.stage !== undefined) body.stage = updates.stage;
-    if (updates.designVersions !== undefined) body.design_versions = updates.designVersions;
-    if (updates.reviewHistory !== undefined) body.review_history = updates.reviewHistory;
-    if (updates.carrier !== undefined) body.carrier = updates.carrier;
-    if (updates.trackingNumber !== undefined) body.tracking_number = updates.trackingNumber;
-    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify(body)
-    });
+    await sbUpdateCustomOrder(orderId, updates);
   } catch(e) { console.error('[Order Update]', e); }
 }
 async function sendLineRaw(to, text) {
@@ -2601,12 +2553,7 @@ async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
         })
       });
     });
-    await fetch(SUPABASE_URL + '/rest/v1/orders?id=eq.' + encodeURIComponent(orderId), {
-      method: 'PATCH',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ cases: casesNoLargeBase64 })
-    });
+    await sbUpdateCustomOrder(orderId, { cases: casesNoLargeBase64 });
   } catch(e) { console.error('[Reupload Save]', e); }
   renderAdminOrders();
 }
@@ -2625,10 +2572,27 @@ function adminShopStageTab(stageKey) {
   currentShopStageTab = stageKey;
   renderAdminShopOrders();
 }
-function renderAdminShopOrders() {
+async function renderAdminShopOrders() {
   var list = document.getElementById('adminTabShopOrders');
   if (!list) return;
   var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  // Supabase에서 최신 데이터 로드
+  try {
+    var sbOrders = await sbGetShopOrders(currentUser.nickname, isAdmin());
+    if (sbOrders && sbOrders.length) {
+      orders = sbOrders.map(function(r) {
+        return {
+          id: r.id, date: r.date, clinic: r.clinic, phone: r.phone,
+          address: r.addr, lineId: r.line_id, nickname: r.user_nickname,
+          items: r.items || [], stage: r.stage,
+          carrier: r.carrier || '', tracking: r.tracking_number || '',
+          totalAmount: (r.items || []).reduce(function(s,i){ return s + (i.price||0)*(i.qty||1); }, 0)
+        };
+      });
+      // localStorage도 업데이트 (캐시)
+      localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
+    }
+  } catch(e) { console.warn('[Shop Orders Load]', e); }
   // 단계별 카운트
   var counts = {};
   SHOP_STAGES.forEach(function(s){ counts[s.key] = 0; });
@@ -2765,6 +2729,11 @@ function _doAdvanceShopOrder(orderId, nextKey, carrier, tracking) {
   if (tracking) o.tracking = tracking;
   var nextStage = SHOP_STAGES.find(function(s){ return s.key===nextKey; });
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
+  // Supabase 업데이트
+  var sbUpdates = { stage: nextKey };
+  if (carrier)  sbUpdates.carrier         = carrier;
+  if (tracking) sbUpdates.tracking_number = tracking;
+  sbUpdateShopOrder(orderId, sbUpdates).catch(function(e){ console.error('[Shop Order Update]', e); });
   // 고객에게 LINE flex 발송 (주문 상세 포함)
   // ※ lineId는 고객이 입력한 LINE User ID(U로 시작)여야 전달 가능
   if (o.lineId) {
@@ -2820,9 +2789,13 @@ function renderAdminUsed() {
 }
 function adminDeleteUsed(i) {
   if (!confirm('이 게시물을 삭제하시겠습니까?')) return;
+  var removed = usedItems[i];
   usedItems.splice(i, 1);
   renderUsed();
   renderAdminUsed();
+  if (removed && (removed._sbId || typeof removed.id === 'string')) {
+    sbDeleteUsedItem(removed._sbId || removed.id).catch(function(e){ console.error('[Admin Used Delete]', e); });
+  }
 }
 function renderAdminForum() {
   var list = document.getElementById('adminTabForum');
@@ -2858,9 +2831,13 @@ function renderAdminForum() {
 }
 function adminDeletePost(i) {
   if (!confirm('이 게시물을 삭제하시겠습니까?')) return;
+  var removed = posts[i];
   posts.splice(i, 1);
   renderForum();
   renderAdminForum();
+  if (removed && (removed._sbId || typeof removed.id === 'string')) {
+    sbDeleteForumPost(removed._sbId || removed.id).catch(function(e){ console.error('[Admin Post Delete]', e); });
+  }
 }
 async function renderAdminOrders() {
   var list = document.getElementById('adminTabOrders');
@@ -3175,16 +3152,30 @@ function adminAddEvent() {
   var name = (document.getElementById('adminEventName').value || '').trim();
   var loc  = (document.getElementById('adminEventLoc').value  || '').trim();
   if (!date || !name || !loc) { alert(t('admin_event_fill_alert')); return; }
-  var newId = events_.length ? Math.max.apply(null, events_.map(function(e){ return e.id; })) + 1 : 1;
-  events_.push({ id: newId, date: date, event: name, loc: loc });
+  var newEv = { id: Date.now(), date: date, event: name, loc: loc,
+    createdBy: isLoggedIn() ? currentUser.nickname : null };
+  events_.push(newEv);
   renderAdminEventsTab();
   renderEvents();
+  renderHomeEventsPreview();
+  // Supabase 저장 (비동기)
+  sbSaveEvent(newEv).then(function(saved) {
+    if (saved && saved.id) {
+      var idx = events_.findIndex(function(x){ return x === newEv; });
+      if (idx !== -1) events_[idx]._sbId = saved.id;
+    }
+  }).catch(function(e){ console.error('[Event Save]', e); });
 }
 function adminDeleteEvent(id) {
   if (!confirm('이벤트를 삭제하시겠습니까?')) return;
+  var removed = events_.find(function(e){ return e.id === id; });
   events_ = events_.filter(function(e){ return e.id !== id; });
   renderAdminEventsTab();
   renderEvents();
+  renderHomeEventsPreview();
+  if (removed && (removed._sbId || typeof removed.id === 'string')) {
+    sbDeleteEvent(removed._sbId || removed.id).catch(function(e){ console.error('[Event Delete]', e); });
+  }
 }
 // ============================================================
 // USED MARKET
@@ -3239,7 +3230,21 @@ function submitUsed() {
   var contact = document.getElementById('u-contact').value.trim();
   if (!name||!price||!contact) { alert(t('used_fill_error')); return; }
   function addItem(imgData) {
-    usedItems.unshift({id:Date.now(),name:name,code:document.getElementById('u-code').value.trim()||'-',price:price,cond:document.getElementById('u-cond').value,desc:document.getElementById('u-desc').value.trim()||'-',contact:contact,seller:'Me',date:new Date().toISOString().slice(0,10),views:0,image:imgData||null});
+    var seller = isLoggedIn() ? (currentUser.nickname || 'Me') : 'Me';
+    var newItem = {
+      id: Date.now(),
+      name: name,
+      code: document.getElementById('u-code').value.trim() || '-',
+      price: price,
+      cond: document.getElementById('u-cond').value,
+      desc: document.getElementById('u-desc').value.trim() || '-',
+      contact: contact,
+      seller: seller,
+      date: new Date().toISOString().slice(0,10),
+      views: 0,
+      image: imgData || null,
+    };
+    usedItems.unshift(newItem);
     ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('u-photo').value = '';
     document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">' + t('used_photo_add') + '</span>';
@@ -3249,6 +3254,14 @@ function submitUsed() {
     if (form) form.classList.add('hidden');
     if (btn)  btn.classList.remove('hidden');
     renderUsed();
+    // Supabase 저장 (비동기)
+    sbSaveUsedItem(newItem).then(function(saved) {
+      // Supabase가 생성한 UUID로 id 교체
+      if (saved && saved.id) {
+        var idx = usedItems.findIndex(function(x){ return x === newItem; });
+        if (idx !== -1) usedItems[idx]._sbId = saved.id;
+      }
+    }).catch(function(e){ console.error('[Used Save]', e); });
   }
   var file = document.getElementById('u-photo').files[0];
   if (file) {
@@ -3259,13 +3272,23 @@ function submitUsed() {
     addItem(null);
   }
 }
-function deleteUsed(i) { usedItems.splice(i,1); renderUsed(); }
+function deleteUsed(i) {
+  var item = usedItems[i];
+  usedItems.splice(i, 1);
+  renderUsed();
+  if (item && (item._sbId || typeof item.id === 'string')) {
+    sbDeleteUsedItem(item._sbId || item.id).catch(function(e){ console.error('[Used Delete]', e); });
+  }
+}
 function showContact(c) { document.getElementById('usedContactText').textContent=c; openModal('usedContactModal'); }
 function openUsedDetail(id) {
   var item = usedItems.find(function(x){ return x.id===id; });
   if (!item) return;
   item.views = (item.views||0) + 1;
   renderUsed();
+  if (item._sbId || typeof item.id === 'string') {
+    sbUpdateUsedItem(item._sbId || item.id, { views: item.views }).catch(function(){});
+  }
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   var condColor = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};
   document.getElementById('udp-name').textContent   = item.name;
@@ -3284,7 +3307,13 @@ function openUsedDetail(id) {
     deleteBtn.style.display = canDelete ? '' : 'none';
     deleteBtn.onclick = function(){
       var idx = usedItems.findIndex(function(x){ return x.id===id; });
-      if (idx !== -1) usedItems.splice(idx, 1);
+      if (idx !== -1) {
+        var removed = usedItems[idx];
+        usedItems.splice(idx, 1);
+        if (removed && (removed._sbId || typeof removed.id === 'string')) {
+          sbDeleteUsedItem(removed._sbId || removed.id).catch(function(){});
+        }
+      }
       goBack();
     };
   }
@@ -3301,6 +3330,10 @@ function openForumDetail(id) {
   post.views = (post.views||0) + 1;
   currentForumPostId = id;
   renderForum();
+  // Supabase 조회수 업데이트 (비동기)
+  if (post._sbId || typeof post.id === 'string') {
+    sbUpdateForumPost(post._sbId || post.id, { views: post.views }).catch(function(){});
+  }
   // 카테고리 뱃지 (i18n)
   var tabCfg = FORUM_CATEGORIES.find(function(x){ return x.key === post.category; });
   var catText = tabCfg ? ((tabCfg.icon || '') + ' ' + t(tabCfg.labelKey)) : post.category;
@@ -3539,7 +3572,8 @@ function submitPost() {
   var provinceEl = document.getElementById('postProvince');
   var reg = regionEl   ? regionEl.value   : 'all';
   var prv = provinceEl ? provinceEl.value : 'all';
-  posts.unshift({id:Date.now(), category:cat, region:reg, province:prv, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today});
+  var newPost = {id:Date.now(), category:cat, region:reg, province:prv, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today};
+  posts.unshift(newPost);
   document.getElementById('postTitle').value  = '';
   document.getElementById('postBody').value   = '';
   document.getElementById('forumPhotoPreview').innerHTML = '';
@@ -3551,6 +3585,13 @@ function submitPost() {
   var form = document.getElementById('forumWriteForm');
   if (form) form.classList.add('hidden');
   renderForum();
+  // Supabase 저장 (비동기)
+  sbSaveForumPost(newPost).then(function(saved) {
+    if (saved && saved.id) {
+      var idx = posts.findIndex(function(x){ return x === newPost; });
+      if (idx !== -1) posts[idx]._sbId = saved.id;
+    }
+  }).catch(function(e){ console.error('[Post Save]', e); });
 }
 function renderComments(post) {
   var el = document.getElementById('fdp-comments');
@@ -3580,6 +3621,10 @@ function submitComment() {
   document.getElementById('commentInput').value = '';
   renderComments(post);
   renderForum();
+  // Supabase 댓글 업데이트 (비동기)
+  if (post._sbId || typeof post.id === 'string') {
+    sbUpdateForumPost(post._sbId || post.id, { comments: post.comments }).catch(function(){});
+  }
 }
 // ============================================================
 // 닉네임 표시 & 프로필
@@ -4116,6 +4161,79 @@ function renderHomePage() {
   renderHomeEventsPreview();
 }
 // ============================================================
+// Supabase 공개 데이터 초기화 (로그인 불필요)
+// ============================================================
+async function initSupabasePublicData() {
+  // ── Used Items ─────────────────────────────────────────────
+  try {
+    var sbUsed = await sbGetUsedItems();
+    if (sbUsed && sbUsed.length) {
+      usedItems = sbUsed.map(function(r) {
+        return {
+          id:      r.id,
+          name:    r.name,
+          code:    r.code    || '-',
+          price:   parseFloat(r.price) || 0,
+          cond:    r.condition || 'good',
+          desc:    r.description || '-',
+          contact: r.contact || '',
+          seller:  r.seller  || '',
+          date:    r.date    || (r.created_at ? r.created_at.slice(0,10) : ''),
+          views:   r.views   || 0,
+          image:   r.image_url || null,
+          _sbId:   r.id,
+        };
+      });
+      renderUsed();
+    }
+  } catch(e) { console.warn('[Used Items Init]', e); }
+
+  // ── Forum Posts ────────────────────────────────────────────
+  try {
+    var sbPosts = await sbGetForumPosts();
+    if (sbPosts && sbPosts.length) {
+      posts = sbPosts.map(function(r) {
+        return {
+          id:       r.id,
+          category: r.category || 'general',
+          region:   r.region   || 'all',
+          province: r.province || 'all',
+          title:    r.title,
+          body:     r.body,
+          author:   r.author   || '',
+          images:   r.images   || [],
+          comments: r.comments || [],
+          views:    r.views    || 0,
+          date:     r.date     || (r.created_at ? r.created_at.slice(0,10) : ''),
+          _sbId:    r.id,
+        };
+      });
+      renderForum();
+      renderHomeForumPreview();
+    }
+  } catch(e) { console.warn('[Forum Posts Init]', e); }
+
+  // ── Events ─────────────────────────────────────────────────
+  try {
+    var sbEvs = await sbGetEvents();
+    if (sbEvs && sbEvs.length) {
+      events_ = sbEvs.map(function(r) {
+        return {
+          id:   r.id,
+          date: r.event_date || '',
+          event: r.title,
+          loc:   r.location  || '',
+          desc:  r.description || '',
+          _sbId: r.id,
+        };
+      });
+      renderEvents();
+      renderHomeEventsPreview();
+    }
+  } catch(e) { console.warn('[Events Init]', e); }
+}
+
+// ============================================================
 // 초기화
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
@@ -4138,4 +4256,6 @@ window.addEventListener('DOMContentLoaded', function() {
   updateNicknameDisplays();
   renderHomePage();
   initHomeBanner();
+  // Supabase에서 공개 데이터 비동기 로드
+  initSupabasePublicData();
 });

@@ -421,6 +421,41 @@ create index if not exists idx_messages_to_user          on public.messages(to_u
 create index if not exists idx_messages_from_user        on public.messages(from_user);
 
 -- ============================================================
+-- Phase 3 추가 컬럼 (재실행 안전)
+-- ============================================================
+
+-- forum_posts: comments + date 컬럼 추가
+alter table public.forum_posts
+  add column if not exists comments jsonb not null default '[]';
+
+alter table public.forum_posts
+  add column if not exists date text;
+
+-- used_items: 기존 condition 컬럼은 스키마에 있으나 date 컬럼 추가
+alter table public.used_items
+  add column if not exists date text;
+
+-- licenses: anon update 정책 추가 (관리자 활성화/비활성화)
+drop policy if exists "licenses: anon update" on public.licenses;
+create policy "licenses: anon update"
+  on public.licenses for update
+  to anon
+  using (true)
+  with check (true);
+
+-- events: anon insert/delete 정책 추가 (관리자 이벤트 관리)
+drop policy if exists "events: anon insert" on public.events;
+drop policy if exists "events: anon delete" on public.events;
+create policy "events: anon insert"
+  on public.events for insert
+  to anon
+  with check (true);
+create policy "events: anon delete"
+  on public.events for delete
+  to anon
+  using (true);
+
+-- ============================================================
 -- 완료!
 -- 이 SQL을 Supabase Dashboard > SQL Editor에 붙여넣고 실행하세요.
 -- ============================================================

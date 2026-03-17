@@ -1,6 +1,6 @@
 // ============================================================
 // supabase.js — Supabase REST API 클라이언트 헬퍼
-// Phase 2-#2: 회원가입/로그인 연동
+// Phase 3: 전체 데이터 Supabase 연동 (대시보드)
 // ============================================================
 
 const SUPABASE_URL      = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co';
@@ -18,7 +18,6 @@ function sbHeaders(extra) {
 }
 
 // ── GET ───────────────────────────────────────────────────────
-// table: 테이블명, params: 쿼리 파라미터 문자열 (e.g. "nickname=eq.foo&is_active=eq.true")
 async function sbGet(table, params) {
   var url = SUPABASE_URL + '/rest/v1/' + table + (params ? '?' + params : '');
   var res = await fetch(url, { headers: sbHeaders() });
@@ -33,7 +32,7 @@ async function sbPost(table, body) {
     headers: sbHeaders({ 'Prefer': 'return=minimal' }),
     body:    JSON.stringify(body),
   });
-  return res; // 호출부에서 status 직접 확인
+  return res;
 }
 
 // ── PATCH (update) ────────────────────────────────────────────
@@ -56,15 +55,11 @@ async function sbDelete(table, params) {
 }
 
 // ============================================================
-// Auth 헬퍼 — users 테이블 기반 (Supabase Auth 미사용)
+// Auth 헬퍼 — licenses 테이블 기반 (Supabase Auth 미사용)
 // ============================================================
 
-/**
- * 회원가입: users 테이블에 삽입
- * @returns {Response} fetch Response
- */
 async function authRegister({ licenseNumber, doctorName, clinicName, contact, nickname, email, password }) {
-  return sbPost('users', {
+  return sbPost('licenses', {
     license_number: licenseNumber,
     doctor_name:    doctorName,
     clinic_name:    clinicName,
@@ -77,10 +72,6 @@ async function authRegister({ licenseNumber, doctorName, clinicName, contact, ni
   });
 }
 
-/**
- * 로그인: nickname + password로 users 테이블 조회
- * @returns {{ ok, user?, reason? }}
- */
 async function authLogin(nickname, password) {
   try {
     var params =
@@ -88,11 +79,10 @@ async function authLogin(nickname, password) {
       '&password=eq.' + encodeURIComponent(password) +
       '&select=license_number,doctor_name,clinic_name,nickname,email,phone,address,role,is_active';
 
-    var data = await sbGet('users', params);
+    var data = await sbGet('licenses', params);
     if (!data.length) return { ok: false, reason: 'not_found' };
 
     var u = data[0];
-    // admin이 아닌 일반 사용자는 is_active=true 필요
     if (u.role !== 'admin' && !u.is_active) return { ok: false, reason: 'not_active' };
 
     return {
@@ -112,23 +102,192 @@ async function authLogin(nickname, password) {
   }
 }
 
-/**
- * 프로필 업데이트: users 테이블 PATCH
- */
 async function authUpdateProfile(licenseNumber, fields) {
-  return sbPatch('users', 'license_number=eq.' + encodeURIComponent(licenseNumber), fields);
+  return sbPatch('licenses', 'license_number=eq.' + encodeURIComponent(licenseNumber), fields);
 }
 
-/**
- * 관리자: users 테이블 전체 목록 조회
- */
 async function authGetAllUsers() {
-  return sbGet('users', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role&order=clinic_name.asc');
+  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role&order=clinic_name.asc');
 }
 
-/**
- * 관리자: 사용자 활성화/비활성화
- */
 async function authSetUserActive(nickname, isActive) {
-  return sbPatch('users', 'nickname=eq.' + encodeURIComponent(nickname), { is_active: isActive });
+  return sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { is_active: isActive });
+}
+
+// ============================================================
+// Custom Orders (CNC 맞춤 보철) — custom_orders 테이블
+// ============================================================
+
+async function sbSaveCustomOrder(order, casesData) {
+  var body = {
+    id:              order.id,
+    user_nickname:   order.userNickname,
+    clinic:          order.clinic,
+    addr:            order.addr,
+    phone:           order.phone,
+    line_id:         order.lineId,
+    cases:           casesData !== undefined ? casesData : (order.cases || []),
+    stage:           order.stage,
+    design_versions: order.designVersions || [],
+    review_history:  order.reviewHistory  || [],
+    date:            order.date,
+  };
+  return fetch(SUPABASE_URL + '/rest/v1/custom_orders', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=minimal' }),
+    body:    JSON.stringify(body),
+  });
+}
+
+async function sbGetCustomOrders(userNickname, isAdmin) {
+  var params = 'order=date.desc';
+  if (!isAdmin && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
+  return sbGet('custom_orders', params);
+}
+
+async function sbUpdateCustomOrder(orderId, updates) {
+  var body = {};
+  if (updates.stage           !== undefined) body.stage           = updates.stage;
+  if (updates.designVersions  !== undefined) body.design_versions = updates.designVersions;
+  if (updates.reviewHistory   !== undefined) body.review_history  = updates.reviewHistory;
+  if (updates.carrier         !== undefined) body.carrier         = updates.carrier;
+  if (updates.trackingNumber  !== undefined) body.tracking_number = updates.trackingNumber;
+  if (updates.cases           !== undefined) body.cases           = updates.cases;
+  return sbPatch('custom_orders', 'id=eq.' + encodeURIComponent(orderId), body);
+}
+
+// ============================================================
+// Shop Orders (쇼핑몰 주문) — orders 테이블
+// ============================================================
+
+async function sbSaveShopOrder(order) {
+  return sbPost('orders', {
+    id:            order.id,
+    user_nickname: order.nickname || '',
+    clinic:        order.clinic,
+    addr:          order.address,
+    phone:         order.phone,
+    line_id:       order.lineId || '',
+    items:         order.items  || [],
+    stage:         order.stage  || 'submitted',
+    date:          order.date,
+  });
+}
+
+async function sbGetShopOrders(userNickname, isAdminUser) {
+  var params = 'order=created_at.desc';
+  if (!isAdminUser && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
+  return sbGet('orders', params);
+}
+
+async function sbUpdateShopOrder(orderId, updates) {
+  var body = {};
+  if (updates.stage           !== undefined) body.stage           = updates.stage;
+  if (updates.carrier         !== undefined) body.carrier         = updates.carrier;
+  if (updates.tracking_number !== undefined) body.tracking_number = updates.tracking_number;
+  return sbPatch('orders', 'id=eq.' + encodeURIComponent(orderId), body);
+}
+
+// ============================================================
+// Used Items (중고 거래) — used_items 테이블
+// ============================================================
+
+async function sbGetUsedItems() {
+  return sbGet('used_items', 'order=created_at.desc');
+}
+
+async function sbSaveUsedItem(item) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/used_items', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      seller:      item.seller,
+      name:        item.name,
+      code:        item.code        || '',
+      price:       item.price       || 0,
+      condition:   item.cond        || 'good',
+      description: item.desc        || '',
+      contact:     item.contact     || '',
+      views:       0,
+      image_url:   item.image       || null,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveUsedItem] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbDeleteUsedItem(id) {
+  return sbDelete('used_items', 'id=eq.' + encodeURIComponent(id));
+}
+
+async function sbUpdateUsedItem(id, updates) {
+  return sbPatch('used_items', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+// ============================================================
+// Forum Posts (커뮤니티) — forum_posts 테이블
+// ============================================================
+
+async function sbGetForumPosts() {
+  return sbGet('forum_posts', 'order=created_at.desc');
+}
+
+async function sbSaveForumPost(post) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/forum_posts', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      author:   post.author,
+      category: post.category || 'general',
+      region:   post.region   || 'all',
+      province: post.province || 'all',
+      title:    post.title,
+      body:     post.body,
+      images:   post.images   || [],
+      views:    0,
+      comments: post.comments || [],
+      date:     post.date     || new Date().toISOString().slice(0,10),
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveForumPost] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbDeleteForumPost(id) {
+  return sbDelete('forum_posts', 'id=eq.' + encodeURIComponent(id));
+}
+
+async function sbUpdateForumPost(id, updates) {
+  return sbPatch('forum_posts', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+// ============================================================
+// Events (이벤트/세미나) — events 테이블
+// ============================================================
+
+async function sbGetEvents() {
+  return sbGet('events', 'order=event_date.asc');
+}
+
+async function sbSaveEvent(ev) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/events', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      title:       ev.event,
+      location:    ev.loc,
+      event_date:  ev.date,
+      description: ev.desc      || null,
+      created_by:  ev.createdBy || null,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveEvent] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbDeleteEvent(id) {
+  return sbDelete('events', 'id=eq.' + encodeURIComponent(id));
 }
