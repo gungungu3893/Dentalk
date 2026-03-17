@@ -2,6 +2,7 @@
 -- Dentalk — Supabase Schema
 -- Phase 2-#1: 테이블 생성 + RLS 정책
 -- Supabase SQL Editor에 붙여넣기 후 실행하세요.
+-- ※ 재실행 가능 (idempotent): 기존 정책 자동 삭제 후 재생성
 -- ============================================================
 
 -- ── 확장 ────────────────────────────────────────────────────
@@ -170,7 +171,7 @@ alter table public.events        enable row level security;
 alter table public.messages      enable row level security;
 
 -- ============================================================
--- RLS 정책
+-- RLS 정책 (재실행 안전: 기존 정책 삭제 후 재생성)
 -- ※ 현재 앱은 anon key 기반 REST API 사용 (Supabase Auth 미사용)
 --   → 앱 자체 nickname/password 인증이므로, 아래 정책은
 --     "anon 역할에 최소 권한 부여 + service_role(admin)은 풀 액세스"
@@ -178,20 +179,20 @@ alter table public.messages      enable row level security;
 -- ============================================================
 
 -- ── licenses (users) ────────────────────────────────────────
--- 누구나 읽기 (로그인 검증용) — anon
+drop policy if exists "licenses: anon read"              on public.licenses;
+drop policy if exists "licenses: anon insert"            on public.licenses;
+drop policy if exists "licenses: service_role full access" on public.licenses;
+
 create policy "licenses: anon read"
   on public.licenses for select
   to anon
   using (true);
 
--- 회원가입: anon insert 허용
 create policy "licenses: anon insert"
   on public.licenses for insert
   to anon
   with check (true);
 
--- 본인 데이터만 수정 (nickname 기준)
--- ※ Supabase Auth 미사용이라 현재는 service_role 정책으로 관리
 create policy "licenses: service_role full access"
   on public.licenses for all
   to service_role
@@ -199,13 +200,14 @@ create policy "licenses: service_role full access"
   with check (true);
 
 -- ── products ────────────────────────────────────────────────
--- 누구나 읽기
+drop policy if exists "products: public read"             on public.products;
+drop policy if exists "products: service_role full access" on public.products;
+
 create policy "products: public read"
   on public.products for select
   to anon
   using (true);
 
--- admin(service_role)만 쓰기
 create policy "products: service_role full access"
   on public.products for all
   to service_role
@@ -213,33 +215,39 @@ create policy "products: service_role full access"
   with check (true);
 
 -- ── orders ──────────────────────────────────────────────────
--- anon: 본인 주문만 읽기 (앱에서 user_nickname 필터링)
+drop policy if exists "orders: anon read"                on public.orders;
+drop policy if exists "orders: anon insert"              on public.orders;
+drop policy if exists "orders: anon update"              on public.orders;
+drop policy if exists "orders: service_role full access" on public.orders;
+
 create policy "orders: anon read"
   on public.orders for select
   to anon
   using (true);
 
--- anon: 주문 생성
 create policy "orders: anon insert"
   on public.orders for insert
   to anon
   with check (true);
 
--- service_role: 풀 액세스 (admin 주문 관리)
-create policy "orders: service_role full access"
-  on public.orders for all
-  to service_role
-  using (true)
-  with check (true);
-
--- anon: 자기 주문 업데이트 (stage 변경 등)
 create policy "orders: anon update"
   on public.orders for update
   to anon
   using (true)
   with check (true);
 
+create policy "orders: service_role full access"
+  on public.orders for all
+  to service_role
+  using (true)
+  with check (true);
+
 -- ── custom_orders ────────────────────────────────────────────
+drop policy if exists "custom_orders: anon read"                on public.custom_orders;
+drop policy if exists "custom_orders: anon insert"              on public.custom_orders;
+drop policy if exists "custom_orders: anon update"              on public.custom_orders;
+drop policy if exists "custom_orders: service_role full access" on public.custom_orders;
+
 create policy "custom_orders: anon read"
   on public.custom_orders for select
   to anon
@@ -263,19 +271,22 @@ create policy "custom_orders: service_role full access"
   with check (true);
 
 -- ── forum_posts ──────────────────────────────────────────────
--- 누구나 읽기
+drop policy if exists "forum_posts: public read"             on public.forum_posts;
+drop policy if exists "forum_posts: anon insert"             on public.forum_posts;
+drop policy if exists "forum_posts: anon update own"         on public.forum_posts;
+drop policy if exists "forum_posts: anon delete own"         on public.forum_posts;
+drop policy if exists "forum_posts: service_role full access" on public.forum_posts;
+
 create policy "forum_posts: public read"
   on public.forum_posts for select
   to anon
   using (true);
 
--- 로그인 사용자(anon key로 판단) 글쓰기
 create policy "forum_posts: anon insert"
   on public.forum_posts for insert
   to anon
   with check (true);
 
--- 본인 글만 수정/삭제 (author 기준)
 create policy "forum_posts: anon update own"
   on public.forum_posts for update
   to anon
@@ -294,6 +305,11 @@ create policy "forum_posts: service_role full access"
   with check (true);
 
 -- ── forum_comments ───────────────────────────────────────────
+drop policy if exists "forum_comments: public read"             on public.forum_comments;
+drop policy if exists "forum_comments: anon insert"             on public.forum_comments;
+drop policy if exists "forum_comments: anon delete own"         on public.forum_comments;
+drop policy if exists "forum_comments: service_role full access" on public.forum_comments;
+
 create policy "forum_comments: public read"
   on public.forum_comments for select
   to anon
@@ -316,7 +332,12 @@ create policy "forum_comments: service_role full access"
   with check (true);
 
 -- ── used_items ───────────────────────────────────────────────
--- 누구나 읽기
+drop policy if exists "used_items: public read"             on public.used_items;
+drop policy if exists "used_items: anon insert"             on public.used_items;
+drop policy if exists "used_items: anon update own"         on public.used_items;
+drop policy if exists "used_items: anon delete own"         on public.used_items;
+drop policy if exists "used_items: service_role full access" on public.used_items;
+
 create policy "used_items: public read"
   on public.used_items for select
   to anon
@@ -345,13 +366,14 @@ create policy "used_items: service_role full access"
   with check (true);
 
 -- ── events ───────────────────────────────────────────────────
--- 누구나 읽기
+drop policy if exists "events: public read"             on public.events;
+drop policy if exists "events: service_role full access" on public.events;
+
 create policy "events: public read"
   on public.events for select
   to anon
   using (true);
 
--- admin(service_role)만 쓰기
 create policy "events: service_role full access"
   on public.events for all
   to service_role
@@ -359,7 +381,11 @@ create policy "events: service_role full access"
   with check (true);
 
 -- ── messages ─────────────────────────────────────────────────
--- 본인 수신/발신 메시지만 읽기
+drop policy if exists "messages: anon read"                on public.messages;
+drop policy if exists "messages: anon insert"              on public.messages;
+drop policy if exists "messages: anon update own"          on public.messages;
+drop policy if exists "messages: service_role full access" on public.messages;
+
 create policy "messages: anon read"
   on public.messages for select
   to anon
