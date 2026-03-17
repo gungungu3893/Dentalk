@@ -74,12 +74,15 @@ async function authRegister({ licenseNumber, doctorName, clinicName, contact, ni
 
 async function authLogin(nickname, password) {
   try {
-    var params =
-      'nickname=eq.' + encodeURIComponent(nickname) +
-      '&password=eq.' + encodeURIComponent(password) +
-      '&select=license_number,doctor_name,clinic_name,nickname,email,phone,address,role,is_active';
+    // RPC 호출: 서버에서 bcrypt 비교 (비밀번호가 클라이언트로 노출되지 않음)
+    var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/login_user', {
+      method:  'POST',
+      headers: sbHeaders(),
+      body:    JSON.stringify({ p_nickname: nickname, p_password: password }),
+    });
+    if (!res.ok) throw new Error('[authLogin] RPC HTTP ' + res.status);
+    var data = await res.json();
 
-    var data = await sbGet('licenses', params);
     if (!data.length) return { ok: false, reason: 'not_found' };
 
     var u = data[0];
