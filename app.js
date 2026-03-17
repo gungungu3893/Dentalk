@@ -2551,7 +2551,51 @@ async function renderAdminPanel() {
   if (!panel) return;
   if (!isAdmin()) { document.body.classList.remove('is-admin'); return; }
   document.body.classList.add('is-admin');
+  renderAdminSummaryCards();
   adminShowTab('orders');
+}
+async function renderAdminSummaryCards() {
+  var container = document.getElementById('adminSummaryCards');
+  if (!container) return;
+  var renderCards = function(totalMembers, totalPending, todaySignups) {
+    var cards = [
+      { label: t('admin_total_members'), value: totalMembers, bg: 'bg-[#001d4a]', icon: '👥' },
+      { label: t('admin_pending_orders'), value: totalPending, bg: 'bg-amber-500', icon: '📦' },
+      { label: t('admin_today_signups'), value: todaySignups, bg: 'bg-green-600', icon: '✨' },
+    ];
+    container.innerHTML = cards.map(function(c) {
+      return '<div class="' + c.bg + ' rounded-2xl p-3 text-center text-white shadow">' +
+        '<div class="text-lg mb-0.5">' + c.icon + '</div>' +
+        '<div class="font-black text-2xl leading-none">' + c.value + '</div>' +
+        '<div class="text-[9px] font-bold opacity-80 mt-1 leading-tight">' + c.label + '</div>' +
+      '</div>';
+    }).join('');
+  };
+  // Initial render with loading state
+  renderCards('…', '…', '…');
+  // Compute pending orders
+  var shopOrders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  var pendingShop = shopOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
+  var pendingCnc = customOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
+  var totalPending = pendingShop + pendingCnc;
+  // Fetch members from Supabase
+  var totalMembers = '—';
+  var todaySignups = '—';
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var res = await fetch(
+      SUPABASE_URL + '/rest/v1/licenses?select=license_number,created_at',
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
+    );
+    if (res.ok) {
+      var users = await res.json();
+      totalMembers = users.length;
+      todaySignups = users.filter(function(u) {
+        return u.created_at && u.created_at.startsWith(today);
+      }).length;
+    }
+  } catch(e) {}
+  renderCards(totalMembers, totalPending, todaySignups);
 }
 async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
   if (!input.files || !input.files[0]) return;
@@ -2645,28 +2689,53 @@ function renderAdminShopOrders() {
   if (!filtered.length) {
     contentHtml = '<p class="text-center text-slate-400 text-sm py-8 font-bold">해당 단계의 주문이 없습니다.</p>';
   } else {
+    // Stage badge colors
+    var stageBadgeClass = {
+      submitted:'bg-amber-100 text-amber-700',
+      paid:'bg-blue-100 text-blue-700',
+      preparing:'bg-purple-100 text-purple-700',
+      shipped:'bg-cyan-100 text-cyan-700',
+      delivered:'bg-green-100 text-green-700'
+    };
     contentHtml = filtered.map(function(o){
       var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; }) || SHOP_STAGES[0];
       var nextStage = stage.next ? SHOP_STAGES.find(function(s){ return s.key===stage.next; }) : null;
       var itemsHtml = o.items.map(function(i){
         return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
       }).join('');
-      var actionHtml = nextStage
-        ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-3 py-2.5 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + nextStage.label + '로 변경 → LINE 발송</button>'
-        : '<div class="mt-3 text-center"><p class="text-[10px] font-black text-green-500">✅ 배송 완료</p></div>';
+      var advanceBtn = nextStage
+        ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-2 py-2 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + nextStage.label + ' → LINE</button>'
+        : '<div class="mt-2 text-center"><p class="text-[10px] font-black text-green-500">✅ ' + t('shipped_status') + '</p></div>';
+      var stageDropdown = '<div class="mt-2">' +
+        '<label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">' + t('admin_change_status') + '</label>' +
+        '<select onchange="adminChangeShopOrderStage(\'' + o.id + '\',this.value)" class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-blue-400 bg-white">' +
+        SHOP_STAGES.map(function(s) {
+          return '<option value="' + s.key + '"' + (s.key === o.stage ? ' selected' : '') + '>' + s.icon + ' ' + s.label + '</option>';
+        }).join('') +
+        '</select></div>';
+      var badgeCls = stageBadgeClass[o.stage] || 'bg-slate-100 text-slate-600';
       return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden">' +
-        '<div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center">' +
-          '<div><p class="font-black text-white text-sm">' + o.clinic + '</p>' +
-               '<p class="text-blue-300 text-[9px] font-bold font-mono mt-0.5">' + o.id + ' · ' + o.date + '</p></div>' +
-          '<span class="text-[10px] font-black px-2 py-1 rounded-lg bg-white/10 text-white">' + stage.icon + ' ' + stage.label + '</span>' +
+        // Table-style header row: status badge | customer name | date | total
+        '<div class="px-4 py-3 border-b border-slate-50">' +
+          '<div class="flex items-center justify-between gap-2 mb-1">' +
+            '<span class="text-[10px] font-black px-2 py-0.5 rounded-full ' + badgeCls + '">' + stage.icon + ' ' + stage.label + '</span>' +
+            '<span class="text-[9px] font-mono text-slate-400">' + o.date + '</span>' +
+          '</div>' +
+          '<div class="flex items-end justify-between gap-2">' +
+            '<div class="min-w-0">' +
+              '<p class="font-black text-slate-800 text-sm truncate">' + o.clinic + '</p>' +
+              '<p class="text-[9px] font-mono text-slate-400">' + o.id + '</p>' +
+            '</div>' +
+            '<p class="font-black text-blue-700 text-sm shrink-0">' + (o.totalAmount||0).toLocaleString() + ' <span class="text-[9px] font-bold">THB</span></p>' +
+          '</div>' +
         '</div>' +
-        '<div class="px-4 pt-3 pb-4">' +
+        '<div class="px-4 pt-2 pb-4">' +
           '<p class="text-[9px] text-slate-400 mb-1">📞 ' + o.phone + ' · 📍 ' + o.address + '</p>' +
-          (o.lineId ? '<p class="text-[9px] text-green-500 font-bold mb-2">💬 Line: ' + o.lineId + '</p>' : '') +
-          (o.carrier ? '<p class="text-[9px] text-blue-500 font-bold mb-2">🚚 ' + o.carrier + (o.tracking ? ' · ' + o.tracking : '') + '</p>' : '') +
+          (o.lineId ? '<p class="text-[9px] text-green-500 font-bold mb-1">💬 Line: ' + o.lineId + '</p>' : '') +
+          (o.carrier ? '<p class="text-[9px] text-blue-500 font-bold mb-1">🚚 ' + o.carrier + (o.tracking ? ' · ' + o.tracking : '') + '</p>' : '') +
           '<div class="bg-slate-50 rounded-xl p-2 space-y-0.5 mb-1">' + itemsHtml + '</div>' +
-          '<p class="text-xs font-black text-blue-800 text-right">합계 ' + o.totalAmount.toLocaleString() + ' THB</p>' +
-          actionHtml +
+          advanceBtn +
+          stageDropdown +
         '</div>' +
       '</div>';
     }).join('');
@@ -2685,6 +2754,18 @@ function adminAdvanceShopOrder(orderId) {
     return;
   }
   _doAdvanceShopOrder(orderId, stage.next, null, null);
+}
+function adminChangeShopOrderStage(orderId, newStage) {
+  if (newStage === 'shipped') {
+    var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+    var o = orders.find(function(x){ return x.id===orderId; });
+    if (o && !o.carrier) {
+      openShopShippingModal(orderId);
+      return;
+    }
+  }
+  _doAdvanceShopOrder(orderId, newStage, null, null);
+  renderAdminSummaryCards();
 }
 function openShopShippingModal(orderId) {
   var modal = document.getElementById('shopShippingModal');
@@ -2922,8 +3003,25 @@ function _buildAdminOrderCard(o) {
       (stlHtml ? '<div class="mt-2 pt-2 border-t border-slate-100">' + stlHtml + '</div>' : '') +
       actionHtml +
       histHtml +
+      '<div class="mt-3 pt-3 border-t border-slate-100">' +
+        '<label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">' + t('admin_custom_change_stage') + '</label>' +
+        '<select onchange="adminChangeCustomOrderStage(\'' + o.id + '\',this.value)" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-blue-400 bg-white">' +
+        ORDER_STAGES.map(function(s) {
+          var sl = t('stage_' + s.key) || s.key;
+          return '<option value="' + s.key + '"' + (s.key === o.stage ? ' selected' : '') + '>' + s.icon + ' ' + sl + '</option>';
+        }).join('') +
+        '</select>' +
+      '</div>' +
     '</div>' +
   '</div>';
+}
+async function adminChangeCustomOrderStage(orderId, newStage) {
+  var ord = customOrders.find(function(o){ return o.id === orderId; });
+  if (!ord || ord.stage === newStage) return;
+  ord.stage = newStage;
+  await updateOrderInSupabase(orderId, { stage: newStage });
+  _renderAdminOrdersList();
+  renderAdminSummaryCards();
 }
 function _renderAdminOrdersList() {
   var list = document.getElementById('adminTabOrders');
@@ -2992,27 +3090,45 @@ function adminToggleStock(id) {
 async function renderAdminUsers() {
   var list = document.getElementById('adminTabUsers');
   if (!list) return;
-  list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
+  list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_loading') + '</p>';
   try {
     var res = await fetch(
       SUPABASE_URL + '/rest/v1/licenses?select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active&order=clinic_name.asc',
       { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY } }
     );
-    if (!res.ok) { list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">로드 실패</p>'; return; }
+    if (!res.ok) { list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_load_fail') + '</p>'; return; }
     var users = await res.json();
-    if (!users.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">회원이 없습니다.</p>'; return; }
-    list.innerHTML = users.map(function(u) {
-      var isActive  = u.is_active !== false;
-      var isAdminU  = ['admin','관리자'].includes((u.nickname||'').trim().toLowerCase());
-      var statusBadge = '<span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[8px] font-black ' +
-        (isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500') + '">' +
-        (isActive ? '활성' : '비활성') + '</span>';
-      var actionBtn = isAdminU
-        ? '<span class="ml-2 shrink-0 text-[9px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-xl">관리자</span>'
-        : '<button onclick="adminToggleUser(\'' + (u.nickname||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\',' + isActive + ')" ' +
-          'class="ml-2 shrink-0 px-3 py-1.5 rounded-xl font-black text-[10px] ' +
-          (isActive ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600') + '">' +
-          (isActive ? '🔒 차단' : '✅ 승인') + '</button>';
+    if (!users.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_no_users') + '</p>'; return; }
+
+    var pendingUsers = users.filter(function(u){ return u.is_active === null || u.is_active === undefined; });
+    var otherUsers   = users.filter(function(u){ return u.is_active !== null && u.is_active !== undefined; });
+
+    var makeUserCard = function(u, isPending) {
+      var isAdminU = ['admin','관리자'].includes((u.nickname||'').trim().toLowerCase());
+      var safeNick = (u.nickname||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var isActive = u.is_active === true;
+      var actionBtns;
+      if (isAdminU) {
+        actionBtns = '<span class="shrink-0 text-[9px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded-xl">Admin</span>';
+      } else if (isPending) {
+        actionBtns = '<div class="flex gap-1 shrink-0">' +
+          '<button onclick="adminApproveUser(\'' + safeNick + '\')" class="px-2.5 py-1.5 rounded-xl font-black text-[10px] bg-green-50 text-green-600 active:scale-95 transition">' + t('admin_user_approve') + '</button>' +
+          '<button onclick="adminRejectUser(\'' + safeNick + '\')" class="px-2.5 py-1.5 rounded-xl font-black text-[10px] bg-red-50 text-red-500 active:scale-95 transition">' + t('admin_user_reject') + '</button>' +
+        '</div>';
+      } else {
+        actionBtns = '<button onclick="adminToggleUser(\'' + safeNick + '\',' + isActive + ')" ' +
+          'class="shrink-0 px-3 py-1.5 rounded-xl font-black text-[10px] ' +
+          (isActive ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600') + ' active:scale-95 transition">' +
+          (isActive ? t('admin_user_block') : t('admin_user_unblock')) + '</button>';
+      }
+      var badge;
+      if (isPending) {
+        badge = '<span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[8px] font-black bg-amber-100 text-amber-600">' + t('admin_user_pending_badge') + '</span>';
+      } else {
+        badge = '<span class="inline-block mt-2 px-2 py-0.5 rounded-full text-[8px] font-black ' +
+          (isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500') + '">' +
+          (isActive ? t('admin_user_active_badge') : t('admin_user_blocked_badge')) + '</span>';
+      }
       return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
         '<div class="flex justify-between items-start">' +
           '<div class="flex-1 min-w-0">' +
@@ -3022,14 +3138,55 @@ async function renderAdminUsers() {
             '<p class="text-[9px] text-slate-400">' + (u.phone||'') + '</p>' +
             '<p class="text-[9px] font-mono text-slate-300">' + (u.license_number||'') + '</p>' +
           '</div>' +
-          actionBtn +
+          actionBtns +
         '</div>' +
-        statusBadge +
+        badge +
       '</div>';
-    }).join('');
+    };
+
+    var html = '';
+    // Pending approval section
+    if (pendingUsers.length) {
+      html += '<div class="mb-4 bg-amber-50 rounded-2xl p-3">' +
+        '<p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3">' + t('admin_pending_users_title') + ' (' + pendingUsers.length + ')</p>' +
+        pendingUsers.map(function(u){ return makeUserCard(u, true); }).join('') +
+      '</div>';
+    } else {
+      html += '<div class="mb-4 p-3 bg-slate-50 rounded-xl">' +
+        '<p class="text-[10px] text-slate-400 font-bold text-center">' + t('admin_no_pending_users') + '</p>' +
+      '</div>';
+    }
+    // All members section
+    if (otherUsers.length) {
+      html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('admin_all_users_title') + ' (' + otherUsers.length + ')</p>';
+      html += otherUsers.map(function(u){ return makeUserCard(u, false); }).join('');
+    }
+    list.innerHTML = html;
   } catch(e) {
-    list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">오류 발생</p>';
+    list.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_error') + '</p>';
   }
+}
+async function adminApproveUser(nickname) {
+  if (!confirm(nickname + ': ' + t('admin_user_approve') + '?')) return;
+  await _setUserActiveState(nickname, true);
+}
+async function adminRejectUser(nickname) {
+  if (!confirm(nickname + ': ' + t('admin_user_reject') + '?')) return;
+  await _setUserActiveState(nickname, false);
+}
+async function _setUserActiveState(nickname, active) {
+  try {
+    var res = await fetch(SUPABASE_URL + '/rest/v1/licenses?nickname=eq.' + encodeURIComponent(nickname), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ is_active: active })
+    });
+    if (res.ok) { renderAdminUsers(); renderAdminSummaryCards(); }
+    else alert(t('admin_load_fail'));
+  } catch(e) { alert(t('admin_error') + ' ' + e.message); }
 }
 async function adminToggleUser(nickname, currentActive) {
   var newActive = !currentActive;

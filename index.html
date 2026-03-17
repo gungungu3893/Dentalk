@@ -1220,18 +1220,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <!-- 관리자 패널 (관리자 로그인 시에만 표시) -->
       <div id="adminPanel">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="text-base">🔧</span>
-          <h3 class="font-black text-sm text-slate-700">관리자 패널</h3>
+        <!-- 요약 카드 -->
+        <div id="adminSummaryCards" class="grid grid-cols-3 gap-2 mb-4"></div>
+        <!-- 주요 탭 버튼 (3개) -->
+        <div class="flex gap-1.5 mb-2 overflow-x-auto pb-1">
+          <button onclick="adminShowTab('orders')" id="adminTabBtn-orders" class="shrink-0 flex-1 px-3 py-2 rounded-xl font-black text-xs bg-[#001d4a] text-white" data-i18n="admin_tab_custom">커스텀주문</button>
+          <button onclick="adminShowTab('shopOrders')" id="adminTabBtn-shopOrders" class="shrink-0 flex-1 px-3 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_orders">주문관리</button>
+          <button onclick="adminShowTab('users')" id="adminTabBtn-users" class="shrink-0 flex-1 px-3 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_users">회원관리</button>
         </div>
-        <!-- 탭 버튼 -->
+        <!-- 보조 탭 버튼 -->
         <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-          <button onclick="adminShowTab('orders')" id="adminTabBtn-orders" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-[#001d4a] text-white">📦 CNC주문</button>
-          <button onclick="adminShowTab('shopOrders')" id="adminTabBtn-shopOrders" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛒 쇼핑주문</button>
-          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품관리</button>
-          <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">♻️ 중고마켓</button>
+          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품</button>
+          <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">♻️ 중고</button>
           <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💬 포럼</button>
-          <button onclick="adminShowTab('users')" id="adminTabBtn-users" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">👥 회원관리</button>
           <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📅 이벤트</button>
         </div>
         <!-- 탭 콘텐츠 -->
