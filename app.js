@@ -128,10 +128,19 @@ let forumRegion       = 'all';
 let forumProvince     = 'all';
 let forumPhotos       = [];
 let currentForumPostId = null;
-// 카테고리 탭
-var FORUM_TABS = [
-  { key: 'implant',    labelKey: 'forum_tab_implant' },
-  { key: 'prosthetic', labelKey: 'forum_tab_prosthetic' },
+// 진료 과목 카테고리
+var FORUM_CATEGORIES = [
+  { key: 'implant',       icon: '🦷', labelKey: 'forum_cat_implant' },
+  { key: 'prosthetic',    icon: '💎', labelKey: 'forum_cat_prosthetic' },
+  { key: 'conservative',  icon: '🪥', labelKey: 'forum_cat_conservative' },
+  { key: 'orthodontics',  icon: '🦷', labelKey: 'forum_cat_orthodontics' },
+  { key: 'oral_surgery',  icon: '✂️', labelKey: 'forum_cat_oral_surgery' },
+  { key: 'periodontics',  icon: '🌿', labelKey: 'forum_cat_periodontics' },
+  { key: 'pediatric',     icon: '👶', labelKey: 'forum_cat_pediatric' },
+  { key: 'radiology',     icon: '📷', labelKey: 'forum_cat_radiology' },
+  { key: 'oral_medicine', icon: '💊', labelKey: 'forum_cat_oral_medicine' },
+  { key: 'preventive',    icon: '🛡', labelKey: 'forum_cat_preventive' },
+  { key: 'general',       icon: '🏥', labelKey: 'forum_cat_general' },
 ];
 // 태국 지역 + 주(province) 구조
 var FORUM_REGIONS = [
@@ -3137,8 +3146,8 @@ function openForumDetail(id) {
   currentForumPostId = id;
   renderForum();
   // 카테고리 뱃지 (i18n)
-  var tabCfg = FORUM_TABS.find(function(x){ return x.key === post.category; });
-  var catText = tabCfg ? t(tabCfg.labelKey) : post.category;
+  var tabCfg = FORUM_CATEGORIES.find(function(x){ return x.key === post.category; });
+  var catText = tabCfg ? ((tabCfg.icon || '') + ' ' + t(tabCfg.labelKey)) : post.category;
   document.getElementById('fdp-catBadge').textContent = catText;
   document.getElementById('fdp-title').textContent  = post.title;
   document.getElementById('fdp-body').textContent   = post.body;
@@ -3208,8 +3217,6 @@ function forumToggleWrite() {
   var isHidden = form.classList.contains('hidden');
   form.classList.toggle('hidden', !isHidden);
   if (isHidden) {
-    var sel = document.getElementById('postCategory');
-    if (sel) sel.value = forumCategory;
     _updateProvinceSelect();
     updateNicknameDisplays();
   }
@@ -3237,16 +3244,6 @@ function _updateProvinceSelect() {
   }
 }
 function renderForum() {
-  // 카테고리 탭
-  var tabsBar = document.getElementById('forumTabsBar');
-  if (tabsBar) {
-    tabsBar.innerHTML = FORUM_TABS.map(function(tab) {
-      var active = forumCategory === tab.key;
-      return '<button onclick="forumTab(\'' + tab.key + '\')" id="ftab-' + tab.key + '" class="shrink-0 px-5 py-2.5 rounded-2xl font-black text-sm transition ' +
-        (active ? 'bg-[#001d4a] text-white shadow' : 'bg-white text-slate-500 border border-slate-200') + '">' +
-        t(tab.labelKey) + '</button>';
-    }).join('');
-  }
   // 지역 탭 (대분류)
   var regionBar = document.getElementById('forumRegionBar');
   if (regionBar) {
@@ -3279,9 +3276,8 @@ function renderForum() {
       provinceBar.innerHTML = '';
     }
   }
-  // 필터링: 카테고리 + 지역 + 주
+  // 필터링: 지역 + 주
   var filtered = posts.filter(function(p){
-    if (p.category !== forumCategory) return false;
     if (forumRegion === 'all') return true;
     if (forumProvince !== 'all') return p.province === forumProvince;
     return p.region === forumRegion;
@@ -3298,8 +3294,9 @@ function renderForum() {
         '</div>'
       : '';
     // 카테고리 뱃지
-    var tabLabel = (FORUM_TABS.find(function(x){ return x.key === p.category; }) || {});
-    var catIcon  = p.category === 'implant' ? '🦷' : (p.category === 'prosthetic' ? '💎' : '📌');
+    var catCfg  = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
+    var catIcon  = catCfg.icon || '📌';
+    var tabLabel = catCfg;
     // 지역/주 뱃지
     var regionBadge = '';
     if (p.region && p.region !== 'all') {
@@ -3393,8 +3390,7 @@ function submitPost() {
   document.getElementById('forumPhotoPreview').classList.add('hidden');
   document.getElementById('forumPhotos').value = '';
   forumPhotos = [];
-  // 글 작성 후 해당 카테고리/지역으로 전환 & 폼 닫기
-  forumCategory = cat;
+  // 글 작성 후 지역 필터 & 폼 닫기
   if (reg && reg !== 'all') { forumRegion = reg; forumProvince = prv || 'all'; }
   var form = document.getElementById('forumWriteForm');
   if (form) form.classList.add('hidden');

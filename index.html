@@ -936,8 +936,6 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
-      <!-- 카테고리 탭 -->
-      <div id="forumTabsBar" class="flex gap-2 mb-2 overflow-x-auto pb-1 no-scroll"></div>
       <!-- 지역 탭 (대분류) -->
       <div id="forumRegionBar" class="flex gap-2 mb-2 overflow-x-auto pb-1 no-scroll"></div>
       <!-- 주(province) 서브탭 -->
@@ -960,8 +958,17 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div class="mb-3">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_cat_label">Category</label>
           <select id="postCategory" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-200">
-            <option value="implant" data-i18n="forum_tab_implant">🦷 Implant</option>
-            <option value="prosthetic" data-i18n="forum_tab_prosthetic">💎 Prosthetic</option>
+            <option value="implant"       data-i18n="forum_cat_implant">🦷 임플란트</option>
+            <option value="prosthetic"    data-i18n="forum_cat_prosthetic">💎 보철</option>
+            <option value="conservative"  data-i18n="forum_cat_conservative">🪥 보존</option>
+            <option value="orthodontics"  data-i18n="forum_cat_orthodontics">🦷 교정</option>
+            <option value="oral_surgery"  data-i18n="forum_cat_oral_surgery">✂️ 구강외과</option>
+            <option value="periodontics"  data-i18n="forum_cat_periodontics">🌿 치주</option>
+            <option value="pediatric"     data-i18n="forum_cat_pediatric">👶 소아치과</option>
+            <option value="radiology"     data-i18n="forum_cat_radiology">📷 영상치의학</option>
+            <option value="oral_medicine" data-i18n="forum_cat_oral_medicine">💊 구강내과</option>
+            <option value="preventive"    data-i18n="forum_cat_preventive">🛡 예방치과</option>
+            <option value="general"       data-i18n="forum_cat_general">🏥 통합진료</option>
           </select>
         </div>
         <!-- 지역 선택 -->
