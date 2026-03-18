@@ -21,7 +21,11 @@ function sbHeaders(extra) {
 async function sbGet(table, params) {
   var url = SUPABASE_URL + '/rest/v1/' + table + (params ? '?' + params : '');
   var res = await fetch(url, { headers: sbHeaders() });
-  if (!res.ok) throw new Error('[sbGet] ' + table + ' HTTP ' + res.status);
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || body.hint || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbGet] ' + table + ' HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
   return res.json();
 }
 

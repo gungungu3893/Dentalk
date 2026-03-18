@@ -20,27 +20,45 @@ CREATE TABLE IF NOT EXISTS banners (
 -- 2) RLS 활성화
 ALTER TABLE banners ENABLE ROW LEVEL SECURITY;
 
--- 누구나 읽기
-CREATE POLICY "banners_select_all" ON banners
-  FOR SELECT USING (true);
+-- 기존 정책 삭제 (재실행 안전)
+DROP POLICY IF EXISTS "banners_select_all"    ON banners;
+DROP POLICY IF EXISTS "banners_insert_admin"  ON banners;
+DROP POLICY IF EXISTS "banners_update_admin"  ON banners;
+DROP POLICY IF EXISTS "banners_delete_admin"  ON banners;
+DROP POLICY IF EXISTS "banners: anon read"    ON banners;
+DROP POLICY IF EXISTS "banners: anon insert"  ON banners;
+DROP POLICY IF EXISTS "banners: anon update"  ON banners;
+DROP POLICY IF EXISTS "banners: anon delete"  ON banners;
+DROP POLICY IF EXISTS "banners: service_role full access" ON banners;
 
--- admin만 생성
-CREATE POLICY "banners_insert_admin" ON banners
-  FOR INSERT WITH CHECK (
-    EXISTS (SELECT 1 FROM licenses WHERE nickname = current_setting('request.jwt.claims', true)::json->>'sub' AND role = 'admin')
-  );
+-- 누구나 읽기 (anon key 호환)
+CREATE POLICY "banners: anon read"
+  ON banners FOR SELECT
+  TO anon
+  USING (true);
 
--- admin만 수정
-CREATE POLICY "banners_update_admin" ON banners
-  FOR UPDATE USING (
-    EXISTS (SELECT 1 FROM licenses WHERE nickname = current_setting('request.jwt.claims', true)::json->>'sub' AND role = 'admin')
-  );
+-- anon 쓰기 (앱에서 admin 체크 수행 — Supabase Auth 미사용)
+CREATE POLICY "banners: anon insert"
+  ON banners FOR INSERT
+  TO anon
+  WITH CHECK (true);
 
--- admin만 삭제
-CREATE POLICY "banners_delete_admin" ON banners
-  FOR DELETE USING (
-    EXISTS (SELECT 1 FROM licenses WHERE nickname = current_setting('request.jwt.claims', true)::json->>'sub' AND role = 'admin')
-  );
+CREATE POLICY "banners: anon update"
+  ON banners FOR UPDATE
+  TO anon
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "banners: anon delete"
+  ON banners FOR DELETE
+  TO anon
+  USING (true);
+
+CREATE POLICY "banners: service_role full access"
+  ON banners FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
 
 -- 3) 클릭/노출 카운트 증가 RPC (anon에서도 호출 가능)
 CREATE OR REPLACE FUNCTION increment_banner_clicks(banner_id UUID)

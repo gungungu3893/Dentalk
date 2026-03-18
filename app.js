@@ -27,15 +27,17 @@ function showToast(msg, type) {
 }
 
 function handleSupabaseError(e, context) {
-  console.error('[' + context + ']', e);
+  console.error('[Supabase:' + context + ']', e);
   var msg = e && e.message ? e.message : String(e);
-  if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+  if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1 || msg.indexOf('Load failed') !== -1) {
     showToast(t('err_network'), 'error');
-  } else if (msg.indexOf('401') !== -1 || msg.indexOf('403') !== -1) {
-    showToast(t('err_auth'), 'error');
   } else if (msg.indexOf('JWT') !== -1 || msg.indexOf('token') !== -1) {
     showToast(t('err_session_expired'), 'error');
+  } else if (msg.indexOf('401') !== -1 || msg.indexOf('403') !== -1) {
+    showToast(t('err_auth'), 'error');
   } else {
+    // 구체적인 HTTP 상태 코드를 콘솔에 출력하여 디버깅 용이
+    console.warn('[Supabase:' + context + '] Detail:', msg);
     showToast(t('err_generic'), 'error');
   }
 }
