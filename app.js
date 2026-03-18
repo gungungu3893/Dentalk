@@ -712,6 +712,7 @@ function updateNavTabs(activeId) {
 }
 function goPage(id) {
   if (LOCKED.includes(id) && !isLoggedIn()) { closeMenu(); openLoginModal(id); return; }
+  if (id === 'factory' && !isAdmin()) { goPage('home'); return; }
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.menu-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('page-' + id).classList.add('active');
@@ -2521,25 +2522,29 @@ async function renderAdminSummaryCards() {
   };
   // Initial render with loading state
   renderCards('…', '…', '…');
-  // Compute pending orders
-  var shopOrders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
-  var pendingShop = shopOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
-  var pendingCnc = customOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
-  var totalPending = pendingShop + pendingCnc;
-  // Fetch members from Supabase
+  // Fetch all data from Supabase
   var totalMembers = '—';
   var todaySignups = '—';
+  var totalPending = 0;
   try {
     var today = new Date().toISOString().split('T')[0];
-    var usersData = await sbGet('users', 'select=license_number,created_at');
-    {
-      var users = usersData;
-      totalMembers = users.length;
-      todaySignups = users.filter(function(u) {
-        return u.created_at && u.created_at.startsWith(today);
-      }).length;
-    }
-  } catch(e) {}
+    // 병렬로 회원 + 주문 데이터 조회
+    var results = await Promise.all([
+      sbGet('licenses', 'select=license_number,created_at'),
+      sbGetShopOrders(currentUser.nickname, true),
+      sbGetCustomOrders(currentUser.nickname, true)
+    ]);
+    var usersData = results[0];
+    var sbShopOrders = results[1];
+    var sbCustomOrders = results[2];
+    totalMembers = usersData.length;
+    todaySignups = usersData.filter(function(u) {
+      return u.created_at && u.created_at.startsWith(today);
+    }).length;
+    var pendingShop = sbShopOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
+    var pendingCnc = sbCustomOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
+    totalPending = pendingShop + pendingCnc;
+  } catch(e) { console.warn('[Summary Cards]', e); }
   renderCards(totalMembers, totalPending, todaySignups);
 }
 async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
@@ -2601,6 +2606,7 @@ var SHOP_STAGES = [
   { key:'delivered', label:'배송완료',   icon:'✅', next:null },
 ];
 var currentShopStageTab = 'submitted';
+var _cachedShopOrders = [];
 function adminShopStageTab(stageKey) {
   currentShopStageTab = stageKey;
   renderAdminShopOrders();
@@ -2622,7 +2628,8 @@ async function renderAdminShopOrders() {
           totalAmount: (r.items || []).reduce(function(s,i){ return s + (i.price||0)*(i.qty||1); }, 0)
         };
       });
-      // localStorage도 업데이트 (캐시)
+      // 메모리 + localStorage 캐시 업데이트
+      _cachedShopOrders = orders;
       localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
     }
   } catch(e) { console.warn('[Shop Orders Load]', e); }
@@ -2700,7 +2707,7 @@ async function renderAdminShopOrders() {
   list.innerHTML = tabsHtml + '<div class="space-y-3">' + contentHtml + '</div>';
 }
 function adminAdvanceShopOrder(orderId) {
-  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  var orders = _cachedShopOrders.length ? _cachedShopOrders : JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
   var o = orders.find(function(x){ return x.id===orderId; });
   if (!o) return;
   var stage = SHOP_STAGES.find(function(s){ return s.key===o.stage; });
@@ -2714,7 +2721,7 @@ function adminAdvanceShopOrder(orderId) {
 }
 function adminChangeShopOrderStage(orderId, newStage) {
   if (newStage === 'shipped') {
-    var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+    var orders = _cachedShopOrders.length ? _cachedShopOrders : JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
     var o = orders.find(function(x){ return x.id===orderId; });
     if (o && !o.carrier) {
       openShopShippingModal(orderId);
@@ -2754,13 +2761,14 @@ function adminConfirmShopShipping() {
   _doAdvanceShopOrder(orderId, 'shipped', carrier, tracking);
 }
 function _doAdvanceShopOrder(orderId, nextKey, carrier, tracking) {
-  var orders = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
+  var orders = _cachedShopOrders.length ? _cachedShopOrders : JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
   var o = orders.find(function(x){ return x.id===orderId; });
   if (!o) return;
   o.stage = nextKey;
   if (carrier) o.carrier = carrier;
   if (tracking) o.tracking = tracking;
   var nextStage = SHOP_STAGES.find(function(s){ return s.key===nextKey; });
+  _cachedShopOrders = orders;
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
   // Supabase 업데이트
   var sbUpdates = { stage: nextKey };
@@ -2988,10 +2996,30 @@ function _buildAdminOrderCard(o) {
 async function adminChangeCustomOrderStage(orderId, newStage) {
   var ord = customOrders.find(function(o){ return o.id === orderId; });
   if (!ord || ord.stage === newStage) return;
+  var oldStage = ord.stage;
   ord.stage = newStage;
   await updateOrderInSupabase(orderId, { stage: newStage });
   _renderAdminOrdersList();
+  renderCustomOrders();
   renderAdminSummaryCards();
+  // LINE 알림: 고객에게 상태 변경 알림
+  var stageObj = ORDER_STAGES.find(function(s){ return s.key === newStage; });
+  var stageLabel = t('stage_' + newStage) || newStage;
+  if (ord.lineId && stageObj) {
+    var fields = [
+      { label: '주문번호', value: ord.id },
+      { label: '클리닉', value: ord.clinic },
+      { label: '변경상태', value: stageObj.icon + ' ' + stageLabel }
+    ];
+    sendLineMessage(ord.lineId, [buildFlexMessage(stageObj.icon, stageLabel, fields, '주문 상태가 변경되었습니다.')]);
+  }
+  // 관리자에게도 알림
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', '커스텀주문 상태변경', [
+    { label: '주문번호', value: ord.id },
+    { label: '클리닉', value: ord.clinic },
+    { label: '이전상태', value: t('stage_' + oldStage) || oldStage },
+    { label: '변경상태', value: stageLabel }
+  ])]);
 }
 function _renderAdminOrdersList() {
   var list = document.getElementById('adminTabOrders');
@@ -3065,8 +3093,8 @@ async function renderAdminUsers() {
     var users = await authGetAllUsers();
     if (!users.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_no_users') + '</p>'; return; }
 
-    var pendingUsers = users.filter(function(u){ return u.is_active === null || u.is_active === undefined; });
-    var otherUsers   = users.filter(function(u){ return u.is_active !== null && u.is_active !== undefined; });
+    var pendingUsers = users.filter(function(u){ return u.is_active === false || u.is_active === null || u.is_active === undefined; });
+    var otherUsers   = users.filter(function(u){ return u.is_active === true; });
 
     var makeUserCard = function(u, isPending) {
       var isAdminU = u.role === 'admin';
