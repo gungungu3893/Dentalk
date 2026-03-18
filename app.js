@@ -1075,11 +1075,11 @@ async function initSupabasePublicData() {
 // ============================================================
 var _searchTimer = null;
 function openSearchModal() {
-  document.getElementById('searchModal').style.display = 'flex';
+  document.getElementById('searchModal').classList.add('open');
   setTimeout(function(){ document.getElementById('searchInput').focus(); }, 100);
 }
 function closeSearchModal() {
-  document.getElementById('searchModal').style.display = 'none';
+  document.getElementById('searchModal').classList.remove('open');
   document.getElementById('searchInput').value = '';
   document.getElementById('searchResults').innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-8">' + t('search_hint') + '</p>';
 }
@@ -1159,7 +1159,7 @@ var _notifPage = 1;
 var _notifHasMore = true;
 
 function openNotifPanel() {
-  document.getElementById('notifPanel').style.display = 'flex';
+  document.getElementById('notifPanel').classList.add('open');
   if (isLoggedIn() && currentUser && currentUser.nickname) {
     _notifPage = 1;
     _notifHasMore = true;
@@ -1170,7 +1170,7 @@ function openNotifPanel() {
   }
 }
 function closeNotifPanel() {
-  document.getElementById('notifPanel').style.display = 'none';
+  document.getElementById('notifPanel').classList.remove('open');
 }
 
 async function loadNotifications() {
