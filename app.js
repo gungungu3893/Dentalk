@@ -106,7 +106,7 @@ const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
 // ============================================================
 let currentPage  = 'home';
 let prevPage     = 'home';
-let currentLang  = 'en';
+let currentLang  = 'th';
 let pendingLang  = null; // 저장 전 선택된 언어
 let currentUser  = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
 let cart         = [];
