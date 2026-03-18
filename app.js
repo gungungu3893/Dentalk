@@ -4526,20 +4526,29 @@ function _renderMarkdown(md) {
 function renderHomeWebzinePreview() {
   var el = document.getElementById('homeWebzinePreview');
   if (!el) return;
-  var latest = webzineArticles.slice(0, 3);
+  var latest = webzineArticles.filter(function(a){ return a.title; }).slice(0, 3);
   if (!latest.length) {
-    el.innerHTML = '<p class="col-span-3 text-center text-slate-400 text-xs font-bold py-6" data-i18n="wz_empty">' + t('wz_empty') + '</p>';
+    el.innerHTML =
+      '<div class="col-span-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-8 text-center">' +
+        '<p class="text-2xl mb-1 opacity-30">📰</p>' +
+        '<p class="text-[11px] font-black text-slate-300">' + t('wz_home_empty') + '</p>' +
+      '</div>';
     return;
   }
   el.innerHTML = latest.map(function(a) {
+    var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     var thumb = a.thumbnail_url
-      ? '<img src="' + a.thumbnail_url + '" class="w-full h-full object-cover">'
-      : '<div class="w-full h-full flex items-center justify-center bg-slate-100"><span class="text-2xl opacity-20">📰</span></div>';
+      ? '<img src="' + a.thumbnail_url + '" class="w-full h-full object-cover" loading="lazy">'
+      : '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-50"><span class="text-2xl opacity-20">📰</span></div>';
+    var dateStr = a.date ? a.date.slice(5, 10).replace('-', '/') : '';
     var aid = typeof a.id === 'string' ? "'" + a.id + "'" : a.id;
-    return '<div class="rounded-xl overflow-hidden bg-white shadow-sm cursor-pointer active:scale-[.97] transition" onclick="goPage(\'webzine\');setTimeout(function(){openWebzineDetail(' + aid + ')},100)">' +
-      '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
+    return '<div class="rounded-xl overflow-hidden bg-white shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openWebzineDetail(' + aid + ')">' +
+      '<div class="aspect-square overflow-hidden relative">' + thumb +
+        '<span class="absolute top-1 left-1 text-[7px] font-black px-1.5 py-0.5 rounded-full bg-white/80 backdrop-blur-sm text-slate-600">' + (catCfg.icon || '📰') + ' ' + t(catCfg.labelKey || 'wz_cat_news') + '</span>' +
+      '</div>' +
       '<div class="p-1.5">' +
-        '<p class="font-black text-[9px] text-slate-700 leading-tight line-clamp-2">' + a.title + '</p>' +
+        '<p class="font-black text-[9px] text-slate-700 leading-tight line-clamp-2 mb-0.5">' + a.title + '</p>' +
+        '<p class="text-[8px] text-slate-300 font-bold">' + dateStr + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -5224,9 +5233,9 @@ async function initSupabasePublicData() {
         };
       });
       renderWebzine();
-      renderHomeWebzinePreview();
     }
-  } catch(e) { console.warn('[Webzine Init]', e); }
+    renderHomeWebzinePreview();
+  } catch(e) { console.warn('[Webzine Init]', e); renderHomeWebzinePreview(); }
 
   // ── Jobs (구인구직) ────────────────────────────────────────
   try {
