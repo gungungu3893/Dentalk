@@ -456,6 +456,28 @@ create policy "events: anon delete"
   using (true);
 
 -- ============================================================
+-- Phase 2-#5: Storage 버킷 생성 (이미지 업로드용)
+-- ※ Supabase Dashboard > Storage에서 'images' 버킷을 public으로 생성하거나
+--   아래 SQL을 실행하세요.
+-- ============================================================
+insert into storage.buckets (id, name, public)
+values ('images', 'images', true)
+on conflict (id) do nothing;
+
+-- Storage RLS: 누구나 읽기, anon 업로드 가능
+drop policy if exists "images: public read" on storage.objects;
+create policy "images: public read"
+  on storage.objects for select
+  to public
+  using (bucket_id = 'images');
+
+drop policy if exists "images: anon upload" on storage.objects;
+create policy "images: anon upload"
+  on storage.objects for insert
+  to anon
+  with check (bucket_id = 'images');
+
+-- ============================================================
 -- 완료!
 -- 이 SQL을 Supabase Dashboard > SQL Editor에 붙여넣고 실행하세요.
 -- ============================================================

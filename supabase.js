@@ -1,6 +1,6 @@
 // ============================================================
 // supabase.js — Supabase REST API 클라이언트 헬퍼
-// Phase 3: 전체 데이터 Supabase 연동 (대시보드)
+// Phase 2-#5: 포럼/중고마켓 Supabase Storage + Comments 연동
 // ============================================================
 
 const SUPABASE_URL      = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co';
@@ -293,4 +293,68 @@ async function sbSaveEvent(ev) {
 
 async function sbDeleteEvent(id) {
   return sbDelete('events', 'id=eq.' + encodeURIComponent(id));
+}
+
+// ============================================================
+// Supabase Storage — 파일 업로드 헬퍼
+// ============================================================
+
+async function sbUploadFile(bucket, filePath, file) {
+  var res = await fetch(SUPABASE_URL + '/storage/v1/object/' + bucket + '/' + filePath, {
+    method:  'POST',
+    headers: {
+      'apikey':        SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type':  file.type || 'application/octet-stream',
+      'x-upsert':      'true',
+    },
+    body: file,
+  });
+  if (!res.ok) throw new Error('[sbUploadFile] HTTP ' + res.status);
+  return res.json();
+}
+
+function sbPublicUrl(bucket, filePath) {
+  return SUPABASE_URL + '/storage/v1/object/public/' + bucket + '/' + filePath;
+}
+
+async function sbUploadForumImage(file, postTimestamp, index) {
+  var ext = file.name.split('.').pop() || 'jpg';
+  var path = 'forum/' + postTimestamp + '_' + index + '.' + ext;
+  await sbUploadFile('images', path, file);
+  return sbPublicUrl('images', path);
+}
+
+async function sbUploadUsedImage(file, itemTimestamp) {
+  var ext = file.name.split('.').pop() || 'jpg';
+  var path = 'used/' + itemTimestamp + '.' + ext;
+  await sbUploadFile('images', path, file);
+  return sbPublicUrl('images', path);
+}
+
+// ============================================================
+// Forum Comments — forum_comments 테이블
+// ============================================================
+
+async function sbGetForumComments(postId) {
+  return sbGet('forum_comments', 'post_id=eq.' + encodeURIComponent(postId) + '&order=created_at.asc');
+}
+
+async function sbSaveForumComment(comment) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/forum_comments', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      post_id: comment.postId,
+      author:  comment.author,
+      body:    comment.text,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveForumComment] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbDeleteForumComment(id) {
+  return sbDelete('forum_comments', 'id=eq.' + encodeURIComponent(id));
 }

@@ -3257,53 +3257,63 @@ function previewPhoto() {
   };
   reader.readAsDataURL(file);
 }
-function submitUsed() {
+async function submitUsed() {
   var name    = document.getElementById('u-name').value.trim();
   var price   = parseInt(document.getElementById('u-price').value,10)||0;
   var contact = document.getElementById('u-contact').value.trim();
   if (!name||!price||!contact) { alert(t('used_fill_error')); return; }
-  function addItem(imgData) {
-    var seller = isLoggedIn() ? (currentUser.nickname || 'Me') : 'Me';
-    var newItem = {
-      id: Date.now(),
-      name: name,
-      code: document.getElementById('u-code').value.trim() || '-',
-      price: price,
-      cond: document.getElementById('u-cond').value,
-      desc: document.getElementById('u-desc').value.trim() || '-',
-      contact: contact,
-      seller: seller,
-      date: new Date().toISOString().slice(0,10),
-      views: 0,
-      image: imgData || null,
-    };
-    usedItems.unshift(newItem);
-    ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
-    document.getElementById('u-photo').value = '';
-    document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">' + t('used_photo_add') + '</span>';
-    // 폼 닫기
-    var form = document.getElementById('usedWriteForm');
-    var btn  = document.getElementById('usedWriteBtn');
-    if (form) form.classList.add('hidden');
-    if (btn)  btn.classList.remove('hidden');
-    renderUsed();
-    // Supabase 저장 (비동기)
-    sbSaveUsedItem(newItem).then(function(saved) {
-      // Supabase가 생성한 UUID로 id 교체
-      if (saved && saved.id) {
-        var idx = usedItems.findIndex(function(x){ return x === newItem; });
-        if (idx !== -1) usedItems[idx]._sbId = saved.id;
-      }
-    }).catch(function(e){ console.error('[Used Save]', e); });
-  }
+
+  var seller = isLoggedIn() ? (currentUser.nickname || 'Me') : 'Me';
+  var ts = Date.now();
+
+  // 이미지 파일을 Supabase Storage에 업로드
+  var imageUrl = null;
   var file = document.getElementById('u-photo').files[0];
   if (file) {
-    var reader = new FileReader();
-    reader.onload = function(e){ addItem(e.target.result); };
-    reader.readAsDataURL(file);
-  } else {
-    addItem(null);
+    try {
+      imageUrl = await sbUploadUsedImage(file, ts);
+    } catch(e) {
+      console.error('[Used Image Upload]', e);
+      // 업로드 실패 시 base64 폴백
+      imageUrl = await new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.onload = function(ev){ resolve(ev.target.result); };
+        reader.readAsDataURL(file);
+      });
+    }
   }
+
+  var newItem = {
+    id: ts,
+    name: name,
+    code: document.getElementById('u-code').value.trim() || '-',
+    price: price,
+    cond: document.getElementById('u-cond').value,
+    desc: document.getElementById('u-desc').value.trim() || '-',
+    contact: contact,
+    seller: seller,
+    date: new Date().toISOString().slice(0,10),
+    views: 0,
+    image: imageUrl,
+  };
+  usedItems.unshift(newItem);
+  ['u-name','u-code','u-price','u-desc','u-contact'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('u-photo').value = '';
+  document.getElementById('u-photo-preview').innerHTML = '<span class="text-3xl mb-1">📷</span><span class="text-xs font-bold">' + t('used_photo_add') + '</span>';
+  // 폼 닫기
+  var form = document.getElementById('usedWriteForm');
+  var btn  = document.getElementById('usedWriteBtn');
+  if (form) form.classList.add('hidden');
+  if (btn)  btn.classList.remove('hidden');
+  renderUsed();
+  // Supabase에 저장
+  try {
+    var saved = await sbSaveUsedItem(newItem);
+    if (saved && saved.id) {
+      var idx = usedItems.findIndex(function(x){ return x === newItem; });
+      if (idx !== -1) { usedItems[idx].id = saved.id; usedItems[idx]._sbId = saved.id; }
+    }
+  } catch(e) { console.error('[Used Save]', e); }
 }
 function deleteUsed(i) {
   var item = usedItems[i];
@@ -3356,16 +3366,17 @@ function openUsedDetail(id) {
   else { imgWrap.classList.add('hidden'); imgEl.src = ''; }
   goDetailPage('used-detail', item.name, 'used');
 }
-function openForumDetail(id) {
+async function openForumDetail(id) {
   if (LOCKED.includes('forum') && !isLoggedIn()) { openLoginModal('forum'); return; }
   var post = posts.find(function(x){ return x.id===id; });
   if (!post) return;
   post.views = (post.views||0) + 1;
   currentForumPostId = id;
   renderForum();
+  var postId = post._sbId || post.id;
   // Supabase 조회수 업데이트 (비동기)
-  if (post._sbId || typeof post.id === 'string') {
-    sbUpdateForumPost(post._sbId || post.id, { views: post.views }).catch(function(){});
+  if (typeof postId === 'string') {
+    sbUpdateForumPost(postId, { views: post.views }).catch(function(){});
   }
   // 카테고리 뱃지 (i18n)
   var tabCfg = FORUM_CATEGORIES.find(function(x){ return x.key === post.category; });
@@ -3385,7 +3396,16 @@ function openForumDetail(id) {
   } else {
     gallery.classList.add('hidden');
   }
-  // 댓글
+  // 댓글: forum_comments 테이블에서 로드
+  if (typeof postId === 'string') {
+    try {
+      var sbComments = await sbGetForumComments(postId);
+      post.comments = (sbComments || []).map(function(c) {
+        return { _sbId: c.id, author: c.author || '', text: c.body || '', date: c.created_at ? c.created_at.slice(0,10) : '' };
+      });
+      post._commentCount = post.comments.length;
+    } catch(e) { console.warn('[Load Comments]', e); }
+  }
   renderComments(post);
   updateNicknameDisplays();
   goDetailPage('forum-detail', post.title, 'forum');
@@ -3507,7 +3527,7 @@ function renderForum() {
   document.getElementById('postList').innerHTML = filtered.length ? filtered.map(function(p){
     var hasImg = p.images && p.images.length;
     var imgCount = hasImg ? p.images.length : 0;
-    var commentCount = p.comments ? p.comments.length : 0;
+    var commentCount = p._commentCount || (p.comments ? p.comments.length : 0);
     // 썸네일 영역
     var thumbHtml = hasImg
       ? '<div class="relative shrink-0">' +
@@ -3594,7 +3614,7 @@ function removeForumPhoto(idx) {
     '</div>';
   }).join('');
 }
-function submitPost() {
+async function submitPost() {
   var tt  = document.getElementById('postTitle').value.trim();
   var b   = document.getElementById('postBody').value.trim();
   var cat = (document.getElementById('postCategory') || {}).value || forumCategory;
@@ -3605,26 +3625,44 @@ function submitPost() {
   var provinceEl = document.getElementById('postProvince');
   var reg = regionEl   ? regionEl.value   : 'all';
   var prv = provinceEl ? provinceEl.value : 'all';
-  var newPost = {id:Date.now(), category:cat, region:reg, province:prv, title:tt, body:b, author:auth, images:forumPhotos.filter(Boolean).slice(), comments:[], views:0, date:today};
+
+  // 이미지 파일을 Supabase Storage에 업로드
+  var imageUrls = [];
+  var fileInput = document.getElementById('forumPhotos');
+  var files = fileInput ? Array.from(fileInput.files).slice(0, 5) : [];
+  var ts = Date.now();
+  if (files.length) {
+    try {
+      var uploads = files.map(function(file, i) { return sbUploadForumImage(file, ts, i); });
+      imageUrls = await Promise.all(uploads);
+    } catch(e) {
+      console.error('[Forum Image Upload]', e);
+      // 업로드 실패 시 base64 폴백
+      imageUrls = forumPhotos.filter(Boolean).slice();
+    }
+  }
+
+  var newPost = {id:ts, category:cat, region:reg, province:prv, title:tt, body:b, author:auth, images:imageUrls, comments:[], views:0, date:today};
   posts.unshift(newPost);
   document.getElementById('postTitle').value  = '';
   document.getElementById('postBody').value   = '';
   document.getElementById('forumPhotoPreview').innerHTML = '';
   document.getElementById('forumPhotoPreview').classList.add('hidden');
-  document.getElementById('forumPhotos').value = '';
+  if (fileInput) fileInput.value = '';
   forumPhotos = [];
   // 글 작성 후 지역 필터 & 폼 닫기
   if (reg && reg !== 'all') { forumRegion = reg; forumProvince = prv || 'all'; }
   var form = document.getElementById('forumWriteForm');
   if (form) form.classList.add('hidden');
   renderForum();
-  // Supabase 저장 (비동기)
-  sbSaveForumPost(newPost).then(function(saved) {
+  // Supabase에 게시글 저장
+  try {
+    var saved = await sbSaveForumPost(newPost);
     if (saved && saved.id) {
       var idx = posts.findIndex(function(x){ return x === newPost; });
-      if (idx !== -1) posts[idx]._sbId = saved.id;
+      if (idx !== -1) { posts[idx].id = saved.id; posts[idx]._sbId = saved.id; }
     }
-  }).catch(function(e){ console.error('[Post Save]', e); });
+  } catch(e) { console.error('[Post Save]', e); }
 }
 function renderComments(post) {
   var el = document.getElementById('fdp-comments');
@@ -3642,7 +3680,7 @@ function renderComments(post) {
     '</div>';
   }).join('');
 }
-function submitComment() {
+async function submitComment() {
   var text = document.getElementById('commentInput').value.trim();
   if (!text) return;
   var post = posts.find(function(x){ return x.id===currentForumPostId; });
@@ -3650,13 +3688,28 @@ function submitComment() {
   if (!post.comments) post.comments = [];
   var auth  = currentUser.nickname || t('anon_patient');
   var today = new Date().toISOString().slice(0,10);
-  post.comments.push({author: auth, text: text, date: today});
+  var postId = post._sbId || post.id;
+
+  // 로컬 즉시 반영
+  var localComment = {author: auth, text: text, date: today};
+  post.comments.push(localComment);
+  post._commentCount = post.comments.length;
   document.getElementById('commentInput').value = '';
   renderComments(post);
   renderForum();
-  // Supabase 댓글 업데이트 (비동기)
-  if (post._sbId || typeof post.id === 'string') {
-    sbUpdateForumPost(post._sbId || post.id, { comments: post.comments }).catch(function(){});
+
+  // Supabase forum_comments 테이블에 저장
+  try {
+    var saved = await sbSaveForumComment({ postId: postId, author: auth, text: text });
+    if (saved && saved.id) {
+      localComment._sbId = saved.id;
+    }
+  } catch(e) {
+    console.error('[Comment Save]', e);
+    // forum_comments 실패 시 기존 JSON 필드에 폴백
+    if (typeof postId === 'string') {
+      sbUpdateForumPost(postId, { comments: post.comments }).catch(function(){});
+    }
   }
 }
 // ============================================================
@@ -4154,7 +4207,7 @@ function renderHomeForumPreview() {
   }
   el.innerHTML = recent.map(function(p) {
     var emoji = p.category === 'prosthetic' ? '💎' : '🦷';
-    var commentCount = p.comments ? p.comments.length : 0;
+    var commentCount = p._commentCount || (p.comments ? p.comments.length : 0);
     return '<div onclick="openForumDetail(' + p.id + ')" ' +
       'class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm border border-slate-100 cursor-pointer active:bg-slate-50 transition flex items-start gap-2.5">' +
       '<span class="text-base shrink-0 mt-0.5">' + emoji + '</span>' +
@@ -4235,7 +4288,8 @@ async function initSupabasePublicData() {
           body:     r.body,
           author:   r.author   || '',
           images:   r.images   || [],
-          comments: r.comments || [],
+          comments: [],  // 댓글은 상세 페이지에서 forum_comments 로드
+          _commentCount: r.comment_count || 0,
           views:    r.views    || 0,
           date:     r.date     || (r.created_at ? r.created_at.slice(0,10) : ''),
           _sbId:    r.id,
@@ -4243,6 +4297,14 @@ async function initSupabasePublicData() {
       });
       renderForum();
       renderHomeForumPreview();
+      // 비동기로 각 게시글 댓글 수 로드
+      posts.forEach(function(p) {
+        sbGetForumComments(p.id).then(function(comments) {
+          p._commentCount = (comments || []).length;
+          renderForum();
+          renderHomeForumPreview();
+        }).catch(function(){});
+      });
     }
   } catch(e) { console.warn('[Forum Posts Init]', e); }
 
