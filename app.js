@@ -1226,7 +1226,7 @@ function completePayment() {
     { label: '연락처', value: order.phone },
     { label: '주소', value: order.address },
   ].concat(order.lineId ? [{ label: 'Line ID', value: order.lineId }] : []).concat(itemFields);
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🛒', '새 쇼핑몰 주문', adminFields, '고객이 QR 결제를 완료하였습니다.', 'Shop Order')]);
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🛒', 'คำสั่งซื้อใหม่จากร้านค้า', adminFields, 'ลูกค้าชำระเงินผ่าน QR เรียบร้อยแล้ว', 'Shop Order')]);
   // 결제완료 팝업
   document.getElementById('payCompleteSummary').innerHTML =
     '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">주문번호: ' + order.id + '</p>' +
@@ -1600,10 +1600,10 @@ async function submitWizardOrder() {
   customOrders.unshift(order);
   saveOrderToSupabase(order);
   var totalTeeth = teethData.length;
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕','새 CNC Custom 주문',[
-    {label:'주문번호',value:oid},{label:'클리닉',value:clinic},{label:'날짜',value:order.date},
-    {label:'연락처',value:phone},{label:'Line ID',value:lineId||'없음'},{label:'치아 / 케이스',value:totalTeeth+'치아 / 1케이스'}
-  ],'관리자 패널에서 접수 확인해 주세요.')]);
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕','คำสั่งซื้อ CNC Custom ใหม่',[
+    {label:'หมายเลขคำสั่งซื้อ',value:oid},{label:'คลินิก',value:clinic},{label:'วันที่',value:order.date},
+    {label:'ติดต่อ',value:phone},{label:'Line ID',value:lineId||'ไม่มี'},{label:'ซี่ฟัน / เคส',value:totalTeeth+'ซี่ / 1เคส'}
+  ],'กรุณายืนยันคำสั่งซื้อในแผงผู้ดูแล')]);
   var msg = tf('order_success_msg', oid, 1, totalTeeth);
   if (lineId) msg += t('order_success_line');
   alert(msg);
@@ -1860,14 +1860,14 @@ async function submitCustom() {
   customOrders.unshift(order);
   saveOrderToSupabase(order);
   // Notify admin of new order (customer gets LINE notification when admin confirms)
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕', '새 CNC Custom 주문', [
-    {label:'주문번호', value: oid},
-    {label:'클리닉', value: clinic},
-    {label:'날짜', value: order.date},
-    {label:'연락처', value: phone},
-    {label:'Line ID', value: lineId || '없음'},
-    {label:'치아 / 케이스', value: totalTeeth + '치아 / ' + cases.length + '케이스'}
-  ], '관리자 패널에서 접수 확인해 주세요.')]);
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕', 'คำสั่งซื้อ CNC Custom ใหม่', [
+    {label:'หมายเลขคำสั่งซื้อ', value: oid},
+    {label:'คลินิก', value: clinic},
+    {label:'วันที่', value: order.date},
+    {label:'ติดต่อ', value: phone},
+    {label:'Line ID', value: lineId || 'ไม่มี'},
+    {label:'ซี่ฟัน / เคส', value: totalTeeth + 'ซี่ / ' + cases.length + 'เคส'}
+  ], 'กรุณายืนยันคำสั่งซื้อในแผงผู้ดูแล')]);
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
   if (lineId) msg += t('order_success_line');
   alert(msg);
@@ -2310,11 +2310,10 @@ function adminConfirmOrder(orderId) {
   updateOrderInSupabase(orderId, { stage: 'confirmed' });
   renderAdminOrders();
   renderCustomOrders();
-  if (ord.lineId) sendLineMessage(ord.lineId, [buildFlexMessage('✅', '주문 접수 완료', [
-    {label:'주문번호', value: ord.id},
-    {label:'클리닉', value: ord.clinic},
-    {label:'날짜', value: ord.date}
-  ], '디자인 완료 후 앱에서 확인하실 수 있습니다.')]);
+  sendStatusChangeNotification(ord.lineId, {
+    orderId: ord.id, icon: '✅', statusTh: 'ยืนยันแล้ว',
+    clinic: ord.clinic, note: 'เมื่อออกแบบเสร็จแล้ว คุณสามารถตรวจสอบได้ในแอป', subtitle: 'CNC Custom Order'
+  });
 }
 async function adminUploadDesign(orderId, input) {
   var file = input.files[0]; if (!file) return;
@@ -2356,18 +2355,21 @@ async function adminUploadDesign(orderId, input) {
   updateOrderInSupabase(orderId, { stage: 'design_ready', designVersions: ord.designVersions });
   renderAdminOrders();
   renderCustomOrders();
-  // ③ 고객에게 LINE 알림 (이미지 + Flex)
+  // ③ 고객에게 LINE 알림 (이미지 + Flex) — 태국어
   if (ord.lineId) {
     var msgs = [];
     var isPublicImg = isImg && fileUrl.startsWith('https');
     if (isPublicImg) {
       msgs.push({ type: 'image', originalContentUrl: fileUrl, previewImageUrl: fileUrl });
     }
-    msgs.push(buildFlexMessage('📐', '디자인 완료', [
-      {label:'주문번호', value: ord.id},
-      {label:'클리닉', value: ord.clinic},
-      {label:'버전', value: 'ver.' + ord.designVersions.length}
-    ], '앱에서 디자인을 확인하고 만족/불만족을 선택해 주세요.'));
+    var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+    msgs.push(buildFlexMessage('📐', 'รอตรวจแบบ', [
+      {label:'หมายเลขคำสั่งซื้อ', value: ord.id},
+      {label:'สถานะ', value: '📐 รอตรวจแบบ'},
+      {label:'วันที่', value: dateStr},
+      {label:'คลินิก', value: ord.clinic},
+      {label:'เวอร์ชัน', value: 'ver.' + ord.designVersions.length}
+    ], 'กรุณาตรวจสอบแบบในแอปแล้วเลือกอนุมัติหรือแก้ไข', 'CNC Custom Order'));
     sendLineMessage(ord.lineId, msgs);
   }
 }
@@ -2391,10 +2393,13 @@ function customerReceiveOrder(orderId) {
   updateOrderInSupabase(orderId, { stage: 'done' });
   renderCustomOrders();
   _renderAdminOrdersList();
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('📦', '수령 완료', [
-    {label:'주문번호', value: ord.id},
-    {label:'클리닉', value: ord.clinic}
-  ], '고객이 제품을 수령하였습니다. 주문이 완료되었습니다. ✅')]);
+  var dateStrRecv = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('📦', 'ส่งมอบแล้ว', [
+    {label:'หมายเลขคำสั่งซื้อ', value: ord.id},
+    {label:'สถานะ', value: '📦 ส่งมอบแล้ว'},
+    {label:'วันที่', value: dateStrRecv},
+    {label:'คลินิก', value: ord.clinic}
+  ], 'ลูกค้าได้รับสินค้าเรียบร้อยแล้ว คำสั่งซื้อเสร็จสมบูรณ์ ✅', 'CNC Custom Order')]);
 }
 function customerApproveDesign(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
@@ -2405,10 +2410,13 @@ function customerApproveDesign(orderId) {
   updateOrderInSupabase(orderId, { stage: 'approved', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
   _renderAdminOrdersList();
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('✅', '고객 만족 (디자인 승인)', [
-    {label:'주문번호', value: ord.id},
-    {label:'클리닉', value: ord.clinic}
-  ], '고객이 디자인을 승인하였습니다. 밀링을 시작해 주세요.')]);
+  var dateStrAppr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('✅', 'ลูกค้าอนุมัติแบบ', [
+    {label:'หมายเลขคำสั่งซื้อ', value: ord.id},
+    {label:'สถานะ', value: '✅ อนุมัติแบบแล้ว'},
+    {label:'วันที่', value: dateStrAppr},
+    {label:'คลินิก', value: ord.clinic}
+  ], 'ลูกค้าอนุมัติแบบแล้ว กรุณาเริ่มกระบวนการมิลลิ่ง', 'CNC Custom Order')]);
 }
 function showRejectPanel(orderId) {
   var panel = document.getElementById('reject-panel-' + orderId);
@@ -2426,11 +2434,14 @@ function customerRejectDesign(orderId) {
   updateOrderInSupabase(orderId, { stage: 'design_revision', reviewHistory: ord.reviewHistory });
   renderCustomOrders();
   _renderAdminOrdersList();
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('❌', '고객 불만족 (수정 요청)', [
-    {label:'주문번호', value: ord.id},
-    {label:'클리닉', value: ord.clinic},
-    {label:'요청사항', value: note}
-  ], '디자인을 수정하여 다시 업로드해 주세요.')]);
+  var dateStrRej = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('❌', 'ลูกค้าขอแก้ไขแบบ', [
+    {label:'หมายเลขคำสั่งซื้อ', value: ord.id},
+    {label:'สถานะ', value: '❌ กำลังแก้ไขแบบ'},
+    {label:'วันที่', value: dateStrRej},
+    {label:'คลินิก', value: ord.clinic},
+    {label:'รายละเอียด', value: note}
+  ], 'กรุณาแก้ไขแบบแล้วอัปโหลดใหม่', 'CNC Custom Order')]);
 }
 function adminStartMilling(orderId) {
   var ord = customOrders.find(function(o){ return o.id===orderId; });
@@ -2440,10 +2451,10 @@ function adminStartMilling(orderId) {
   updateOrderInSupabase(orderId, { stage: 'milling' });
   renderAdminOrders();
   renderCustomOrders();
-  if (ord.lineId) sendLineMessage(ord.lineId, [buildFlexMessage('⚙️', 'CNC 밀링 시작', [
-    {label:'주문번호', value: ord.id},
-    {label:'클리닉', value: ord.clinic}
-  ], 'CNC 밀링 작업이 시작되었습니다. 완료 후 배송해 드리겠습니다.')]);
+  sendStatusChangeNotification(ord.lineId, {
+    orderId: ord.id, icon: '⚙️', statusTh: 'กำลัง CNC มิลลิ่ง',
+    clinic: ord.clinic, note: 'เริ่มกระบวนการ CNC มิลลิ่งแล้ว เมื่อเสร็จจะจัดส่งให้ทันที', subtitle: 'CNC Custom Order'
+  });
 }
 function adminShipOrder(orderId) {
   var modal = document.getElementById('shippingModal');
@@ -2486,12 +2497,15 @@ async function adminConfirmShipping() {
     if (latestDesign && latestDesign.url && latestDesign.url.startsWith('https')) {
       shipMsgs.push({ type: 'image', originalContentUrl: latestDesign.url, previewImageUrl: latestDesign.url });
     }
-    shipMsgs.push(buildFlexMessage('🚚', '배송 시작', [
-      {label:'주문번호', value: ord.id},
-      {label:'클리닉', value: ord.clinic},
-      {label:'배송사', value: carrier},
-      {label:'송장번호', value: trackingNumber}
-    ], '배송이 시작되었습니다. 앱에서 수령 완료 버튼을 눌러주세요.'));
+    var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+    shipMsgs.push(buildFlexMessage('🚚', 'ส่งพัสดุแล้ว', [
+      {label:'หมายเลขคำสั่งซื้อ', value: ord.id},
+      {label:'สถานะ', value: '🚚 ส่งพัสดุแล้ว'},
+      {label:'วันที่', value: dateStr},
+      {label:'คลินิก', value: ord.clinic},
+      {label:'ขนส่ง', value: carrier},
+      {label:'เลขพัสดุ', value: trackingNumber}
+    ], 'จัดส่งแล้ว กรุณากดปุ่มยืนยันรับสินค้าในแอป', 'CNC Custom Order'));
     sendLineMessage(ord.lineId, shipMsgs);
   }
 }
@@ -2605,6 +2619,28 @@ var SHOP_STAGES = [
   { key:'shipped',   label:'배송중',     icon:'🚚', next:'delivered' },
   { key:'delivered', label:'배송완료',   icon:'✅', next:null },
 ];
+// ── 태국어 상태 라벨 (LINE 알림용) ──────────────────────────
+var SHOP_STAGE_TH = {
+  submitted:'รับคำสั่งซื้อแล้ว', paid:'ชำระเงินแล้ว',
+  preparing:'กำลังเตรียมสินค้า', shipped:'กำลังจัดส่ง', delivered:'จัดส่งเรียบร้อย'
+};
+// ── LINE 상태변경 알림 (태국어) ──────────────────────────────
+function sendStatusChangeNotification(lineId, opts) {
+  if (!lineId || !LINE_PROXY_URL) return;
+  var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  var fields = [
+    { label: 'หมายเลขคำสั่งซื้อ', value: opts.orderId },
+    { label: 'สถานะ', value: opts.icon + ' ' + opts.statusTh },
+    { label: 'วันที่', value: dateStr }
+  ];
+  if (opts.clinic) fields.push({ label: 'คลินิก', value: opts.clinic });
+  if (opts.carrier) fields.push({ label: 'ขนส่ง', value: opts.carrier });
+  if (opts.tracking) fields.push({ label: 'เลขพัสดุ', value: opts.tracking });
+  if (opts.extraFields) fields = fields.concat(opts.extraFields);
+  var note = opts.note || 'สถานะคำสั่งซื้อของคุณมีการเปลี่ยนแปลง';
+  var subtitle = opts.subtitle || 'BIOPLANT · Dentalk';
+  sendLineMessage(lineId, [buildFlexMessage(opts.icon, opts.statusTh, fields, note, subtitle)]);
+}
 var currentShopStageTab = 'submitted';
 var _cachedShopOrders = [];
 function adminShopStageTab(stageKey) {
@@ -2775,32 +2811,35 @@ function _doAdvanceShopOrder(orderId, nextKey, carrier, tracking) {
   if (carrier)  sbUpdates.carrier         = carrier;
   if (tracking) sbUpdates.tracking_number = tracking;
   sbUpdateShopOrder(orderId, sbUpdates).catch(function(e){ console.error('[Shop Order Update]', e); });
-  // 고객에게 LINE flex 발송 (주문 상세 포함)
-  // ※ lineId는 고객이 입력한 LINE User ID(U로 시작)여야 전달 가능
+  // 고객에게 LINE flex 발송 (태국어)
+  var shopStageTh = SHOP_STAGE_TH[nextKey] || nextKey;
+  var dateStrShop = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
   if (o.lineId) {
     var itemRows = (o.items || []).map(function(i) {
       return { label: i.name, value: '[' + i.code + '] ×' + i.qty + '  ' + (i.price * i.qty).toLocaleString() + ' THB' };
     });
     var fields = [
-      { label: '주문번호', value: o.id },
-      { label: '클리닉', value: o.clinic },
-      { label: '날짜', value: o.date },
+      { label: 'หมายเลขคำสั่งซื้อ', value: o.id },
+      { label: 'สถานะ', value: nextStage.icon + ' ' + shopStageTh },
+      { label: 'วันที่', value: dateStrShop },
+      { label: 'คลินิก', value: o.clinic },
     ];
-    if (carrier)  fields.push({ label: '배송사', value: carrier });
-    if (tracking) fields.push({ label: '송장번호', value: tracking });
+    if (carrier)  fields.push({ label: 'ขนส่ง', value: carrier });
+    if (tracking) fields.push({ label: 'เลขพัสดุ', value: tracking });
     fields = fields.concat(itemRows);
-    fields.push({ label: '합계', value: (o.totalAmount || 0).toLocaleString() + ' THB' });
-    sendLineMessage(o.lineId, [buildFlexMessage(nextStage.icon, nextStage.label, fields, '문의: Line @bioplant_th', 'Shop Order')]);
+    fields.push({ label: 'รวม', value: (o.totalAmount || 0).toLocaleString() + ' THB' });
+    sendLineMessage(o.lineId, [buildFlexMessage(nextStage.icon, shopStageTh, fields, 'สอบถาม: Line @bioplant_th', 'Shop Order')]);
   }
-  // 관리자에게도 flex 알림
+  // 관리자에게도 flex 알림 (태국어)
   var adminFields = [
-    { label: '주문번호', value: o.id },
-    { label: '클리닉', value: o.clinic },
-    { label: '변경상태', value: nextStage.icon + ' ' + nextStage.label },
+    { label: 'หมายเลขคำสั่งซื้อ', value: o.id },
+    { label: 'คลินิก', value: o.clinic },
+    { label: 'สถานะใหม่', value: nextStage.icon + ' ' + shopStageTh },
+    { label: 'วันที่', value: dateStrShop },
   ];
-  if (carrier)  adminFields.push({ label: '배송사', value: carrier });
-  if (tracking) adminFields.push({ label: '송장번호', value: tracking });
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', '쇼핑주문 상태변경', adminFields, null, 'Shop Order')]);
+  if (carrier)  adminFields.push({ label: 'ขนส่ง', value: carrier });
+  if (tracking) adminFields.push({ label: 'เลขพัสดุ', value: tracking });
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', 'เปลี่ยนสถานะคำสั่งซื้อ', adminFields, null, 'Shop Order')]);
   renderAdminShopOrders();
 }
 function renderAdminUsed() {
@@ -3002,24 +3041,30 @@ async function adminChangeCustomOrderStage(orderId, newStage) {
   _renderAdminOrdersList();
   renderCustomOrders();
   renderAdminSummaryCards();
-  // LINE 알림: 고객에게 상태 변경 알림
+  // LINE 알림: 고객에게 상태 변경 알림 (태국어)
   var stageObj = ORDER_STAGES.find(function(s){ return s.key === newStage; });
-  var stageLabel = t('stage_' + newStage) || newStage;
-  if (ord.lineId && stageObj) {
-    var fields = [
-      { label: '주문번호', value: ord.id },
-      { label: '클리닉', value: ord.clinic },
-      { label: '변경상태', value: stageObj.icon + ' ' + stageLabel }
-    ];
-    sendLineMessage(ord.lineId, [buildFlexMessage(stageObj.icon, stageLabel, fields, '주문 상태가 변경되었습니다.')]);
+  var CUSTOM_STAGE_TH = {
+    submitted:'รอการยืนยัน', confirmed:'ยืนยันแล้ว', design_ready:'รอตรวจแบบ',
+    design_revision:'กำลังแก้ไขแบบ', approved:'อนุมัติแบบแล้ว',
+    milling:'กำลัง CNC มิลลิ่ง', shipped:'ส่งพัสดุแล้ว', done:'ส่งมอบแล้ว'
+  };
+  var stageTh = CUSTOM_STAGE_TH[newStage] || newStage;
+  var oldStageTh = CUSTOM_STAGE_TH[oldStage] || oldStage;
+  if (stageObj) {
+    sendStatusChangeNotification(ord.lineId, {
+      orderId: ord.id, icon: stageObj.icon, statusTh: stageTh,
+      clinic: ord.clinic, note: 'สถานะคำสั่งซื้อของคุณมีการเปลี่ยนแปลง', subtitle: 'CNC Custom Order'
+    });
   }
   // 관리자에게도 알림
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', '커스텀주문 상태변경', [
-    { label: '주문번호', value: ord.id },
-    { label: '클리닉', value: ord.clinic },
-    { label: '이전상태', value: t('stage_' + oldStage) || oldStage },
-    { label: '변경상태', value: stageLabel }
-  ])]);
+  var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🔄', 'เปลี่ยนสถานะคำสั่งซื้อ', [
+    { label: 'หมายเลขคำสั่งซื้อ', value: ord.id },
+    { label: 'คลินิก', value: ord.clinic },
+    { label: 'สถานะเดิม', value: oldStageTh },
+    { label: 'สถานะใหม่', value: stageTh },
+    { label: 'วันที่', value: dateStr }
+  ], null, 'CNC Custom Order')]);
 }
 function _renderAdminOrdersList() {
   var list = document.getElementById('adminTabOrders');
