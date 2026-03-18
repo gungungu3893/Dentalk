@@ -530,6 +530,59 @@ alter table public.forum_posts
   add column if not exists is_pinned boolean not null default false;
 
 -- ============================================================
+-- Phase 3-#4: 웹진 시스템
+-- ============================================================
+create table if not exists public.webzine_articles (
+  id            uuid        primary key default uuid_generate_v4(),
+  category      text        not null default 'news',
+  title         text        not null,
+  body_md       text        not null default '',
+  thumbnail_url text,
+  author_id     text        references public.licenses(nickname) on delete set null,
+  views         integer     not null default 0,
+  is_published  boolean     not null default true,
+  created_at    timestamptz not null default now()
+);
+
+alter table public.webzine_articles enable row level security;
+
+drop policy if exists "webzine: public read"             on public.webzine_articles;
+drop policy if exists "webzine: anon insert"             on public.webzine_articles;
+drop policy if exists "webzine: anon update"             on public.webzine_articles;
+drop policy if exists "webzine: anon delete"             on public.webzine_articles;
+drop policy if exists "webzine: service_role full access" on public.webzine_articles;
+
+create policy "webzine: public read"
+  on public.webzine_articles for select
+  to anon
+  using (true);
+
+create policy "webzine: anon insert"
+  on public.webzine_articles for insert
+  to anon
+  with check (true);
+
+create policy "webzine: anon update"
+  on public.webzine_articles for update
+  to anon
+  using (true)
+  with check (true);
+
+create policy "webzine: anon delete"
+  on public.webzine_articles for delete
+  to anon
+  using (true);
+
+create policy "webzine: service_role full access"
+  on public.webzine_articles for all
+  to service_role
+  using (true)
+  with check (true);
+
+create index if not exists idx_webzine_category   on public.webzine_articles(category);
+create index if not exists idx_webzine_created_at on public.webzine_articles(created_at desc);
+
+-- ============================================================
 -- 완료!
 -- 이 SQL을 Supabase Dashboard > SQL Editor에 붙여넣고 실행하세요.
 -- ============================================================

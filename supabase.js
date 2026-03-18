@@ -346,3 +346,38 @@ async function sbGetRsvpAttendees(eventId) {
     return { nickname: r.user_id, clinic: u.clinic_name || '', date: r.created_at };
   });
 }
+
+// ============================================================
+// Webzine Articles (웹진) — webzine_articles 테이블
+// ============================================================
+
+async function sbGetWebzineArticles() {
+  return sbGet('webzine_articles', 'is_published=eq.true&order=created_at.desc');
+}
+
+async function sbSaveWebzineArticle(article) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/webzine_articles', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      category:      article.category  || 'news',
+      title:         article.title,
+      body_md:       article.body_md   || '',
+      thumbnail_url: article.thumbnail_url || null,
+      author_id:     article.author_id || null,
+      views:         0,
+      is_published:  article.is_published !== false,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveWebzineArticle] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbUpdateWebzineArticle(id, updates) {
+  return sbPatch('webzine_articles', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+async function sbDeleteWebzineArticle(id) {
+  return sbDelete('webzine_articles', 'id=eq.' + encodeURIComponent(id));
+}

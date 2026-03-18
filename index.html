@@ -588,6 +588,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_forum">토론방</span>
         <span id="ntab-lock-forum" class="nav-lock hidden">🔒</span>
       </button>
+      <button onclick="goPage('webzine')"               id="ntab-webzine"  class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">📰</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_webzine">WEBZINE</span>
+      </button>
       <button onclick="goPage('events')"                id="ntab-events"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
         <span class="text-base leading-none">📅</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_events">EVENTS</span>
@@ -625,6 +629,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <button onclick="goPage('custom')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><span>🔧</span><span data-i18n="nav_custom">CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
       <button onclick="goPage('used')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><span>♻️</span><span data-i18n="nav_used">USED MARKET</span></button>
       <button onclick="goPage('forum')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><span>💬</span><span data-i18n="nav_forum">FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
+      <button onclick="goPage('webzine')"  class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-webzine"><span>📰</span><span data-i18n="nav_webzine">WEBZINE</span></button>
       <button onclick="goPage('events')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span data-i18n="nav_events">EVENTS</span></button>
 
       <button onclick="goPage('settings')" class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><span>⚙️</span><span data-i18n="nav_settings">SETTINGS</span></button>
@@ -740,31 +745,16 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="homeEventsPreview"></div>
       </div>
 
-      <!-- ─── WEBZINE PLACEHOLDER ───────────────────────────────── -->
+      <!-- ─── WEBZINE PREVIEW ─────────────────────────────────── -->
       <div class="px-4 pt-5 pb-2">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_webzine">Webzine</h2>
             <p class="text-[9px] text-slate-400 font-medium mt-0.5" data-i18n="sec_webzine_sub">Clinical cases &amp; product updates</p>
           </div>
+          <button onclick="goPage('webzine')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_events_more">View All ›</button>
         </div>
-        <!-- 3 thumbnail placeholder slots + coming soon label -->
-        <div class="rounded-2xl overflow-hidden border-2 border-dashed border-slate-200">
-          <div class="grid grid-cols-3">
-            <div class="aspect-square bg-slate-50 flex items-center justify-center border-r border-b border-dashed border-slate-200">
-              <span class="text-2xl opacity-20">📄</span>
-            </div>
-            <div class="aspect-square bg-slate-50 flex items-center justify-center border-r border-b border-dashed border-slate-200">
-              <span class="text-2xl opacity-20">📄</span>
-            </div>
-            <div class="aspect-square bg-slate-50 flex items-center justify-center border-b border-dashed border-slate-200">
-              <span class="text-2xl opacity-20">📄</span>
-            </div>
-          </div>
-          <div class="bg-slate-50 px-5 py-3.5 text-center">
-            <p class="text-xs font-bold text-slate-400" data-i18n="sec_webzine_coming">Coming Soon — Stay tuned</p>
-          </div>
-        </div>
+        <div id="homeWebzinePreview" class="grid grid-cols-3 gap-2"></div>
       </div>
 
       <!-- ─── FOOTER LINKS ──────────────────────────────────────── -->
@@ -1184,6 +1174,40 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
       </div>
     </div>
+    <!-- ==================== WEBZINE ==================== -->
+    <div id="page-webzine" class="page p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xl">📰</span>
+        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_webzine">Webzine</h2>
+      </div>
+      <!-- 관리자: 글쓰기 버튼 -->
+      <div id="webzineAdminBtn" class="hidden mb-3">
+        <button onclick="toggleWebzineForm()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-2xl font-black text-xs active:scale-95 transition">✏️ <span data-i18n="wz_write_btn">Write Article</span></button>
+      </div>
+      <div id="webzineFormWrap" class="hidden mb-4"></div>
+      <!-- 카테고리 필터 -->
+      <div id="webzineCatBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
+      <!-- 기사 목록 -->
+      <div id="webzineList" class="grid grid-cols-2 gap-3"></div>
+    </div>
+    <!-- ==================== WEBZINE DETAIL ==================== -->
+    <div id="page-webzine-detail" class="page">
+      <div id="wzd-thumbWrap" class="hidden">
+        <img id="wzd-thumb" src="" class="w-full max-h-[240px] object-cover">
+      </div>
+      <div class="p-5">
+        <span id="wzd-catBadge" class="inline-block text-[10px] font-black px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 mb-2"></span>
+        <h2 id="wzd-title" class="font-black text-slate-800 text-xl mb-2 leading-snug"></h2>
+        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold mb-4">
+          <span id="wzd-author"></span>
+          <span>·</span>
+          <span id="wzd-date"></span>
+          <span>·</span>
+          <span>👁 <span id="wzd-views">0</span></span>
+        </div>
+        <div id="wzd-body" class="prose prose-sm text-slate-600 leading-relaxed"></div>
+      </div>
+    </div>
     <!-- ==================== EVENTS ==================== -->
     <div id="page-events" class="page p-4">
       <div class="flex items-center gap-2 mb-4">
@@ -1251,6 +1275,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품</button>
           <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">♻️ 중고</button>
           <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💬 포럼</button>
+          <button onclick="adminShowTab('webzine')" id="adminTabBtn-webzine" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📰 웹진</button>
           <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📅 이벤트</button>
         </div>
         <!-- 탭 콘텐츠 -->
@@ -1260,6 +1285,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="adminTabUsed" class="hidden space-y-3"></div>
         <div id="adminTabForum" class="hidden space-y-3"></div>
         <div id="adminTabUsers" class="hidden"></div>
+        <div id="adminTabWebzine" class="hidden"></div>
         <div id="adminTabEvents" class="hidden"></div>
       </div>
     </div>
