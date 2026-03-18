@@ -588,6 +588,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_forum">토론방</span>
         <span id="ntab-lock-forum" class="nav-lock hidden">🔒</span>
       </button>
+      <button onclick="goPage('jobs')"                   id="ntab-jobs"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <span class="text-base leading-none">💼</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_jobs">JOBS</span>
+      </button>
       <button onclick="goPage('webzine')"               id="ntab-webzine"  class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
         <span class="text-base leading-none">📰</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_webzine">WEBZINE</span>
@@ -629,6 +633,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <button onclick="goPage('custom')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><span>🔧</span><span data-i18n="nav_custom">CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
       <button onclick="goPage('used')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><span>♻️</span><span data-i18n="nav_used">USED MARKET</span></button>
       <button onclick="goPage('forum')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><span>💬</span><span data-i18n="nav_forum">FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
+      <button onclick="goPage('jobs')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-jobs"><span>💼</span><span data-i18n="nav_jobs">JOBS</span></button>
       <button onclick="goPage('webzine')"  class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-webzine"><span>📰</span><span data-i18n="nav_webzine">WEBZINE</span></button>
       <button onclick="goPage('events')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span data-i18n="nav_events">EVENTS</span></button>
 
@@ -1174,6 +1179,61 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
       </div>
     </div>
+    <!-- ==================== JOBS ==================== -->
+    <div id="page-jobs" class="page p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xl">💼</span>
+        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_jobs">Jobs</h2>
+      </div>
+      <!-- 로그인 유저: 글쓰기 버튼 -->
+      <div id="jobsWriteBtn" class="hidden mb-3">
+        <button onclick="toggleJobForm()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-2xl font-black text-xs active:scale-95 transition">✏️ <span data-i18n="job_write_btn">Post Job</span></button>
+      </div>
+      <div id="jobFormWrap" class="hidden mb-4"></div>
+      <!-- type 탭 -->
+      <div id="jobTypeBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-2 -mx-0.5 px-0.5"></div>
+      <!-- 지역 필터 -->
+      <div id="jobRegionBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
+      <!-- 목록 -->
+      <div id="jobsList" class="flex flex-col gap-2.5"></div>
+    </div>
+    <!-- ==================== JOB DETAIL ==================== -->
+    <div id="page-job-detail" class="page p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span id="jd-typeBadge" class="inline-block text-[10px] font-black px-2.5 py-1 rounded-full"></span>
+        <span id="jd-regionBadge" class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500"></span>
+      </div>
+      <h2 id="jd-title" class="font-black text-slate-800 text-xl mb-1 leading-snug"></h2>
+      <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold mb-4">
+        <span id="jd-author"></span>
+        <span>·</span>
+        <span id="jd-date"></span>
+      </div>
+      <!-- 급여 -->
+      <div id="jd-salaryWrap" class="hidden bg-green-50 rounded-xl p-3 mb-3">
+        <p class="text-[10px] font-black text-green-600 mb-0.5" data-i18n="job_salary">Salary</p>
+        <p id="jd-salary" class="font-black text-green-800 text-sm"></p>
+      </div>
+      <!-- 설명 -->
+      <div class="mb-3">
+        <p class="text-[10px] font-black text-slate-400 mb-1" data-i18n="job_desc">Description</p>
+        <p id="jd-desc" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"></p>
+      </div>
+      <!-- 요구사항 -->
+      <div id="jd-reqWrap" class="hidden mb-3">
+        <p class="text-[10px] font-black text-slate-400 mb-1" data-i18n="job_requirements">Requirements</p>
+        <p id="jd-req" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"></p>
+      </div>
+      <!-- 연락처 -->
+      <div id="jd-contactWrap" class="hidden bg-blue-50 rounded-xl p-3 mb-3">
+        <p class="text-[10px] font-black text-blue-600 mb-0.5" data-i18n="job_contact">Contact</p>
+        <p id="jd-contact" class="font-black text-blue-800 text-sm"></p>
+      </div>
+      <!-- 삭제 버튼 (본인 글) -->
+      <div id="jd-ownerActions" class="hidden mt-4">
+        <button onclick="deleteMyJob()" class="w-full py-2.5 bg-red-50 text-red-500 rounded-xl font-black text-xs active:scale-95 transition" data-i18n="job_delete_btn">Delete Post</button>
+      </div>
+    </div>
     <!-- ==================== WEBZINE ==================== -->
     <div id="page-webzine" class="page p-4">
       <div class="flex items-center gap-2 mb-3">
@@ -1275,6 +1335,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품</button>
           <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">♻️ 중고</button>
           <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💬 포럼</button>
+          <button onclick="adminShowTab('jobs')" id="adminTabBtn-jobs" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💼 구인구직</button>
           <button onclick="adminShowTab('webzine')" id="adminTabBtn-webzine" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📰 웹진</button>
           <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📅 이벤트</button>
         </div>
@@ -1285,6 +1346,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="adminTabUsed" class="hidden space-y-3"></div>
         <div id="adminTabForum" class="hidden space-y-3"></div>
         <div id="adminTabUsers" class="hidden"></div>
+        <div id="adminTabJobs" class="hidden"></div>
         <div id="adminTabWebzine" class="hidden"></div>
         <div id="adminTabEvents" class="hidden"></div>
       </div>

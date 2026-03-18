@@ -583,6 +583,63 @@ create index if not exists idx_webzine_category   on public.webzine_articles(cat
 create index if not exists idx_webzine_created_at on public.webzine_articles(created_at desc);
 
 -- ============================================================
+-- Phase 3-#5: 구인구직 게시판 (Jobs Board)
+-- ============================================================
+create table if not exists public.jobs (
+  id            uuid        primary key default uuid_generate_v4(),
+  user_id       text        references public.licenses(nickname) on delete set null,
+  type          text        not null default 'dentist_hire',
+  region        text,
+  province      text,
+  title         text        not null,
+  description   text        not null default '',
+  salary_range  text,
+  requirements  text,
+  contact       text,
+  is_active     boolean     not null default true,
+  created_at    timestamptz not null default now()
+);
+
+alter table public.jobs enable row level security;
+
+drop policy if exists "jobs: public read"              on public.jobs;
+drop policy if exists "jobs: anon insert"              on public.jobs;
+drop policy if exists "jobs: anon update"              on public.jobs;
+drop policy if exists "jobs: anon delete"              on public.jobs;
+drop policy if exists "jobs: service_role full access"  on public.jobs;
+
+create policy "jobs: public read"
+  on public.jobs for select
+  to anon
+  using (true);
+
+create policy "jobs: anon insert"
+  on public.jobs for insert
+  to anon
+  with check (true);
+
+create policy "jobs: anon update"
+  on public.jobs for update
+  to anon
+  using (true)
+  with check (true);
+
+create policy "jobs: anon delete"
+  on public.jobs for delete
+  to anon
+  using (true);
+
+create policy "jobs: service_role full access"
+  on public.jobs for all
+  to service_role
+  using (true)
+  with check (true);
+
+create index if not exists idx_jobs_type       on public.jobs(type);
+create index if not exists idx_jobs_region     on public.jobs(region);
+create index if not exists idx_jobs_created_at on public.jobs(created_at desc);
+
+-- ============================================================
 -- 완료!
 -- 이 SQL을 Supabase Dashboard > SQL Editor에 붙여넣고 실행하세요.
 -- ============================================================

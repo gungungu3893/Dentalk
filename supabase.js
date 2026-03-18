@@ -381,3 +381,41 @@ async function sbUpdateWebzineArticle(id, updates) {
 async function sbDeleteWebzineArticle(id) {
   return sbDelete('webzine_articles', 'id=eq.' + encodeURIComponent(id));
 }
+
+// ============================================================
+// Jobs (구인구직) — jobs 테이블
+// ============================================================
+
+async function sbGetJobs() {
+  return sbGet('jobs', 'is_active=eq.true&order=created_at.desc');
+}
+
+async function sbSaveJob(job) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/jobs', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      user_id:      job.user_id      || null,
+      type:         job.type         || 'dentist_hire',
+      region:       job.region       || null,
+      province:     job.province     || null,
+      title:        job.title,
+      description:  job.description  || '',
+      salary_range: job.salary_range || null,
+      requirements: job.requirements || null,
+      contact:      job.contact      || null,
+      is_active:    job.is_active !== false,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveJob] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbUpdateJob(id, updates) {
+  return sbPatch('jobs', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+async function sbDeleteJob(id) {
+  return sbDelete('jobs', 'id=eq.' + encodeURIComponent(id));
+}
