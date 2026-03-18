@@ -87,14 +87,14 @@ async function saveOrderToSupabase(order) {
     var res = await sbSaveCustomOrder(order, order.cases);
     if (res.ok) return;
     var errText = await res.text();
-    console.warn('[Order Save] HTTP', res.status, errText);
+    // HTTP error on full save, retry without large data
     // ② 용량 문제(413)이면 대용량 base64 제거 후 재시도
     var res2 = await sbSaveCustomOrder(order, stripLargeBase64(order.cases));
     if (!res2.ok) {
       var err2 = await res2.text();
       console.error('[Order Save] Retry failed:', res2.status, err2);
     } else {
-      console.warn('[Order Save] Saved without large STL data.');
+      // Saved without large STL data
     }
   } catch(e) { console.error('[Order Save]', e); }
 }
@@ -252,7 +252,7 @@ function customerRejectDesign(orderId) {
   if (!ord) return;
   var noteEl = document.getElementById('reject-note-' + orderId);
   var note = noteEl ? noteEl.value.trim() : '';
-  if (!note) { alert('수정 요청사항을 입력해주세요.'); return; }
+  if (!note) { showToast('수정 요청사항을 입력해주세요.', 'warning'); return; }
   ord.stage = 'design_revision';
   if (!ord.reviewHistory) ord.reviewHistory = [];
   ord.reviewHistory.push({ action:'rejected', note:note, date:new Date().toLocaleDateString() });
@@ -305,8 +305,8 @@ async function adminConfirmShipping() {
     ? (document.getElementById('ship-carrier-custom').value.trim())
     : sel.value;
   var trackingNumber = document.getElementById('ship-tracking').value.trim();
-  if (!carrier) { alert('배송사를 선택해주세요.'); return; }
-  if (!trackingNumber) { alert('송장번호를 입력해주세요.'); return; }
+  if (!carrier) { showToast('배송사를 선택해주세요.', 'warning'); return; }
+  if (!trackingNumber) { showToast('송장번호를 입력해주세요.', 'warning'); return; }
   var ord = customOrders.find(function(o){ return o.id===orderId; });
   if (!ord) return;
   ord.stage = 'shipped';
@@ -388,7 +388,7 @@ async function renderAdminSummaryCards() {
     var pendingShop = sbShopOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
     var pendingCnc = sbCustomOrders.filter(function(o){ return o.stage === 'submitted'; }).length;
     totalPending = pendingShop + pendingCnc;
-  } catch(e) { console.warn('[Summary Cards]', e); }
+  } catch(e) { handleSupabaseError(e, 'Summary Cards'); }
   renderCards(totalMembers, totalPending, todaySignups);
 }
 async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
@@ -873,8 +873,8 @@ async function _setUserActiveState(nickname, active) {
   try {
     var res = await authSetUserActive(nickname, active);
     if (res.ok) { renderAdminUsers(); renderAdminSummaryCards(); }
-    else alert(t('admin_load_fail'));
-  } catch(e) { alert(t('admin_error') + ' ' + e.message); }
+    else showToast(t('admin_load_fail'), 'error');
+  } catch(e) { handleSupabaseError(e, 'User Active State'); }
 }
 async function adminToggleUser(nickname, currentActive) {
   var newActive = !currentActive;
@@ -882,8 +882,8 @@ async function adminToggleUser(nickname, currentActive) {
   try {
     var res = await authSetUserActive(nickname, newActive);
     if (res.ok) renderAdminUsers();
-    else alert('업데이트 실패');
-  } catch(e) { alert('오류: ' + e.message); }
+    else showToast(t('admin_load_fail'), 'error');
+  } catch(e) { handleSupabaseError(e, 'Toggle User'); }
 }
 // ── 지역 리더 관리 (피라미드 계층형 + 직책) ─────────────────
 // 직책 key → labelKey 변환
@@ -965,8 +965,8 @@ async function adminSetLeader(nickname) {
   var esc = nickname.replace(/'/g,"\\'");
   var levelSel = document.getElementById('leader-level-' + esc);
   var titleSel = document.getElementById('leader-title-' + esc);
-  if (!levelSel || !levelSel.value) { alert(t('leader_select_level')); return; }
-  if (!titleSel || !titleSel.value) { alert(t('leader_select_title')); return; }
+  if (!levelSel || !levelSel.value) { showToast(t('leader_select_level'), 'warning'); return; }
+  if (!titleSel || !titleSel.value) { showToast(t('leader_select_title'), 'warning'); return; }
   var lv = levelSel.value;
   var title = titleSel.value;
   var region = '';
@@ -974,18 +974,18 @@ async function adminSetLeader(nickname) {
     region = 'all';
   } else if (lv === 'region') {
     var rSel = document.getElementById('leader-region-' + esc);
-    if (!rSel || !rSel.value) { alert(t('leader_select_region')); return; }
+    if (!rSel || !rSel.value) { showToast(t('leader_select_region'), 'warning'); return; }
     region = rSel.value;
   } else if (lv === 'province') {
     var rSel2 = document.getElementById('leader-region-' + esc);
     var pSel = document.getElementById('leader-province-' + esc);
-    if (!rSel2 || !rSel2.value) { alert(t('leader_select_region')); return; }
-    if (!pSel || !pSel.value) { alert(t('leader_select_province')); return; }
+    if (!rSel2 || !rSel2.value) { showToast(t('leader_select_region'), 'warning'); return; }
+    if (!pSel || !pSel.value) { showToast(t('leader_select_province'), 'warning'); return; }
     region = pSel.value;
   }
   // 점유 확인
   if (_isTitleOccupied(region, title, nickname)) {
-    alert(t('leader_title_occupied')); return;
+    showToast(t('leader_title_occupied'), 'error'); return;
   }
   var lbl = _resolveLeaderLabel(region);
   var titleLabel = t(_titleKeyToLabelKey(title));
@@ -993,16 +993,16 @@ async function adminSetLeader(nickname) {
   try {
     var res = await authSetUserRole(nickname, 'region_leader', region, title);
     if (res.ok) { await _loadLeaderCache(); renderAdminUsers(); }
-    else alert(t('admin_error'));
-  } catch(e) { alert(t('admin_error') + ' ' + e.message); }
+    else showToast(t('admin_error'), 'error');
+  } catch(e) { handleSupabaseError(e, 'Set Leader'); }
 }
 async function adminRemoveLeader(nickname) {
   if (!confirm(nickname + ': ' + t('leader_remove') + '?')) return;
   try {
     var res = await authSetUserRole(nickname, 'user', null, null);
     if (res.ok) { await _loadLeaderCache(); renderAdminUsers(); }
-    else alert(t('admin_error'));
-  } catch(e) { alert(t('admin_error') + ' ' + e.message); }
+    else showToast(t('admin_error'), 'error');
+  } catch(e) { handleSupabaseError(e, 'Remove Leader'); }
 }
 // ── 이벤트 관리 ────────────────────────────────────────────
 function renderAdminEventsTab() {
@@ -1037,7 +1037,7 @@ function adminAddEvent() {
   var date = (document.getElementById('adminEventDate').value || '').trim();
   var name = (document.getElementById('adminEventName').value || '').trim();
   var loc  = (document.getElementById('adminEventLoc').value  || '').trim();
-  if (!date || !name || !loc) { alert(t('admin_event_fill_alert')); return; }
+  if (!date || !name || !loc) { showToast(t('admin_event_fill_alert'), 'warning'); return; }
   var newEv = { id: Date.now(), date: date, event: name, loc: loc,
     type: 'event', region: 'all',
     createdBy: isLoggedIn() ? currentUser.nickname : null };
@@ -1179,7 +1179,7 @@ async function renderAdminStats() {
 
     container.innerHTML = html;
   } catch(e) {
-    console.warn('[Admin Stats]', e);
+    handleSupabaseError(e, 'Admin Stats');
     container.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_error') + '</p>';
   }
 }

@@ -590,7 +590,7 @@ async function saveProfileInline() {
   localStorage.setItem('dentalk_profile_' + currentUser.licenseNum, JSON.stringify(profile));
   try {
     await authUpdateProfile(currentUser.licenseNum, { email: currentUser.email, phone: currentUser.phone, address: currentUser.address, clinic_name: currentUser.clinicName });
-  } catch(e) { console.warn('Supabase PATCH 실패:', e); }
+  } catch(e) { handleSupabaseError(e, 'Profile Update'); }
   var msg = document.getElementById('profileSavedMsg');
   if (msg) { msg.classList.remove('hidden'); setTimeout(function(){ msg.classList.add('hidden'); }, 2500); }
   renderProfileSettings();
@@ -598,7 +598,7 @@ async function saveProfileInline() {
   setTimeout(function(){ toggleProfileEditInline(); }, 1500);
 }
 function openProfileEdit() {
-  if (!isLoggedIn()) { alert(t('login_required')); return; }
+  if (!isLoggedIn()) { showToast(t('login_required'), 'warning'); return; }
   document.getElementById('pe-email').value   = currentUser.email   || '';
   document.getElementById('pe-phone').value   = currentUser.phone   || '';
   document.getElementById('pe-address').value = currentUser.address || '';
@@ -621,7 +621,7 @@ async function saveProfile() {
   // Supabase에 PATCH
   try {
     await authUpdateProfile(currentUser.licenseNum, { email: currentUser.email, phone: currentUser.phone, address: currentUser.address, clinic_name: currentUser.clinicName });
-  } catch(e) { console.warn('Supabase PATCH 실패 (로컬에는 저장됨):', e); }
+  } catch(e) { handleSupabaseError(e, 'Profile Update Modal'); }
   closeModal('profileEditModal');
   renderProfileSettings();
   var msg = document.getElementById('profileSavedMsg');
@@ -724,11 +724,11 @@ function sendMsg() {
   var to      = document.getElementById('compose-to').value.trim();
   var subject = document.getElementById('compose-subj').value.trim();
   var body    = document.getElementById('compose-body').value.trim();
-  if (!to||!subject||!body) { alert('받는 사람, 제목, 내용을 모두 입력해주세요.'); return; }
+  if (!to||!subject||!body) { showToast('받는 사람, 제목, 내용을 모두 입력해주세요.', 'warning'); return; }
   messages.push({ id:Date.now(), from:currentUser.nickname, to:to, subject:subject, body:body, date:new Date().toLocaleDateString(), read:false });
   closeModal('composeModal');
   renderMyMsgs();
-  alert('쪽지를 보냈습니다!');
+  showToast('쪽지를 보냈습니다!', 'success');
 }
 
 // ============================================================
@@ -1144,7 +1144,7 @@ async function doSearch() {
     }
     container.innerHTML = html;
   } catch(e) {
-    console.warn('[Search]', e);
+    handleSupabaseError(e, 'Search');
     container.innerHTML = '<p class="text-center text-red-400 text-sm font-bold py-8">' + t('search_error') + '</p>';
   }
 }
@@ -1180,7 +1180,7 @@ async function loadNotifications() {
     _notifications = _notifications.concat(data || []);
     renderNotifications();
   } catch(e) {
-    console.warn('[Notifications]', e);
+    handleSupabaseError(e, 'Notifications');
     if (!_notifications.length) {
       list.innerHTML = '<p class="text-center text-red-400 text-sm font-bold py-12">' + t('notif_error') + '</p>';
     }
@@ -1339,7 +1339,7 @@ async function loadMoreItems(pageType) {
       }
     }
   } catch(e) {
-    console.warn('[InfiniteScroll]', pageType, e);
+    handleSupabaseError(e, 'InfiniteScroll');
   }
   state.loading = false;
   if (loader) loader.classList.toggle('hidden', !state.hasMore);

@@ -180,10 +180,10 @@ function renderForum() {
             '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + catIcon + ' ' + (tabLabel.key ? t(tabLabel.labelKey) : p.category) + '</span>' +
             regionBadge +
           '</div>' +
-          '<p class="font-black text-slate-800 text-sm leading-snug mb-1 line-clamp-2">' + p.title + '</p>' +
-          '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + p.body + '</p>' +
+          '<p class="font-black text-slate-800 text-sm leading-snug mb-1 line-clamp-2">' + escHtml(p.title) + '</p>' +
+          '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + escHtml(p.body) + '</p>' +
           '<div class="flex items-center gap-2 text-[10px] text-slate-300 font-bold">' +
-            '<span class="text-slate-500 font-black">' + p.author + '</span>' +
+            '<span class="text-slate-500 font-black">' + escHtml(p.author) + '</span>' +
             authorLeaderBadge +
             '<span>·</span>' +
             '<span>' + (p.date||'') + '</span>' +

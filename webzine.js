@@ -48,7 +48,7 @@ function renderWebzine() {
       '<div class="aspect-[4/3] overflow-hidden">' + thumb + '</div>' +
       '<div class="p-3">' +
         '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 mb-1">' + (catCfg.icon || '') + ' ' + t(catCfg.labelKey || 'wz_cat_news') + '</span>' +
-        '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-2 mb-1">' + a.title + '</p>' +
+        '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-2 mb-1">' + escHtml(a.title) + '</p>' +
         '<div class="flex items-center gap-1.5 text-[9px] text-slate-300 font-bold">' +
           '<span>' + dateStr + '</span>' +
           '<span>·</span>' +
@@ -132,7 +132,7 @@ function renderHomeWebzinePreview() {
         '<span class="absolute top-1 left-1 text-[7px] font-black px-1.5 py-0.5 rounded-full bg-white/80 backdrop-blur-sm text-slate-600">' + (catCfg.icon || '📰') + ' ' + t(catCfg.labelKey || 'wz_cat_news') + '</span>' +
       '</div>' +
       '<div class="p-1.5">' +
-        '<p class="font-black text-[9px] text-slate-700 leading-tight line-clamp-2 mb-0.5">' + a.title + '</p>' +
+        '<p class="font-black text-[9px] text-slate-700 leading-tight line-clamp-2 mb-0.5">' + escHtml(a.title) + '</p>' +
         '<p class="text-[8px] text-slate-300 font-bold">' + dateStr + '</p>' +
       '</div>' +
     '</div>';
@@ -205,7 +205,7 @@ async function submitWebzineArticle() {
   var title = (document.getElementById('wz-title').value || '').trim();
   var cat   = (document.getElementById('wz-cat').value || 'news');
   var body  = (document.getElementById('wz-body').value || '').trim();
-  if (!title || !body) { alert(t('wz_fill_alert')); return; }
+  if (!title || !body) { showToast(t('wz_fill_alert'), 'warning'); return; }
   var article = {
     category:      cat,
     title:         title,
@@ -223,7 +223,7 @@ async function submitWebzineArticle() {
         author_id: saved.author_id, views: 0, date: saved.created_at,
       });
     }
-  } catch(e) { console.error('[Webzine Save]', e); }
+  } catch(e) { handleSupabaseError(e, 'Webzine Save'); }
   _wzThumbUrl = null;
   document.getElementById('webzineFormWrap').classList.add('hidden');
   renderWebzine();
@@ -243,7 +243,7 @@ function renderAdminWebzine() {
     return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm flex items-center gap-3">' +
       (a.thumbnail_url ? '<img src="' + a.thumbnail_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0" loading="lazy">' : '<div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><span class="text-lg opacity-30">📰</span></div>') +
       '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-xs text-slate-800 truncate">' + a.title + '</p>' +
+        '<p class="font-black text-xs text-slate-800 truncate">' + escHtml(a.title) + '</p>' +
         '<p class="text-[9px] text-slate-400">' + (catCfg.icon || '') + ' ' + t(catCfg.labelKey || '') + ' · 👁 ' + (a.views || 0) + '</p>' +
       '</div>' +
       '<button onclick="adminDeleteWebzine(' + aid + ')" class="shrink-0 px-3 py-1.5 bg-red-50 text-red-500 rounded-xl font-black text-[10px]">' + t('forum_delete') + '</button>' +

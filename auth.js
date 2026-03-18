@@ -195,7 +195,7 @@ async function submitRegistration() {
     btn.textContent = t('reg_submit');
     if (res.status === 409) { showRegError(t('reg_duplicate')); return; }
     if (!res.ok) { showRegError(t('reg_network_error')); return; }
-    alert(t('reg_success'));
+    showToast(t('reg_success'), 'success');
     closeModal('registerModal');
   } catch(e) {
     btn.disabled = false;
@@ -332,7 +332,7 @@ function forceLogout() {
   renderProfileSettings();
   updateNicknameDisplays();
   if (LOCKED.includes(currentPage)) goPage('home');
-  alert(t('session_expired'));
+  showToast(t('session_expired'), 'warning');
 }
 function doLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;

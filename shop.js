@@ -82,7 +82,7 @@ async function renderMyShopOrders() {
     // localStorage 캐시 업데이트
     localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
   } catch(e) {
-    console.warn('[MyShopOrders]', e);
+    handleSupabaseError(e, 'MyShopOrders');
     // 네트워크 오류 시 localStorage 폴백
     var cached = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
     var nick = currentUser && currentUser.nickname;
@@ -387,7 +387,7 @@ function updateBadge() {
   updateFloatingCart();
 }
 function openCart() {
-  if (!cart.length) { alert(t('cart_empty')); return; }
+  if (!cart.length) { showToast(t('cart_empty'), 'warning'); return; }
   renderCart(); openModal('cartModal');
 }
 function renderCart() {
@@ -424,7 +424,7 @@ async function requestPay() {
   var phone   = document.getElementById('clinicPhone').value.trim();
   var addr    = document.getElementById('fullAddress').value.trim();
   var lineId  = document.getElementById('clinicLineId').value.trim();
-  if (!clinic||!phone||!addr) { alert(t('addr_fill_error')); return; }
+  if (!clinic||!phone||!addr) { showToast(t('addr_fill_error'), 'warning'); return; }
   var amt = cart.reduce(function(s,c){ return s+c.price*c.qty; },0);
   var oid = 'SP-' + Date.now();
   pendingShopOrder = {
@@ -556,7 +556,7 @@ async function renderAdminShopOrders() {
       _cachedShopOrders = orders;
       localStorage.setItem('dentalk_shop_orders', JSON.stringify(orders));
     }
-  } catch(e) { console.warn('[Shop Orders Load]', e); }
+  } catch(e) { handleSupabaseError(e, 'Shop Orders Load'); }
   // 단계별 카운트
   var counts = {};
   SHOP_STAGES.forEach(function(s){ counts[s.key] = 0; });
@@ -679,8 +679,8 @@ function adminConfirmShopShipping() {
     ? document.getElementById('sship-carrier-custom').value.trim()
     : sel.value;
   var tracking = document.getElementById('sship-tracking').value.trim();
-  if (!carrier) { alert('배송사를 선택해주세요.'); return; }
-  if (!tracking) { alert('송장번호를 입력해주세요.'); return; }
+  if (!carrier) { showToast('배송사를 선택해주세요.', 'warning'); return; }
+  if (!tracking) { showToast('송장번호를 입력해주세요.', 'warning'); return; }
   closeShopShippingModal();
   _doAdvanceShopOrder(orderId, 'shipped', carrier, tracking);
 }
@@ -826,7 +826,7 @@ function renderReviewList(reviews) {
 }
 
 async function submitReview() {
-  if (!_reviewRating || _reviewRating < 1) { alert(t('review_rating_required')); return; }
+  if (!_reviewRating || _reviewRating < 1) { showToast(t('review_rating_required'), 'warning'); return; }
   if (!isLoggedIn() || !currentUser) return;
   var comment = document.getElementById('reviewComment').value.trim();
   try {
@@ -838,7 +838,7 @@ async function submitReview() {
     });
     loadProductReviews(_currentReviewProductId);
   } catch(e) {
-    alert(t('review_submit_error'));
+    handleSupabaseError(e, 'Review Submit');
   }
 }
 

@@ -41,8 +41,8 @@ function renderEvents() {
       '<div class="flex-1 p-4 min-w-0 flex items-center">' +
         '<div class="flex-1 min-w-0">' +
           typeBadge +
-          '<p class="font-black text-slate-800 text-sm leading-snug">' + e.event + '</p>' +
-          '<p class="text-xs text-slate-400 font-bold mt-1">📍 ' + e.loc + '</p>' +
+          '<p class="font-black text-slate-800 text-sm leading-snug">' + escHtml(e.event) + '</p>' +
+          '<p class="text-xs text-slate-400 font-bold mt-1">📍 ' + escHtml(e.loc) + '</p>' +
           rsvpLabel +
         '</div>' +
         '<span class="text-slate-300 text-lg font-black shrink-0 ml-2">›</span>' +
@@ -140,8 +140,8 @@ async function _loadEventDetailRsvp(ev) {
       ? attendees.map(function(a) {
           return '<div class="flex items-center gap-2 py-1.5 border-b border-slate-50 last:border-0">' +
             '<span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs">👤</span>' +
-            '<span class="font-black text-xs text-slate-700">' + a.nickname + '</span>' +
-            '<span class="text-[10px] text-slate-400">' + (a.clinic || '') + '</span>' +
+            '<span class="font-black text-xs text-slate-700">' + escHtml(a.nickname) + '</span>' +
+            '<span class="text-[10px] text-slate-400">' + escHtml(a.clinic || '') + '</span>' +
           '</div>';
         }).join('')
       : '<p class="text-xs text-slate-400 font-bold py-2">' + t('rsvp_no_attendees') + '</p>';
@@ -157,7 +157,7 @@ async function _loadEventDetailRsvp(ev) {
       }
     }
   } catch(e) {
-    console.warn('[RSVP Load]', e);
+    handleSupabaseError(e, 'RSVP Load');
     countEl.textContent = '0 ' + t('rsvp_attendees');
     attendeeList.innerHTML = '';
   }
@@ -181,14 +181,14 @@ async function toggleRsvp(status) {
   if (!isLoggedIn() || !_currentDetailEvent) return;
   var ev = _currentDetailEvent;
   var sbId = ev._sbId || ev.id;
-  if (typeof sbId !== 'string') { alert(t('rsvp_error')); return; }
+  if (typeof sbId !== 'string') { showToast(t('rsvp_error'), 'error'); return; }
   try {
     await sbUpsertRsvp(sbId, currentUser.nickname, status);
     _updateRsvpButtons(status);
     _loadEventDetailRsvp(ev);
   } catch(e) {
-    console.error('[RSVP]', e);
-    alert(t('rsvp_error'));
+    handleSupabaseError(e, 'RSVP');
+    showToast(t('rsvp_error'), 'error');
   }
 }
 async function leaderDeleteEvent(id) {
@@ -232,7 +232,7 @@ async function submitMeetup() {
   var loc    = (document.getElementById('meetup-loc').value || '').trim();
   var region = (document.getElementById('meetup-region').value || 'all');
   var desc   = (document.getElementById('meetup-desc').value || '').trim();
-  if (!title || !date || !loc) { alert(t('meetup_fill_alert')); return; }
+  if (!title || !date || !loc) { showToast(t('meetup_fill_alert'), 'warning'); return; }
   var newEv = {
     id: Date.now(), date: date, event: title, loc: loc, desc: desc,
     type: 'meetup', region: region,
@@ -248,5 +248,5 @@ async function submitMeetup() {
       var idx = events_.findIndex(function(x){ return x === newEv; });
       if (idx !== -1) { events_[idx]._sbId = saved.id; events_[idx].id = saved.id; }
     }
-  } catch(e) { console.error('[Meetup Save]', e); }
+  } catch(e) { handleSupabaseError(e, 'Meetup Save'); }
 }

@@ -300,14 +300,14 @@ function customWizardNext() {
     if (patEl) wizardData.patient = patEl.value.trim();
     var dlEl = document.getElementById('wiz-deadline');
     if (dlEl) wizardData.deadline = dlEl.value;
-    if (!wizardData.teethSet.size) { alert(t('wiz_no_tooth_err')); return; }
+    if (!wizardData.teethSet.size) { showToast(t('wiz_no_tooth_err'), 'warning'); return; }
   } else if (wizardStep === 2) {
     // save sizes
     Array.from(wizardData.teethSet).forEach(function(tn) {
       var sEl = document.getElementById('wiz-size-' + tn);
       if (sEl) wizardData.teethSizes[tn] = sEl.value.trim();
     });
-    if (!wizardData.brand) { alert(t('wiz_no_brand_err')); return; }
+    if (!wizardData.brand) { showToast(t('wiz_no_brand_err'), 'warning'); return; }
   } else if (wizardStep === 3) {
     var memoEl = document.getElementById('wiz-memo');
     if (memoEl) wizardData.memo = memoEl.value.trim();
@@ -324,10 +324,10 @@ async function submitWizardOrder() {
   var _addrEl   = document.getElementById('cust-addr');   var addr   = _addrEl   ? _addrEl.value.trim()   : '';
   var _phoneEl  = document.getElementById('cust-phone');  var phone  = _phoneEl  ? _phoneEl.value.trim()  : '';
   var _lineEl   = document.getElementById('cust-line');   var lineId = _lineEl   ? _lineEl.value.trim()   : '';
-  if (!clinic || !addr || !phone) { alert(t('err_fill_delivery')); return; }
+  if (!clinic || !addr || !phone) { showToast(t('err_fill_delivery'), 'warning'); return; }
   var teeth = Array.from(wizardData.teethSet).sort(function(a,b){return a-b;});
-  if (!teeth.length) { alert(t('wiz_no_tooth_err')); return; }
-  if (!wizardData.brand) { alert(t('wiz_no_brand_err')); return; }
+  if (!teeth.length) { showToast(t('wiz_no_tooth_err'), 'warning'); return; }
+  if (!wizardData.brand) { showToast(t('wiz_no_brand_err'), 'warning'); return; }
   var teethData = teeth.map(function(tn) {
     return { tooth:tn, toothName:getToothName(tn), brand:wizardData.brand, size:wizardData.teethSizes[tn]||'', color:wizardData.shade||'' };
   });
@@ -348,7 +348,7 @@ async function submitWizardOrder() {
         method:'POST', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/octet-stream','x-upsert':'true'}, body:origFile
       });
       if (r.ok) stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-file/' + fname;
-    } catch(e) { console.warn('[STL]',e); }
+    } catch(e) { /* STL parse error - non-critical */ }
     if (!stlUrl) {
       stlUrl = await new Promise(function(resolve) {
         var reader = new FileReader();
@@ -369,7 +369,7 @@ async function submitWizardOrder() {
   ],'กรุณายืนยันคำสั่งซื้อในแผงผู้ดูแล')]);
   var msg = tf('order_success_msg', oid, 1, totalTeeth);
   if (lineId) msg += t('order_success_line');
-  alert(msg);
+  showToast(msg, 'success');
   customTab('list');
 }
 
@@ -534,19 +534,19 @@ async function submitCustom() {
   var addr   = document.getElementById('cust-addr').value.trim();
   var phone  = document.getElementById('cust-phone').value.trim();
   var lineId = document.getElementById('cust-line').value.trim();
-  if (!clinic||!addr||!phone) { alert(t('err_fill_delivery')); return; }
+  if (!clinic||!addr||!phone) { showToast(t('err_fill_delivery'), 'warning'); return; }
   var cases = []; var caseStlFiles = [];
   for (var i=1; i<=caseCount; i++) {
     if (!document.getElementById('case-'+i)) continue;
     var selectedTeeth = caseTeeth[i] ? Array.from(caseTeeth[i]).sort(function(a,b){return a-b;}) : [];
-    if (!selectedTeeth.length) { alert(tf('err_select_tooth', i)); return; }
+    if (!selectedTeeth.length) { showToast(tf('err_select_tooth', i), 'warning'); return; }
     var teethData = [];
     var valid = true;
     for (var ti=0; ti<selectedTeeth.length; ti++) {
       var tn = selectedTeeth[ti];
       var brand = (document.getElementById('tb-'+i+'-'+tn)||{}).value || '';
       var size  = ((document.getElementById('ts-'+i+'-'+tn)||{}).value || '').trim();
-      if (!brand||!size) { alert(tf('err_fill_tooth', i, tn)); valid=false; break; }
+      if (!brand||!size) { showToast(tf('err_fill_tooth', i, tn), 'warning'); valid=false; break; }
       teethData.push({
         tooth:     tn,
         toothName: getToothName(tn),
@@ -568,7 +568,7 @@ async function submitCustom() {
       stlUrls:  [],
     });
   }
-  if (!cases.length) { alert(t('err_add_case')); return; }
+  if (!cases.length) { showToast(t('err_add_case'), 'warning'); return; }
   var totalTeeth = cases.reduce(function(s,c){ return s+c.teeth.length; },0);
   var _now = new Date();
   var _month = String.fromCharCode(64 + _now.getMonth() + 1);
@@ -594,9 +594,9 @@ async function submitCustom() {
           stlUrl = SUPABASE_URL + '/storage/v1/object/public/stl-file/' + fname;
         } else {
           var errText = await r.text();
-          console.warn('[STL Upload] HTTP ' + r.status + ' - ' + errText + ' → base64 fallback 사용');
+          // Storage upload failed, using base64 fallback
         }
-      } catch(e) { console.warn('[STL Upload]', e, '→ base64 fallback 사용'); }
+      } catch(e) { /* Storage upload failed, using base64 fallback */ }
       // ② Storage 실패 시 base64 fallback
       if (!stlUrl) {
         stlUrl = await new Promise(function(resolve) {
@@ -605,7 +605,7 @@ async function submitCustom() {
             var result = ev.target.result;
             // base64 data URI가 너무 크면 (>3MB) Supabase 저장이 어려우므로 경고
             if (result && result.length > 3 * 1024 * 1024) {
-              console.warn('[STL Base64] File too large for inline storage:', Math.round(result.length/1024) + 'KB');
+              // File too large for inline base64 storage
             }
             resolve(result);
           };
@@ -633,7 +633,7 @@ async function submitCustom() {
   ], 'กรุณายืนยันคำสั่งซื้อในแผงผู้ดูแล')]);
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
   if (lineId) msg += t('order_success_line');
-  alert(msg);
+  showToast(msg, 'success');
   customTab('list');
 }
 function renderCustomOrders() {
@@ -958,7 +958,7 @@ async function sendLine(order, stageKey) {
     var data = await res.json();
     if (!res.ok) {
       console.error('[LINE] status:', res.status, data);
-      alert('[LINE 오류] status: ' + res.status + '\n' + JSON.stringify(data));
+      showToast('[LINE] status: ' + res.status, 'error');
     }
     if (order.lineId) {
       var res2 = await fetch(LINE_PROXY_URL, {
@@ -973,7 +973,7 @@ async function sendLine(order, stageKey) {
     }
   } catch(e) {
     console.error('[LINE] fetch error:', e);
-    alert('[LINE 연결 오류] Worker URL 또는 네트워크를 확인하세요.\n' + e.message);
+    showToast(t('err_network'), 'error');
   }
 }
 
@@ -1028,7 +1028,7 @@ function submitUsed() {
   var name    = document.getElementById('u-name').value.trim();
   var price   = parseInt(document.getElementById('u-price').value,10)||0;
   var contact = document.getElementById('u-contact').value.trim();
-  if (!name||!price||!contact) { alert(t('used_fill_error')); return; }
+  if (!name||!price||!contact) { showToast(t('used_fill_error'), 'warning'); return; }
   function addItem(imgData) {
     var seller = isLoggedIn() ? (currentUser.nickname || 'Me') : 'Me';
     var newItem = {

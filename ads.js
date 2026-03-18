@@ -128,7 +128,7 @@ function _renderAdminAdsUI() {
         '<div class="flex items-center gap-2 mb-2">' +
           (b.image_url ? '<img src="' + b.image_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0" loading="lazy">' : '') +
           '<div class="flex-1 min-w-0">' +
-            '<p class="font-black text-xs text-slate-800 truncate">' + (b.advertiser_name || '-') + '</p>' +
+            '<p class="font-black text-xs text-slate-800 truncate">' + escHtml(b.advertiser_name || '-') + '</p>' +
             '<p class="text-[9px] text-slate-400">' + b.position + ' · ' + (b.start_date || '') + ' ~ ' + (b.end_date || '') + '</p>' +
           '</div>' +
           '<button onclick="adminAdToggle(' + bid + ')" class="shrink-0 px-2 py-1 rounded-full font-black text-[9px] ' + statusClass + '">' + statusText + '</button>' +
@@ -191,11 +191,11 @@ async function adminAdSubmit() {
 
   // 새 등록시 이미지 필수
   if (!isEditing && !_adminAdImageFile) {
-    alert(t('admin_ads_fill_alert'));
+    showToast(t('admin_ads_fill_alert'), 'warning');
     return;
   }
   if (!advertiser || !position) {
-    alert(t('admin_ads_fill_alert'));
+    showToast(t('admin_ads_fill_alert'), 'warning');
     return;
   }
 
@@ -215,7 +215,7 @@ async function adminAdSubmit() {
       };
       if (imageUrl) updates.image_url = imageUrl;
       await sbUpdateBanner(_adminAdEditId, updates);
-      alert(t('admin_ads_update_success'));
+      showToast(t('admin_ads_update_success'), 'success');
     } else {
       await sbSaveBanner({
         advertiser_name: advertiser,
@@ -237,7 +237,7 @@ async function adminAdSubmit() {
     renderAllAdSlots();
   } catch(e) {
     console.error('[AdminAd Submit]', e);
-    alert('Error: ' + e.message);
+    handleSupabaseError(e, 'AdminAd');
   }
 }
 
@@ -270,7 +270,7 @@ async function adminAdToggle(id) {
     renderAllAdSlots();
   } catch(e) {
     console.error('[AdminAd Toggle]', e);
-    alert('Error: ' + e.message);
+    handleSupabaseError(e, 'AdminAd');
   }
 }
 
@@ -284,7 +284,7 @@ async function adminAdDelete(id) {
     renderAllAdSlots();
   } catch(e) {
     console.error('[AdminAd Delete]', e);
-    alert('Error: ' + e.message);
+    handleSupabaseError(e, 'AdminAd');
   }
 }
 
@@ -303,7 +303,7 @@ async function loadAdBanners() {
       var rows = await sbGetBannersByPosition(pos);
       _adBanners[pos] = rows || [];
     } catch(e) {
-      console.warn('[loadAdBanners]', pos, e);
+      // silent: ad banners are non-critical
       _adBanners[pos] = [];
     }
   }));

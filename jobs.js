@@ -70,12 +70,12 @@ function renderJobs() {
             '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full ' + typeCfg.color + '">' + t(typeCfg.labelKey) + '</span>' +
             (regionLabel ? '<span class="text-[8px] font-bold text-slate-400">' + regionLabel + provinceLbl + '</span>' : '') +
           '</div>' +
-          '<p class="font-black text-slate-800 text-sm leading-snug mb-1 truncate">' + j.title + '</p>' +
+          '<p class="font-black text-slate-800 text-sm leading-snug mb-1 truncate">' + escHtml(j.title) + '</p>' +
           '<div class="flex items-center gap-2 text-[9px] text-slate-300 font-bold">' +
-            (j.salary_range ? '<span class="text-green-500 font-black">' + j.salary_range + '</span><span>·</span>' : '') +
+            (j.salary_range ? '<span class="text-green-500 font-black">' + escHtml(j.salary_range) + '</span><span>·</span>' : '') +
             '<span>' + dateStr + '</span>' +
             '<span>·</span>' +
-            '<span>' + (j.user_id || '') + '</span>' +
+            '<span>' + escHtml(j.user_id || '') + '</span>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -204,7 +204,7 @@ async function submitJob() {
   var region  = document.getElementById('job-region').value;
   var prov    = document.getElementById('job-province').value;
   var contact = (document.getElementById('job-contact').value || '').trim();
-  if (!title || !desc) { alert(t('job_fill_alert')); return; }
+  if (!title || !desc) { showToast(t('job_fill_alert'), 'warning'); return; }
   var job = {
     user_id:      currentUser.nickname || '',
     type:         type,
@@ -228,7 +228,7 @@ async function submitJob() {
         date: saved.created_at,
       });
     }
-  } catch(e) { console.error('[Job Save]', e); }
+  } catch(e) { handleSupabaseError(e, 'Job Save'); }
   document.getElementById('jobFormWrap').classList.add('hidden');
   renderJobs();
 }
@@ -247,8 +247,8 @@ function renderAdminJobs() {
     return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm flex items-center gap-3">' +
       '<div class="text-xl">' + typeCfg.icon + '</div>' +
       '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-xs text-slate-800 truncate">' + j.title + '</p>' +
-        '<p class="text-[9px] text-slate-400">' + t(typeCfg.labelKey) + ' · ' + (j.user_id || '') + '</p>' +
+        '<p class="font-black text-xs text-slate-800 truncate">' + escHtml(j.title) + '</p>' +
+        '<p class="text-[9px] text-slate-400">' + t(typeCfg.labelKey) + ' · ' + escHtml(j.user_id || '') + '</p>' +
       '</div>' +
       '<button onclick="adminDeleteJob(' + jid + ')" class="shrink-0 px-3 py-1.5 bg-red-50 text-red-500 rounded-xl font-black text-[10px]">' + t('forum_delete') + '</button>' +
     '</div>';

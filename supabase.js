@@ -521,7 +521,7 @@ async function sbSearchAll(keyword) {
     if (res[1].status === 'fulfilled') results.webzine = res[1].value || [];
     if (res[2].status === 'fulfilled') results.jobs    = res[2].value || [];
     if (res[3].status === 'fulfilled') results.used    = res[3].value || [];
-  } catch(e) { console.warn('[sbSearchAll]', e); }
+  } catch(e) { /* search error - return partial results */ }
   return results;
 }
 
