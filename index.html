@@ -15,7 +15,8 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;600;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
 <!-- Capture beforeinstallprompt BEFORE defer scripts load -->
 <script>
 window._pwaInstallPrompt = null;
@@ -200,7 +201,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- Image viewer -->
     <div id="viewerImagePanel" class="hidden flex-1 bg-slate-900 flex items-center justify-center overflow-auto p-2" style="min-height:320px">
-      <img id="viewerImg" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+      <img id="viewerImg" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg" loading="lazy">
     </div>
     <!-- PDF viewer -->
     <div id="viewerPdfPanel" class="hidden flex-1" style="min-height:320px">
@@ -441,7 +442,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="qrModal" class="modal fixed inset-0 bg-slate-900/95 z-[700] items-center justify-center p-6">
   <div class="bg-white p-7 rounded-3xl w-full max-w-sm text-center">
     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4" data-i18n="qr_label">Scan to Pay</p>
-    <img id="qrImg" alt="QR Code for payment" class="mx-auto w-52 h-52 border-4 border-slate-50 rounded-2xl mb-5">
+    <img id="qrImg" alt="QR Code for payment" class="mx-auto w-52 h-52 border-4 border-slate-50 rounded-2xl mb-5" loading="lazy">
     <div id="qrSummary" class="text-left bg-slate-50 rounded-2xl p-4 mb-5 text-xs text-slate-600 space-y-1 max-h-40 overflow-y-auto no-scroll"></div>
     <button onclick="completePayment()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg" data-i18n="qr_complete">PAYMENT COMPLETE</button>
   </div>
@@ -1133,7 +1134,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <!-- ==================== USED DETAIL PAGE ==================== -->
     <div id="page-used-detail" class="page">
       <div id="udp-imageWrap" class="hidden">
-        <img id="udp-image" src="" class="w-full object-contain">
+        <img id="udp-image" src="" class="w-full object-contain" loading="lazy">
       </div>
       <div class="p-5">
         <div class="flex justify-between items-start mb-3">
@@ -1263,7 +1264,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <!-- ==================== WEBZINE DETAIL ==================== -->
     <div id="page-webzine-detail" class="page">
       <div id="wzd-thumbWrap" class="hidden">
-        <img id="wzd-thumb" src="" class="w-full max-h-[240px] object-cover">
+        <img id="wzd-thumb" src="" class="w-full max-h-[240px] object-cover" loading="lazy">
       </div>
       <div class="p-5">
         <span id="wzd-catBadge" class="inline-block text-[10px] font-black px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 mb-2"></span>
@@ -1289,7 +1290,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <!-- ==================== EVENT DETAIL PAGE ==================== -->
     <div id="page-event-detail" class="page">
       <div id="edp-imageWrap" class="hidden">
-        <img id="edp-image" src="" class="w-full object-contain">
+        <img id="edp-image" src="" class="w-full object-contain" loading="lazy">
       </div>
       <div class="p-5">
         <div class="flex items-center gap-3 mb-3">

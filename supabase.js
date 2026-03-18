@@ -151,8 +151,10 @@ async function sbSaveCustomOrder(order, casesData) {
   });
 }
 
-async function sbGetCustomOrders(userNickname, isAdmin) {
-  var params = 'order=date.desc';
+async function sbGetCustomOrders(userNickname, isAdmin, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  var params = 'select=id,user_nickname,clinic,addr,phone,line_id,cases,stage,design_versions,review_history,date,carrier,tracking_number&order=date.desc&limit=' + limit + '&offset=' + offset;
   if (!isAdmin && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
   return sbGet('custom_orders', params);
 }
@@ -186,8 +188,10 @@ async function sbSaveShopOrder(order) {
   });
 }
 
-async function sbGetShopOrders(userNickname, isAdminUser) {
-  var params = 'order=created_at.desc';
+async function sbGetShopOrders(userNickname, isAdminUser, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  var params = 'select=id,user_nickname,clinic,addr,phone,line_id,items,stage,date,carrier,tracking_number,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset;
   if (!isAdminUser && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
   return sbGet('orders', params);
 }
@@ -204,8 +208,10 @@ async function sbUpdateShopOrder(orderId, updates) {
 // Used Items (중고 거래) — used_items 테이블
 // ============================================================
 
-async function sbGetUsedItems() {
-  return sbGet('used_items', 'order=created_at.desc');
+async function sbGetUsedItems(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('used_items', 'select=id,seller,name,code,price,condition,description,contact,views,image_url,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveUsedItem(item) {
@@ -241,8 +247,10 @@ async function sbUpdateUsedItem(id, updates) {
 // Forum Posts (커뮤니티) — forum_posts 테이블
 // ============================================================
 
-async function sbGetForumPosts() {
-  return sbGet('forum_posts', 'order=created_at.desc');
+async function sbGetForumPosts(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('forum_posts', 'select=id,author,category,region,province,title,body,images,views,comments,date,is_pinned,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveForumPost(post) {
@@ -279,8 +287,10 @@ async function sbUpdateForumPost(id, updates) {
 // Events (이벤트/세미나) — events 테이블
 // ============================================================
 
-async function sbGetEvents() {
-  return sbGet('events', 'order=event_date.asc');
+async function sbGetEvents(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('events', 'select=id,title,location,event_date,description,created_by,type,region,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveEvent(ev) {
@@ -353,8 +363,10 @@ async function sbGetRsvpAttendees(eventId) {
 // Webzine Articles (웹진) — webzine_articles 테이블
 // ============================================================
 
-async function sbGetWebzineArticles() {
-  return sbGet('webzine_articles', 'is_published=eq.true&order=created_at.desc');
+async function sbGetWebzineArticles(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('webzine_articles', 'select=id,category,title,body_md,thumbnail_url,author_id,views,is_published,created_at&is_published=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveWebzineArticle(article) {
@@ -388,8 +400,10 @@ async function sbDeleteWebzineArticle(id) {
 // Jobs (구인구직) — jobs 테이블
 // ============================================================
 
-async function sbGetJobs() {
-  return sbGet('jobs', 'is_active=eq.true&order=created_at.desc');
+async function sbGetJobs(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveJob(job) {
@@ -427,11 +441,11 @@ async function sbDeleteJob(id) {
 // ============================================================
 
 async function sbGetBanners() {
-  return sbGet('banners', 'is_active=eq.true&order=created_at.desc');
+  return sbGet('banners', 'select=id,advertiser_name,image_url,link_url,position,start_date,end_date,is_active,clicks,impressions,created_at&is_active=eq.true&order=created_at.desc');
 }
 
 async function sbGetAllBanners() {
-  return sbGet('banners', 'order=created_at.desc');
+  return sbGet('banners', 'select=id,advertiser_name,image_url,link_url,position,start_date,end_date,is_active,clicks,impressions,created_at&order=created_at.desc');
 }
 
 async function sbGetBannersByPosition(position) {

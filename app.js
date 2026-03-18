@@ -1934,7 +1934,7 @@ function renderCustomOrders() {
       designHtml =
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
           '<p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2">📐 디자인 확인 (ver.' + o.designVersions.length + ')</p>' +
-          '<img src="' + latest.url + '" class="w-full rounded-xl mb-2 max-h-52 object-contain bg-slate-50">' +
+          '<img src="' + latest.url + '" class="w-full rounded-xl mb-2 max-h-52 object-contain bg-slate-50" loading="lazy">' +
           '<p class="text-[8px] text-slate-400 mb-3">' + latest.name + ' · ' + latest.date + '</p>' +
           '<div class="flex gap-2 mb-2">' +
             '<button onclick="customerApproveDesign(\'' + o.id + '\')" class="flex-1 py-2.5 bg-green-600 text-white rounded-xl font-black text-xs active:scale-95 transition">✅ 만족</button>' +
@@ -1952,7 +1952,7 @@ function renderCustomOrders() {
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
           '<p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-2">⏳ 디자인 수정 요청됨</p>' +
           (lastRev ? '<div class="bg-amber-50 rounded-xl p-2.5 mb-2"><p class="text-[9px] text-slate-600 leading-relaxed">"' + lastRev.note + '"</p></div>' : '') +
-          (lastDesign ? '<img src="' + lastDesign.url + '" class="w-full rounded-xl mb-1 max-h-36 object-contain bg-slate-50 opacity-50">' : '') +
+          (lastDesign ? '<img src="' + lastDesign.url + '" class="w-full rounded-xl mb-1 max-h-36 object-contain bg-slate-50 opacity-50" loading="lazy">' : '') +
         '</div>';
     } else if (o.stage === 'confirmed') {
       designHtml = '<div class="mt-3 pt-3 border-t border-slate-100"><p class="text-[9px] text-slate-400 font-bold">📐 ' + t('design_waiting') + '</p></div>';
@@ -2068,7 +2068,7 @@ function renderDoneOrders() {
         '</div>' +
       '</div>' +
       '<div class="px-5 py-4">' +
-        (latestDesign ? '<img src="' + latestDesign.url + '" class="w-full rounded-xl mb-3 max-h-40 object-contain bg-slate-50">' : '') +
+        (latestDesign ? '<img src="' + latestDesign.url + '" class="w-full rounded-xl mb-3 max-h-40 object-contain bg-slate-50" loading="lazy">' : '') +
         '<p class="text-[10px] text-slate-500 font-bold mb-2">' + tf('done_cases_teeth_fmt', o.cases.length, totalTeeth) + '</p>' +
         caseRows +
         '<p class="text-[9px] text-slate-400 mt-2">📍 ' + o.addr + '</p>' +
@@ -2916,7 +2916,7 @@ function renderAdminUsed() {
   list.innerHTML = usedItems.map(function(item, i) {
     return '<div class="bg-white rounded-2xl shadow-sm p-4">' +
       '<div class="flex justify-between items-start gap-3">' +
-        (item.image ? '<img src="' + item.image + '" class="w-14 h-14 rounded-xl object-cover shrink-0">' : '<div class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0">📦</div>') +
+        (item.image ? '<img src="' + item.image + '" class="w-14 h-14 rounded-xl object-cover shrink-0" loading="lazy">' : '<div class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0">📦</div>') +
         '<div class="flex-1 min-w-0">' +
           '<p class="font-black text-slate-800 text-sm truncate">' + item.name + '</p>' +
           '<p class="text-[9px] font-mono text-slate-400">' + item.code + '</p>' +
@@ -3045,7 +3045,7 @@ function _buildAdminOrderCard(o) {
     var latest = (o.designVersions && o.designVersions.length) ? o.designVersions[o.designVersions.length-1] : null;
     actionHtml = '<div class="mt-3 bg-blue-50 rounded-xl p-3">' +
       '<p class="text-[9px] font-black text-blue-600 mb-2">📐 고객 검토 대기 중 (ver.' + (o.designVersions?o.designVersions.length:1) + ')</p>' +
-      (latest ? '<img src="' + latest.url + '" class="w-full rounded-lg max-h-28 object-contain bg-white mb-1">' : '') +
+      (latest ? '<img src="' + latest.url + '" class="w-full rounded-lg max-h-28 object-contain bg-white mb-1" loading="lazy">' : '') +
       '<p class="text-[8px] text-slate-400">고객이 만족/불만족을 선택할 때까지 대기합니다.</p></div>';
   } else if (o.stage === 'approved') {
     actionHtml = '<button onclick="adminStartMilling(\'' + o.id + '\')" class="w-full py-2.5 bg-purple-600 text-white rounded-xl font-black text-xs mt-3 active:scale-95 transition">⚙️ 밀링 시작 → LINE 발송</button>';
@@ -3545,7 +3545,7 @@ function renderUsed() {
   var condLabel = {new:t('cond_new'),good:t('cond_good'),fair:t('cond_fair')};
   list.innerHTML = usedItems.map(function(item) {
     var thumb = item.image
-      ? '<img src="' + item.image + '" class="w-full h-full object-cover">'
+      ? '<img src="' + item.image + '" class="w-full h-full object-cover" loading="lazy">'
       : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-2xl">📷</span></div>';
     var badge = '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full ' + condMap[item.cond||'fair'] + '">' + condLabel[item.cond||'fair'] + '</span>';
     var date   = (item.date||'').slice(5); // MM-DD
@@ -3745,7 +3745,7 @@ function renderForumGallery() {
   if (!track) return;
   track.innerHTML = forumGalleryImages.map(function(src){
     return '<div class="shrink-0 w-full h-full flex items-center justify-center" style="flex:0 0 100%">' +
-      '<img src="' + src + '" style="max-width:100%;max-height:240px;object-fit:contain">' +
+      '<img src="' + src + '" style="max-width:100%;max-height:240px;object-fit:contain" loading="lazy">' +
     '</div>';
   }).join('');
   track.style.transform = 'translateX(-' + (forumGalleryIndex * 100) + '%)';
@@ -3908,7 +3908,7 @@ function renderForum() {
     // 썸네일 영역
     var thumbHtml = hasImg
       ? '<div class="relative shrink-0">' +
-          '<img src="' + p.images[0] + '" class="w-[72px] h-[72px] rounded-2xl object-cover">' +
+          '<img src="' + p.images[0] + '" class="w-[72px] h-[72px] rounded-2xl object-cover" loading="lazy">' +
           (imgCount > 1 ? '<span class="absolute bottom-1 right-1 text-[9px] font-black bg-black/60 text-white px-1.5 py-0.5 rounded-full">+' + (imgCount - 1) + '</span>' : '') +
         '</div>'
       : '';
@@ -4146,7 +4146,7 @@ function renderProfileSettings() {
       } else {
         myUsedEl.innerHTML = myUsed.map(function(u) {
           var thumb = u.image
-            ? '<img src="' + u.image + '" class="w-full h-full object-cover">'
+            ? '<img src="' + u.image + '" class="w-full h-full object-cover" loading="lazy">'
             : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
           return '<div class="bg-slate-50 rounded-xl overflow-hidden cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + u.id + ')">' +
             '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
@@ -4637,7 +4637,7 @@ function renderWebzine() {
   list.innerHTML = filtered.map(function(a) {
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     var thumb = a.thumbnail_url
-      ? '<img src="' + a.thumbnail_url + '" class="w-full h-full object-cover">'
+      ? '<img src="' + a.thumbnail_url + '" class="w-full h-full object-cover" loading="lazy">'
       : '<div class="w-full h-full flex items-center justify-center bg-slate-100"><span class="text-3xl opacity-20">📰</span></div>';
     var dateStr = a.date ? a.date.slice(0,10) : '';
     var aid = typeof a.id === 'string' ? "'" + a.id + "'" : a.id;
@@ -4696,7 +4696,7 @@ function _renderMarkdown(md) {
     .replace(/^# (.+)$/gm, '<h1 class="font-black text-slate-800 text-xl mt-6 mb-3">$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-xl my-3">')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-xl my-3" loading="lazy">')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 underline" target="_blank">$1</a>')
     .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-sm">$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-sm">$2</li>')
@@ -4838,7 +4838,7 @@ function renderAdminWebzine() {
     var aid = typeof a.id === 'string' ? "'" + a.id + "'" : a.id;
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm flex items-center gap-3">' +
-      (a.thumbnail_url ? '<img src="' + a.thumbnail_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0">' : '<div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><span class="text-lg opacity-30">📰</span></div>') +
+      (a.thumbnail_url ? '<img src="' + a.thumbnail_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0" loading="lazy">' : '<div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><span class="text-lg opacity-30">📰</span></div>') +
       '<div class="flex-1 min-w-0">' +
         '<p class="font-black text-xs text-slate-800 truncate">' + a.title + '</p>' +
         '<p class="text-[9px] text-slate-400">' + (catCfg.icon || '') + ' ' + t(catCfg.labelKey || '') + ' · 👁 ' + (a.views || 0) + '</p>' +
@@ -5338,7 +5338,7 @@ function _renderAdminAdsUI() {
       var bid = "'" + b.id + "'";
       return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm">' +
         '<div class="flex items-center gap-2 mb-2">' +
-          (b.image_url ? '<img src="' + b.image_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0">' : '') +
+          (b.image_url ? '<img src="' + b.image_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0" loading="lazy">' : '') +
           '<div class="flex-1 min-w-0">' +
             '<p class="font-black text-xs text-slate-800 truncate">' + (b.advertiser_name || '-') + '</p>' +
             '<p class="text-[9px] text-slate-400">' + b.position + ' · ' + (b.start_date || '') + ' ~ ' + (b.end_date || '') + '</p>' +
