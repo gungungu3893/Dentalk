@@ -242,7 +242,7 @@ var LEADER_TITLES_NATIONAL = [
 ];
 var LEADER_TITLES_REGIONAL = [
   { key: 'president',      labelKey: 'title_president' },
-  { key: 'vice_president', labelKey: 'title_vice_president' },
+  { key: 'secretary',      labelKey: 'title_secretary' },
 ];
 var LEADER_TITLES_PROVINCE = [
   { key: 'representative', labelKey: 'title_representative' },
