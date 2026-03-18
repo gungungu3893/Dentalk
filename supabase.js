@@ -428,6 +428,10 @@ async function sbGetBanners() {
   return sbGet('banners', 'is_active=eq.true&order=created_at.desc');
 }
 
+async function sbGetAllBanners() {
+  return sbGet('banners', 'order=created_at.desc');
+}
+
 async function sbGetBannersByPosition(position) {
   var today = new Date().toISOString().slice(0, 10);
   return sbGet('banners',
