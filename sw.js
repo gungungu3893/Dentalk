@@ -1,9 +1,10 @@
 // ============================================================
-// Service Worker — Phase 5-2 캐싱 전략 개선
+// Service Worker — Phase 5-5 배포 준비
 // 정적 파일: Cache First / API 호출: Network First
+// 오프라인 폴백 페이지 개선
 // ============================================================
 
-const CACHE_VERSION = 'dentalk-v5';
+const CACHE_VERSION = 'dentalk-v6';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -21,13 +22,49 @@ const API_PATTERNS = [
   'supabase.co',
   'googleapis.com',
   'cdn.tailwindcss.com',
+  'cdn.jsdelivr.net',
+  'api.qrserver.com',
 ];
 
-// ── Install: 정적 자산 프리캐시 ──
+// 오프라인 폴백 페이지 HTML
+const OFFLINE_PAGE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dentalk — Offline</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#001d4a;color:white;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem}
+.wrap{max-width:360px}
+h1{font-size:2.5rem;font-weight:900;margin-bottom:.5rem;letter-spacing:-1px}
+h1 span{color:#D4AF37}
+p{font-size:.85rem;opacity:.6;margin-bottom:2rem;line-height:1.6}
+button{background:#D4AF37;color:#001d4a;border:none;padding:14px 32px;border-radius:16px;font-weight:900;font-size:.85rem;cursor:pointer}
+button:active{transform:scale(.96)}
+.icon{font-size:4rem;margin-bottom:1.5rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="icon">📡</div>
+<h1>den<span>t</span>alk</h1>
+<p>You are currently offline.<br>Please check your internet connection and try again.</p>
+<button onclick="location.reload()">Try Again</button>
+</div>
+</body>
+</html>`;
+
+// ── Install: 정적 자산 프리캐시 + 오프라인 페이지 ──
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_VERSION)
-      .then(function(cache) { return cache.addAll(STATIC_ASSETS); })
+      .then(function(cache) {
+        // 오프라인 폴백 페이지 저장
+        cache.put(new Request('/_offline'), new Response(OFFLINE_PAGE, {
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        }));
+        return cache.addAll(STATIC_ASSETS);
+      })
       .then(function() { return self.skipWaiting(); })
   );
 });
@@ -57,6 +94,27 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
+  // 네비게이션 요청 (HTML 페이지) → Network First + 오프라인 폴백
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(function(response) {
+          if (response && response.status === 200) {
+            var clone = response.clone();
+            caches.open(CACHE_VERSION).then(function(cache) { cache.put(e.request, clone); });
+          }
+          return response;
+        })
+        .catch(function() {
+          return caches.match(e.request)
+            .then(function(cached) {
+              return cached || caches.match('/_offline');
+            });
+        })
+    );
+    return;
+  }
+
   // 정적 자산 → Cache First
   e.respondWith(cacheFirst(e.request));
 });
@@ -74,6 +132,10 @@ function cacheFirst(request) {
       }
       return response;
     }).catch(function() {
+      // 이미지 요청 실패 시 빈 응답 반환
+      if (request.destination === 'image') {
+        return new Response('', { status: 200, headers: { 'Content-Type': 'image/svg+xml' } });
+      }
       return caches.match('./index.html');
     });
   });

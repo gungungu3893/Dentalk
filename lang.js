@@ -88,6 +88,7 @@ const LANG = {
     pay_stage_payment_pending:'Payment Pending',pay_stage_payment_confirmed:'Payment Confirmed',
     review_title:'Reviews',review_your_rating:'Your Rating:',review_comment_ph:'Write a review...',review_submit:'Submit Review',review_empty:'No reviews yet.',review_purchase_required:'Purchase this product to write a review.',review_rating_required:'Please select a rating.',review_submit_error:'Failed to submit review.',review_delete_confirm:'Delete this review?',review_load_error:'Failed to load reviews.',
     admin_tab_stats:'Statistics',stats_monthly_revenue:'Monthly Revenue',stats_total_members:'Total Members',stats_weekly_signups:'Weekly Signups',stats_monthly_orders:'Monthly Orders',stats_top_products:'Top 5 Products',stats_monthly_trend:'Monthly Order Trend (6 months)',stats_no_data:'No data available.',
+    err_network:'Network error. Please check your connection.',err_auth:'Authentication failed. Please log in again.',err_session_expired:'Session expired. Please log in again.',err_generic:'An error occurred. Please try again.',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'임상토론방',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',nav_login:'로그인',privacy_btn:'개인정보 처리방침',
@@ -177,6 +178,7 @@ const LANG = {
     pay_stage_payment_pending:'입금 대기',pay_stage_payment_confirmed:'입금 확인',
     review_title:'리뷰',review_your_rating:'평점:',review_comment_ph:'리뷰를 작성하세요...',review_submit:'리뷰 등록',review_empty:'아직 리뷰가 없습니다.',review_purchase_required:'이 제품을 구매한 후 리뷰를 작성할 수 있습니다.',review_rating_required:'평점을 선택해주세요.',review_submit_error:'리뷰 등록에 실패했습니다.',review_delete_confirm:'이 리뷰를 삭제하시겠습니까?',review_load_error:'리뷰를 불러오지 못했습니다.',
     admin_tab_stats:'통계',stats_monthly_revenue:'이번 달 매출',stats_total_members:'총 회원수',stats_weekly_signups:'이번 주 신규가입',stats_monthly_orders:'이번 달 주문',stats_top_products:'인기 제품 Top 5',stats_monthly_trend:'월별 주문 추이 (6개월)',stats_no_data:'데이터가 없습니다.',
+    err_network:'네트워크 오류입니다. 연결을 확인해주세요.',err_auth:'인증에 실패했습니다. 다시 로그인해주세요.',err_session_expired:'세션이 만료되었습니다. 다시 로그인해주세요.',err_generic:'오류가 발생했습니다. 다시 시도해주세요.',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'临床讨论',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',nav_login:'登录',privacy_btn:'隐私政策',
@@ -266,6 +268,7 @@ const LANG = {
     pay_stage_payment_pending:'待付款',pay_stage_payment_confirmed:'已确认付款',
     review_title:'评价',review_your_rating:'您的评分：',review_comment_ph:'写评价...',review_submit:'提交评价',review_empty:'暂无评价。',review_purchase_required:'购买此产品后才能写评价。',review_rating_required:'请选择评分。',review_submit_error:'提交评价失败。',review_delete_confirm:'确认删除此评价？',review_load_error:'加载评价失败。',
     admin_tab_stats:'统计',stats_monthly_revenue:'本月销售额',stats_total_members:'总会员数',stats_weekly_signups:'本周新注册',stats_monthly_orders:'本月订单',stats_top_products:'热门产品 Top 5',stats_monthly_trend:'月度订单趋势（6个月）',stats_no_data:'暂无数据。',
+    err_network:'网络错误，请检查连接。',err_auth:'认证失败，请重新登录。',err_session_expired:'会话已过期，请重新登录。',err_generic:'发生错误，请重试。',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'อะบัทเมนท์ CNC',nav_used:'ตลาดมือสอง',nav_forum:'ห้องสนทนา',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',nav_login:'เข้าสู่ระบบ',privacy_btn:'นโยบายความเป็นส่วนตัว',
@@ -357,6 +360,7 @@ const LANG = {
     pay_stage_payment_pending:'รอชำระเงิน',pay_stage_payment_confirmed:'ยืนยันชำระเงินแล้ว',
     review_title:'รีวิว',review_your_rating:'คะแนนของคุณ:',review_comment_ph:'เขียนรีวิว...',review_submit:'ส่งรีวิว',review_empty:'ยังไม่มีรีวิว',review_purchase_required:'ซื้อสินค้านี้เพื่อเขียนรีวิว',review_rating_required:'กรุณาเลือกคะแนน',review_submit_error:'ส่งรีวิวไม่สำเร็จ',review_delete_confirm:'ลบรีวิวนี้?',review_load_error:'โหลดรีวิวไม่สำเร็จ',
     admin_tab_stats:'สถิติ',stats_monthly_revenue:'ยอดขายเดือนนี้',stats_total_members:'สมาชิกทั้งหมด',stats_weekly_signups:'สมัครใหม่สัปดาห์นี้',stats_monthly_orders:'คำสั่งซื้อเดือนนี้',stats_top_products:'สินค้ายอดนิยม Top 5',stats_monthly_trend:'แนวโน้มคำสั่งซื้อรายเดือน (6 เดือน)',stats_no_data:'ยังไม่มีข้อมูล',
+    err_network:'เครือข่ายผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ',err_auth:'การยืนยันตัวตนล้มเหลว กรุณาเข้าสู่ระบบอีกครั้ง',err_session_expired:'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง',err_generic:'เกิดข้อผิดพลาด กรุณาลองใหม่',
   },
   vi: {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'THẢO LUẬN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',nav_login:'Đăng nhập',privacy_btn:'Chính sách bảo mật',
@@ -446,6 +450,7 @@ const LANG = {
     pay_stage_payment_pending:'Chờ thanh toán',pay_stage_payment_confirmed:'Đã xác nhận thanh toán',
     review_title:'Đánh giá',review_your_rating:'Đánh giá của bạn:',review_comment_ph:'Viết đánh giá...',review_submit:'Gửi đánh giá',review_empty:'Chưa có đánh giá.',review_purchase_required:'Mua sản phẩm này để viết đánh giá.',review_rating_required:'Vui lòng chọn số sao.',review_submit_error:'Gửi đánh giá thất bại.',review_delete_confirm:'Xóa đánh giá này?',review_load_error:'Tải đánh giá thất bại.',
     admin_tab_stats:'Thống kê',stats_monthly_revenue:'Doanh thu tháng',stats_total_members:'Tổng thành viên',stats_weekly_signups:'Đăng ký tuần này',stats_monthly_orders:'Đơn hàng tháng',stats_top_products:'Top 5 sản phẩm',stats_monthly_trend:'Xu hướng đơn hàng theo tháng (6 tháng)',stats_no_data:'Chưa có dữ liệu.',
+    err_network:'Lỗi mạng. Vui lòng kiểm tra kết nối.',err_auth:'Xác thực thất bại. Vui lòng đăng nhập lại.',err_session_expired:'Phiên đã hết hạn. Vui lòng đăng nhập lại.',err_generic:'Đã xảy ra lỗi. Vui lòng thử lại.',
   },
   es: {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'DISCUSIÓN',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',nav_login:'Iniciar sesión',privacy_btn:'Política de privacidad',
@@ -535,6 +540,7 @@ const LANG = {
     pay_stage_payment_pending:'Pago pendiente',pay_stage_payment_confirmed:'Pago confirmado',
     review_title:'Reseñas',review_your_rating:'Tu calificación:',review_comment_ph:'Escribe una reseña...',review_submit:'Enviar reseña',review_empty:'Sin reseñas aún.',review_purchase_required:'Compra este producto para escribir una reseña.',review_rating_required:'Por favor selecciona una calificación.',review_submit_error:'Error al enviar la reseña.',review_delete_confirm:'¿Eliminar esta reseña?',review_load_error:'Error al cargar reseñas.',
     admin_tab_stats:'Estadísticas',stats_monthly_revenue:'Ingresos del mes',stats_total_members:'Total de miembros',stats_weekly_signups:'Registros esta semana',stats_monthly_orders:'Pedidos del mes',stats_top_products:'Top 5 productos',stats_monthly_trend:'Tendencia mensual de pedidos (6 meses)',stats_no_data:'No hay datos disponibles.',
+    err_network:'Error de red. Verifique su conexión.',err_auth:'Autenticación fallida. Inicie sesión nuevamente.',err_session_expired:'Sesión expirada. Inicie sesión nuevamente.',err_generic:'Ocurrió un error. Inténtelo de nuevo.',
   },
 };
 

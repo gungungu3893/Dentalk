@@ -1,4 +1,45 @@
 // ============================================================
+// 유틸리티 — XSS 방지 HTML 이스케이핑 + 토스트 알림
+// ============================================================
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showToast(msg, type) {
+  var existing = document.getElementById('dtToast');
+  if (existing) existing.remove();
+  var colors = {
+    error:   'bg-red-600',
+    success: 'bg-green-600',
+    warning: 'bg-amber-500',
+    info:    'bg-blue-600',
+  };
+  var bg = colors[type] || colors.info;
+  var toast = document.createElement('div');
+  toast.id = 'dtToast';
+  toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 z-[9999] ' + bg + ' text-white px-5 py-3 rounded-2xl shadow-xl font-bold text-xs max-w-[90vw] text-center';
+  toast.style.cssText = 'animation:fadeUp .3s ease;';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3500);
+}
+
+function handleSupabaseError(e, context) {
+  console.error('[' + context + ']', e);
+  var msg = e && e.message ? e.message : String(e);
+  if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+    showToast(t('err_network'), 'error');
+  } else if (msg.indexOf('401') !== -1 || msg.indexOf('403') !== -1) {
+    showToast(t('err_auth'), 'error');
+  } else if (msg.indexOf('JWT') !== -1 || msg.indexOf('token') !== -1) {
+    showToast(t('err_session_expired'), 'error');
+  } else {
+    showToast(t('err_generic'), 'error');
+  }
+}
+
+// ============================================================
 // PWA 설치 — prompt captured early in index.html <head>
 // ============================================================
 function triggerInstall() {
@@ -4059,10 +4100,10 @@ function renderComments(post) {
   el.innerHTML = post.comments.map(function(c){
     return '<div class="bg-slate-50 rounded-2xl p-3">' +
       '<div class="flex items-center gap-2 mb-1">' +
-        '<span class="text-xs font-black text-slate-700">' + c.author + '</span>' +
-        '<span class="text-[10px] text-slate-300">' + c.date + '</span>' +
+        '<span class="text-xs font-black text-slate-700">' + escHtml(c.author) + '</span>' +
+        '<span class="text-[10px] text-slate-300">' + escHtml(c.date) + '</span>' +
       '</div>' +
-      '<p class="text-sm text-slate-600 leading-relaxed">' + c.text + '</p>' +
+      '<p class="text-sm text-slate-600 leading-relaxed">' + escHtml(c.text) + '</p>' +
     '</div>';
   }).join('');
 }
@@ -5757,7 +5798,7 @@ async function initSupabasePublicData() {
       });
       renderUsed();
     }
-  } catch(e) { console.warn('[Used Items Init]', e); }
+  } catch(e) { handleSupabaseError(e, 'Used Items Init'); }
 
   // ── Forum Posts ────────────────────────────────────────────
   try {
@@ -5783,7 +5824,7 @@ async function initSupabasePublicData() {
       renderForum();
       renderHomeForumPreview();
     }
-  } catch(e) { console.warn('[Forum Posts Init]', e); }
+  } catch(e) { handleSupabaseError(e, 'Forum Posts Init'); }
 
   // ── 리더 캐시 로드 (포럼 배지용) ──────────────────────────
   _loadLeaderCache();
@@ -5808,7 +5849,7 @@ async function initSupabasePublicData() {
       renderEvents();
       renderHomeEventsPreview();
     }
-  } catch(e) { console.warn('[Events Init]', e); }
+  } catch(e) { handleSupabaseError(e, 'Events Init'); }
 
   // ── Webzine Articles ──────────────────────────────────────
   try {
@@ -5825,7 +5866,7 @@ async function initSupabasePublicData() {
       renderWebzine();
     }
     renderHomeWebzinePreview();
-  } catch(e) { console.warn('[Webzine Init]', e); renderHomeWebzinePreview(); }
+  } catch(e) { handleSupabaseError(e, 'Webzine Init'); renderHomeWebzinePreview(); }
 
   // ── Jobs (구인구직) ────────────────────────────────────────
   try {
@@ -5842,13 +5883,13 @@ async function initSupabasePublicData() {
       });
       renderJobs();
     }
-  } catch(e) { console.warn('[Jobs Init]', e); }
+  } catch(e) { handleSupabaseError(e, 'Jobs Init'); }
 
   // ── Ad Banners (광고 배너) ──────────────────────────────────
   try {
     await loadAdBanners();
     renderAllAdSlots();
-  } catch(e) { console.warn('[Banners Init]', e); }
+  } catch(e) { handleSupabaseError(e, 'Banners Init'); }
 }
 
 // ============================================================
@@ -5935,12 +5976,12 @@ function renderReviewList(reviews) {
     return '<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">' +
       '<div class="flex items-center justify-between mb-1">' +
         '<div class="flex items-center gap-2">' +
-          '<span class="font-black text-xs text-slate-700">' + (r.user_id || '') + '</span>' +
+          '<span class="font-black text-xs text-slate-700">' + escHtml(r.user_id || '') + '</span>' +
           '<span class="text-xs">' + starsHtml(r.rating) + '</span>' +
         '</div>' +
         '<span class="text-[9px] text-slate-400">' + (r.created_at || '').slice(0,10) + deleteBtn + '</span>' +
       '</div>' +
-      (r.comment ? '<p class="text-[11px] text-slate-600 leading-relaxed">' + r.comment + '</p>' : '') +
+      (r.comment ? '<p class="text-[11px] text-slate-600 leading-relaxed">' + escHtml(r.comment) + '</p>' : '') +
     '</div>';
   }).join('');
 }
@@ -6130,7 +6171,7 @@ async function doSearch() {
       html += '<div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('nav_forum') + ' (' + results.forum.length + ')</p>';
       html += results.forum.map(function(r) {
         return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm" onclick="closeSearchModal();goPage(\'forum\')">' +
-          '<p class="font-black text-sm text-slate-800 truncate">' + r.title + '</p>' +
+          '<p class="font-black text-sm text-slate-800 truncate">' + escHtml(r.title) + '</p>' +
           '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.author || '') + ' · ' + (r.created_at || '').slice(0,10) + '</p></div>';
       }).join('');
       html += '</div>';
@@ -6142,7 +6183,7 @@ async function doSearch() {
         var aid = typeof r.id === 'string' ? "'" + r.id + "'" : r.id;
         return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm flex items-center gap-3" onclick="closeSearchModal();openWebzineDetail(' + aid + ')">' +
           (r.thumbnail_url ? '<img src="' + r.thumbnail_url + '" class="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy">' : '') +
-          '<div class="flex-1 min-w-0"><p class="font-black text-sm text-slate-800 truncate">' + r.title + '</p>' +
+          '<div class="flex-1 min-w-0"><p class="font-black text-sm text-slate-800 truncate">' + escHtml(r.title) + '</p>' +
           '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.created_at || '').slice(0,10) + '</p></div></div>';
       }).join('');
       html += '</div>';
@@ -6152,7 +6193,7 @@ async function doSearch() {
       html += '<div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('nav_jobs') + ' (' + results.jobs.length + ')</p>';
       html += results.jobs.map(function(r) {
         return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm" onclick="closeSearchModal();openJobDetail(' + r.id + ')">' +
-          '<p class="font-black text-sm text-slate-800 truncate">' + r.title + '</p>' +
+          '<p class="font-black text-sm text-slate-800 truncate">' + escHtml(r.title) + '</p>' +
           '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.type || '') + ' · ' + (r.created_at || '').slice(0,10) + '</p></div>';
       }).join('');
       html += '</div>';
