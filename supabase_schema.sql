@@ -446,6 +446,7 @@ create policy "licenses: anon update"
 -- events: anon insert/delete 정책 추가 (관리자 이벤트 관리)
 drop policy if exists "events: anon insert" on public.events;
 drop policy if exists "events: anon delete" on public.events;
+drop policy if exists "events: anon update" on public.events;
 create policy "events: anon insert"
   on public.events for insert
   to anon
@@ -454,6 +455,67 @@ create policy "events: anon delete"
   on public.events for delete
   to anon
   using (true);
+create policy "events: anon update"
+  on public.events for update
+  to anon
+  using (true)
+  with check (true);
+
+-- events: type/region 컬럼 추가 (오프라인 모임 지원)
+alter table public.events
+  add column if not exists type text not null default 'event';  -- 'event' | 'meetup'
+alter table public.events
+  add column if not exists region text not null default 'all';
+
+-- ============================================================
+-- 10. events_rsvp (이벤트 참석 관리)
+-- ============================================================
+create table if not exists public.events_rsvp (
+  id          uuid        primary key default uuid_generate_v4(),
+  event_id    uuid        not null references public.events(id) on delete cascade,
+  user_id     text        not null references public.licenses(nickname) on delete cascade,
+  status      text        not null default 'attending',  -- 'attending' | 'not_attending'
+  created_at  timestamptz not null default now(),
+  unique(event_id, user_id)
+);
+
+alter table public.events_rsvp enable row level security;
+
+drop policy if exists "events_rsvp: public read"             on public.events_rsvp;
+drop policy if exists "events_rsvp: anon insert"             on public.events_rsvp;
+drop policy if exists "events_rsvp: anon update"             on public.events_rsvp;
+drop policy if exists "events_rsvp: anon delete"             on public.events_rsvp;
+drop policy if exists "events_rsvp: service_role full access" on public.events_rsvp;
+
+create policy "events_rsvp: public read"
+  on public.events_rsvp for select
+  to anon
+  using (true);
+
+create policy "events_rsvp: anon insert"
+  on public.events_rsvp for insert
+  to anon
+  with check (true);
+
+create policy "events_rsvp: anon update"
+  on public.events_rsvp for update
+  to anon
+  using (true)
+  with check (true);
+
+create policy "events_rsvp: anon delete"
+  on public.events_rsvp for delete
+  to anon
+  using (true);
+
+create policy "events_rsvp: service_role full access"
+  on public.events_rsvp for all
+  to service_role
+  using (true)
+  with check (true);
+
+create index if not exists idx_events_rsvp_event_id on public.events_rsvp(event_id);
+create index if not exists idx_events_rsvp_user_id  on public.events_rsvp(user_id);
 
 -- ============================================================
 -- 완료!

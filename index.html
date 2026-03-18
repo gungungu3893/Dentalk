@@ -1196,19 +1196,35 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <img id="edp-image" src="" class="w-full object-contain">
       </div>
       <div class="p-5">
-        <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center gap-3 mb-3">
           <div id="edp-dateBadge" class="bg-[#001d4a] flex flex-col items-center justify-center px-4 py-3 rounded-2xl shrink-0 min-w-[64px]">
             <span id="edp-month" class="text-blue-300 text-[10px] font-black uppercase tracking-widest"></span>
             <span id="edp-day"   class="text-white text-2xl font-black leading-none mt-0.5"></span>
             <span id="edp-year"  class="text-blue-400 text-[10px] font-bold mt-0.5"></span>
           </div>
           <div class="flex-1 min-w-0">
+            <div id="edp-typeBadge" class="mb-1"></div>
             <h2 id="edp-title" class="font-black text-slate-800 text-xl leading-snug"></h2>
             <p id="edp-loc" class="text-sm text-slate-400 font-bold mt-1">📍 <span id="edp-locText"></span></p>
+            <p id="edp-creator" class="text-[10px] text-slate-400 mt-0.5"></p>
           </div>
         </div>
         <div id="edp-descWrap" class="hidden bg-slate-50 rounded-2xl p-4 mb-4">
           <p id="edp-desc" class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
+        </div>
+        <!-- RSVP 섹션 -->
+        <div id="edp-rsvpWrap" class="hidden">
+          <div class="bg-white rounded-2xl shadow-sm p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <p class="font-black text-xs text-slate-700" data-i18n="rsvp_title">RSVP</p>
+              <span id="edp-rsvpCount" class="text-[10px] font-black text-green-600"></span>
+            </div>
+            <div id="edp-rsvpBtns" class="flex gap-2 mb-4"></div>
+            <div class="border-t border-slate-100 pt-3">
+              <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2" data-i18n="rsvp_attendee_list">Attendee List</p>
+              <div id="edp-attendeeList"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
