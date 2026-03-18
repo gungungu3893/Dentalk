@@ -106,7 +106,7 @@ const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
 // ============================================================
 let currentPage  = 'home';
 let prevPage     = 'home';
-let currentLang  = 'th';
+let currentLang  = 'en';
 let pendingLang  = null; // 저장 전 선택된 언어
 let currentUser  = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
 let cart         = [];
@@ -5656,7 +5656,7 @@ async function initSupabasePublicData() {
 // 초기화
 // ============================================================
 window.addEventListener('DOMContentLoaded', function() {
-  var saved = localStorage.getItem('dentalk_lang') || 'th';
+  var saved = localStorage.getItem('dentalk_lang') || 'en';
   currentLang = saved;
   document.documentElement.lang = currentLang; // 폰트 CSS 즉시 적용
   pendingLang = null;
