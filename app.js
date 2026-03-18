@@ -5030,6 +5030,107 @@ function applyLang() {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 // ============================================================
+// AD BANNERS — 광고 배너 시스템
+// ============================================================
+var _adBanners = {};          // position → [banner, ...]
+var _adSlideIdx = {};         // position → current slide index
+var _adSlideTimers = {};      // position → interval id
+
+// position별 활성 배너 fetch → 캐시
+async function loadAdBanners() {
+  var positions = ['home_top', 'home_mid', 'forum_top', 'shop_bottom'];
+  await Promise.all(positions.map(async function(pos) {
+    try {
+      var rows = await sbGetBannersByPosition(pos);
+      _adBanners[pos] = rows || [];
+    } catch(e) {
+      console.warn('[loadAdBanners]', pos, e);
+      _adBanners[pos] = [];
+    }
+  }));
+}
+
+// 공통 배너 렌더링 함수
+function renderAdSlot(position, containerId) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var banners = _adBanners[position] || [];
+  if (!banners.length) {
+    el.innerHTML = '';
+    el.classList.add('hidden');
+    return;
+  }
+  el.classList.remove('hidden');
+
+  if (banners.length === 1) {
+    // 단일 배너
+    var b = banners[0];
+    el.innerHTML =
+      '<div class="relative rounded-2xl overflow-hidden shadow-sm cursor-pointer active:scale-[.98] transition" onclick="onAdBannerClick(\'' + b.id + '\',\'' + (b.link_url || '').replace(/'/g, "\\'") + '\')">' +
+        '<img src="' + b.image_url + '" class="w-full h-auto object-cover" style="max-height:140px" loading="lazy">' +
+        '<span class="absolute bottom-1.5 right-2 text-[7px] font-bold text-white/60 bg-black/30 px-1.5 py-0.5 rounded-full">' + t('ad_label') + '</span>' +
+      '</div>';
+    // impression 기록
+    _trackAdImpression(b.id);
+    return;
+  }
+
+  // 다중 배너 슬라이드
+  var slides = banners.map(function(b, i) {
+    return '<div class="shrink-0 w-full cursor-pointer" onclick="onAdBannerClick(\'' + b.id + '\',\'' + (b.link_url || '').replace(/'/g, "\\'") + '\')">' +
+      '<img src="' + b.image_url + '" class="w-full h-auto object-cover rounded-2xl" style="max-height:140px" loading="lazy">' +
+    '</div>';
+  }).join('');
+
+  var dots = banners.map(function(_, i) {
+    return '<span class="ad-dot w-1.5 h-1.5 rounded-full transition-all ' + (i === 0 ? 'bg-white w-2 h-2' : 'bg-white/40') + '"></span>';
+  }).join('');
+
+  el.innerHTML =
+    '<div class="relative rounded-2xl overflow-hidden shadow-sm">' +
+      '<div class="ad-track flex" style="transition:transform .4s ease" data-pos="' + position + '">' + slides + '</div>' +
+      '<div class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">' + dots + '</div>' +
+      '<span class="absolute bottom-1.5 right-2 text-[7px] font-bold text-white/60 bg-black/30 px-1.5 py-0.5 rounded-full">' + t('ad_label') + '</span>' +
+    '</div>';
+
+  // 초기화: 슬라이드 + impression
+  _adSlideIdx[position] = 0;
+  _trackAdImpression(banners[0].id);
+
+  if (_adSlideTimers[position]) clearInterval(_adSlideTimers[position]);
+  _adSlideTimers[position] = setInterval(function() {
+    var idx = ((_adSlideIdx[position] || 0) + 1) % banners.length;
+    _adSlideIdx[position] = idx;
+    var track = el.querySelector('.ad-track');
+    if (track) track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    var allDots = el.querySelectorAll('.ad-dot');
+    allDots.forEach(function(d, di) {
+      d.style.width = di === idx ? '8px' : '6px';
+      d.style.height = di === idx ? '8px' : '6px';
+      d.style.background = di === idx ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.4)';
+    });
+    _trackAdImpression(banners[idx].id);
+  }, 5000);
+}
+
+function onAdBannerClick(bannerId, linkUrl) {
+  sbBannerClick(bannerId).catch(function(){});
+  if (linkUrl) window.open(linkUrl, '_blank');
+}
+
+function _trackAdImpression(bannerId) {
+  sbBannerImpression(bannerId).catch(function(){});
+}
+
+// 모든 슬롯 렌더링
+function renderAllAdSlots() {
+  renderAdSlot('home_top',    'adSlotHomeTop');
+  renderAdSlot('home_mid',    'adSlotHomeMid');
+  renderAdSlot('forum_top',   'adSlotForumTop');
+  renderAdSlot('shop_bottom', 'adSlotShopBottom');
+}
+
+// ============================================================
 // HOME PAGE — banner + categories + forum/events preview
 // ============================================================
 var _bannerSlide = 0, _bannerInterval = null;
@@ -5253,6 +5354,12 @@ async function initSupabasePublicData() {
       renderJobs();
     }
   } catch(e) { console.warn('[Jobs Init]', e); }
+
+  // ── Ad Banners (광고 배너) ──────────────────────────────────
+  try {
+    await loadAdBanners();
+    renderAllAdSlots();
+  } catch(e) { console.warn('[Banners Init]', e); }
 }
 
 // ============================================================

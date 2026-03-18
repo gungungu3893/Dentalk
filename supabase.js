@@ -419,3 +419,65 @@ async function sbUpdateJob(id, updates) {
 async function sbDeleteJob(id) {
   return sbDelete('jobs', 'id=eq.' + encodeURIComponent(id));
 }
+
+// ============================================================
+// Banners (광고 배너) — banners 테이블
+// ============================================================
+
+async function sbGetBanners() {
+  return sbGet('banners', 'is_active=eq.true&order=created_at.desc');
+}
+
+async function sbGetBannersByPosition(position) {
+  var today = new Date().toISOString().slice(0, 10);
+  return sbGet('banners',
+    'is_active=eq.true' +
+    '&position=eq.' + encodeURIComponent(position) +
+    '&start_date=lte.' + today +
+    '&end_date=gte.' + today +
+    '&order=created_at.desc'
+  );
+}
+
+async function sbSaveBanner(banner) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/banners', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      advertiser_name: banner.advertiser_name || '',
+      image_url:       banner.image_url,
+      link_url:        banner.link_url || '',
+      position:        banner.position || 'home_top',
+      start_date:      banner.start_date || new Date().toISOString().slice(0, 10),
+      end_date:        banner.end_date || '',
+      is_active:       banner.is_active !== false,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveBanner] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbUpdateBanner(id, updates) {
+  return sbPatch('banners', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+async function sbDeleteBanner(id) {
+  return sbDelete('banners', 'id=eq.' + encodeURIComponent(id));
+}
+
+async function sbBannerClick(id) {
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/increment_banner_clicks', {
+    method:  'POST',
+    headers: sbHeaders(),
+    body:    JSON.stringify({ banner_id: id }),
+  });
+}
+
+async function sbBannerImpression(id) {
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/increment_banner_impressions', {
+    method:  'POST',
+    headers: sbHeaders(),
+    body:    JSON.stringify({ banner_id: id }),
+  });
+}
