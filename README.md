@@ -31,20 +31,49 @@ Premium digital dental implant parts ordering system for clinics in Thailand.
 
 ```
 Dentalk/
-├── index.html          # Single-page app (all views)
-├── app.js              # Application logic, rendering, event handlers
-├── supabase.js         # Supabase REST API client helpers
-├── lang.js             # i18n translations (6 languages)
-├── sw.js               # Service Worker (caching + offline)
-├── manifest.json       # PWA manifest
-├── icon.svg            # App icon (SVG)
-├── icon-192.png        # App icon 192×192
-├── icon-512.png        # App icon 512×512
+├── index.html              # Single-page app (all views)
+├── app.js           (1382) # Core: utilities, PWA, constants, state, navigation,
+│                           #   language, modals, home page, search, notifications,
+│                           #   infinite scroll, initialization
+├── auth.js           (358) # Login, registration, session management
+├── shop.js           (852) # Product catalog, cart, orders, reviews, shop stages
+├── custom.js        (1211) # CNC custom abutment wizard, used market
+├── forum.js          (303) # Forum, region tabs, posts, comments
+├── admin.js         (1194) # Admin panel, user/order/leader mgmt, stats dashboard
+├── jobs.js           (267) # Job listings, filters, detail view
+├── webzine.js        (262) # Webzine articles, categories
+├── events.js         (252) # Events, meetups, RSVP system
+├── ads.js            (391) # Ad banner management and display
+├── supabase.js       (610) # Supabase REST API client helpers
+├── lang.js           (552) # i18n translations (6 languages)
+├── sw.js             (166) # Service Worker (caching + offline)
+├── cloudflare-worker.js    # LINE Messaging API proxy
+├── manifest.json           # PWA manifest
+├── icon.svg                # App icon (SVG)
+├── icon-192.png            # App icon 192×192
+├── icon-512.png            # App icon 512×512
 ├── sql/
 │   ├── notifications.sql   # Notifications table + RLS
 │   └── reviews.sql         # Reviews table + RLS
 └── README.md
 ```
+
+### Script Load Order (index.html)
+
+All scripts use `defer` and execute in document order:
+
+1. `lang.js` → i18n translation data
+2. `supabase.js` → API client (depends on lang for `t()`)
+3. `app.js` → Core utilities, constants, state, navigation
+4. `auth.js` → Session management (uses `goPage`, `openModal` from app.js)
+5. `shop.js` → Shop features (uses auth, app functions)
+6. `custom.js` → CNC wizard (uses auth, app, LINE functions)
+7. `forum.js` → Forum (uses auth, app functions)
+8. `admin.js` → Admin panel (uses all modules, only runs for admin users)
+9. `jobs.js` → Jobs (uses auth, app functions)
+10. `webzine.js` → Webzine (uses auth, app functions)
+11. `events.js` → Events (uses auth, app functions)
+12. `ads.js` → Ad banners (uses supabase, app functions)
 
 ## Setup
 
