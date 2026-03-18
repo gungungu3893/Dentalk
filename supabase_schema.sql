@@ -518,6 +518,18 @@ create index if not exists idx_events_rsvp_event_id on public.events_rsvp(event_
 create index if not exists idx_events_rsvp_user_id  on public.events_rsvp(user_id);
 
 -- ============================================================
+-- Phase 3-#3: 지역 리더 시스템
+-- ============================================================
+
+-- licenses: leader_region 컬럼 추가 (role='region_leader'일 때 지역 지정)
+alter table public.licenses
+  add column if not exists leader_region text;
+
+-- forum_posts: is_pinned 컬럼 추가 (지역 리더가 글 고정)
+alter table public.forum_posts
+  add column if not exists is_pinned boolean not null default false;
+
+-- ============================================================
 -- 완료!
 -- 이 SQL을 Supabase Dashboard > SQL Editor에 붙여넣고 실행하세요.
 -- ============================================================

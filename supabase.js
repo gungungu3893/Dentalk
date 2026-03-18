@@ -86,18 +86,19 @@ async function authLogin(nickname, password) {
     if (!data.length) return { ok: false, reason: 'not_found' };
 
     var u = data[0];
-    if (u.role !== 'admin' && !u.is_active) return { ok: false, reason: 'not_active' };
+    if (u.role !== 'admin' && u.role !== 'region_leader' && !u.is_active) return { ok: false, reason: 'not_active' };
 
     return {
-      ok:         true,
-      licenseNum: u.license_number || '',
-      doctorName: u.doctor_name    || '',
-      clinicName: u.clinic_name    || '',
-      nickname:   u.nickname       || '',
-      email:      u.email          || '',
-      phone:      u.phone          || '',
-      address:    u.address        || '',
-      role:       u.role           || 'user',
+      ok:            true,
+      licenseNum:    u.license_number || '',
+      doctorName:    u.doctor_name    || '',
+      clinicName:    u.clinic_name    || '',
+      nickname:      u.nickname       || '',
+      email:         u.email          || '',
+      phone:         u.phone          || '',
+      address:       u.address        || '',
+      role:          u.role           || 'user',
+      leaderRegion:  u.leader_region  || '',
     };
   } catch(e) {
     console.error('[authLogin]', e);
@@ -110,7 +111,13 @@ async function authUpdateProfile(licenseNumber, fields) {
 }
 
 async function authGetAllUsers() {
-  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role&order=clinic_name.asc');
+  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region&order=clinic_name.asc');
+}
+
+async function authSetUserRole(nickname, role, leaderRegion) {
+  var body = { role: role };
+  if (leaderRegion !== undefined) body.leader_region = leaderRegion;
+  return sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), body);
 }
 
 async function authSetUserActive(nickname, isActive) {

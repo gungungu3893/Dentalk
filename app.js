@@ -491,7 +491,8 @@ async function handleLogin() {
     address:    result.address    || local.address    || '',
     clinicName: result.clinicName || local.clinicName || '',
     doctorName: result.doctorName || '',
-    role:       result.role       || 'user',
+    role:          result.role          || 'user',
+    leaderRegion:  result.leaderRegion  || '',
   };
   // Supabase에서 받은 최신 데이터를 localStorage에도 동기화
   var sync = { nickname:currentUser.nickname, email:currentUser.email, phone:currentUser.phone, address:currentUser.address, clinicName:currentUser.clinicName, doctorName:currentUser.doctorName };
@@ -2247,6 +2248,17 @@ function adminShowTab(tab) {
 function isAdmin() {
   return isLoggedIn() && currentUser.role === 'admin';
 }
+function isRegionLeader() {
+  return isLoggedIn() && currentUser.role === 'region_leader';
+}
+function getLeaderRegion() {
+  return currentUser.leaderRegion || null;
+}
+function canManageRegion(region) {
+  if (isAdmin()) return true;
+  if (isRegionLeader() && getLeaderRegion() === region) return true;
+  return false;
+}
 async function saveOrderToSupabase(order) {
   var stripLargeBase64 = function(cases) {
     return cases.map(function(cs) {
@@ -2512,10 +2524,15 @@ async function adminConfirmShipping() {
 async function renderAdminPanel() {
   var panel = document.getElementById('adminPanel');
   if (!panel) return;
-  if (!isAdmin()) { document.body.classList.remove('is-admin'); return; }
+  if (!isAdmin() && !isRegionLeader()) { document.body.classList.remove('is-admin'); return; }
   document.body.classList.add('is-admin');
   renderAdminSummaryCards();
-  adminShowTab('orders');
+  if (isRegionLeader()) {
+    // 리더는 포럼/이벤트/회원 탭만 접근
+    adminShowTab('forum');
+  } else {
+    adminShowTab('orders');
+  }
 }
 async function renderAdminSummaryCards() {
   var container = document.getElementById('adminSummaryCards');
@@ -3142,7 +3159,8 @@ async function renderAdminUsers() {
     var otherUsers   = users.filter(function(u){ return u.is_active === true; });
 
     var makeUserCard = function(u, isPending) {
-      var isAdminU = u.role === 'admin';
+      var isAdminU  = u.role === 'admin';
+      var isLeaderU = u.role === 'region_leader';
       var safeNick = (u.nickname||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       var isActive = u.is_active === true;
       var actionBtns;
@@ -3167,6 +3185,30 @@ async function renderAdminUsers() {
           (isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500') + '">' +
           (isActive ? t('admin_user_active_badge') : t('admin_user_blocked_badge')) + '</span>';
       }
+      // 리더 배지 + 지역 표시
+      var leaderBadge = '';
+      if (isLeaderU) {
+        var lrCfg = FORUM_REGIONS.find(function(r){ return r.key === u.leader_region; });
+        var lrLabel = lrCfg ? (lrCfg.icon + ' ' + t(lrCfg.labelKey)) : (u.leader_region || '');
+        leaderBadge = '<span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[8px] font-black bg-purple-100 text-purple-700">⭐ ' + t('leader_badge') + ' — ' + lrLabel + '</span>';
+      }
+      // 리더 지정/해임 드롭다운 (관리자 전용, admin/pending 제외)
+      var leaderCtrl = '';
+      if (!isAdminU && !isPending && isActive) {
+        var regionOpts = FORUM_REGIONS.filter(function(r){ return r.key !== 'all'; }).map(function(r){
+          var sel = (isLeaderU && u.leader_region === r.key) ? ' selected' : '';
+          return '<option value="' + r.key + '"' + sel + '>' + r.icon + ' ' + t(r.labelKey) + '</option>';
+        }).join('');
+        leaderCtrl = '<div class="mt-2 flex items-center gap-1.5">' +
+          (isLeaderU
+            ? '<button onclick="adminRemoveLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-red-50 text-red-500 active:scale-95 transition">' + t('leader_remove') + '</button>'
+            : '') +
+          '<select id="leader-region-' + safeNick + '" class="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold">' +
+            '<option value="">' + t('leader_select_region') + '</option>' + regionOpts +
+          '</select>' +
+          '<button onclick="adminSetLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-purple-50 text-purple-700 active:scale-95 transition">⭐ ' + t('leader_assign') + '</button>' +
+        '</div>';
+      }
       return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
         '<div class="flex justify-between items-start">' +
           '<div class="flex-1 min-w-0">' +
@@ -3178,7 +3220,7 @@ async function renderAdminUsers() {
           '</div>' +
           actionBtns +
         '</div>' +
-        badge +
+        badge + leaderBadge + leaderCtrl +
       '</div>';
     };
 
@@ -3227,6 +3269,28 @@ async function adminToggleUser(nickname, currentActive) {
     if (res.ok) renderAdminUsers();
     else alert('업데이트 실패');
   } catch(e) { alert('오류: ' + e.message); }
+}
+// ── 지역 리더 관리 ────────────────────────────────────────────
+async function adminSetLeader(nickname) {
+  var sel = document.getElementById('leader-region-' + nickname.replace(/'/g,"\\'"));
+  if (!sel || !sel.value) { alert(t('leader_select_region')); return; }
+  var region = sel.value;
+  var rCfg = FORUM_REGIONS.find(function(r){ return r.key === region; });
+  var rLabel = rCfg ? (rCfg.icon + ' ' + t(rCfg.labelKey)) : region;
+  if (!confirm(nickname + ' → ⭐ ' + t('leader_badge') + ' (' + rLabel + ')?')) return;
+  try {
+    var res = await authSetUserRole(nickname, 'region_leader', region);
+    if (res.ok) renderAdminUsers();
+    else alert(t('admin_error'));
+  } catch(e) { alert(t('admin_error') + ' ' + e.message); }
+}
+async function adminRemoveLeader(nickname) {
+  if (!confirm(nickname + ': ' + t('leader_remove') + '?')) return;
+  try {
+    var res = await authSetUserRole(nickname, 'user', null);
+    if (res.ok) renderAdminUsers();
+    else alert(t('admin_error'));
+  } catch(e) { alert(t('admin_error') + ' ' + e.message); }
 }
 // ── 이벤트 관리 ────────────────────────────────────────────
 function renderAdminEventsTab() {
@@ -3451,8 +3515,33 @@ function openForumDetail(id) {
   document.getElementById('fdp-catBadge').textContent = catText;
   document.getElementById('fdp-title').textContent  = post.title;
   document.getElementById('fdp-body').textContent   = post.body;
-  document.getElementById('fdp-author').textContent = post.author + ' · ' + (post.date||'');
+  // 작성자 + 리더 배지
+  var authorEl = document.getElementById('fdp-author');
+  var authorBadge = _isAuthorLeader(post.author) ? ' ⭐ ' + t('leader_badge') : '';
+  authorEl.innerHTML = '<span class="font-black text-slate-500">' + post.author + '</span>' +
+    (authorBadge ? '<span class="text-purple-600 font-black">' + authorBadge + '</span>' : '') +
+    ' · ' + (post.date||'');
   document.getElementById('fdp-views').textContent  = post.views;
+  // 리더/관리자 액션 버튼 (고정/삭제)
+  var leaderActionsEl = document.getElementById('fdp-leaderActions');
+  if (leaderActionsEl) {
+    var canManage = canManageRegion(post.region);
+    if (canManage) {
+      var postSbId = post._sbId || post.id;
+      var pinLabel = post.is_pinned ? t('forum_unpin') : t('forum_pin');
+      var pinIcon  = post.is_pinned ? '📌' : '📌';
+      leaderActionsEl.innerHTML =
+        '<div class="flex gap-2 mt-3">' +
+          '<button onclick="leaderTogglePin(' + post.id + ')" class="flex-1 py-2 rounded-xl font-black text-[10px] border-2 ' +
+            (post.is_pinned ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500') +
+            ' active:scale-95 transition">' + pinIcon + ' ' + pinLabel + '</button>' +
+          '<button onclick="leaderDeletePost(' + post.id + ')" class="px-4 py-2 rounded-xl font-black text-[10px] border-2 border-red-200 text-red-500 active:scale-95 transition">🗑 ' + t('forum_delete') + '</button>' +
+        '</div>';
+      leaderActionsEl.classList.remove('hidden');
+    } else {
+      leaderActionsEl.classList.add('hidden');
+    }
+  }
   // 이미지 갤러리 슬라이더
   forumGalleryImages = (post.images && post.images.length) ? post.images : [];
   forumGalleryIndex  = 0;
@@ -3497,6 +3586,47 @@ function forumGallerySlide(dir) {
 // ============================================================
 // FORUM
 // ============================================================
+// 리더 배지 표시용 캐시 (renderAdminUsers에서 로드)
+var _leaderCache = {};
+async function _loadLeaderCache() {
+  try {
+    var users = await authGetAllUsers();
+    _leaderCache = {};
+    users.forEach(function(u) {
+      if (u.role === 'region_leader') _leaderCache[u.nickname] = u.leader_region;
+      if (u.role === 'admin') _leaderCache[u.nickname] = '__admin__';
+    });
+  } catch(e) {}
+}
+function _isAuthorLeader(nickname) {
+  return _leaderCache[nickname] && _leaderCache[nickname] !== '__admin__';
+}
+function _isAuthorAdmin(nickname) {
+  return _leaderCache[nickname] === '__admin__';
+}
+async function leaderTogglePin(postId) {
+  var post = posts.find(function(p){ return p.id === postId; });
+  if (!post) return;
+  post.is_pinned = !post.is_pinned;
+  var sbId = post._sbId || post.id;
+  if (typeof sbId === 'string') {
+    try { await sbUpdateForumPost(sbId, { is_pinned: post.is_pinned }); } catch(e) { console.error('[Pin]', e); }
+  }
+  renderForum();
+  openForumDetail(postId);
+}
+async function leaderDeletePost(postId) {
+  if (!confirm(t('forum_delete_confirm'))) return;
+  var post = posts.find(function(p){ return p.id === postId; });
+  if (!post) return;
+  var sbId = post._sbId || post.id;
+  posts = posts.filter(function(p){ return p.id !== postId; });
+  if (typeof sbId === 'string') {
+    try { await sbDeleteForumPost(sbId); } catch(e) { console.error('[Delete Post]', e); }
+  }
+  renderForum();
+  goBack();
+}
 function forumTab(cat) {
   forumCategory = cat;
   renderForum();
@@ -3582,7 +3712,11 @@ function renderForum() {
     if (forumProvince !== 'all') return p.province === forumProvince;
     return p.region === forumRegion;
   });
-  document.getElementById('postList').innerHTML = filtered.length ? filtered.map(function(p){
+  // 고정 글 먼저 정렬
+  var pinned = filtered.filter(function(p){ return p.is_pinned; });
+  var notPinned = filtered.filter(function(p){ return !p.is_pinned; });
+  var sorted = pinned.concat(notPinned);
+  document.getElementById('postList').innerHTML = sorted.length ? sorted.map(function(p){
     var hasImg = p.images && p.images.length;
     var imgCount = hasImg ? p.images.length : 0;
     var commentCount = p.comments ? p.comments.length : 0;
@@ -3597,6 +3731,12 @@ function renderForum() {
     var catCfg  = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
     var catIcon  = catCfg.icon || '📌';
     var tabLabel = catCfg;
+    // 고정 배지
+    var pinnedBadge = p.is_pinned
+      ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">📌 ' + t('forum_pinned') + '</span>' : '';
+    // 리더 배지 (작성자가 리더인 경우)
+    var authorLeaderBadge = _isAuthorLeader(p.author)
+      ? '<span class="text-[9px] font-black text-purple-600">⭐</span>' : '';
     // 지역/주 뱃지
     var regionBadge = '';
     if (p.region && p.region !== 'all') {
@@ -3614,6 +3754,7 @@ function renderForum() {
       '<div class="p-4 flex gap-3 items-start">' +
         '<div class="flex-1 min-w-0">' +
           '<div class="flex items-center gap-1.5 flex-wrap mb-1.5">' +
+            pinnedBadge +
             '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + catIcon + ' ' + (tabLabel.key ? t(tabLabel.labelKey) : p.category) + '</span>' +
             regionBadge +
           '</div>' +
@@ -3621,6 +3762,7 @@ function renderForum() {
           '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + p.body + '</p>' +
           '<div class="flex items-center gap-2 text-[10px] text-slate-300 font-bold">' +
             '<span class="text-slate-500 font-black">' + p.author + '</span>' +
+            authorLeaderBadge +
             '<span>·</span>' +
             '<span>' + (p.date||'') + '</span>' +
             '<span>·</span>' +
@@ -4030,6 +4172,11 @@ function renderEvents() {
     var rsvpCount = (e._rsvpCount !== undefined) ? e._rsvpCount : '';
     var rsvpLabel = rsvpCount !== '' ? '<span class="text-[9px] font-black text-green-600 mt-1">👥 ' + rsvpCount + ' ' + t('rsvp_attendees') + '</span>' : '';
     var evId = typeof e.id === 'string' ? "'" + e.id + "'" : e.id;
+    // 리더/관리자 삭제 버튼
+    var canDel = canManageRegion(e.region || 'all') || (isLoggedIn() && e.createdBy === currentUser.nickname);
+    var delBtn = canDel
+      ? '<button onclick="event.stopPropagation();leaderDeleteEvent(' + evId + ')" class="shrink-0 ml-1 w-7 h-7 rounded-lg bg-red-50 text-red-400 text-xs font-black flex items-center justify-center active:scale-90">✕</button>'
+      : '';
     return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden flex cursor-pointer active:scale-[.98] transition" onclick="openEventDetail(' + evId + ')">' +
       '<div class="bg-[#001d4a] flex flex-col items-center justify-center px-5 py-5 shrink-0 min-w-[72px]">' +
         '<span class="text-blue-300 text-[10px] font-black uppercase tracking-widest">' + monthStr + '</span>' +
@@ -4044,6 +4191,7 @@ function renderEvents() {
           rsvpLabel +
         '</div>' +
         '<span class="text-slate-300 text-lg font-black shrink-0 ml-2">›</span>' +
+        delBtn +
       '</div>' +
     '</div>';
   }).join('');
@@ -4186,6 +4334,16 @@ async function toggleRsvp(status) {
   } catch(e) {
     console.error('[RSVP]', e);
     alert(t('rsvp_error'));
+  }
+}
+async function leaderDeleteEvent(id) {
+  if (!confirm(t('event_delete_confirm'))) return;
+  var removed = events_.find(function(e){ return e.id === id; });
+  events_ = events_.filter(function(e){ return e.id !== id; });
+  renderEvents();
+  renderHomeEventsPreview();
+  if (removed && (removed._sbId || typeof removed.id === 'string')) {
+    sbDeleteEvent(removed._sbId || removed.id).catch(function(e){ console.error('[Event Delete]', e); });
   }
 }
 // ============================================================
@@ -4495,14 +4653,18 @@ async function initSupabasePublicData() {
           images:   r.images   || [],
           comments: r.comments || [],
           views:    r.views    || 0,
-          date:     r.date     || (r.created_at ? r.created_at.slice(0,10) : ''),
-          _sbId:    r.id,
+          date:      r.date      || (r.created_at ? r.created_at.slice(0,10) : ''),
+          is_pinned: r.is_pinned || false,
+          _sbId:     r.id,
         };
       });
       renderForum();
       renderHomeForumPreview();
     }
   } catch(e) { console.warn('[Forum Posts Init]', e); }
+
+  // ── 리더 캐시 로드 (포럼 배지용) ──────────────────────────
+  _loadLeaderCache();
 
   // ── Events ─────────────────────────────────────────────────
   try {
