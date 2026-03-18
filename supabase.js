@@ -566,3 +566,45 @@ async function sbCreateNotification(notif) {
     is_read:   false,
   });
 }
+
+// ============================================================
+// Reviews (리뷰/평점)
+// ============================================================
+
+async function sbGetReviews(productId) {
+  return sbGet('reviews', 'select=id,user_id,product_id,rating,comment,created_at&product_id=eq.' + encodeURIComponent(productId) + '&order=created_at.desc&limit=50');
+}
+
+async function sbPostReview(review) {
+  return sbPost('reviews', {
+    user_id:    review.user_id,
+    product_id: review.product_id,
+    rating:     review.rating,
+    comment:    review.comment || '',
+  });
+}
+
+async function sbDeleteReview(reviewId) {
+  return sbDelete('reviews', 'id=eq.' + encodeURIComponent(reviewId));
+}
+
+async function sbCheckUserReview(userId, productId) {
+  var result = await sbGet('reviews', 'select=id&user_id=eq.' + encodeURIComponent(userId) + '&product_id=eq.' + encodeURIComponent(productId) + '&limit=1');
+  return result && result.length > 0;
+}
+
+// ============================================================
+// 통계 (Admin Dashboard Stats)
+// ============================================================
+
+async function sbGetOrderStats() {
+  return sbGet('orders', 'select=id,items,stage,date,created_at&order=created_at.desc&limit=500');
+}
+
+async function sbGetAllUsersCount() {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/licenses?select=license_number&status=eq.active', {
+    method: 'GET',
+    headers: sbHeaders(),
+  });
+  return (await res.json()) || [];
+}

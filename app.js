@@ -980,6 +980,7 @@ function renderProductPage() {
   var addBtn = document.getElementById('shopProductAddBtn');
   if (addBtn) { addBtn.disabled = !inStock; addBtn.style.opacity = inStock ? '1' : '0.5'; addBtn.textContent = t('order_add_cart'); }
   renderProductTable();
+  loadProductReviews(p.id);
 }
 function renderProductTable() {
   var p = currentProd;
@@ -1212,19 +1213,32 @@ async function requestPay() {
     nickname: currentUser.nickname || '',
     items: cart.map(function(c){ return {name:c.name,code:c.code,qty:c.qty,price:c.price}; }),
     totalAmount: amt,
-    stage: 'submitted'
+    stage: 'payment_pending'
   };
+  // PromptPay QR 생성 (금액+참조번호 포함)
+  var ppData = '00020101021230140016A00000067701011301' + '0208' + oid.slice(-8) + '5303764' + '5404' + amt.toFixed(2) + '5802TH6304';
   var qrUrl;
   try {
     var res = await fetch('http://localhost:3000/pay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart,address:clinic,phone,detailAddress:addr})});
     qrUrl = (await res.json()).qr_image;
   } catch(e) {
-    qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DENTALK_' + oid + '_' + amt + 'THB';
+    qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('PROMPTPAY|' + oid + '|' + amt + 'THB');
   }
   document.getElementById('qrSummary').innerHTML =
     '<p class="font-black text-slate-500 uppercase text-[9px] mb-2">' + t('qr_summary_title') + '</p>' +
     cart.map(function(c){ return '<div class="flex justify-between gap-2 text-[10px]"><span class="flex-1">' + c.name + '</span><span class="font-mono text-slate-500">' + c.code + '</span><span class="font-black ml-1">×' + c.qty + '</span><span class="font-mono font-black ml-1">' + (c.price*c.qty).toLocaleString() + '</span></div>'; }).join('') +
-    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-slate-800"><span>' + t('qr_total') + '</span><span class="font-mono">' + amt.toLocaleString() + ' THB</span></div>';
+    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-slate-800"><span>' + t('qr_total') + '</span><span class="font-mono">' + amt.toLocaleString() + ' THB</span></div>' +
+    '<p class="text-[9px] font-bold text-slate-400 mt-1">' + t('pay_ref') + ': ' + oid + '</p>' +
+    // 은행 이체 안내
+    '<div class="mt-3 pt-3 border-t border-slate-200">' +
+      '<p class="font-black text-[10px] text-slate-600 mb-1.5">' + t('pay_bank_title') + '</p>' +
+      '<div class="bg-blue-50 rounded-lg p-2.5 text-[10px] space-y-1">' +
+        '<div class="flex justify-between"><span class="text-slate-500">' + t('pay_bank_name') + '</span><span class="font-black text-slate-800">Kasikorn Bank (KBank)</span></div>' +
+        '<div class="flex justify-between"><span class="text-slate-500">' + t('pay_bank_acct') + '</span><span class="font-black text-slate-800 font-mono">088-8-88888-8</span></div>' +
+        '<div class="flex justify-between"><span class="text-slate-500">' + t('pay_bank_holder') + '</span><span class="font-black text-slate-800">BIOTEM × BIOPLANT</span></div>' +
+        '<div class="flex justify-between"><span class="text-slate-500">' + t('pay_bank_amount') + '</span><span class="font-black text-blue-700 font-mono">' + amt.toLocaleString() + ' THB</span></div>' +
+      '</div>' +
+    '</div>';
   document.getElementById('qrImg').src = qrUrl;
   closeModal('addressModal'); openModal('qrModal');
 }
@@ -2247,7 +2261,7 @@ var productStock    = JSON.parse(localStorage.getItem('adminProductStock') || '{
 
 function adminShowTab(tab) {
   adminCurrentTab = tab;
-  ['orders','shopOrders','products','used','forum','users','jobs','webzine','events','ads'].forEach(function(t) {
+  ['orders','shopOrders','products','used','forum','users','jobs','webzine','events','ads','stats'].forEach(function(t) {
     var key = t.charAt(0).toUpperCase() + t.slice(1);
     var content = document.getElementById('adminTab' + key);
     var btn     = document.getElementById('adminTabBtn-' + t);
@@ -2270,6 +2284,7 @@ function adminShowTab(tab) {
   else if (tab === 'webzine')    renderAdminWebzine();
   else if (tab === 'events')     renderAdminEventsTab();
   else if (tab === 'ads')        renderAdminAds();
+  else if (tab === 'stats')      renderAdminStats();
 }
 function isAdmin() {
   return isLoggedIn() && currentUser.role === 'admin';
@@ -2680,16 +2695,17 @@ async function adminReuploadStl(orderId, caseIdx, fileIdx, fileName, input) {
 // 쇼핑몰 주문 관리
 // ============================================================
 var SHOP_STAGES = [
-  { key:'submitted', label:'주문접수',   icon:'📥', next:'paid' },
-  { key:'paid',      label:'결제완료',   icon:'💳', next:'preparing' },
-  { key:'preparing', label:'제품준비중', icon:'📦', next:'shipped' },
-  { key:'shipped',   label:'배송중',     icon:'🚚', next:'delivered' },
-  { key:'delivered', label:'배송완료',   icon:'✅', next:null },
+  { key:'submitted',         label:'주문접수',   icon:'📥', next:'payment_pending' },
+  { key:'payment_pending',   label:'입금대기',   icon:'🏦', next:'payment_confirmed' },
+  { key:'payment_confirmed', label:'입금확인',   icon:'💳', next:'preparing' },
+  { key:'preparing',         label:'제품준비중', icon:'📦', next:'shipped' },
+  { key:'shipped',           label:'배송중',     icon:'🚚', next:'delivered' },
+  { key:'delivered',         label:'배송완료',   icon:'✅', next:null },
 ];
 // ── 태국어 상태 라벨 (LINE 알림용) ──────────────────────────
 var SHOP_STAGE_TH = {
-  submitted:'รับคำสั่งซื้อแล้ว', paid:'ชำระเงินแล้ว',
-  preparing:'กำลังเตรียมสินค้า', shipped:'กำลังจัดส่ง', delivered:'จัดส่งเรียบร้อย'
+  submitted:'รับคำสั่งซื้อแล้ว', payment_pending:'รอชำระเงิน', payment_confirmed:'ยืนยันชำระเงินแล้ว',
+  paid:'ชำระเงินแล้ว', preparing:'กำลังเตรียมสินค้า', shipped:'กำลังจัดส่ง', delivered:'จัดส่งเรียบร้อย'
 };
 // ── LINE 상태변경 알림 (태국어) ──────────────────────────────
 function sendStatusChangeNotification(lineId, opts) {
@@ -5833,6 +5849,252 @@ async function initSupabasePublicData() {
     await loadAdBanners();
     renderAllAdSlots();
   } catch(e) { console.warn('[Banners Init]', e); }
+}
+
+// ============================================================
+// 리뷰/평점 시스템
+// ============================================================
+var _reviewRating = 0;
+var _currentReviewProductId = null;
+
+function setReviewStar(n) {
+  _reviewRating = n;
+  var stars = document.querySelectorAll('#reviewStars .review-star');
+  for (var i = 0; i < stars.length; i++) {
+    stars[i].style.color = (i < n) ? '#f59e0b' : '#e2e8f0';
+  }
+}
+
+async function loadProductReviews(productId) {
+  _currentReviewProductId = productId;
+  _reviewRating = 0;
+  setReviewStar(0);
+  var reviewList = document.getElementById('reviewList');
+  var formWrap = document.getElementById('reviewFormWrap');
+  var notice = document.getElementById('reviewNotice');
+  var commentEl = document.getElementById('reviewComment');
+  if (commentEl) commentEl.value = '';
+
+  // 구매 완료 유저만 리뷰 작성 가능
+  var canReview = false;
+  if (isLoggedIn() && currentUser && currentUser.nickname) {
+    try {
+      var orders = await sbGetShopOrders(currentUser.nickname, false);
+      if (orders && orders.length) {
+        canReview = orders.some(function(o) {
+          return (o.stage === 'delivered' || o.stage === 'payment_confirmed') && o.items && o.items.some(function(item) {
+            return item.code === productId || item.name === productId;
+          });
+        });
+      }
+      // 이미 리뷰 작성 여부 확인
+      var hasReview = await sbCheckUserReview(currentUser.nickname, productId);
+      if (hasReview) canReview = false;
+    } catch(e) { /* silent */ }
+  }
+  if (formWrap) formWrap.classList.toggle('hidden', !canReview);
+  if (notice) notice.classList.toggle('hidden', canReview || !isLoggedIn());
+
+  // 리뷰 목록 로드
+  try {
+    var reviews = await sbGetReviews(productId);
+    renderReviewList(reviews || []);
+  } catch(e) {
+    if (reviewList) reviewList.innerHTML = '<p class="text-center text-slate-400 text-xs py-4">' + t('review_load_error') + '</p>';
+  }
+}
+
+function renderReviewList(reviews) {
+  var list = document.getElementById('reviewList');
+  var avgEl = document.getElementById('reviewAvgScore');
+  var countEl = document.getElementById('reviewCount');
+  if (!list) return;
+
+  if (!reviews.length) {
+    list.innerHTML = '<p class="text-center text-slate-400 text-[10px] font-bold py-4">' + t('review_empty') + '</p>';
+    if (avgEl) avgEl.textContent = '-';
+    if (countEl) countEl.textContent = '(0)';
+    return;
+  }
+
+  var sum = reviews.reduce(function(s, r){ return s + r.rating; }, 0);
+  var avg = (sum / reviews.length).toFixed(1);
+  if (avgEl) avgEl.textContent = avg;
+  if (countEl) countEl.textContent = '(' + reviews.length + ')';
+
+  var starsHtml = function(rating) {
+    var s = '';
+    for (var i = 1; i <= 5; i++) s += '<span style="color:' + (i <= rating ? '#f59e0b' : '#e2e8f0') + '">★</span>';
+    return s;
+  };
+
+  list.innerHTML = reviews.map(function(r) {
+    var deleteBtn = (isLoggedIn() && currentUser && currentUser.nickname === r.user_id)
+      ? ' <button onclick="deleteReview(\'' + r.id + '\')" class="text-red-400 text-[9px] font-bold hover:text-red-600">✕</button>'
+      : '';
+    return '<div class="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">' +
+      '<div class="flex items-center justify-between mb-1">' +
+        '<div class="flex items-center gap-2">' +
+          '<span class="font-black text-xs text-slate-700">' + (r.user_id || '') + '</span>' +
+          '<span class="text-xs">' + starsHtml(r.rating) + '</span>' +
+        '</div>' +
+        '<span class="text-[9px] text-slate-400">' + (r.created_at || '').slice(0,10) + deleteBtn + '</span>' +
+      '</div>' +
+      (r.comment ? '<p class="text-[11px] text-slate-600 leading-relaxed">' + r.comment + '</p>' : '') +
+    '</div>';
+  }).join('');
+}
+
+async function submitReview() {
+  if (!_reviewRating || _reviewRating < 1) { alert(t('review_rating_required')); return; }
+  if (!isLoggedIn() || !currentUser) return;
+  var comment = document.getElementById('reviewComment').value.trim();
+  try {
+    await sbPostReview({
+      user_id: currentUser.nickname,
+      product_id: _currentReviewProductId,
+      rating: _reviewRating,
+      comment: comment,
+    });
+    loadProductReviews(_currentReviewProductId);
+  } catch(e) {
+    alert(t('review_submit_error'));
+  }
+}
+
+async function deleteReview(reviewId) {
+  if (!confirm(t('review_delete_confirm'))) return;
+  try {
+    await sbDeleteReview(reviewId);
+    loadProductReviews(_currentReviewProductId);
+  } catch(e) { /* silent */ }
+}
+
+// ============================================================
+// 관리자 통계 대시보드
+// ============================================================
+async function renderAdminStats() {
+  var container = document.getElementById('adminTabStats');
+  if (!container) return;
+  container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_loading') + '</p>';
+  try {
+    var results = await Promise.all([
+      sbGetOrderStats(),
+      sbGet('licenses', 'select=license_number,created_at,status'),
+      sbGetShopOrders(currentUser.nickname, true),
+    ]);
+    var allOrders = results[0] || [];
+    var allUsers = results[1] || [];
+    var shopOrders = results[2] || [];
+
+    var now = new Date();
+    var thisMonth = now.toISOString().slice(0,7);
+    var oneWeekAgo = new Date(now - 7*24*60*60*1000).toISOString().slice(0,10);
+
+    // 이번 달 매출
+    var monthlyRevenue = 0;
+    allOrders.forEach(function(o) {
+      if (o.created_at && o.created_at.slice(0,7) === thisMonth && o.items) {
+        o.items.forEach(function(item) {
+          monthlyRevenue += (item.price || 0) * (item.qty || 1);
+        });
+      }
+    });
+
+    // 총 회원수
+    var totalMembers = allUsers.filter(function(u){ return u.status === 'active'; }).length;
+
+    // 이번 주 신규 가입
+    var weeklySignups = allUsers.filter(function(u) {
+      return u.created_at && u.created_at.slice(0,10) >= oneWeekAgo;
+    }).length;
+
+    // 주문 건수 (이번 달)
+    var monthlyOrders = allOrders.filter(function(o) {
+      return o.created_at && o.created_at.slice(0,7) === thisMonth;
+    }).length;
+
+    // 인기 제품 Top 5
+    var productCount = {};
+    allOrders.forEach(function(o) {
+      if (o.items) o.items.forEach(function(item) {
+        var key = item.name || item.code || 'Unknown';
+        productCount[key] = (productCount[key] || 0) + (item.qty || 1);
+      });
+    });
+    var topProducts = Object.keys(productCount).map(function(k){ return { name:k, qty:productCount[k] }; })
+      .sort(function(a,b){ return b.qty - a.qty; }).slice(0,5);
+
+    // 월별 주문 추이 (최근 6개월)
+    var monthlyData = [];
+    for (var m = 5; m >= 0; m--) {
+      var d = new Date(now.getFullYear(), now.getMonth() - m, 1);
+      var monthKey = d.toISOString().slice(0,7);
+      var label = d.toLocaleString('en', { month:'short' });
+      var count = allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,7) === monthKey; }).length;
+      var revenue = 0;
+      allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,7) === monthKey; }).forEach(function(o) {
+        if (o.items) o.items.forEach(function(item){ revenue += (item.price||0)*(item.qty||1); });
+      });
+      monthlyData.push({ label:label, count:count, revenue:revenue });
+    }
+    var maxCount = Math.max.apply(null, monthlyData.map(function(m){ return m.count; })) || 1;
+
+    // 렌더
+    var html = '';
+    // 요약 카드 (4개)
+    html += '<div class="grid grid-cols-2 gap-3 mb-5">';
+    html += _statCard('💰', t('stats_monthly_revenue'), monthlyRevenue.toLocaleString() + ' THB', 'bg-gradient-to-br from-green-500 to-emerald-700');
+    html += _statCard('👥', t('stats_total_members'), totalMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
+    html += _statCard('✨', t('stats_weekly_signups'), weeklySignups, 'bg-gradient-to-br from-purple-500 to-violet-700');
+    html += _statCard('📦', t('stats_monthly_orders'), monthlyOrders, 'bg-gradient-to-br from-amber-500 to-orange-700');
+    html += '</div>';
+
+    // 인기 제품 Top 5
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-5">';
+    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('stats_top_products') + '</p>';
+    if (topProducts.length) {
+      html += topProducts.map(function(p, i) {
+        var medals = ['🥇','🥈','🥉','④','⑤'];
+        return '<div class="flex items-center gap-2.5 py-2 ' + (i < topProducts.length - 1 ? 'border-b border-slate-50' : '') + '">' +
+          '<span class="text-sm w-6 text-center">' + medals[i] + '</span>' +
+          '<span class="flex-1 font-bold text-xs text-slate-700 truncate">' + p.name + '</span>' +
+          '<span class="font-mono font-black text-xs text-blue-600">' + p.qty + '</span>' +
+        '</div>';
+      }).join('');
+    } else {
+      html += '<p class="text-center text-slate-400 text-xs py-4">' + t('stats_no_data') + '</p>';
+    }
+    html += '</div>';
+
+    // 월별 주문 추이 차트 (CSS bar chart)
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">';
+    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">' + t('stats_monthly_trend') + '</p>';
+    html += '<div class="flex items-end gap-2 h-32">';
+    html += monthlyData.map(function(m) {
+      var pct = Math.max(8, (m.count / maxCount) * 100);
+      return '<div class="flex-1 flex flex-col items-center gap-1">' +
+        '<span class="text-[9px] font-black text-slate-600">' + m.count + '</span>' +
+        '<div class="w-full rounded-t-lg transition-all" style="height:' + pct + '%;background:linear-gradient(to top,#001d4a,#3b82f6)"></div>' +
+        '<span class="text-[8px] font-bold text-slate-400 mt-1">' + m.label + '</span>' +
+      '</div>';
+    }).join('');
+    html += '</div>';
+    html += '</div>';
+
+    container.innerHTML = html;
+  } catch(e) {
+    console.warn('[Admin Stats]', e);
+    container.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_error') + '</p>';
+  }
+}
+
+function _statCard(icon, label, value, bgClass) {
+  return '<div class="' + bgClass + ' rounded-2xl p-4 text-white shadow-lg">' +
+    '<div class="text-2xl mb-1">' + icon + '</div>' +
+    '<div class="font-black text-xl leading-none mb-1">' + value + '</div>' +
+    '<div class="text-[9px] font-bold opacity-80 leading-tight">' + label + '</div>' +
+  '</div>';
 }
 
 // ============================================================

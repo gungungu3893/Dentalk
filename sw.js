@@ -3,7 +3,7 @@
 // 정적 파일: Cache First / API 호출: Network First
 // ============================================================
 
-const CACHE_VERSION = 'dentalk-v4';
+const CACHE_VERSION = 'dentalk-v5';
 const STATIC_ASSETS = [
   './',
   './index.html',
