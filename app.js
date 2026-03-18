@@ -2261,8 +2261,32 @@ function getLeaderRegion() {
 }
 function canManageRegion(region) {
   if (isAdmin()) return true;
-  if (isRegionLeader() && getLeaderRegion() === region) return true;
+  if (!isRegionLeader()) return false;
+  var lr = getLeaderRegion();
+  if (!lr) return false;
+  // 전국 리더는 모든 지역 관리 가능
+  if (lr === 'all') return true;
+  // 지역 리더: 해당 지역 + 하위 주 관리 가능
+  if (lr === region) return true;
+  // region이 'north:chiang_mai' 형태일 때 lr이 'north'이면 관리 가능
+  if (region && region.indexOf(':') !== -1 && region.split(':')[0] === lr) return true;
+  // lr이 'north:chiang_mai'이고 region이 'north'이면 — 주 리더는 상위 지역 관리 불가
   return false;
+}
+// leader_region 값을 사람이 읽을 수 있는 라벨로 변환
+function _resolveLeaderLabel(leaderRegion) {
+  if (!leaderRegion) return '';
+  if (leaderRegion === 'all') return '🇹🇭 ' + t('leader_level_all');
+  if (leaderRegion.indexOf(':') !== -1) {
+    var parts = leaderRegion.split(':');
+    var rCfg = FORUM_REGIONS.find(function(r){ return r.key === parts[0]; });
+    if (rCfg) {
+      var pCfg = rCfg.provinces.find(function(p){ return p.key === parts[1]; });
+      return rCfg.icon + ' ' + t(rCfg.labelKey) + ' > ' + (pCfg ? pCfg.label : parts[1]);
+    }
+  }
+  var rCfg2 = FORUM_REGIONS.find(function(r){ return r.key === leaderRegion; });
+  return rCfg2 ? (rCfg2.icon + ' ' + t(rCfg2.labelKey)) : leaderRegion;
 }
 async function saveOrderToSupabase(order) {
   var stripLargeBase64 = function(cases) {
@@ -3190,28 +3214,54 @@ async function renderAdminUsers() {
           (isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500') + '">' +
           (isActive ? t('admin_user_active_badge') : t('admin_user_blocked_badge')) + '</span>';
       }
-      // 리더 배지 + 지역 표시
+      // 리더 배지 + 지역 표시 (계층형)
       var leaderBadge = '';
       if (isLeaderU) {
-        var lrCfg = FORUM_REGIONS.find(function(r){ return r.key === u.leader_region; });
-        var lrLabel = lrCfg ? (lrCfg.icon + ' ' + t(lrCfg.labelKey)) : (u.leader_region || '');
+        var lrLabel = _resolveLeaderLabel(u.leader_region);
         leaderBadge = '<span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[8px] font-black bg-purple-100 text-purple-700">⭐ ' + t('leader_badge') + ' — ' + lrLabel + '</span>';
       }
-      // 리더 지정/해임 드롭다운 (관리자 전용, admin/pending 제외)
+      // 리더 지정/해임 — 피라미드 계층 (관리자 전용, admin/pending 제외)
       var leaderCtrl = '';
       if (!isAdminU && !isPending && isActive) {
-        var regionOpts = FORUM_REGIONS.filter(function(r){ return r.key !== 'all'; }).map(function(r){
-          var sel = (isLeaderU && u.leader_region === r.key) ? ' selected' : '';
-          return '<option value="' + r.key + '"' + sel + '>' + r.icon + ' ' + t(r.labelKey) + '</option>';
-        }).join('');
-        leaderCtrl = '<div class="mt-2 flex items-center gap-1.5">' +
+        // 1단계: 레벨 선택 (전국 / 지역 / 주)
+        var curLevel = '';
+        var curRegion = '';
+        var curProvince = '';
+        if (isLeaderU && u.leader_region) {
+          if (u.leader_region === 'all') { curLevel = 'all'; }
+          else if (u.leader_region.indexOf(':') !== -1) {
+            var parts = u.leader_region.split(':');
+            curLevel = 'province'; curRegion = parts[0]; curProvince = u.leader_region;
+          } else { curLevel = 'region'; curRegion = u.leader_region; }
+        }
+        var levelOpts = '<option value="">' + t('leader_select_level') + '</option>' +
+          '<option value="all"' + (curLevel==='all'?' selected':'') + '>🇹🇭 ' + t('leader_level_all') + '</option>' +
+          '<option value="region"' + (curLevel==='region'?' selected':'') + '>📍 ' + t('leader_level_region') + '</option>' +
+          '<option value="province"' + (curLevel==='province'?' selected':'') + '>🏘 ' + t('leader_level_province') + '</option>';
+        // 2단계: 지역 선택
+        var regionOpts = '<option value="">' + t('leader_select_region') + '</option>';
+        FORUM_REGIONS.forEach(function(r) {
+          if (r.key === 'all') return;
+          regionOpts += '<option value="' + r.key + '"' + (curRegion===r.key?' selected':'') + '>' + r.icon + ' ' + t(r.labelKey) + '</option>';
+        });
+        // 3단계: 주 선택 (동적으로 변경)
+        var provinceOpts = '<option value="">' + t('leader_select_province') + '</option>';
+        if (curRegion) {
+          var rCfg = FORUM_REGIONS.find(function(r){ return r.key === curRegion; });
+          if (rCfg) rCfg.provinces.forEach(function(p) {
+            provinceOpts += '<option value="' + rCfg.key + ':' + p.key + '"' + (curProvince===(rCfg.key+':'+p.key)?' selected':'') + '>' + p.label + '</option>';
+          });
+        }
+        leaderCtrl = '<div class="mt-2 space-y-1.5">' +
           (isLeaderU
             ? '<button onclick="adminRemoveLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-red-50 text-red-500 active:scale-95 transition">' + t('leader_remove') + '</button>'
             : '') +
-          '<select id="leader-region-' + safeNick + '" class="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold">' +
-            '<option value="">' + t('leader_select_region') + '</option>' + regionOpts +
-          '</select>' +
-          '<button onclick="adminSetLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-purple-50 text-purple-700 active:scale-95 transition">⭐ ' + t('leader_assign') + '</button>' +
+          '<div class="flex items-center gap-1.5 flex-wrap">' +
+            '<select id="leader-level-' + safeNick + '" onchange="adminLeaderLevelChanged(\'' + safeNick + '\')" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold">' + levelOpts + '</select>' +
+            '<select id="leader-region-' + safeNick + '" onchange="adminLeaderRegionChanged(\'' + safeNick + '\')" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold" style="' + (curLevel==='region'||curLevel==='province'?'':'display:none') + '">' + regionOpts + '</select>' +
+            '<select id="leader-province-' + safeNick + '" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold" style="' + (curLevel==='province'?'':'display:none') + '">' + provinceOpts + '</select>' +
+            '<button onclick="adminSetLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-purple-50 text-purple-700 active:scale-95 transition">⭐ ' + t('leader_assign') + '</button>' +
+          '</div>' +
         '</div>';
       }
       return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
@@ -3275,17 +3325,59 @@ async function adminToggleUser(nickname, currentActive) {
     else alert('업데이트 실패');
   } catch(e) { alert('오류: ' + e.message); }
 }
-// ── 지역 리더 관리 ────────────────────────────────────────────
+// ── 지역 리더 관리 (피라미드 계층형) ──────────────────────────
+// 레벨 선택 변경 시: 지역/주 드롭다운 표시/숨김
+function adminLeaderLevelChanged(nickname) {
+  var esc = nickname.replace(/'/g,"\\'");
+  var levelSel = document.getElementById('leader-level-' + esc);
+  var regionSel = document.getElementById('leader-region-' + esc);
+  var provinceSel = document.getElementById('leader-province-' + esc);
+  if (!levelSel) return;
+  var lv = levelSel.value;
+  regionSel.style.display = (lv === 'region' || lv === 'province') ? '' : 'none';
+  provinceSel.style.display = (lv === 'province') ? '' : 'none';
+  if (lv === 'all' || lv === '') { regionSel.value = ''; provinceSel.value = ''; }
+  if (lv === 'region') provinceSel.value = '';
+}
+// 지역 선택 변경 시: 해당 지역의 주 옵션 업데이트
+function adminLeaderRegionChanged(nickname) {
+  var esc = nickname.replace(/'/g,"\\'");
+  var regionSel = document.getElementById('leader-region-' + esc);
+  var provinceSel = document.getElementById('leader-province-' + esc);
+  if (!regionSel || !provinceSel) return;
+  var regionKey = regionSel.value;
+  var html = '<option value="">' + t('leader_select_province') + '</option>';
+  var rCfg = FORUM_REGIONS.find(function(r){ return r.key === regionKey; });
+  if (rCfg) rCfg.provinces.forEach(function(p) {
+    html += '<option value="' + rCfg.key + ':' + p.key + '">' + p.label + '</option>';
+  });
+  provinceSel.innerHTML = html;
+}
+// 리더 지정 — 계층에 따라 leader_region 값 결정
 async function adminSetLeader(nickname) {
-  var sel = document.getElementById('leader-region-' + nickname.replace(/'/g,"\\'"));
-  if (!sel || !sel.value) { alert(t('leader_select_region')); return; }
-  var region = sel.value;
-  var rCfg = FORUM_REGIONS.find(function(r){ return r.key === region; });
-  var rLabel = rCfg ? (rCfg.icon + ' ' + t(rCfg.labelKey)) : region;
-  if (!confirm(nickname + ' → ⭐ ' + t('leader_badge') + ' (' + rLabel + ')?')) return;
+  var esc = nickname.replace(/'/g,"\\'");
+  var levelSel = document.getElementById('leader-level-' + esc);
+  if (!levelSel || !levelSel.value) { alert(t('leader_select_level')); return; }
+  var lv = levelSel.value;
+  var region = '';
+  if (lv === 'all') {
+    region = 'all';
+  } else if (lv === 'region') {
+    var rSel = document.getElementById('leader-region-' + esc);
+    if (!rSel || !rSel.value) { alert(t('leader_select_region')); return; }
+    region = rSel.value;
+  } else if (lv === 'province') {
+    var rSel2 = document.getElementById('leader-region-' + esc);
+    var pSel = document.getElementById('leader-province-' + esc);
+    if (!rSel2 || !rSel2.value) { alert(t('leader_select_region')); return; }
+    if (!pSel || !pSel.value) { alert(t('leader_select_province')); return; }
+    region = pSel.value; // 'region:province' 형태
+  }
+  var lbl = _resolveLeaderLabel(region);
+  if (!confirm(nickname + ' → ⭐ ' + t('leader_badge') + ' (' + lbl + ')?')) return;
   try {
     var res = await authSetUserRole(nickname, 'region_leader', region);
-    if (res.ok) renderAdminUsers();
+    if (res.ok) { await _loadLeaderCache(); renderAdminUsers(); }
     else alert(t('admin_error'));
   } catch(e) { alert(t('admin_error') + ' ' + e.message); }
 }
@@ -3293,7 +3385,7 @@ async function adminRemoveLeader(nickname) {
   if (!confirm(nickname + ': ' + t('leader_remove') + '?')) return;
   try {
     var res = await authSetUserRole(nickname, 'user', null);
-    if (res.ok) renderAdminUsers();
+    if (res.ok) { await _loadLeaderCache(); renderAdminUsers(); }
     else alert(t('admin_error'));
   } catch(e) { alert(t('admin_error') + ' ' + e.message); }
 }
