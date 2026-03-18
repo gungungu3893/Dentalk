@@ -90,6 +90,12 @@ function openWebzineDetail(id) {
   document.getElementById('wzd-body').innerHTML = _renderMarkdown(article.body_md || '');
   goDetailPage('webzine-detail', article.title, 'webzine');
 }
+function _sanitizeUrl(url) {
+  // XSS 방지: javascript:, data:, vbscript: 등 위험한 프로토콜 차단
+  var trimmed = url.replace(/^\s+/, '').toLowerCase();
+  if (trimmed.indexOf('javascript:') === 0 || trimmed.indexOf('vbscript:') === 0 || trimmed.indexOf('data:text') === 0) return '';
+  return url;
+}
 function _renderMarkdown(md) {
   // 간단한 마크다운 → HTML 변환
   var html = md
@@ -99,8 +105,14 @@ function _renderMarkdown(md) {
     .replace(/^# (.+)$/gm, '<h1 class="font-black text-slate-800 text-xl mt-6 mb-3">$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="w-full rounded-xl my-3" loading="lazy">')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 underline" target="_blank">$1</a>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(_, alt, src) {
+      var safe = _sanitizeUrl(src);
+      return safe ? '<img src="' + safe + '" alt="' + alt + '" class="w-full rounded-xl my-3" loading="lazy">' : '';
+    })
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, text, href) {
+      var safe = _sanitizeUrl(href);
+      return safe ? '<a href="' + safe + '" class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">' + text + '</a>' : text;
+    })
     .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-sm">$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-sm">$2</li>')
     .replace(/\n\n/g, '</p><p class="mb-3">')
