@@ -536,6 +536,8 @@ async function handleLogin() {
   updateNavLocks();
   updateNicknameDisplays();
   closeModal('loginModal');
+  // 알림 배지 업데이트
+  updateNotifBadge();
   // 로그인 직후 CNC 주문 로드 → 설정 페이지 요약에 반영
   loadOrdersFromSupabase().then(function() { renderProfileSettings(); });
   renderProfileSettings(); // 로딩 전 빈 화면 방지용 즉시 렌더
@@ -5831,6 +5833,292 @@ async function initSupabasePublicData() {
     await loadAdBanners();
     renderAllAdSlots();
   } catch(e) { console.warn('[Banners Init]', e); }
+}
+
+// ============================================================
+// 통합 검색
+// ============================================================
+var _searchTimer = null;
+function openSearchModal() {
+  document.getElementById('searchModal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('searchInput').focus(); }, 100);
+}
+function closeSearchModal() {
+  document.getElementById('searchModal').style.display = 'none';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-8">' + t('search_hint') + '</p>';
+}
+function debounceSearch() {
+  if (_searchTimer) clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(doSearch, 350);
+}
+async function doSearch() {
+  var keyword = document.getElementById('searchInput').value.trim();
+  var container = document.getElementById('searchResults');
+  if (!keyword || keyword.length < 2) {
+    container.innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-8">' + t('search_hint') + '</p>';
+    return;
+  }
+  container.innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-8">' + t('search_searching') + '</p>';
+  try {
+    var results = await sbSearchAll(keyword);
+    var html = '';
+    // 포럼
+    if (results.forum.length) {
+      html += '<div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('nav_forum') + ' (' + results.forum.length + ')</p>';
+      html += results.forum.map(function(r) {
+        return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm" onclick="closeSearchModal();goPage(\'forum\')">' +
+          '<p class="font-black text-sm text-slate-800 truncate">' + r.title + '</p>' +
+          '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.author || '') + ' · ' + (r.created_at || '').slice(0,10) + '</p></div>';
+      }).join('');
+      html += '</div>';
+    }
+    // 웹진
+    if (results.webzine.length) {
+      html += '<div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('nav_webzine') + ' (' + results.webzine.length + ')</p>';
+      html += results.webzine.map(function(r) {
+        var aid = typeof r.id === 'string' ? "'" + r.id + "'" : r.id;
+        return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm flex items-center gap-3" onclick="closeSearchModal();openWebzineDetail(' + aid + ')">' +
+          (r.thumbnail_url ? '<img src="' + r.thumbnail_url + '" class="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy">' : '') +
+          '<div class="flex-1 min-w-0"><p class="font-black text-sm text-slate-800 truncate">' + r.title + '</p>' +
+          '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.created_at || '').slice(0,10) + '</p></div></div>';
+      }).join('');
+      html += '</div>';
+    }
+    // 구인구직
+    if (results.jobs.length) {
+      html += '<div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('nav_jobs') + ' (' + results.jobs.length + ')</p>';
+      html += results.jobs.map(function(r) {
+        return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm" onclick="closeSearchModal();openJobDetail(' + r.id + ')">' +
+          '<p class="font-black text-sm text-slate-800 truncate">' + r.title + '</p>' +
+          '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.type || '') + ' · ' + (r.created_at || '').slice(0,10) + '</p></div>';
+      }).join('');
+      html += '</div>';
+    }
+    // 중고마켓
+    if (results.used.length) {
+      html += '<div><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('nav_used') + ' (' + results.used.length + ')</p>';
+      html += results.used.map(function(r) {
+        return '<div class="bg-white rounded-xl p-3 mb-1.5 cursor-pointer active:bg-slate-50 transition shadow-sm flex items-center gap-3" onclick="closeSearchModal();openUsedDetail(' + r.id + ')">' +
+          (r.image_url ? '<img src="' + r.image_url + '" class="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy">' : '') +
+          '<div class="flex-1 min-w-0"><p class="font-black text-sm text-slate-800 truncate">' + r.name + '</p>' +
+          '<p class="text-[9px] text-slate-400 mt-0.5">' + (r.seller || '') + ' · ' + (r.price ? r.price.toLocaleString() + ' THB' : '') + '</p></div></div>';
+      }).join('');
+      html += '</div>';
+    }
+    if (!html) {
+      html = '<p class="text-center text-slate-400 text-sm font-bold py-8">' + t('search_no_results') + '</p>';
+    }
+    container.innerHTML = html;
+  } catch(e) {
+    console.warn('[Search]', e);
+    container.innerHTML = '<p class="text-center text-red-400 text-sm font-bold py-8">' + t('search_error') + '</p>';
+  }
+}
+
+// ============================================================
+// 알림 센터
+// ============================================================
+var _notifications = [];
+var _notifPage = 1;
+var _notifHasMore = true;
+
+function openNotifPanel() {
+  document.getElementById('notifPanel').style.display = 'flex';
+  if (isLoggedIn() && currentUser && currentUser.nickname) {
+    _notifPage = 1;
+    _notifHasMore = true;
+    _notifications = [];
+    loadNotifications();
+  } else {
+    document.getElementById('notifList').innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-12">' + t('notif_login_required') + '</p>';
+  }
+}
+function closeNotifPanel() {
+  document.getElementById('notifPanel').style.display = 'none';
+}
+
+async function loadNotifications() {
+  if (!currentUser || !currentUser.nickname) return;
+  var list = document.getElementById('notifList');
+  try {
+    var data = await sbGetNotifications(currentUser.nickname, _notifPage);
+    if (!data || data.length < 20) _notifHasMore = false;
+    _notifications = _notifications.concat(data || []);
+    renderNotifications();
+  } catch(e) {
+    console.warn('[Notifications]', e);
+    if (!_notifications.length) {
+      list.innerHTML = '<p class="text-center text-red-400 text-sm font-bold py-12">' + t('notif_error') + '</p>';
+    }
+  }
+}
+
+function renderNotifications() {
+  var list = document.getElementById('notifList');
+  if (!_notifications.length) {
+    list.innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-12">' + t('notif_empty') + '</p>';
+    return;
+  }
+  var typeIcons = { order_status: '📦', comment: '💬', rsvp: '📅', admin: '📢', info: 'ℹ️' };
+  list.innerHTML = _notifications.map(function(n) {
+    var icon = typeIcons[n.type] || 'ℹ️';
+    var readClass = n.is_read ? 'bg-white opacity-60' : 'bg-blue-50 border-l-4 border-blue-400';
+    var onclick = n.link ? 'onclick="handleNotifClick(\'' + n.id + '\',\'' + (n.link || '') + '\')"' : 'onclick="markNotifRead(\'' + n.id + '\')"';
+    return '<div class="' + readClass + ' rounded-xl p-3 cursor-pointer active:bg-slate-100 transition shadow-sm" ' + onclick + '>' +
+      '<div class="flex items-start gap-2">' +
+        '<span class="text-base mt-0.5 shrink-0">' + icon + '</span>' +
+        '<div class="flex-1 min-w-0">' +
+          '<p class="font-black text-xs text-slate-800 leading-snug">' + (n.title || '') + '</p>' +
+          (n.body ? '<p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">' + n.body + '</p>' : '') +
+          '<p class="text-[9px] text-slate-400 mt-1">' + (n.created_at || '').slice(0,16).replace('T',' ') + '</p>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function handleNotifClick(notifId, link) {
+  markNotifRead(notifId);
+  closeNotifPanel();
+  if (link) {
+    // link = "page:forum" or "page:webzine" etc.
+    if (link.indexOf('page:') === 0) {
+      goPage(link.replace('page:', ''));
+    }
+  }
+}
+
+async function markNotifRead(notifId) {
+  var n = _notifications.find(function(x){ return x.id === notifId; });
+  if (n) n.is_read = true;
+  renderNotifications();
+  updateNotifBadge();
+  try { await sbMarkNotifRead(notifId); } catch(e) { /* silent */ }
+}
+
+async function markAllNotifsRead() {
+  if (!currentUser || !currentUser.nickname) return;
+  _notifications.forEach(function(n){ n.is_read = true; });
+  renderNotifications();
+  updateNotifBadge();
+  try { await sbMarkAllNotifsRead(currentUser.nickname); } catch(e) { /* silent */ }
+}
+
+async function updateNotifBadge() {
+  var badge = document.getElementById('notifBadge');
+  if (!badge) return;
+  if (!isLoggedIn() || !currentUser || !currentUser.nickname) {
+    badge.classList.add('hidden');
+    return;
+  }
+  try {
+    var count = await sbGetUnreadNotifCount(currentUser.nickname);
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : count;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  } catch(e) { badge.classList.add('hidden'); }
+}
+
+// ============================================================
+// 무한 스크롤
+// ============================================================
+var _infiniteScroll = {
+  used:    { page: 1, loading: false, hasMore: true },
+  forum:   { page: 1, loading: false, hasMore: true },
+  jobs:    { page: 1, loading: false, hasMore: true },
+  webzine: { page: 1, loading: false, hasMore: true },
+};
+
+function _getCurrentPage() {
+  var pages = ['used', 'forum', 'jobs', 'webzine'];
+  for (var i = 0; i < pages.length; i++) {
+    var el = document.getElementById('page-' + pages[i]);
+    if (el && el.style.display !== 'none' && !el.classList.contains('hidden')) return pages[i];
+  }
+  return null;
+}
+
+function _isNearBottom() {
+  return (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 300);
+}
+
+window.addEventListener('scroll', function() {
+  if (!_isNearBottom()) return;
+  var page = _getCurrentPage();
+  if (!page) return;
+  var state = _infiniteScroll[page];
+  if (!state || state.loading || !state.hasMore) return;
+  loadMoreItems(page);
+});
+
+async function loadMoreItems(pageType) {
+  var state = _infiniteScroll[pageType];
+  state.loading = true;
+  state.page++;
+  var loader = document.getElementById(pageType === 'used' ? 'usedLoadMore' : pageType === 'forum' ? 'forumLoadMore' : pageType === 'jobs' ? 'jobsLoadMore' : 'webzineLoadMore');
+  if (loader) loader.classList.remove('hidden');
+
+  try {
+    var data;
+    if (pageType === 'used') {
+      data = await sbGetUsedItems(state.page);
+      if (!data || data.length < 20) state.hasMore = false;
+      if (data && data.length) {
+        var mapped = data.map(function(r) {
+          return { id:r.id, name:r.name, code:r.code||'-', price:parseFloat(r.price)||0, cond:r.condition||'good', desc:r.description||'-', contact:r.contact||'', seller:r.seller||'', date:r.date||(r.created_at?r.created_at.slice(0,10):''), views:r.views||0, image:r.image_url||null, _sbId:r.id };
+        });
+        usedItems = usedItems.concat(mapped);
+        renderUsed();
+      }
+    } else if (pageType === 'forum') {
+      data = await sbGetForumPosts(state.page);
+      if (!data || data.length < 20) state.hasMore = false;
+      if (data && data.length) {
+        var mapped = data.map(function(r) {
+          return { id:r.id, category:r.category||'general', region:r.region||'all', province:r.province||'all', title:r.title, body:r.body, author:r.author||'', images:r.images||[], comments:r.comments||[], views:r.views||0, date:r.date||(r.created_at?r.created_at.slice(0,10):''), is_pinned:r.is_pinned||false, _sbId:r.id };
+        });
+        posts = posts.concat(mapped);
+        renderForum();
+      }
+    } else if (pageType === 'jobs') {
+      data = await sbGetJobs(state.page);
+      if (!data || data.length < 20) state.hasMore = false;
+      if (data && data.length) {
+        var mapped = data.map(function(r) {
+          return { id:r.id, user_id:r.user_id, type:r.type||'dentist_hire', region:r.region||null, province:r.province||null, title:r.title, description:r.description||'', salary_range:r.salary_range||null, requirements:r.requirements||null, contact:r.contact||null, date:r.created_at||'' };
+        });
+        jobsList = jobsList.concat(mapped);
+        renderJobs();
+      }
+    } else if (pageType === 'webzine') {
+      data = await sbGetWebzineArticles(state.page);
+      if (!data || data.length < 20) state.hasMore = false;
+      if (data && data.length) {
+        var mapped = data.map(function(r) {
+          return { id:r.id, category:r.category||'news', title:r.title, body_md:r.body_md||'', thumbnail_url:r.thumbnail_url||null, author_id:r.author_id||'', views:r.views||0, date:r.created_at||'' };
+        });
+        webzineArticles = webzineArticles.concat(mapped);
+        renderWebzine();
+      }
+    }
+  } catch(e) {
+    console.warn('[InfiniteScroll]', pageType, e);
+  }
+  state.loading = false;
+  if (loader) loader.classList.toggle('hidden', !state.hasMore);
+}
+
+// Reset infinite scroll when navigating to a page
+function resetInfiniteScroll(pageType) {
+  if (_infiniteScroll[pageType]) {
+    _infiniteScroll[pageType].page = 1;
+    _infiniteScroll[pageType].hasMore = true;
+    _infiniteScroll[pageType].loading = false;
+  }
 }
 
 // ============================================================

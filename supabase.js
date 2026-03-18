@@ -501,3 +501,68 @@ async function sbBannerImpression(id) {
     body:    JSON.stringify({ banner_id: id }),
   });
 }
+
+// ============================================================
+// 통합 검색 — 여러 테이블 동시 검색
+// ============================================================
+
+async function sbSearchAll(keyword) {
+  var encoded = encodeURIComponent('%' + keyword + '%');
+  var results = { forum: [], webzine: [], jobs: [], used: [] };
+  try {
+    var queries = [
+      sbGet('forum_posts', 'select=id,title,author,category,created_at&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('webzine_articles', 'select=id,title,category,thumbnail_url,created_at&is_published=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('jobs', 'select=id,title,type,region,created_at&is_active=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('used_items', 'select=id,name,price,seller,image_url,created_at&name=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+    ];
+    var res = await Promise.allSettled(queries);
+    if (res[0].status === 'fulfilled') results.forum   = res[0].value || [];
+    if (res[1].status === 'fulfilled') results.webzine = res[1].value || [];
+    if (res[2].status === 'fulfilled') results.jobs    = res[2].value || [];
+    if (res[3].status === 'fulfilled') results.used    = res[3].value || [];
+  } catch(e) { console.warn('[sbSearchAll]', e); }
+  return results;
+}
+
+// ============================================================
+// Notifications (알림) — notifications 테이블
+// ============================================================
+
+async function sbGetNotifications(userId, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('notifications', 'select=id,user_id,type,title,body,link,is_read,created_at&user_id=eq.' + encodeURIComponent(userId) + '&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbMarkNotifRead(notifId) {
+  return sbPatch('notifications', 'id=eq.' + encodeURIComponent(notifId), { is_read: true });
+}
+
+async function sbMarkAllNotifsRead(userId) {
+  return sbPatch('notifications', 'user_id=eq.' + encodeURIComponent(userId) + '&is_read=eq.false', { is_read: true });
+}
+
+async function sbGetUnreadNotifCount(userId) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/notifications?user_id=eq.' + encodeURIComponent(userId) + '&is_read=eq.false&select=id', {
+    method: 'HEAD',
+    headers: sbHeaders({ 'Prefer': 'count=exact' }),
+  });
+  var count = res.headers.get('content-range');
+  if (count) {
+    var parts = count.split('/');
+    return parseInt(parts[1]) || 0;
+  }
+  return 0;
+}
+
+async function sbCreateNotification(notif) {
+  return sbPost('notifications', {
+    user_id:   notif.user_id,
+    type:      notif.type    || 'info',
+    title:     notif.title,
+    body:      notif.body    || '',
+    link:      notif.link    || '',
+    is_read:   false,
+  });
+}

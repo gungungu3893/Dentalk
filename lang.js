@@ -80,6 +80,9 @@ const LANG = {
     admin_user_pending_badge:'Pending',admin_user_active_badge:'Active',admin_user_blocked_badge:'Blocked',
     admin_custom_change_stage:'Change Stage',admin_pending_users_title:'⏳ Pending Approval',admin_all_users_title:'👥 All Members',
     admin_no_pending_users:'No pending approvals.',admin_loading:'Loading...',admin_load_fail:'Load failed',admin_no_users:'No members.',admin_error:'An error occurred.',
+    search_ph:'Search...',search_hint:'Enter a keyword to search',search_searching:'Searching...',search_no_results:'No results found.',search_error:'Search failed. Please try again.',
+    notif_title:'Notifications',notif_empty:'No notifications',notif_mark_all:'Mark all read',notif_login_required:'Please log in to view notifications.',notif_error:'Failed to load notifications.',
+    load_more_loading:'Loading more...',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'임상토론방',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',nav_login:'로그인',privacy_btn:'개인정보 처리방침',
@@ -161,6 +164,9 @@ const LANG = {
     admin_user_pending_badge:'승인대기',admin_user_active_badge:'활성',admin_user_blocked_badge:'차단됨',
     admin_custom_change_stage:'단계 변경',admin_pending_users_title:'⏳ 승인 대기 회원',admin_all_users_title:'👥 전체 회원',
     admin_no_pending_users:'승인 대기 회원이 없습니다.',admin_loading:'로딩 중...',admin_load_fail:'로드 실패',admin_no_users:'회원이 없습니다.',admin_error:'오류가 발생했습니다.',
+    search_ph:'검색...',search_hint:'검색어를 입력하세요',search_searching:'검색 중...',search_no_results:'검색 결과가 없습니다.',search_error:'검색에 실패했습니다. 다시 시도해주세요.',
+    notif_title:'알림',notif_empty:'알림이 없습니다',notif_mark_all:'모두 읽음',notif_login_required:'알림을 보려면 로그인하세요.',notif_error:'알림을 불러오지 못했습니다.',
+    load_more_loading:'더 불러오는 중...',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'临床讨论',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',nav_login:'登录',privacy_btn:'隐私政策',
@@ -242,6 +248,9 @@ const LANG = {
     admin_user_pending_badge:'待审核',admin_user_active_badge:'活跃',admin_user_blocked_badge:'已封禁',
     admin_custom_change_stage:'更改阶段',admin_pending_users_title:'⏳ 待审核会员',admin_all_users_title:'👥 全部会员',
     admin_no_pending_users:'没有待审核的会员。',admin_loading:'加载中...',admin_load_fail:'加载失败',admin_no_users:'没有会员。',admin_error:'发生错误。',
+    search_ph:'搜索...',search_hint:'输入关键词搜索',search_searching:'搜索中...',search_no_results:'未找到结果。',search_error:'搜索失败，请重试。',
+    notif_title:'通知',notif_empty:'暂无通知',notif_mark_all:'全部已读',notif_login_required:'请登录查看通知。',notif_error:'加载通知失败。',
+    load_more_loading:'加载更多...',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'อะบัทเมนท์ CNC',nav_used:'ตลาดมือสอง',nav_forum:'ห้องสนทนา',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',nav_login:'เข้าสู่ระบบ',privacy_btn:'นโยบายความเป็นส่วนตัว',
@@ -325,6 +334,9 @@ const LANG = {
     admin_user_pending_badge:'รอการอนุมัติ',admin_user_active_badge:'ใช้งานอยู่',admin_user_blocked_badge:'ถูกบล็อก',
     admin_custom_change_stage:'เปลี่ยนขั้นตอน',admin_pending_users_title:'⏳ รอการอนุมัติ',admin_all_users_title:'👥 สมาชิกทั้งหมด',
     admin_no_pending_users:'ไม่มีสมาชิกที่รอการอนุมัติ',admin_loading:'กำลังโหลด...',admin_load_fail:'โหลดไม่สำเร็จ',admin_no_users:'ไม่มีสมาชิก',admin_error:'เกิดข้อผิดพลาด',
+    search_ph:'ค้นหา...',search_hint:'พิมพ์คำค้นหา',search_searching:'กำลังค้นหา...',search_no_results:'ไม่พบผลลัพธ์',search_error:'ค้นหาไม่สำเร็จ กรุณาลองใหม่',
+    notif_title:'การแจ้งเตือน',notif_empty:'ไม่มีการแจ้งเตือน',notif_mark_all:'อ่านทั้งหมด',notif_login_required:'กรุณาเข้าสู่ระบบเพื่อดูการแจ้งเตือน',notif_error:'โหลดการแจ้งเตือนไม่สำเร็จ',
+    load_more_loading:'กำลังโหลดเพิ่มเติม...',
   },
   vi: {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'THẢO LUẬN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',nav_login:'Đăng nhập',privacy_btn:'Chính sách bảo mật',
@@ -406,6 +418,9 @@ const LANG = {
     admin_user_pending_badge:'Đang chờ',admin_user_active_badge:'Đang hoạt động',admin_user_blocked_badge:'Đã chặn',
     admin_custom_change_stage:'Thay đổi giai đoạn',admin_pending_users_title:'⏳ Chờ phê duyệt',admin_all_users_title:'👥 Tất cả thành viên',
     admin_no_pending_users:'Không có thành viên chờ phê duyệt.',admin_loading:'Đang tải...',admin_load_fail:'Tải thất bại',admin_no_users:'Không có thành viên.',admin_error:'Đã xảy ra lỗi.',
+    search_ph:'Tìm kiếm...',search_hint:'Nhập từ khóa để tìm kiếm',search_searching:'Đang tìm kiếm...',search_no_results:'Không tìm thấy kết quả.',search_error:'Tìm kiếm thất bại. Vui lòng thử lại.',
+    notif_title:'Thông báo',notif_empty:'Không có thông báo',notif_mark_all:'Đánh dấu đã đọc',notif_login_required:'Vui lòng đăng nhập để xem thông báo.',notif_error:'Tải thông báo thất bại.',
+    load_more_loading:'Đang tải thêm...',
   },
   es: {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'DISCUSIÓN',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',nav_login:'Iniciar sesión',privacy_btn:'Política de privacidad',
@@ -487,6 +502,9 @@ const LANG = {
     admin_user_pending_badge:'Pendiente',admin_user_active_badge:'Activo',admin_user_blocked_badge:'Bloqueado',
     admin_custom_change_stage:'Cambiar etapa',admin_pending_users_title:'⏳ Pendiente de aprobación',admin_all_users_title:'👥 Todos los miembros',
     admin_no_pending_users:'No hay aprobaciones pendientes.',admin_loading:'Cargando...',admin_load_fail:'Error al cargar',admin_no_users:'No hay miembros.',admin_error:'Se produjo un error.',
+    search_ph:'Buscar...',search_hint:'Ingrese una palabra clave',search_searching:'Buscando...',search_no_results:'No se encontraron resultados.',search_error:'Error en la búsqueda. Inténtelo de nuevo.',
+    notif_title:'Notificaciones',notif_empty:'Sin notificaciones',notif_mark_all:'Marcar todo leído',notif_login_required:'Inicie sesión para ver las notificaciones.',notif_error:'Error al cargar notificaciones.',
+    load_more_loading:'Cargando más...',
   },
 };
 

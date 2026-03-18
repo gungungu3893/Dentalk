@@ -187,6 +187,40 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
+
+<!-- ============================== 통합 검색 모달 ============================== -->
+<div id="searchModal" class="modal fixed inset-0 bg-black/75 backdrop-blur-sm z-[950] items-center justify-start p-0">
+  <div class="w-full max-w-lg mx-auto bg-white rounded-b-2xl shadow-2xl overflow-hidden" style="max-height:90vh">
+    <div class="bg-[#001d4a] px-4 py-3 flex items-center gap-3">
+      <span class="text-lg">🔍</span>
+      <input id="searchInput" type="text" data-i18n-ph="search_ph" placeholder="Search..." class="flex-1 bg-white/10 text-white placeholder-white/40 rounded-xl px-3 py-2 text-sm font-bold outline-none" oninput="debounceSearch()" autocomplete="off">
+      <button onclick="closeSearchModal()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
+    </div>
+    <div id="searchResults" class="overflow-y-auto p-4 space-y-4" style="max-height:calc(90vh - 56px)">
+      <p class="text-center text-slate-400 text-sm font-bold py-8" data-i18n="search_hint">Enter a keyword to search</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 알림 센터 패널 ============================== -->
+<div id="notifPanel" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[940] items-start justify-end p-0">
+  <div class="w-full max-w-md ml-auto bg-white shadow-2xl overflow-hidden h-full">
+    <div class="bg-[#001d4a] px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🔔</span>
+        <span class="text-white font-black text-sm" data-i18n="notif_title">Notifications</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="markAllNotifsRead()" class="text-[10px] font-bold text-blue-300 hover:text-white transition" data-i18n="notif_mark_all">Mark all read</button>
+        <button onclick="closeNotifPanel()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
+      </div>
+    </div>
+    <div id="notifList" class="overflow-y-auto p-3 space-y-2" style="max-height:calc(100vh - 56px)">
+      <p class="text-center text-slate-400 text-sm font-bold py-12" data-i18n="notif_empty">No notifications</p>
+    </div>
+  </div>
+</div>
+
 <!-- ============================== STL 3D 뷰어 모달 ============================== -->
 <div id="stlViewerModal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm z-[900] items-center justify-center p-4">
   <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col" style="max-height:88vh">
@@ -554,6 +588,13 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
       </div>
     </div>
+    <button onclick="openSearchModal()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0" title="Search">
+      <span class="text-lg leading-none">🔍</span>
+    </button>
+    <button onclick="openNotifPanel()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0" title="Notifications">
+      <span class="text-lg leading-none">🔔</span>
+      <span id="notifBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden leading-none">0</span>
+    </button>
     <button id="installBtn" onclick="triggerInstall()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0" title="앱 설치">
       <span class="text-lg leading-none">⬇️</span>
       <span class="absolute -top-0.5 -right-0.5 bg-blue-400 text-white text-[7px] font-black px-1 py-0.5 rounded-full leading-none">APP</span>
@@ -1058,6 +1099,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
       <div id="usedList" class="grid grid-cols-5 gap-2"></div>
+      <div id="usedLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
@@ -1130,6 +1172,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <!-- 게시글 목록 (카드형) -->
       <div id="postList" class="space-y-3"></div>
+      <div id="forumLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
     </div>
     <!-- ==================== USED DETAIL PAGE ==================== -->
     <div id="page-used-detail" class="page">
@@ -1207,6 +1250,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="jobRegionBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
       <!-- 목록 -->
       <div id="jobsList" class="flex flex-col gap-2.5"></div>
+      <div id="jobsLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
     </div>
     <!-- ==================== JOB DETAIL ==================== -->
     <div id="page-job-detail" class="page p-5">
@@ -1260,6 +1304,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="webzineCatBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
       <!-- 기사 목록 -->
       <div id="webzineList" class="grid grid-cols-2 gap-3"></div>
+      <div id="webzineLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
     </div>
     <!-- ==================== WEBZINE DETAIL ==================== -->
     <div id="page-webzine-detail" class="page">
