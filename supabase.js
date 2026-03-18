@@ -99,6 +99,7 @@ async function authLogin(nickname, password) {
       address:       u.address        || '',
       role:          u.role           || 'user',
       leaderRegion:  u.leader_region  || '',
+      leaderTitle:   u.leader_title   || '',
     };
   } catch(e) {
     console.error('[authLogin]', e);
@@ -111,12 +112,13 @@ async function authUpdateProfile(licenseNumber, fields) {
 }
 
 async function authGetAllUsers() {
-  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region&order=clinic_name.asc');
+  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region,leader_title&order=clinic_name.asc');
 }
 
-async function authSetUserRole(nickname, role, leaderRegion) {
+async function authSetUserRole(nickname, role, leaderRegion, leaderTitle) {
   var body = { role: role };
   if (leaderRegion !== undefined) body.leader_region = leaderRegion;
+  if (leaderTitle !== undefined) body.leader_title = leaderTitle;
   return sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), body);
 }
 

@@ -525,6 +525,10 @@ create index if not exists idx_events_rsvp_user_id  on public.events_rsvp(user_i
 alter table public.licenses
   add column if not exists leader_region text;
 
+-- licenses: leader_title 컬럼 추가 (리더 직책: president, vice_president, secretary, director, auditor)
+alter table public.licenses
+  add column if not exists leader_title text;
+
 -- forum_posts: is_pinned 컬럼 추가 (지역 리더가 글 고정)
 alter table public.forum_posts
   add column if not exists is_pinned boolean not null default false;

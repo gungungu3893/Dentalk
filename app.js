@@ -229,6 +229,24 @@ var FORUM_REGIONS = [
     { key: 'uthai_thani',         label: 'Uthai Thani' },
   ]},
 ];
+// ── 리더 직책 (피라미드 계층) ──────────────────────────────────
+// 전국(all): 5명 — 회장, 부회장, 총무, 이사, 감사
+// 지역(region): 2명 — 회장, 부회장
+// 주(province): 1명 — 대표
+var LEADER_TITLES_NATIONAL = [
+  { key: 'president',      labelKey: 'title_president' },
+  { key: 'vice_president', labelKey: 'title_vice_president' },
+  { key: 'secretary',      labelKey: 'title_secretary' },
+  { key: 'director',       labelKey: 'title_director' },
+  { key: 'auditor',        labelKey: 'title_auditor' },
+];
+var LEADER_TITLES_REGIONAL = [
+  { key: 'president',      labelKey: 'title_president' },
+  { key: 'vice_president', labelKey: 'title_vice_president' },
+];
+var LEADER_TITLES_PROVINCE = [
+  { key: 'representative', labelKey: 'title_representative' },
+];
 // 갤러리 슬라이더 상태
 var forumGalleryImages = [];
 var forumGalleryIndex  = 0;
@@ -493,6 +511,7 @@ async function handleLogin() {
     doctorName: result.doctorName || '',
     role:          result.role          || 'user',
     leaderRegion:  result.leaderRegion  || '',
+    leaderTitle:   result.leaderTitle   || '',
   };
   // Supabase에서 받은 최신 데이터를 localStorage에도 동기화
   var sync = { nickname:currentUser.nickname, email:currentUser.email, phone:currentUser.phone, address:currentUser.address, clinicName:currentUser.clinicName, doctorName:currentUser.doctorName };
@@ -3182,6 +3201,7 @@ async function renderAdminUsers() {
   list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_loading') + '</p>';
   try {
     var users = await authGetAllUsers();
+    _allUsersCache = users; // 직책 점유 확인용 캐시
     if (!users.length) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_no_users') + '</p>'; return; }
 
     var pendingUsers = users.filter(function(u){ return u.is_active === false || u.is_active === null || u.is_active === undefined; });
@@ -3214,19 +3234,20 @@ async function renderAdminUsers() {
           (isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-500') + '">' +
           (isActive ? t('admin_user_active_badge') : t('admin_user_blocked_badge')) + '</span>';
       }
-      // 리더 배지 + 지역 표시 (계층형)
+      // 리더 배지 + 지역 + 직책 표시 (계층형)
       var leaderBadge = '';
       if (isLeaderU) {
         var lrLabel = _resolveLeaderLabel(u.leader_region);
-        leaderBadge = '<span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[8px] font-black bg-purple-100 text-purple-700">⭐ ' + t('leader_badge') + ' — ' + lrLabel + '</span>';
+        var titleLabel = u.leader_title ? t(_titleKeyToLabelKey(u.leader_title)) : '';
+        leaderBadge = '<span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[8px] font-black bg-purple-100 text-purple-700">⭐ ' + lrLabel + (titleLabel ? ' · ' + titleLabel : '') + '</span>';
       }
       // 리더 지정/해임 — 피라미드 계층 (관리자 전용, admin/pending 제외)
       var leaderCtrl = '';
       if (!isAdminU && !isPending && isActive) {
-        // 1단계: 레벨 선택 (전국 / 지역 / 주)
         var curLevel = '';
         var curRegion = '';
         var curProvince = '';
+        var curTitle = (isLeaderU && u.leader_title) ? u.leader_title : '';
         if (isLeaderU && u.leader_region) {
           if (u.leader_region === 'all') { curLevel = 'all'; }
           else if (u.leader_region.indexOf(':') !== -1) {
@@ -3238,13 +3259,11 @@ async function renderAdminUsers() {
           '<option value="all"' + (curLevel==='all'?' selected':'') + '>🇹🇭 ' + t('leader_level_all') + '</option>' +
           '<option value="region"' + (curLevel==='region'?' selected':'') + '>📍 ' + t('leader_level_region') + '</option>' +
           '<option value="province"' + (curLevel==='province'?' selected':'') + '>🏘 ' + t('leader_level_province') + '</option>';
-        // 2단계: 지역 선택
         var regionOpts = '<option value="">' + t('leader_select_region') + '</option>';
         FORUM_REGIONS.forEach(function(r) {
           if (r.key === 'all') return;
           regionOpts += '<option value="' + r.key + '"' + (curRegion===r.key?' selected':'') + '>' + r.icon + ' ' + t(r.labelKey) + '</option>';
         });
-        // 3단계: 주 선택 (동적으로 변경)
         var provinceOpts = '<option value="">' + t('leader_select_province') + '</option>';
         if (curRegion) {
           var rCfg = FORUM_REGIONS.find(function(r){ return r.key === curRegion; });
@@ -3252,6 +3271,13 @@ async function renderAdminUsers() {
             provinceOpts += '<option value="' + rCfg.key + ':' + p.key + '"' + (curProvince===(rCfg.key+':'+p.key)?' selected':'') + '>' + p.label + '</option>';
           });
         }
+        // 직책 드롭다운 — 레벨에 따라 다른 직책 표시
+        var titleList = curLevel === 'all' ? LEADER_TITLES_NATIONAL : curLevel === 'region' ? LEADER_TITLES_REGIONAL : curLevel === 'province' ? LEADER_TITLES_PROVINCE : [];
+        var titleOpts = '<option value="">' + t('leader_select_title') + '</option>';
+        titleList.forEach(function(ti) {
+          var occupied = _isTitleOccupied(u.leader_region || '', ti.key, u.nickname);
+          titleOpts += '<option value="' + ti.key + '"' + (curTitle===ti.key?' selected':'') + (occupied?' disabled':'') + '>' + t(ti.labelKey) + (occupied ? ' ✓' : '') + '</option>';
+        });
         leaderCtrl = '<div class="mt-2 space-y-1.5">' +
           (isLeaderU
             ? '<button onclick="adminRemoveLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-red-50 text-red-500 active:scale-95 transition">' + t('leader_remove') + '</button>'
@@ -3259,7 +3285,8 @@ async function renderAdminUsers() {
           '<div class="flex items-center gap-1.5 flex-wrap">' +
             '<select id="leader-level-' + safeNick + '" onchange="adminLeaderLevelChanged(\'' + safeNick + '\')" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold">' + levelOpts + '</select>' +
             '<select id="leader-region-' + safeNick + '" onchange="adminLeaderRegionChanged(\'' + safeNick + '\')" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold" style="' + (curLevel==='region'||curLevel==='province'?'':'display:none') + '">' + regionOpts + '</select>' +
-            '<select id="leader-province-' + safeNick + '" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold" style="' + (curLevel==='province'?'':'display:none') + '">' + provinceOpts + '</select>' +
+            '<select id="leader-province-' + safeNick + '" onchange="adminLeaderProvinceChanged(\'' + safeNick + '\')" class="border border-slate-200 rounded-lg px-2 py-1 text-[9px] font-bold" style="' + (curLevel==='province'?'':'display:none') + '">' + provinceOpts + '</select>' +
+            '<select id="leader-title-' + safeNick + '" class="border border-purple-200 rounded-lg px-2 py-1 text-[9px] font-bold text-purple-700" style="' + (curLevel?'':'display:none') + '">' + titleOpts + '</select>' +
             '<button onclick="adminSetLeader(\'' + safeNick + '\')" class="px-2 py-1 rounded-lg font-black text-[9px] bg-purple-50 text-purple-700 active:scale-95 transition">⭐ ' + t('leader_assign') + '</button>' +
           '</div>' +
         '</div>';
@@ -3325,8 +3352,41 @@ async function adminToggleUser(nickname, currentActive) {
     else alert('업데이트 실패');
   } catch(e) { alert('오류: ' + e.message); }
 }
-// ── 지역 리더 관리 (피라미드 계층형) ──────────────────────────
-// 레벨 선택 변경 시: 지역/주 드롭다운 표시/숨김
+// ── 지역 리더 관리 (피라미드 계층형 + 직책) ─────────────────
+// 직책 key → labelKey 변환
+function _titleKeyToLabelKey(key) {
+  var map = { president:'title_president', vice_president:'title_vice_president', secretary:'title_secretary', director:'title_director', auditor:'title_auditor', representative:'title_representative' };
+  return map[key] || key;
+}
+// 특정 region+title 조합이 이미 다른 사용자에게 배정되었는지 확인
+var _allUsersCache = [];
+function _isTitleOccupied(region, titleKey, excludeNickname) {
+  return _allUsersCache.some(function(u) {
+    return u.role === 'region_leader' && u.leader_region === region && u.leader_title === titleKey && u.nickname !== excludeNickname;
+  });
+}
+// 레벨에 맞는 직책 목록 반환
+function _getTitlesForLevel(lv) {
+  if (lv === 'all') return LEADER_TITLES_NATIONAL;
+  if (lv === 'region') return LEADER_TITLES_REGIONAL;
+  if (lv === 'province') return LEADER_TITLES_PROVINCE;
+  return [];
+}
+// 직책 드롭다운 HTML 갱신
+function _refreshTitleOpts(nickname, region, lv) {
+  var esc = nickname.replace(/'/g,"\\'");
+  var titleSel = document.getElementById('leader-title-' + esc);
+  if (!titleSel) return;
+  titleSel.style.display = lv ? '' : 'none';
+  var titles = _getTitlesForLevel(lv);
+  var html = '<option value="">' + t('leader_select_title') + '</option>';
+  titles.forEach(function(ti) {
+    var occupied = _isTitleOccupied(region || '', ti.key, nickname);
+    html += '<option value="' + ti.key + '"' + (occupied ? ' disabled' : '') + '>' + t(ti.labelKey) + (occupied ? ' ✓' : '') + '</option>';
+  });
+  titleSel.innerHTML = html;
+}
+// 레벨 선택 변경 시
 function adminLeaderLevelChanged(nickname) {
   var esc = nickname.replace(/'/g,"\\'");
   var levelSel = document.getElementById('leader-level-' + esc);
@@ -3338,10 +3398,13 @@ function adminLeaderLevelChanged(nickname) {
   provinceSel.style.display = (lv === 'province') ? '' : 'none';
   if (lv === 'all' || lv === '') { regionSel.value = ''; provinceSel.value = ''; }
   if (lv === 'region') provinceSel.value = '';
+  var region = lv === 'all' ? 'all' : regionSel.value || '';
+  _refreshTitleOpts(nickname, region, lv);
 }
-// 지역 선택 변경 시: 해당 지역의 주 옵션 업데이트
+// 지역 선택 변경 시
 function adminLeaderRegionChanged(nickname) {
   var esc = nickname.replace(/'/g,"\\'");
+  var levelSel = document.getElementById('leader-level-' + esc);
   var regionSel = document.getElementById('leader-region-' + esc);
   var provinceSel = document.getElementById('leader-province-' + esc);
   if (!regionSel || !provinceSel) return;
@@ -3352,13 +3415,27 @@ function adminLeaderRegionChanged(nickname) {
     html += '<option value="' + rCfg.key + ':' + p.key + '">' + p.label + '</option>';
   });
   provinceSel.innerHTML = html;
+  // 직책 드롭다운도 갱신 (지역 변경 시 해당 지역의 점유 상태 반영)
+  var lv = levelSel ? levelSel.value : '';
+  var region = lv === 'province' ? '' : regionKey; // province 레벨이면 주 선택 후 갱신
+  if (lv === 'region') _refreshTitleOpts(nickname, regionKey, lv);
 }
-// 리더 지정 — 계층에 따라 leader_region 값 결정
+// 주 선택 변경 시 직책 갱신 (province 레벨)
+function adminLeaderProvinceChanged(nickname) {
+  var esc = nickname.replace(/'/g,"\\'");
+  var provinceSel = document.getElementById('leader-province-' + esc);
+  if (!provinceSel) return;
+  _refreshTitleOpts(nickname, provinceSel.value || '', 'province');
+}
+// 리더 지정
 async function adminSetLeader(nickname) {
   var esc = nickname.replace(/'/g,"\\'");
   var levelSel = document.getElementById('leader-level-' + esc);
+  var titleSel = document.getElementById('leader-title-' + esc);
   if (!levelSel || !levelSel.value) { alert(t('leader_select_level')); return; }
+  if (!titleSel || !titleSel.value) { alert(t('leader_select_title')); return; }
   var lv = levelSel.value;
+  var title = titleSel.value;
   var region = '';
   if (lv === 'all') {
     region = 'all';
@@ -3371,12 +3448,17 @@ async function adminSetLeader(nickname) {
     var pSel = document.getElementById('leader-province-' + esc);
     if (!rSel2 || !rSel2.value) { alert(t('leader_select_region')); return; }
     if (!pSel || !pSel.value) { alert(t('leader_select_province')); return; }
-    region = pSel.value; // 'region:province' 형태
+    region = pSel.value;
+  }
+  // 점유 확인
+  if (_isTitleOccupied(region, title, nickname)) {
+    alert(t('leader_title_occupied')); return;
   }
   var lbl = _resolveLeaderLabel(region);
-  if (!confirm(nickname + ' → ⭐ ' + t('leader_badge') + ' (' + lbl + ')?')) return;
+  var titleLabel = t(_titleKeyToLabelKey(title));
+  if (!confirm(nickname + ' → ⭐ ' + lbl + ' · ' + titleLabel + '?')) return;
   try {
-    var res = await authSetUserRole(nickname, 'region_leader', region);
+    var res = await authSetUserRole(nickname, 'region_leader', region, title);
     if (res.ok) { await _loadLeaderCache(); renderAdminUsers(); }
     else alert(t('admin_error'));
   } catch(e) { alert(t('admin_error') + ' ' + e.message); }
@@ -3384,7 +3466,7 @@ async function adminSetLeader(nickname) {
 async function adminRemoveLeader(nickname) {
   if (!confirm(nickname + ': ' + t('leader_remove') + '?')) return;
   try {
-    var res = await authSetUserRole(nickname, 'user', null);
+    var res = await authSetUserRole(nickname, 'user', null, null);
     if (res.ok) { await _loadLeaderCache(); renderAdminUsers(); }
     else alert(t('admin_error'));
   } catch(e) { alert(t('admin_error') + ' ' + e.message); }
@@ -3614,7 +3696,8 @@ function openForumDetail(id) {
   document.getElementById('fdp-body').textContent   = post.body;
   // 작성자 + 리더 배지
   var authorEl = document.getElementById('fdp-author');
-  var authorBadge = _isAuthorLeader(post.author) ? ' ⭐ ' + t('leader_badge') : '';
+  var _li = _getLeaderInfo(post.author);
+  var authorBadge = _li ? ' ⭐ ' + _resolveLeaderLabel(_li.region) + (_li.title ? ' · ' + t(_titleKeyToLabelKey(_li.title)) : '') : '';
   authorEl.innerHTML = '<span class="font-black text-slate-500">' + post.author + '</span>' +
     (authorBadge ? '<span class="text-purple-600 font-black">' + authorBadge + '</span>' : '') +
     ' · ' + (post.date||'');
@@ -3690,7 +3773,7 @@ async function _loadLeaderCache() {
     var users = await authGetAllUsers();
     _leaderCache = {};
     users.forEach(function(u) {
-      if (u.role === 'region_leader') _leaderCache[u.nickname] = u.leader_region;
+      if (u.role === 'region_leader') _leaderCache[u.nickname] = { region: u.leader_region, title: u.leader_title || '' };
       if (u.role === 'admin') _leaderCache[u.nickname] = '__admin__';
     });
   } catch(e) {}
@@ -3700,6 +3783,11 @@ function _isAuthorLeader(nickname) {
 }
 function _isAuthorAdmin(nickname) {
   return _leaderCache[nickname] === '__admin__';
+}
+function _getLeaderInfo(nickname) {
+  var v = _leaderCache[nickname];
+  if (!v || v === '__admin__') return null;
+  return v; // { region, title }
 }
 async function leaderTogglePin(postId) {
   var post = posts.find(function(p){ return p.id === postId; });
@@ -3831,9 +3919,10 @@ function renderForum() {
     // 고정 배지
     var pinnedBadge = p.is_pinned
       ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">📌 ' + t('forum_pinned') + '</span>' : '';
-    // 리더 배지 (작성자가 리더인 경우)
-    var authorLeaderBadge = _isAuthorLeader(p.author)
-      ? '<span class="text-[9px] font-black text-purple-600">⭐</span>' : '';
+    // 리더 배지 (작성자가 리더인 경우 — 직책 포함)
+    var _pli = _getLeaderInfo(p.author);
+    var authorLeaderBadge = _pli
+      ? '<span class="text-[9px] font-black text-purple-600" title="' + _resolveLeaderLabel(_pli.region) + (_pli.title ? ' · ' + t(_titleKeyToLabelKey(_pli.title)) : '') + '">⭐</span>' : '';
     // 지역/주 뱃지
     var regionBadge = '';
     if (p.region && p.region !== 'all') {
