@@ -55,7 +55,7 @@ function buildWizToothChart() {
   var lower = [47,46,45,44,43,42,41,31,32,33,34,35,36,37];
   function btn(num) {
     return '<button type="button" id="wiz-tooth-' + num + '" onclick="wizToggleTooth(' + num + ')" ' +
-      'class="w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none">' + num + '</button>';
+      'class="wiz-tooth-btn w-8 h-8 rounded-lg text-[11px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none">' + num + '</button>';
   }
   var html = '<div class="bg-slate-50 rounded-2xl p-3 border border-slate-100">';
   html += '<p class="text-center text-[8px] font-black text-blue-400 uppercase tracking-widest mb-2">' + t('upper_jaw') + '</p>';
@@ -75,10 +75,10 @@ function wizToggleTooth(num) {
   var btn = document.getElementById('wiz-tooth-' + num);
   if (wizardData.teethSet.has(num)) {
     wizardData.teethSet.delete(num);
-    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none';
+    if (btn) btn.className = 'wiz-tooth-btn w-8 h-8 rounded-lg text-[11px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none';
   } else {
     wizardData.teethSet.add(num);
-    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-blue-500 bg-blue-500 text-white transition active:scale-90 leading-none';
+    if (btn) btn.className = 'wiz-tooth-btn w-8 h-8 rounded-lg text-[11px] font-black border-2 border-blue-500 bg-blue-500 text-white transition active:scale-90 leading-none';
   }
   var countEl = document.getElementById('wizTeethCount');
   if (countEl) {
@@ -431,10 +431,10 @@ function toggleTooth(caseId, toothNum) {
   var btn = document.getElementById('tooth-' + caseId + '-' + toothNum);
   if (caseTeeth[caseId].has(toothNum)) {
     caseTeeth[caseId].delete(toothNum);
-    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none';
+    if (btn) btn.className = 'wiz-tooth-btn w-8 h-8 rounded-lg text-[11px] font-black border-2 border-slate-200 bg-white text-slate-500 transition active:scale-90 leading-none';
   } else {
     caseTeeth[caseId].add(toothNum);
-    if (btn) btn.className = 'w-8 h-8 rounded-lg text-[9px] font-black border-2 border-blue-500 bg-blue-500 text-white transition active:scale-90 leading-none';
+    if (btn) btn.className = 'wiz-tooth-btn w-8 h-8 rounded-lg text-[11px] font-black border-2 border-blue-500 bg-blue-500 text-white transition active:scale-90 leading-none';
   }
   renderToothDetails(caseId);
 }

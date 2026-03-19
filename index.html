@@ -215,6 +215,221 @@ input[type=number] { -moz-appearance:textfield; }
 #adminPanel { display:none !important; }
 body.is-admin #adminPanel { display:block !important; }
 body.is-admin #factoryPromoHeader { display:none !important; }
+
+/* ============================================================
+   MOBILE RESPONSIVE — 375px ~ 480px
+   ============================================================ */
+@media (max-width: 480px) {
+  /* ── 1) HEADER: compact buttons, prevent overflow ── */
+  header.text-white {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  header .text-lg.leading-none { font-size: 15px; }
+  header button[class*="w-9"] {
+    width: 36px; height: 36px;
+    min-width: 44px; min-height: 44px;
+    padding: 4px;
+  }
+  header #headerLoginBtn,
+  header #headerNickBadge,
+  header #headerLogoutBtn {
+    padding: 6px 8px;
+    min-height: 36px;
+  }
+  /* Logo size on small screens */
+  header .flex-1 > div[onclick] { font-size: 19px !important; }
+  header .flex-1 > div[onclick] span[style*="font-size:8px"] {
+    display: none;
+  }
+
+  /* ── 2) NAV TABS: horizontal scroll, touch-friendly ── */
+  #navTabBar .nav-tab {
+    min-width: 48px;
+    min-height: 44px;
+    padding: 6px 10px;
+  }
+  #navTabBar .nav-tab span.text-base { font-size: 16px; }
+  #navTabBar .nav-tab span[class*="text-\\[9px\\]"],
+  #navTabBar .nav-tab span.text-\[9px\] { font-size: 10px; }
+
+  /* ── 3) HERO BANNER: fit text, larger CTA ── */
+  #page-home .shrink-0.w-full[style*="padding"] {
+    padding: 24px 16px 44px !important;
+  }
+  #page-home h1[style*="font-size:27px"] {
+    font-size: 22px !important;
+    letter-spacing: -0.5px !important;
+  }
+  #page-home .shrink-0.w-full button[style*="touch-action"] {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  /* ── 4) CATEGORY GRID: ensure 2-col ── */
+  #homeCategories { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+  /* ── 5) SHOP PRODUCT DETAIL: spec table scroll, bigger qty btns ── */
+  #shopProductTable { margin: 0 -12px; padding: 0 12px; }
+  #shopProductTable .qty-input {
+    width: 40px !important;
+    height: 36px !important;
+    font-size: 14px !important;
+  }
+  /* Quantity +/- buttons – enlarge for touch */
+  #shopProductTable button[onclick*="stepQ"],
+  #orderTable button[onclick*="stepQ"] {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 16px !important;
+  }
+
+  /* ── 6) CUSTOM WIZARD: tooth buttons, step bar ── */
+  /* Tooth diagram buttons */
+  #wizToothChart button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 11px !important;
+    border-radius: 10px;
+  }
+  /* Step bar */
+  #wizStepBar > div { gap: 2px; }
+  #wizStepBar .flex-col { min-width: 1.8rem !important; }
+  #wizStepBar .flex-col > div:first-child {
+    width: 28px !important; height: 28px !important;
+  }
+
+  /* ── 7) FORUM: gallery images full-width ── */
+  #fdp-gallery .overflow-hidden { height: 200px; }
+  #fdp-galleryTrack img { width: 100%; height: 100%; object-fit: cover; }
+  /* Gallery nav arrows */
+  #fdp-galleryPrev, #fdp-galleryNext {
+    width: 44px !important; height: 44px !important;
+    font-size: 20px;
+  }
+
+  /* ── 8) FLOATING CART BAR: safe area + no overlap ── */
+  #floatingCartBar {
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  #floatingCartBar > div { padding-bottom: 12px; }
+
+  /* ── 9) MODALS: full-width, scrollable, no overflow ── */
+  .modal > div {
+    max-width: calc(100vw - 24px) !important;
+    max-height: 92vh !important;
+  }
+  /* Bottom-sheet modals */
+  .modal[class*="items-end"] > div {
+    max-width: 100% !important;
+    max-height: 90vh !important;
+  }
+  /* Login/Register modal inner scroll */
+  #loginModal > div,
+  #registerModal > div,
+  #cartModal > div,
+  #addressModal > div,
+  #profileEditModal > div,
+  #composeModal > div {
+    max-height: 90vh !important;
+    overflow-y: auto;
+  }
+
+  /* ── 10) FONT SIZES: minimum legible sizes ── */
+  /* Upgrade very small fonts */
+  .text-\[8px\] { font-size: 10px !important; }
+  .text-\[9px\] { font-size: 11px !important; }
+  .text-\[10px\] { font-size: 11px !important; }
+
+  /* ── 11) TOUCH TARGETS: min 44px tap area ── */
+  /* Generic small buttons that need bigger tap areas */
+  button, a[role="button"], [onclick] {
+    min-height: 32px;
+  }
+  /* Navigation dropdown items */
+  .nav-drop-item {
+    padding: 12px 14px !important;
+    min-height: 44px;
+  }
+
+  /* Side menu buttons */
+  .menu-btn {
+    min-height: 48px;
+    padding: 12px 16px !important;
+  }
+
+  /* Wizard nav buttons */
+  #wizNav button {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  /* Shade grid buttons */
+  #wizShadeGrid button {
+    min-height: 44px;
+  }
+
+  /* Brand grid buttons */
+  #wizBrandGrid button {
+    min-height: 48px;
+    font-size: 13px !important;
+  }
+
+  /* Review stars bigger touch target */
+  .review-star { font-size: 28px !important; padding: 4px; }
+
+  /* Forum region/province bar buttons */
+  #forumRegionBar button,
+  #forumProvinceBar button,
+  #jobTypeBar button,
+  #jobRegionBar button {
+    min-height: 36px;
+    padding: 8px 12px;
+  }
+
+  /* Used market grid: 2 cols instead of 5 on mobile */
+  #usedList { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+
+  /* Webzine grid: 2 cols on mobile */
+  #homeWebzinePreview { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Comment input row */
+  #commentInput { min-height: 44px; }
+  #commentInput + button { min-height: 44px; }
+
+  /* Language selector grid */
+  .grid-cols-3 button[onclick*="selectLang"] {
+    min-height: 64px;
+    font-size: 12px;
+  }
+
+  /* Settings profile edit button */
+  button[onclick*="toggleProfileEdit"] { min-height: 44px; }
+
+  /* Admin summary cards */
+  #adminSummaryCards { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Ultra-small screens (320-374px) */
+@media (max-width: 374px) {
+  header .flex-1 > div[onclick] { font-size: 17px !important; }
+  #homeCategories { grid-template-columns: 1fr; }
+  #usedList { grid-template-columns: 1fr !important; }
+  #wizToothChart button {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 10px !important;
+  }
+  #wizToothChart .flex { gap: 2px !important; }
+}
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -1569,18 +1784,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=10" defer></script>
-<script src="lang.js?v=10" defer></script>
-<script src="auth.js?v=10" defer></script>
-<script src="shop.js?v=10" defer></script>
-<script src="custom.js?v=10" defer></script>
-<script src="forum.js?v=10" defer></script>
-<script src="jobs.js?v=10" defer></script>
-<script src="webzine.js?v=10" defer></script>
-<script src="events.js?v=10" defer></script>
-<script src="ads.js?v=10" defer></script>
-<script src="admin.js?v=10" defer></script>
-<script src="app.js?v=10" defer></script>
+<script src="supabase.js?v=11" defer></script>
+<script src="lang.js?v=11" defer></script>
+<script src="auth.js?v=11" defer></script>
+<script src="shop.js?v=11" defer></script>
+<script src="custom.js?v=11" defer></script>
+<script src="forum.js?v=11" defer></script>
+<script src="jobs.js?v=11" defer></script>
+<script src="webzine.js?v=11" defer></script>
+<script src="events.js?v=11" defer></script>
+<script src="ads.js?v=11" defer></script>
+<script src="admin.js?v=11" defer></script>
+<script src="app.js?v=11" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
