@@ -1493,9 +1493,4 @@ window.addEventListener('DOMContentLoaded', function() {
   initHomeBanner();
   // Supabase에서 공개 데이터 비동기 로드
   initSupabasePublicData();
-  // PWA standalone 모드 감지 → 네비게이션 버튼 표시
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-    var pwaNav = document.getElementById('pwaNavBar');
-    if (pwaNav) pwaNav.classList.remove('hidden');
-  }
 });
