@@ -439,37 +439,33 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 }
 
 /* ============================================================
-   DESKTOP 2-COLUMN LAYOUT — ≥1024px
+   DESKTOP 2-COLUMN LAYOUT — ≥1024px (full-width style)
    ============================================================ */
 @media (min-width: 1024px) {
-  /* ── Header/Nav: full bg, inner content constrained ── */
+  /* ── Header/Nav: full width, no max-width constraint ── */
   .sticky.top-0.z-\[200\] header {
-    max-width: 1600px;
-    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
   }
   .sticky.top-0.z-\[200\] nav#navTabBar > div {
-    max-width: 1600px;
-    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
-  /* ── 2-column layout wrapper ── */
+  /* ── 2-column layout wrapper: full width ── */
   #desktopLayout {
     display: flex;
-    max-width: 1600px;
-    margin: 0 auto;
-    gap: 24px;
-    padding: 0 24px;
+    gap: 28px;
+    padding: 0 32px;
     align-items: flex-start;
   }
   #desktopMain {
-    flex: 3;
+    flex: 1;
     min-width: 0;
   }
   #desktopSidebar {
     display: block !important;
-    flex: 1;
-    max-width: 380px;
-    min-width: 260px;
+    width: 300px;
     flex-shrink: 0;
     position: sticky;
     top: 110px;
@@ -480,11 +476,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   #desktopSidebar::-webkit-scrollbar { display: none; }
   #desktopSidebar { scrollbar-width: none; }
 
-  /* ── Home hero: full width break-out ── */
+  /* ── Home hero: full width ── */
   #homeHeroFull {
     display: block !important;
-    max-width: 1600px;
-    margin: 0 auto;
   }
 
   /* ── Home grids: expand on desktop ── */
@@ -503,6 +497,26 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   /* ── Shop product detail: wider spec table ── */
   #shopProductTable { max-width: 100%; }
 
+  /* ── Post list / event cards: roomier ── */
+  #postList .bg-white,
+  #eventList .bg-white,
+  #jobsList .bg-white { padding: 20px; }
+
+  /* ── Admin summary: 3-col ── */
+  #adminSummaryCards { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* ── Extra-wide screens ≥1440px ── */
+@media (min-width: 1440px) {
+  #desktopSidebar { width: 320px; }
+  #desktopLayout { gap: 32px; padding: 0 40px; }
+  #homeCategories { grid-template-columns: repeat(4, 1fr) !important; }
+  #usedList { grid-template-columns: repeat(5, 1fr) !important; }
+  #webzineList { grid-template-columns: repeat(4, 1fr) !important; }
+  #homeWebzinePreview { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+@media (min-width: 1024px) {
   /* ── Sidebar cards ── */
   .sidebar-card {
     background: white;
@@ -1979,18 +1993,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=17" defer></script>
-<script src="lang.js?v=17" defer></script>
-<script src="auth.js?v=17" defer></script>
-<script src="shop.js?v=17" defer></script>
-<script src="custom.js?v=17" defer></script>
-<script src="forum.js?v=17" defer></script>
-<script src="jobs.js?v=17" defer></script>
-<script src="webzine.js?v=17" defer></script>
-<script src="events.js?v=17" defer></script>
-<script src="ads.js?v=17" defer></script>
-<script src="admin.js?v=17" defer></script>
-<script src="app.js?v=17" defer></script>
+<script src="supabase.js?v=18" defer></script>
+<script src="lang.js?v=18" defer></script>
+<script src="auth.js?v=18" defer></script>
+<script src="shop.js?v=18" defer></script>
+<script src="custom.js?v=18" defer></script>
+<script src="forum.js?v=18" defer></script>
+<script src="jobs.js?v=18" defer></script>
+<script src="webzine.js?v=18" defer></script>
+<script src="events.js?v=18" defer></script>
+<script src="ads.js?v=18" defer></script>
+<script src="admin.js?v=18" defer></script>
+<script src="app.js?v=18" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
