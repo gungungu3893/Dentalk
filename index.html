@@ -217,6 +217,24 @@ body.is-admin #adminPanel { display:block !important; }
 body.is-admin #factoryPromoHeader { display:none !important; }
 
 /* ============================================================
+   MOBILE HEADER — ≤768px: nav tabs text hidden, icon only
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Nav tabs: show icon only, hide text label */
+  #navTabBar .nav-tab span[data-i18n] { display: none; }
+  #navTabBar .nav-tab {
+    min-width: 40px;
+    padding: 8px 6px;
+    gap: 0;
+  }
+  #navTabBar .nav-tab span.text-base { font-size: 18px; }
+  /* Header: hide BIOTEM subtitle */
+  header .flex-1 > div[onclick] span[style*="font-size:8px"] { display: none; }
+  /* Logo compact */
+  header .flex-1 > div[onclick] { font-size: 20px !important; }
+}
+
+/* ============================================================
    MOBILE RESPONSIVE — 375px ~ 480px
    ============================================================ */
 @media (max-width: 480px) {
@@ -804,6 +822,14 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 </div>
 <!-- ============================== 메인 앱 ============================== -->
 <div id="mainApp" class="min-h-screen flex flex-col">
+  <!-- PWA standalone 네비게이션 바 (브라우저에서는 숨김) -->
+  <div id="pwaNavBar" class="hidden sticky top-0 z-[210] flex items-center gap-1 px-2 py-1.5" style="background:#000d1f">
+    <button onclick="goBack()" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 text-white font-black text-sm active:bg-white/20 transition" data-i18n="pwa_back" title="Back">←</button>
+    <button onclick="location.reload()" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 text-white font-black text-sm active:bg-white/20 transition" data-i18n="pwa_refresh" title="Refresh">↻</button>
+    <button onclick="goPage('home')" class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 text-white font-black text-sm active:bg-white/20 transition" title="Home">🏠</button>
+    <div class="flex-1"></div>
+    <span class="text-[9px] text-white/30 font-bold">PWA</span>
+  </div>
   <!-- 헤더 + 네비 탭 바 (sticky wrapper) -->
   <div class="sticky top-0 z-[200] shadow-lg">
   <!-- 헤더 -->
@@ -926,6 +952,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <button onclick="goPage('events')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span data-i18n="nav_events">EVENTS</span></button>
 
       <button onclick="goPage('settings')" class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><span>⚙️</span><span data-i18n="nav_settings">SETTINGS</span></button>
+      <div class="mt-2 pt-2 border-t border-white/10">
+        <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener" class="w-full text-left px-4 py-3.5 rounded-2xl font-black text-sm flex items-center gap-3 active:opacity-80 transition" style="background:#06C755;color:white">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 shrink-0" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          <span data-i18n="line_add_friend">Add LINE Friend</span>
+        </a>
+      </div>
     </nav>
     <div class="p-4 border-t border-white/10">
       <div id="sideLoginArea">
@@ -1054,6 +1086,24 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <button onclick="goPage('webzine')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_events_more">View All ›</button>
         </div>
         <div id="homeWebzinePreview" class="grid grid-cols-3 gap-2"></div>
+      </div>
+
+      <!-- ─── LINE FRIEND BANNER ───────────────────────────────── -->
+      <div class="px-4 pt-5 pb-2">
+        <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
+          class="block rounded-2xl p-4 shadow-sm active:scale-[.98] transition"
+          style="background:linear-gradient(135deg,#06C755 0%,#04a648 100%)">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" class="w-8 h-8" fill="#06C755"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-black text-white text-sm" data-i18n="line_add_friend">Add LINE Friend</p>
+              <p class="text-white/70 text-[10px] font-bold mt-0.5" data-i18n="line_add_desc">Get order updates & support</p>
+            </div>
+            <span class="text-white/60 text-lg font-black shrink-0">›</span>
+          </div>
+        </a>
       </div>
 
       <!-- ─── FOOTER LINKS ──────────────────────────────────────── -->
@@ -1760,6 +1810,35 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <div id="settingsMyUsed" class="grid grid-cols-3 gap-2"></div>
       </div>
+      <!-- LINE 친구 추가 버튼 -->
+      <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
+        class="block rounded-2xl p-4 shadow-sm active:scale-[.98] transition"
+        style="background:#06C755">
+        <div class="flex items-center gap-3">
+          <svg viewBox="0 0 24 24" class="w-8 h-8 shrink-0" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          <div>
+            <p class="font-black text-white text-sm" data-i18n="line_add_friend">Add LINE Friend</p>
+            <p class="text-white/80 text-[10px] font-bold" data-i18n="line_add_desc">Get order updates & support</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <!-- ==================== MY ACTIVITY PAGE ==================== -->
+    <div id="page-myactivity" class="page p-4">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-xl">👤</span>
+        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_myactivity">My Activity</h2>
+      </div>
+      <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1 no-scroll">
+        <button onclick="myActivityTab('msg')"    id="matab-msg"    class="flex-1 py-2.5 rounded-xl font-black text-xs bg-[#001d4a] text-white whitespace-nowrap px-2" data-i18n="ma_tab_msg">Messages</button>
+        <button onclick="myActivityTab('posts')"  id="matab-posts"  class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_posts">Posts</button>
+        <button onclick="myActivityTab('orders')" id="matab-orders" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_orders">Orders</button>
+        <button onclick="myActivityTab('used')"   id="matab-used"   class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_used">Used</button>
+      </div>
+      <div id="ma-msg" class=""></div>
+      <div id="ma-posts" class="hidden"></div>
+      <div id="ma-orders" class="hidden"></div>
+      <div id="ma-used" class="hidden"></div>
     </div>
   </div>
   <!-- ── Floating Cart Bar ───────────────────────────────────── -->
@@ -1784,18 +1863,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=11" defer></script>
-<script src="lang.js?v=11" defer></script>
-<script src="auth.js?v=11" defer></script>
-<script src="shop.js?v=11" defer></script>
-<script src="custom.js?v=11" defer></script>
-<script src="forum.js?v=11" defer></script>
-<script src="jobs.js?v=11" defer></script>
-<script src="webzine.js?v=11" defer></script>
-<script src="events.js?v=11" defer></script>
-<script src="ads.js?v=11" defer></script>
-<script src="admin.js?v=11" defer></script>
-<script src="app.js?v=11" defer></script>
+<script src="supabase.js?v=12" defer></script>
+<script src="lang.js?v=12" defer></script>
+<script src="auth.js?v=12" defer></script>
+<script src="shop.js?v=12" defer></script>
+<script src="custom.js?v=12" defer></script>
+<script src="forum.js?v=12" defer></script>
+<script src="jobs.js?v=12" defer></script>
+<script src="webzine.js?v=12" defer></script>
+<script src="events.js?v=12" defer></script>
+<script src="ads.js?v=12" defer></script>
+<script src="admin.js?v=12" defer></script>
+<script src="app.js?v=12" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────

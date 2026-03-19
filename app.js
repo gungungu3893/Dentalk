@@ -348,13 +348,10 @@ function openNavDropdown(type, event) {
     goPage('custom');
     return;
   } else if (type === 'forum') {
-    inner.innerHTML =
-      '<button class="nav-drop-item" onclick="goForumSub(\'implant\')">' +
-        '<span>🦷</span><span data-i18n="forum_tab_implant">Implant</span>' +
-      '</button>' +
-      '<button class="nav-drop-item" onclick="goForumSub(\'prosthetic\')">' +
-        '<span>💎</span><span data-i18n="forum_tab_prosthetic">Prosthetic</span>' +
-      '</button>';
+    // 포럼은 드롭다운 없이 바로 페이지 이동
+    closeNavDropdown();
+    goPage('forum');
+    return;
   } else if (type === 'shop') {
     inner.innerHTML = SHOP_CATEGORIES.map(function(cat) {
       return '<button class="nav-drop-item" onclick="goShopSub(\'' + cat.id + '\')">' +
@@ -635,18 +632,99 @@ async function saveProfile() {
 function openMyActivity() {
   if (!isLoggedIn()) { openLoginModal(); return; }
   messages.forEach(function(m){ if (m.to===currentUser.nickname) m.read=true; });
-  activityTab('msg');
-  openModal('myActivityModal');
+  goDetailPage('myactivity', t('nav_myactivity'), currentPage);
+  myActivityTab('msg');
 }
-function activityTab(name) {
-  ['msg','posts'].forEach(function(tab){
-    var btn  = document.getElementById('atab-'+tab);
-    var pane = document.getElementById('activity-'+tab);
-    if (btn)  btn.className  = 'flex-1 py-2 rounded-xl font-black text-xs ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
+function activityTab(name) { myActivityTab(name); }
+function myActivityTab(name) {
+  ['msg','posts','orders','used'].forEach(function(tab){
+    var btn  = document.getElementById('matab-'+tab);
+    var pane = document.getElementById('ma-'+tab);
+    if (btn)  btn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
     if (pane) pane.classList.toggle('hidden', tab!==name);
   });
-  if (name==='msg')   renderMyMsgs();
-  if (name==='posts') renderMyPosts();
+  if (name==='msg')    renderMyMsgs2();
+  if (name==='posts')  renderMyPosts2();
+  if (name==='orders') renderMyOrders2();
+  if (name==='used')   renderMyUsed2();
+}
+function renderMyMsgs2() {
+  var el = document.getElementById('ma-msg');
+  if (!el) return;
+  var nick  = currentUser.nickname;
+  var inbox = messages.filter(function(m){ return m.to===nick; });
+  var sent  = messages.filter(function(m){ return m.from===nick; });
+  var html = '<button onclick="openCompose()" class="w-full py-3 bg-[#001d4a] text-white rounded-xl font-black text-sm mb-4 active:scale-95 transition">' + t('ma_compose') + '</button>';
+  html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('ma_inbox') + ' (' + inbox.length + ')</p>';
+  if (inbox.length) {
+    html += inbox.slice().reverse().map(function(m){
+      return '<div class="bg-white rounded-xl p-3.5 mb-2 shadow-sm border-l-4 ' + (m.read?'border-slate-100':'border-blue-500') + '">' +
+        '<div class="flex justify-between items-center mb-1"><span class="text-xs font-black text-slate-700">' + escHtml(m.from) + '</span><span class="text-[10px] text-slate-400">' + m.date + '</span></div>' +
+        '<p class="text-xs font-bold text-slate-600 mb-1">' + escHtml(m.subject) + '</p>' +
+        '<p class="text-[11px] text-slate-500 leading-relaxed">' + escHtml(m.body) + '</p>' +
+        '<button onclick="openCompose(\'' + escHtml(m.from) + '\')" class="mt-2 text-[10px] text-blue-500 font-black min-h-[36px]">' + t('ma_reply') + '</button>' +
+      '</div>';
+    }).join('');
+  } else {
+    html += '<p class="text-sm text-slate-300 font-bold py-6 text-center">' + t('ma_no_inbox') + '</p>';
+  }
+  html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-4">' + t('ma_sent') + ' (' + sent.length + ')</p>';
+  if (sent.length) {
+    html += sent.slice().reverse().map(function(m){
+      return '<div class="bg-slate-50 rounded-xl p-3 mb-2">' +
+        '<div class="flex justify-between items-center mb-1"><span class="text-xs font-bold text-slate-600">' + t('ma_to') + ' ' + escHtml(m.to) + '</span><span class="text-[10px] text-slate-400">' + m.date + '</span></div>' +
+        '<p class="text-xs font-bold text-slate-500">' + escHtml(m.subject) + '</p>' +
+      '</div>';
+    }).join('');
+  } else {
+    html += '<p class="text-sm text-slate-300 font-bold py-3 text-center">' + t('ma_no_sent') + '</p>';
+  }
+  el.innerHTML = html;
+}
+function renderMyPosts2() {
+  var el = document.getElementById('ma-posts');
+  if (!el) return;
+  var nick = currentUser.nickname;
+  var myPosts = posts.filter(function(p){ return p.author===nick; });
+  if (!myPosts.length) { el.innerHTML='<p class="text-sm text-slate-300 font-bold text-center py-10">' + t('ma_no_posts') + '</p>'; return; }
+  el.innerHTML = myPosts.map(function(p){
+    return '<div class="bg-white rounded-xl p-3.5 mb-2 shadow-sm cursor-pointer active:bg-slate-50" onclick="openForumDetail(' + p.id + ')">' +
+      '<p class="text-xs font-black text-slate-700 mb-1">' + escHtml(p.title) + '</p>' +
+      '<p class="text-[10px] text-slate-400 font-bold">' + (p.date||'') + ' · 💬 ' + (p.comments||[]).length + '</p>' +
+    '</div>';
+  }).join('');
+}
+function renderMyOrders2() {
+  var el = document.getElementById('ma-orders');
+  if (!el) return;
+  var myOrders = customOrders.filter(function(o){ return o.userNickname === currentUser.nickname; });
+  if (!myOrders.length) { el.innerHTML='<p class="text-sm text-slate-300 font-bold text-center py-10">' + t('ma_no_orders') + '</p>'; return; }
+  var stageColors = {submitted:'bg-slate-100 text-slate-500',confirmed:'bg-blue-100 text-blue-600',design_ready:'bg-purple-100 text-purple-600',milling:'bg-yellow-100 text-yellow-700',shipped:'bg-green-100 text-green-700',done:'bg-emerald-100 text-emerald-700'};
+  el.innerHTML = myOrders.map(function(o) {
+    var stageLabel = t('stage_' + (o.stage||'submitted')) || o.stage || '-';
+    var stageColor = stageColors[o.stage||'submitted'] || 'bg-slate-100 text-slate-500';
+    var casesStr = (o.cases||[]).length + t('cases_unit') + ' · ' + ((o.cases||[]).reduce(function(a,c){ return a + (c.teeth||[]).length; }, 0)) + t('teeth_count');
+    return '<div class="bg-white rounded-xl p-3.5 mb-2 shadow-sm flex items-center justify-between">' +
+      '<div><p class="text-xs font-black text-slate-700"># ' + o.id + '</p><p class="text-[10px] text-slate-400 font-bold mt-0.5">' + casesStr + '</p></div>' +
+      '<span class="text-[10px] font-black px-2.5 py-1 rounded-full ' + stageColor + '">' + stageLabel + '</span>' +
+    '</div>';
+  }).join('');
+}
+function renderMyUsed2() {
+  var el = document.getElementById('ma-used');
+  if (!el) return;
+  var nick = currentUser.nickname;
+  var myUsed = usedItems.filter(function(u){ return u.seller===nick || u.seller==='Me'; });
+  if (!myUsed.length) { el.innerHTML='<p class="text-sm text-slate-300 font-bold text-center py-10">' + t('ma_no_used') + '</p>'; return; }
+  el.innerHTML = '<div class="grid grid-cols-2 gap-2.5">' + myUsed.map(function(u){
+    var thumb = u.image
+      ? '<img src="' + u.image + '" class="w-full h-full object-cover" loading="lazy">'
+      : '<div class="w-full h-full flex items-center justify-center bg-slate-100"><span class="text-slate-300 text-2xl">📷</span></div>';
+    return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + u.id + ')">' +
+      '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
+      '<div class="p-2"><p class="text-[10px] font-black text-slate-700 truncate">' + escHtml(u.name) + '</p><p class="text-[10px] font-black text-blue-700 font-mono">฿' + u.price.toLocaleString() + '</p></div>' +
+    '</div>';
+  }).join('') + '</div>';
 }
 function renderMyMsgs() {
   var el = document.getElementById('activity-msg');
@@ -1367,8 +1445,42 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('mb-home').classList.add('active');
   updateNavTabs('home');
 
-  // 페이지 로드 시 항상 로그아웃 상태로 시작
-  localStorage.removeItem('dentalk_session');
+  // 페이지 로드 시 세션 복원 시도
+  var savedSession = localStorage.getItem('dentalk_session');
+  if (savedSession) {
+    try {
+      var sess = JSON.parse(savedSession);
+      if (sess.sessionEnd && Date.now() < sess.sessionEnd && sess.user && sess.user.licenseNum) {
+        currentUser = sess.user;
+        sessionEnd  = sess.sessionEnd;
+        extShown    = false;
+        // UI 업데이트
+        var hNick = document.getElementById('headerNickBadge');
+        var hNickTxt = document.getElementById('headerNickText');
+        if (hNick && hNickTxt) { hNickTxt.textContent = currentUser.nickname; hNick.classList.add('show'); }
+        var hLoginBtn = document.getElementById('headerLoginBtn');
+        if (hLoginBtn) hLoginBtn.classList.add('hide');
+        var hLogoutBtn = document.getElementById('headerLogoutBtn');
+        if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('flex'); }
+        document.getElementById('sideLoginArea').classList.add('hidden');
+        document.getElementById('sideLoggedArea').classList.remove('hidden');
+        var sn = document.getElementById('sideNickname');
+        if (sn) sn.textContent = currentUser.nickname;
+        if (isAdmin()) {
+          document.body.classList.add('is-admin');
+        }
+        // 세션 타이머 시작
+        sessionTimer = setInterval(tickSession, 1000);
+        // 비동기 데이터 로드
+        updateNotifBadge();
+        loadOrdersFromSupabase().then(function() { renderProfileSettings(); });
+      } else {
+        localStorage.removeItem('dentalk_session');
+      }
+    } catch(e) {
+      localStorage.removeItem('dentalk_session');
+    }
+  }
 
   updateNavLocks();
   applyLang();
@@ -1381,4 +1493,9 @@ window.addEventListener('DOMContentLoaded', function() {
   initHomeBanner();
   // Supabase에서 공개 데이터 비동기 로드
   initSupabasePublicData();
+  // PWA standalone 모드 감지 → 네비게이션 버튼 표시
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    var pwaNav = document.getElementById('pwaNavBar');
+    if (pwaNav) pwaNav.classList.remove('hidden');
+  }
 });

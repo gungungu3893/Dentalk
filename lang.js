@@ -89,6 +89,9 @@ const LANG = {
     review_title:'Reviews',review_your_rating:'Your Rating:',review_comment_ph:'Write a review...',review_submit:'Submit Review',review_empty:'No reviews yet.',review_purchase_required:'Purchase this product to write a review.',review_rating_required:'Please select a rating.',review_submit_error:'Failed to submit review.',review_delete_confirm:'Delete this review?',review_load_error:'Failed to load reviews.',
     admin_tab_stats:'Statistics',stats_monthly_revenue:'Monthly Revenue',stats_total_members:'Total Members',stats_weekly_signups:'Weekly Signups',stats_monthly_orders:'Monthly Orders',stats_top_products:'Top 5 Products',stats_monthly_trend:'Monthly Order Trend (6 months)',stats_no_data:'No data available.',
     err_network:'Network error. Please check your connection.',err_auth:'Authentication failed. Please log in again.',err_session_expired:'Session expired. Please log in again.',err_generic:'An error occurred. Please try again.',
+    line_add_friend:'Add LINE Friend',line_add_desc:'Get order updates & support',
+    nav_myactivity:'My Activity',ma_tab_msg:'Messages',ma_tab_posts:'My Posts',ma_tab_orders:'My Orders',ma_tab_used:'My Used',ma_compose:'New Message',ma_inbox:'Inbox',ma_sent:'Sent',ma_to:'To',ma_reply:'Reply',ma_no_inbox:'No messages received.',ma_no_sent:'No messages sent.',ma_no_posts:'No posts yet.',ma_no_orders:'No orders yet.',ma_no_used:'No used items listed.',
+    pwa_back:'Back',pwa_refresh:'Refresh',
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'임상토론방',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',nav_login:'로그인',privacy_btn:'개인정보 처리방침',
@@ -179,6 +182,9 @@ const LANG = {
     review_title:'리뷰',review_your_rating:'평점:',review_comment_ph:'리뷰를 작성하세요...',review_submit:'리뷰 등록',review_empty:'아직 리뷰가 없습니다.',review_purchase_required:'이 제품을 구매한 후 리뷰를 작성할 수 있습니다.',review_rating_required:'평점을 선택해주세요.',review_submit_error:'리뷰 등록에 실패했습니다.',review_delete_confirm:'이 리뷰를 삭제하시겠습니까?',review_load_error:'리뷰를 불러오지 못했습니다.',
     admin_tab_stats:'통계',stats_monthly_revenue:'이번 달 매출',stats_total_members:'총 회원수',stats_weekly_signups:'이번 주 신규가입',stats_monthly_orders:'이번 달 주문',stats_top_products:'인기 제품 Top 5',stats_monthly_trend:'월별 주문 추이 (6개월)',stats_no_data:'데이터가 없습니다.',
     err_network:'네트워크 오류입니다. 연결을 확인해주세요.',err_auth:'인증에 실패했습니다. 다시 로그인해주세요.',err_session_expired:'세션이 만료되었습니다. 다시 로그인해주세요.',err_generic:'오류가 발생했습니다. 다시 시도해주세요.',
+    line_add_friend:'LINE 친구 추가',line_add_desc:'주문 알림 및 고객 지원',
+    nav_myactivity:'내 활동',ma_tab_msg:'쪽지',ma_tab_posts:'내 게시물',ma_tab_orders:'내 주문',ma_tab_used:'내 중고',ma_compose:'새 쪽지 보내기',ma_inbox:'받은 쪽지',ma_sent:'보낸 쪽지',ma_to:'받는 사람:',ma_reply:'답장',ma_no_inbox:'받은 쪽지가 없습니다.',ma_no_sent:'보낸 쪽지가 없습니다.',ma_no_posts:'작성한 게시물이 없습니다.',ma_no_orders:'주문 내역이 없습니다.',ma_no_used:'등록한 중고물품이 없습니다.',
+    pwa_back:'뒤로',pwa_refresh:'새로고침',
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'临床讨论',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',nav_login:'登录',privacy_btn:'隐私政策',
@@ -269,6 +275,9 @@ const LANG = {
     review_title:'评价',review_your_rating:'您的评分：',review_comment_ph:'写评价...',review_submit:'提交评价',review_empty:'暂无评价。',review_purchase_required:'购买此产品后才能写评价。',review_rating_required:'请选择评分。',review_submit_error:'提交评价失败。',review_delete_confirm:'确认删除此评价？',review_load_error:'加载评价失败。',
     admin_tab_stats:'统计',stats_monthly_revenue:'本月销售额',stats_total_members:'总会员数',stats_weekly_signups:'本周新注册',stats_monthly_orders:'本月订单',stats_top_products:'热门产品 Top 5',stats_monthly_trend:'月度订单趋势（6个月）',stats_no_data:'暂无数据。',
     err_network:'网络错误，请检查连接。',err_auth:'认证失败，请重新登录。',err_session_expired:'会话已过期，请重新登录。',err_generic:'发生错误，请重试。',
+    line_add_friend:'添加LINE好友',line_add_desc:'获取订单通知和客服支持',
+    nav_myactivity:'我的活动',ma_tab_msg:'消息',ma_tab_posts:'我的帖子',ma_tab_orders:'我的订单',ma_tab_used:'我的二手',ma_compose:'发送新消息',ma_inbox:'收件箱',ma_sent:'已发送',ma_to:'收件人：',ma_reply:'回复',ma_no_inbox:'没有收到消息。',ma_no_sent:'没有发送消息。',ma_no_posts:'还没有帖子。',ma_no_orders:'还没有订单。',ma_no_used:'还没有二手物品。',
+    pwa_back:'返回',pwa_refresh:'刷新',
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'อะบัทเมนท์ CNC',nav_used:'ตลาดมือสอง',nav_forum:'ห้องสนทนา',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',nav_login:'เข้าสู่ระบบ',privacy_btn:'นโยบายความเป็นส่วนตัว',
@@ -361,6 +370,9 @@ const LANG = {
     review_title:'รีวิว',review_your_rating:'คะแนนของคุณ:',review_comment_ph:'เขียนรีวิว...',review_submit:'ส่งรีวิว',review_empty:'ยังไม่มีรีวิว',review_purchase_required:'ซื้อสินค้านี้เพื่อเขียนรีวิว',review_rating_required:'กรุณาเลือกคะแนน',review_submit_error:'ส่งรีวิวไม่สำเร็จ',review_delete_confirm:'ลบรีวิวนี้?',review_load_error:'โหลดรีวิวไม่สำเร็จ',
     admin_tab_stats:'สถิติ',stats_monthly_revenue:'ยอดขายเดือนนี้',stats_total_members:'สมาชิกทั้งหมด',stats_weekly_signups:'สมัครใหม่สัปดาห์นี้',stats_monthly_orders:'คำสั่งซื้อเดือนนี้',stats_top_products:'สินค้ายอดนิยม Top 5',stats_monthly_trend:'แนวโน้มคำสั่งซื้อรายเดือน (6 เดือน)',stats_no_data:'ยังไม่มีข้อมูล',
     err_network:'เครือข่ายผิดพลาด กรุณาตรวจสอบการเชื่อมต่อ',err_auth:'การยืนยันตัวตนล้มเหลว กรุณาเข้าสู่ระบบอีกครั้ง',err_session_expired:'เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง',err_generic:'เกิดข้อผิดพลาด กรุณาลองใหม่',
+    line_add_friend:'เพิ่มเพื่อน LINE',line_add_desc:'รับแจ้งเตือนคำสั่งซื้อและบริการ',
+    nav_myactivity:'กิจกรรมของฉัน',ma_tab_msg:'ข้อความ',ma_tab_posts:'โพสต์ของฉัน',ma_tab_orders:'คำสั่งซื้อของฉัน',ma_tab_used:'ของมือสองของฉัน',ma_compose:'ส่งข้อความใหม่',ma_inbox:'กล่องจดหมาย',ma_sent:'ส่งแล้ว',ma_to:'ถึง:',ma_reply:'ตอบกลับ',ma_no_inbox:'ไม่มีข้อความที่ได้รับ',ma_no_sent:'ไม่มีข้อความที่ส่ง',ma_no_posts:'ยังไม่มีโพสต์',ma_no_orders:'ยังไม่มีคำสั่งซื้อ',ma_no_used:'ยังไม่มีสินค้ามือสอง',
+    pwa_back:'ย้อนกลับ',pwa_refresh:'รีเฟรช',
   },
   vi: {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'THẢO LUẬN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',nav_login:'Đăng nhập',privacy_btn:'Chính sách bảo mật',
@@ -451,6 +463,9 @@ const LANG = {
     review_title:'Đánh giá',review_your_rating:'Đánh giá của bạn:',review_comment_ph:'Viết đánh giá...',review_submit:'Gửi đánh giá',review_empty:'Chưa có đánh giá.',review_purchase_required:'Mua sản phẩm này để viết đánh giá.',review_rating_required:'Vui lòng chọn số sao.',review_submit_error:'Gửi đánh giá thất bại.',review_delete_confirm:'Xóa đánh giá này?',review_load_error:'Tải đánh giá thất bại.',
     admin_tab_stats:'Thống kê',stats_monthly_revenue:'Doanh thu tháng',stats_total_members:'Tổng thành viên',stats_weekly_signups:'Đăng ký tuần này',stats_monthly_orders:'Đơn hàng tháng',stats_top_products:'Top 5 sản phẩm',stats_monthly_trend:'Xu hướng đơn hàng theo tháng (6 tháng)',stats_no_data:'Chưa có dữ liệu.',
     err_network:'Lỗi mạng. Vui lòng kiểm tra kết nối.',err_auth:'Xác thực thất bại. Vui lòng đăng nhập lại.',err_session_expired:'Phiên đã hết hạn. Vui lòng đăng nhập lại.',err_generic:'Đã xảy ra lỗi. Vui lòng thử lại.',
+    line_add_friend:'Thêm bạn LINE',line_add_desc:'Nhận thông báo đơn hàng và hỗ trợ',
+    nav_myactivity:'Hoạt động của tôi',ma_tab_msg:'Tin nhắn',ma_tab_posts:'Bài viết',ma_tab_orders:'Đơn hàng',ma_tab_used:'Đồ cũ',ma_compose:'Gửi tin nhắn mới',ma_inbox:'Hộp thư đến',ma_sent:'Đã gửi',ma_to:'Đến:',ma_reply:'Trả lời',ma_no_inbox:'Không có tin nhắn.',ma_no_sent:'Chưa gửi tin nhắn nào.',ma_no_posts:'Chưa có bài viết.',ma_no_orders:'Chưa có đơn hàng.',ma_no_used:'Chưa có đồ cũ.',
+    pwa_back:'Quay lại',pwa_refresh:'Làm mới',
   },
   es: {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'DISCUSIÓN',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',nav_login:'Iniciar sesión',privacy_btn:'Política de privacidad',
@@ -541,6 +556,9 @@ const LANG = {
     review_title:'Reseñas',review_your_rating:'Tu calificación:',review_comment_ph:'Escribe una reseña...',review_submit:'Enviar reseña',review_empty:'Sin reseñas aún.',review_purchase_required:'Compra este producto para escribir una reseña.',review_rating_required:'Por favor selecciona una calificación.',review_submit_error:'Error al enviar la reseña.',review_delete_confirm:'¿Eliminar esta reseña?',review_load_error:'Error al cargar reseñas.',
     admin_tab_stats:'Estadísticas',stats_monthly_revenue:'Ingresos del mes',stats_total_members:'Total de miembros',stats_weekly_signups:'Registros esta semana',stats_monthly_orders:'Pedidos del mes',stats_top_products:'Top 5 productos',stats_monthly_trend:'Tendencia mensual de pedidos (6 meses)',stats_no_data:'No hay datos disponibles.',
     err_network:'Error de red. Verifique su conexión.',err_auth:'Autenticación fallida. Inicie sesión nuevamente.',err_session_expired:'Sesión expirada. Inicie sesión nuevamente.',err_generic:'Ocurrió un error. Inténtelo de nuevo.',
+    line_add_friend:'Agregar amigo LINE',line_add_desc:'Recibe notificaciones y soporte',
+    nav_myactivity:'Mi actividad',ma_tab_msg:'Mensajes',ma_tab_posts:'Mis posts',ma_tab_orders:'Mis pedidos',ma_tab_used:'Mis usados',ma_compose:'Nuevo mensaje',ma_inbox:'Bandeja de entrada',ma_sent:'Enviados',ma_to:'Para:',ma_reply:'Responder',ma_no_inbox:'No hay mensajes recibidos.',ma_no_sent:'No hay mensajes enviados.',ma_no_posts:'Sin publicaciones.',ma_no_orders:'Sin pedidos.',ma_no_used:'Sin artículos usados.',
+    pwa_back:'Atrás',pwa_refresh:'Actualizar',
   },
 };
 
