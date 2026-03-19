@@ -505,29 +505,40 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   /* ── Admin summary: 3-col ── */
   #adminSummaryCards { grid-template-columns: repeat(3, 1fr) !important; }
 
+  /* ── Desktop base font size ── */
+  body { font-size: 16px; }
+
+  /* ── Logo: 40% larger on desktop ── */
+  header .flex-1 > div[onclick] {
+    font-size: 40px !important;
+    letter-spacing: -1.8px !important;
+  }
+  header .flex-1 > div[onclick] span[style*="font-size:9px"] {
+    font-size: 11px !important;
+    margin-left: 10px !important;
+  }
+
   /* ── Desktop font size bump ── */
-  /* Headings: +2px */
-  h1, .text-xl { font-size: 22px !important; }
-  h2, .text-lg { font-size: 19px !important; }
+  /* Headings */
+  h1, .text-xl { font-size: 24px !important; }
+  h2, .text-lg { font-size: 20px !important; }
   .text-base { font-size: 17px !important; }
-  /* Body / descriptions: +1~2px */
+  /* Body / descriptions */
   .text-sm { font-size: 15px !important; }
-  .text-xs { font-size: 13px !important; }
-  /* Tiny text floor: 8-9px → 11px min */
+  .text-xs { font-size: 14px !important; }
+  /* Tiny text floor: minimum 11px */
   .text-\[8px\] { font-size: 11px !important; }
   .text-\[9px\] { font-size: 12px !important; }
   .text-\[10px\] { font-size: 13px !important; }
-  .text-\[11px\] { font-size: 13px !important; }
-  /* Button text */
-  button.font-black, a.font-black { font-size: inherit; }
+  .text-\[11px\] { font-size: 14px !important; }
 
   /* ── Card padding: roomier ── */
   #homeCategories .bg-white,
-  #homeCategories > div { padding: 14px !important; }
-  #postList > div { padding: 18px; }
-  #eventList > div { padding: 18px; }
-  #jobsList > div { padding: 18px; }
-  .bg-white.rounded-2xl { padding: 18px; }
+  #homeCategories > div { padding: 16px !important; }
+  #postList > div { padding: 20px; }
+  #eventList > div { padding: 20px; }
+  #jobsList > div { padding: 20px; }
+  .bg-white.rounded-2xl { padding: 20px; }
 }
 
 /* ── Extra-wide screens ≥1440px ── */
@@ -2017,18 +2028,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=19" defer></script>
-<script src="lang.js?v=19" defer></script>
-<script src="auth.js?v=19" defer></script>
-<script src="shop.js?v=19" defer></script>
-<script src="custom.js?v=19" defer></script>
-<script src="forum.js?v=19" defer></script>
-<script src="jobs.js?v=19" defer></script>
-<script src="webzine.js?v=19" defer></script>
-<script src="events.js?v=19" defer></script>
-<script src="ads.js?v=19" defer></script>
-<script src="admin.js?v=19" defer></script>
-<script src="app.js?v=19" defer></script>
+<script src="supabase.js?v=20" defer></script>
+<script src="lang.js?v=20" defer></script>
+<script src="auth.js?v=20" defer></script>
+<script src="shop.js?v=20" defer></script>
+<script src="custom.js?v=20" defer></script>
+<script src="forum.js?v=20" defer></script>
+<script src="jobs.js?v=20" defer></script>
+<script src="webzine.js?v=20" defer></script>
+<script src="events.js?v=20" defer></script>
+<script src="ads.js?v=20" defer></script>
+<script src="admin.js?v=20" defer></script>
+<script src="app.js?v=20" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────

@@ -471,18 +471,29 @@ function _isDesktop() { return window.innerWidth >= 1024; }
 
 function updateDesktopHero(pageId) {
   var heroSlot = document.getElementById('homeHeroFull');
-  if (!heroSlot) return;
-  if (!_isDesktop()) { heroSlot.style.display = 'none'; heroSlot.innerHTML = ''; return; }
   var homeHero = document.querySelector('#page-home > .relative.overflow-hidden');
-  if (pageId === 'home' && homeHero) {
-    heroSlot.innerHTML = '';
+  if (!heroSlot || !homeHero) return;
+  if (pageId === 'home' && _isDesktop()) {
+    // Clone hero into full-width slot, hide original
+    heroSlot.innerHTML = homeHero.outerHTML;
     heroSlot.style.display = '';
-    heroSlot.appendChild(homeHero);
+    homeHero.style.display = 'none';
+    // Re-bind banner dots in clone
+    var cloneDot0 = heroSlot.querySelector('#bannerDot0');
+    var cloneDot1 = heroSlot.querySelector('#bannerDot1');
+    if (cloneDot0) cloneDot0.setAttribute('onclick', 'setBannerSlide(0)');
+    if (cloneDot1) cloneDot1.setAttribute('onclick', 'setBannerSlide(1)');
+    // Make banner track work on clone
+    var cloneTrack = heroSlot.querySelector('#homeBannerTrack');
+    if (cloneTrack) cloneTrack.id = 'homeBannerTrackDesktop';
+    // Override setBannerSlide to update both
+    var origSetBanner = setBannerSlide;
+    window._desktopHeroActive = true;
   } else {
-    // Return hero to page-home if it was moved
-    var ph = document.getElementById('page-home');
-    if (heroSlot.firstChild && ph) { ph.insertBefore(heroSlot.firstChild, ph.firstChild); }
     heroSlot.style.display = 'none';
+    heroSlot.innerHTML = '';
+    if (homeHero) homeHero.style.display = '';
+    window._desktopHeroActive = false;
   }
 }
 
@@ -1060,7 +1071,9 @@ var _bannerSlide = 0, _bannerInterval = null;
 function setBannerSlide(idx) {
   _bannerSlide = idx;
   var track = document.getElementById('homeBannerTrack');
+  var trackD = document.getElementById('homeBannerTrackDesktop');
   if (track) track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+  if (trackD) trackD.style.transform = 'translateX(-' + (idx * 100) + '%)';
   [0, 1].forEach(function(i) {
     var dot = document.getElementById('bannerDot' + i);
     if (!dot) return;
