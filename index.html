@@ -206,10 +206,50 @@ body.is-admin #adminPanel { display:block !important; }
 body.is-admin #factoryPromoHeader { display:none !important; }
 
 /* ============================================================
-   MOBILE HEADER — ≤768px: nav tabs text hidden, icon only
+   MOBILE HEADER — ≤768px: compact header + icon-only nav
    ============================================================ */
 @media (max-width: 768px) {
-  /* Nav tabs: show icon only, hide text label */
+  /* ── Header: tight layout ── */
+  header.text-white {
+    padding: 6px 10px;
+    gap: 4px;
+  }
+  /* Logo: small on mobile */
+  header .flex-1 > div[onclick] {
+    font-size: 20px !important;
+    letter-spacing: -0.8px !important;
+  }
+  /* Hide BIOTEM subtitle */
+  header .flex-1 > div[onclick] span[style*="font-size:9px"],
+  header .flex-1 > div[onclick] span[style*="font-size:8px"] {
+    display: none !important;
+  }
+  /* Hide logout button text (use side menu instead) */
+  #headerLogoutBtn { display: none !important; }
+  /* Hide timer wrap on mobile */
+  #timerWrap { display: none !important; }
+  /* Hide install button on mobile */
+  #installBtn { display: none !important; }
+  /* Nick badge: small circle only, hide text */
+  #headerNickBadge {
+    padding: 4px 6px !important;
+    border-radius: 50%;
+  }
+  #headerNickBadge #headerNickText { display: none; }
+  /* Login button: icon only */
+  #headerLoginBtn span[data-i18n] { display: none; }
+  #headerLoginBtn {
+    padding: 4px 8px !important;
+    border-radius: 50%;
+  }
+  /* Icon buttons: compact */
+  header button[class*="w-9"] {
+    width: 32px; height: 32px;
+    min-width: 32px; min-height: 32px;
+  }
+  header button[class*="w-9"] .text-lg { font-size: 16px; }
+
+  /* ── Nav tabs: icon only, no text ── */
   #navTabBar .nav-tab span[data-i18n] { display: none; }
   #navTabBar .nav-tab {
     min-width: 40px;
@@ -217,48 +257,22 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     gap: 0;
   }
   #navTabBar .nav-tab span.text-base { font-size: 18px; }
-  /* Header: hide BIOTEM subtitle */
-  header .flex-1 > div[onclick] span[style*="font-size:8px"] { display: none; }
-  /* Logo compact */
-  header .flex-1 > div[onclick] { font-size: 20px !important; }
 }
 
 /* ============================================================
    MOBILE RESPONSIVE — 375px ~ 480px
    ============================================================ */
 @media (max-width: 480px) {
-  /* ── 1) HEADER: compact buttons, prevent overflow ── */
-  header.text-white {
-    padding: 8px 10px;
-    gap: 6px;
-  }
-  header .text-lg.leading-none { font-size: 15px; }
+  /* ── 1) HEADER: extra compact on small screens ── */
+  header.text-white { padding: 5px 8px; gap: 3px; }
+  header .flex-1 > div[onclick] { font-size: 18px !important; }
   header button[class*="w-9"] {
-    width: 36px; height: 36px;
-    min-width: 44px; min-height: 44px;
-    padding: 4px;
-  }
-  header #headerLoginBtn,
-  header #headerNickBadge,
-  header #headerLogoutBtn {
-    padding: 6px 8px;
-    min-height: 36px;
-  }
-  /* Logo size on small screens */
-  header .flex-1 > div[onclick] { font-size: 19px !important; }
-  header .flex-1 > div[onclick] span[style*="font-size:8px"] {
-    display: none;
+    width: 30px; height: 30px;
+    min-width: 30px; min-height: 30px;
   }
 
-  /* ── 2) NAV TABS: horizontal scroll, touch-friendly ── */
-  #navTabBar .nav-tab {
-    min-width: 48px;
-    min-height: 44px;
-    padding: 6px 10px;
-  }
-  #navTabBar .nav-tab span.text-base { font-size: 16px; }
-  #navTabBar .nav-tab span[class*="text-\\[9px\\]"],
-  #navTabBar .nav-tab span.text-\[9px\] { font-size: 10px; }
+  /* ── 2) NAV TABS ── */
+  #navTabBar .nav-tab { min-width: 36px; padding: 6px 5px; }
 
   /* ── 3) HERO BANNER: fit text, larger CTA ── */
   #page-home .shrink-0.w-full[style*="padding"] {
@@ -2028,18 +2042,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=20" defer></script>
-<script src="lang.js?v=20" defer></script>
-<script src="auth.js?v=20" defer></script>
-<script src="shop.js?v=20" defer></script>
-<script src="custom.js?v=20" defer></script>
-<script src="forum.js?v=20" defer></script>
-<script src="jobs.js?v=20" defer></script>
-<script src="webzine.js?v=20" defer></script>
-<script src="events.js?v=20" defer></script>
-<script src="ads.js?v=20" defer></script>
-<script src="admin.js?v=20" defer></script>
-<script src="app.js?v=20" defer></script>
+<script src="supabase.js?v=21" defer></script>
+<script src="lang.js?v=21" defer></script>
+<script src="auth.js?v=21" defer></script>
+<script src="shop.js?v=21" defer></script>
+<script src="custom.js?v=21" defer></script>
+<script src="forum.js?v=21" defer></script>
+<script src="jobs.js?v=21" defer></script>
+<script src="webzine.js?v=21" defer></script>
+<script src="events.js?v=21" defer></script>
+<script src="ads.js?v=21" defer></script>
+<script src="admin.js?v=21" defer></script>
+<script src="app.js?v=21" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
