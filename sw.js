@@ -4,7 +4,7 @@
 // 오프라인 폴백 페이지 개선
 // ============================================================
 
-const CACHE_VERSION = 'dentalk-v9';
+const CACHE_VERSION = 'dentalk-v10';
 const STATIC_ASSETS = [
   './',
   './index.html',
