@@ -627,6 +627,82 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   #desktopSidebar { display: none !important; }
   #homeHeroFull { display: none !important; }
 }
+
+/* ── Mobile ad banners (≤1023px only) ── */
+.mobile-ad-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+}
+.mobile-ad-bottom #mobileBottomAdContent {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.mobile-ad-bottom #mobileBottomAdContent img {
+  max-width: 320px;
+  max-height: 100px;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.mobile-ad-close {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.mobile-ad-slot .mobile-mid-banner {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  position: relative;
+  cursor: pointer;
+}
+.mobile-ad-slot .mobile-mid-banner img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  display: block;
+}
+.mobile-ad-slot .mobile-mid-banner .ad-tag {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+/* Hide mobile ads on desktop */
+@media (min-width: 1024px) {
+  .mobile-ad-bottom { display: none !important; }
+  .mobile-ad-slot { display: none !important; }
+}
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -1233,6 +1309,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <!-- ─── AD SLOT: HOME MID ─────────────────────────────────── -->
       <div id="adSlotHomeMid" class="hidden px-4 pt-3"></div>
 
+      <!-- ─── MOBILE AD: after categories ─────────────────────────── -->
+      <div id="mobileAdMid1" class="hidden px-4 pt-3 mobile-ad-slot"></div>
+
       <!-- ─── FORUM PREVIEW (3 latest posts) ───────────────────── -->
       <div class="px-4 pt-5 pb-1">
         <div class="flex items-center justify-between mb-3">
@@ -1241,6 +1320,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <div id="homeForumPreview"></div>
       </div>
+
+      <!-- ─── MOBILE AD: after forum preview ─────────────────────── -->
+      <div id="mobileAdMid2" class="hidden px-4 pt-3 mobile-ad-slot"></div>
 
       <!-- ─── EVENTS PREVIEW ────────────────────────────────────── -->
       <div class="px-4 pt-5 pb-1">
@@ -2042,18 +2124,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=21" defer></script>
-<script src="lang.js?v=21" defer></script>
-<script src="auth.js?v=21" defer></script>
-<script src="shop.js?v=21" defer></script>
-<script src="custom.js?v=21" defer></script>
-<script src="forum.js?v=21" defer></script>
-<script src="jobs.js?v=21" defer></script>
-<script src="webzine.js?v=21" defer></script>
-<script src="events.js?v=21" defer></script>
-<script src="ads.js?v=21" defer></script>
-<script src="admin.js?v=21" defer></script>
-<script src="app.js?v=21" defer></script>
+<script src="supabase.js?v=22" defer></script>
+<script src="lang.js?v=22" defer></script>
+<script src="auth.js?v=22" defer></script>
+<script src="shop.js?v=22" defer></script>
+<script src="custom.js?v=22" defer></script>
+<script src="forum.js?v=22" defer></script>
+<script src="jobs.js?v=22" defer></script>
+<script src="webzine.js?v=22" defer></script>
+<script src="events.js?v=22" defer></script>
+<script src="ads.js?v=22" defer></script>
+<script src="admin.js?v=22" defer></script>
+<script src="app.js?v=22" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
@@ -2216,5 +2298,10 @@ function _showStlGeometry(geometry) {
   (function loop(){ _stlAnimId=requestAnimationFrame(loop); if(_stlRenderer) _stlRenderer.render(_stlScene,_stlCamera); })();
 }
 </script>
+<!-- ============================== 모바일 하단 고정 광고 배너 ============================== -->
+<div id="mobileBottomAd" class="mobile-ad-bottom" style="display:none">
+  <div id="mobileBottomAdContent"></div>
+  <button id="mobileBottomAdClose" onclick="closeMobileBottomAd()" class="mobile-ad-close">✕</button>
+</div>
 </body>
 </html>

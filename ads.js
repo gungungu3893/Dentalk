@@ -67,7 +67,7 @@ function _renderAdminAdsUI() {
   var formTitle = isEditing ? t('admin_ads_editing') : t('admin_ads_form_title');
   var submitLabel = isEditing ? t('admin_ads_save') : t('admin_ads_submit');
 
-  var posOptions = ['home_top','home_mid','forum_top','shop_bottom'].map(function(p) {
+  var posOptions = ['home_top','home_mid','forum_top','shop_bottom','mobile_bottom','mobile_mid'].map(function(p) {
     var sel = editBanner && editBanner.position === p ? ' selected' : (!editBanner && p === 'home_top' ? ' selected' : '');
     return '<option value="' + p + '"' + sel + '>' + p + '</option>';
   }).join('');
@@ -297,13 +297,12 @@ var _adSlideTimers = {};      // position → interval id
 
 // position별 활성 배너 fetch → 캐시
 async function loadAdBanners() {
-  var positions = ['home_top', 'home_mid', 'forum_top', 'shop_bottom'];
+  var positions = ['home_top', 'home_mid', 'forum_top', 'shop_bottom', 'mobile_bottom', 'mobile_mid'];
   await Promise.all(positions.map(async function(pos) {
     try {
       var rows = await sbGetBannersByPosition(pos);
       _adBanners[pos] = rows || [];
     } catch(e) {
-      // silent: ad banners are non-critical
       _adBanners[pos] = [];
     }
   }));
@@ -387,5 +386,63 @@ function renderAllAdSlots() {
   renderAdSlot('home_mid',    'adSlotHomeMid');
   renderAdSlot('forum_top',   'adSlotForumTop');
   renderAdSlot('shop_bottom', 'adSlotShopBottom');
+  // 모바일 배너
+  renderMobileBottomAd();
+  renderMobileMidAds();
+}
+
+// ============================================================
+// MOBILE AD BANNERS
+// ============================================================
+
+// ── 하단 고정 배너 (mobile_bottom) ──
+function renderMobileBottomAd() {
+  var wrap = document.getElementById('mobileBottomAd');
+  var content = document.getElementById('mobileBottomAdContent');
+  if (!wrap || !content) return;
+  // 데스크톱이면 숨김
+  if (window.innerWidth >= 1024) { wrap.style.display = 'none'; return; }
+  // 세션에서 닫은 경우
+  if (sessionStorage.getItem('dentalk_mobile_ad_closed')) { wrap.style.display = 'none'; return; }
+  var banners = _adBanners['mobile_bottom'] || [];
+  if (!banners.length) { wrap.style.display = 'none'; return; }
+  var b = banners[0]; // 첫 번째 활성 배너
+  content.innerHTML =
+    '<img src="' + b.image_url + '" alt="' + escHtml(b.advertiser_name || 'Ad') + '" onclick="onAdBannerClick(\'' + b.id + '\',\'' + (b.link_url || '').replace(/'/g, "\\'") + '\')" loading="lazy">';
+  wrap.style.display = '';
+  _trackAdImpression(b.id);
+}
+
+function closeMobileBottomAd() {
+  var wrap = document.getElementById('mobileBottomAd');
+  if (wrap) wrap.style.display = 'none';
+  sessionStorage.setItem('dentalk_mobile_ad_closed', '1');
+}
+
+// ── 콘텐츠 사이 중간 배너 (mobile_mid) ──
+function renderMobileMidAds() {
+  var slots = ['mobileAdMid1', 'mobileAdMid2'];
+  var banners = _adBanners['mobile_mid'] || [];
+  // 데스크톱이면 숨김
+  if (window.innerWidth >= 1024) {
+    slots.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.classList.add('hidden'); el.innerHTML = ''; }
+    });
+    return;
+  }
+  slots.forEach(function(slotId, idx) {
+    var el = document.getElementById(slotId);
+    if (!el) return;
+    var b = banners[idx] || banners[0]; // 배너가 1개면 양쪽에 같은 것
+    if (!b) { el.classList.add('hidden'); el.innerHTML = ''; return; }
+    el.classList.remove('hidden');
+    el.innerHTML =
+      '<div class="mobile-mid-banner" onclick="onAdBannerClick(\'' + b.id + '\',\'' + (b.link_url || '').replace(/'/g, "\\'") + '\')">' +
+        '<img src="' + b.image_url + '" alt="' + escHtml(b.advertiser_name || 'Ad') + '" loading="lazy">' +
+        '<span class="ad-tag">' + t('ad_label') + '</span>' +
+      '</div>';
+    _trackAdImpression(b.id);
+  });
 }
 
