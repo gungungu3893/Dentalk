@@ -271,7 +271,7 @@ async function handleLogin() {
   var hLoginBtn = document.getElementById('headerLoginBtn');
   if (hLoginBtn) hLoginBtn.classList.add('hide');
   var hLogoutBtn = document.getElementById('headerLogoutBtn');
-  if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('flex'); }
+  if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('show'); }
   updateNavLocks();
   updateNicknameDisplays();
   closeModal('loginModal');
@@ -327,7 +327,7 @@ function forceLogout() {
   var hLoginBtn = document.getElementById('headerLoginBtn');
   if (hLoginBtn) hLoginBtn.classList.remove('hide');
   var hLogoutBtn = document.getElementById('headerLogoutBtn');
-  if (hLogoutBtn) { hLogoutBtn.classList.add('hidden'); hLogoutBtn.classList.remove('flex'); }
+  if (hLogoutBtn) { hLogoutBtn.classList.add('hidden'); hLogoutBtn.classList.remove('show'); }
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();
@@ -349,7 +349,7 @@ function doLogout() {
   var hLoginBtn = document.getElementById('headerLoginBtn');
   if (hLoginBtn) hLoginBtn.classList.remove('hide');
   var hLogoutBtn = document.getElementById('headerLogoutBtn');
-  if (hLogoutBtn) { hLogoutBtn.classList.add('hidden'); hLogoutBtn.classList.remove('flex'); }
+  if (hLogoutBtn) { hLogoutBtn.classList.add('hidden'); hLogoutBtn.classList.remove('show'); }
   updateNavLocks();
   renderProfileSettings();
   updateNicknameDisplays();

@@ -398,8 +398,8 @@ function updateNavLocks() {
   // 헤더 로그아웃 버튼 show/hide
   var logoutBtn = document.getElementById('headerLogoutBtn');
   if (logoutBtn) {
-    if (loggedIn) { logoutBtn.classList.remove('hidden'); logoutBtn.classList.add('flex'); }
-    else          { logoutBtn.classList.add('hidden');    logoutBtn.classList.remove('flex'); }
+    if (loggedIn) { logoutBtn.classList.remove('hidden'); logoutBtn.classList.add('show'); }
+    else          { logoutBtn.classList.add('hidden');    logoutBtn.classList.remove('show'); }
   }
 }
 document.addEventListener('click', function() { closeNavDropdown(); });
@@ -1611,7 +1611,7 @@ window.addEventListener('DOMContentLoaded', function() {
         var hLoginBtn = document.getElementById('headerLoginBtn');
         if (hLoginBtn) hLoginBtn.classList.add('hide');
         var hLogoutBtn = document.getElementById('headerLogoutBtn');
-        if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('flex'); }
+        if (hLogoutBtn) { hLogoutBtn.classList.remove('hidden'); hLogoutBtn.classList.add('show'); }
         document.getElementById('sideLoginArea').classList.add('hidden');
         document.getElementById('sideLoggedArea').classList.remove('hidden');
         var sn = document.getElementById('sideNickname');

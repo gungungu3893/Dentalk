@@ -2,7 +2,7 @@
 const LANG = {
   en: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'USED MARKET',nav_forum:'DISCUSSION',nav_events:'EVENTS',nav_factory:'FACTORY',nav_settings:'SETTINGS',nav_login:'Login',privacy_btn:'Privacy Policy',
-    hdr_search:'Search',hdr_notif:'Alerts',hdr_install:'Install',hdr_cart:'Cart',
+    hdr_search:'Search',hdr_notif:'Alerts',hdr_install:'Install',hdr_cart:'Cart',hdr_login:'Login',hdr_logout:'Logout',
     pt_home:'Home',pt_shop:'Shop',pt_custom:'Custom Abutment',pt_used:'Used Market',pt_forum:'Clinical Discussion',pt_events:'Events',pt_factory:'Factory',pt_settings:'Settings',
     login_subtitle:'DOCTOR LOGIN',login_ph:'Nickname',login_password_ph:'Password',login_btn:'LOGIN',login_cancel:'Cancel',login_error:'Please enter nickname and password.',login_verifying:'Verifying...',login_not_found:'Nickname not found or incorrect password.',login_network_error:'Network error. Please try again.',login_register_link:'Request Access →',
     reg_title:'Request Access',reg_subtitle:'Fill in your details. Admin will approve within 24 hours.',reg_license_ph:'License Number (required)',reg_name_ph:'Doctor Name (required)',reg_clinic_ph:'Clinic Name (required)',reg_contact_ph:'Phone or Line ID (required)',reg_password_ph:'Password (required)',reg_password_confirm_ph:'Confirm Password (required)',reg_submit:'Submit Request',reg_submitting:'Submitting...',reg_success:'Request submitted!\nWe will contact you within 24 hours after approval.',reg_error:'Please fill in all required fields.',reg_pwd_mismatch:'Passwords do not match.',reg_duplicate:'This nickname is already registered.',reg_network_error:'Network error. Please try again.',
@@ -102,7 +102,7 @@ const LANG = {
   },
   ko: {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'임상토론방',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',nav_login:'로그인',privacy_btn:'개인정보 처리방침',
-    hdr_search:'검색',hdr_notif:'알림',hdr_install:'설치',hdr_cart:'장바구니',
+    hdr_search:'검색',hdr_notif:'알림',hdr_install:'설치',hdr_cart:'장바구니',hdr_login:'로그인',hdr_logout:'로그아웃',
     pt_home:'Home',pt_shop:'Shop',pt_custom:'Custom Abutment',pt_used:'중고마켓',pt_forum:'임상토론방',pt_events:'Events',pt_factory:'Factory',pt_settings:'설정',
     login_subtitle:'의사 로그인',login_ph:'닉네임',login_password_ph:'비밀번호',login_btn:'로그인',login_cancel:'취소',login_error:'닉네임과 비밀번호를 입력해주세요.',login_verifying:'확인 중...',login_not_found:'닉네임이 없거나 비밀번호가 틀렸습니다.',login_network_error:'네트워크 오류가 발생했습니다. 다시 시도해주세요.',login_register_link:'사용 신청하기 →',
     reg_title:'사용 신청',reg_subtitle:'정보를 입력하시면 24시간 내에 검토 후 승인해 드립니다.',reg_license_ph:'면허 번호 (필수)',reg_name_ph:'의사 이름 (필수)',reg_clinic_ph:'치과명 (필수)',reg_contact_ph:'전화번호 또는 Line ID (필수)',reg_password_ph:'비밀번호 (필수)',reg_password_confirm_ph:'비밀번호 확인 (필수)',reg_submit:'신청하기',reg_submitting:'신청 중...',reg_success:'신청이 접수되었습니다!\n관리자 승인 후 24시간 내에 연락드리겠습니다.',reg_error:'필수 항목을 모두 입력해주세요.',reg_pwd_mismatch:'비밀번호가 일치하지 않습니다.',reg_duplicate:'이미 등록된 닉네임입니다.',reg_network_error:'네트워크 오류가 발생했습니다. 다시 시도해주세요.',
@@ -202,7 +202,7 @@ const LANG = {
   },
   zh: {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'临床讨论',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',nav_login:'登录',privacy_btn:'隐私政策',
-    hdr_search:'搜索',hdr_notif:'通知',hdr_install:'安装',hdr_cart:'购物车',
+    hdr_search:'搜索',hdr_notif:'通知',hdr_install:'安装',hdr_cart:'购物车',hdr_login:'登录',hdr_logout:'退出',
     pt_home:'主页',pt_shop:'商城',pt_custom:'定制基台',pt_used:'二手市场',pt_forum:'临床讨论',pt_events:'活动',pt_factory:'工厂',pt_settings:'设置',
     login_subtitle:'医生登录',login_ph:'昵称',login_password_ph:'密码',login_btn:'登录',login_cancel:'取消',login_error:'请输入昵称和密码。',login_verifying:'验证中...',login_not_found:'昵称不存在或密码错误。',login_network_error:'网络错误，请重试。',login_register_link:'申请使用 →',
     reg_title:'申请使用',reg_subtitle:'填写信息后，管理员将在24小时内审核并联系您。',reg_license_ph:'执照号码（必填）',reg_name_ph:'医生姓名（必填）',reg_clinic_ph:'诊所名称（必填）',reg_contact_ph:'电话或 Line ID（必填）',reg_password_ph:'密码（必填）',reg_password_confirm_ph:'确认密码（必填）',reg_submit:'提交申请',reg_submitting:'提交中...',reg_success:'申请已提交！\n审核通过后将在24小时内与您联系。',reg_error:'请填写所有必填项。',reg_pwd_mismatch:'两次密码不一致。',reg_duplicate:'该昵称已被注册。',reg_network_error:'网络错误，请重试。',
@@ -302,7 +302,7 @@ const LANG = {
   },
   th: {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'อะบัทเมนท์ CNC',nav_used:'ตลาดมือสอง',nav_forum:'ห้องสนทนา',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',nav_login:'เข้าสู่ระบบ',privacy_btn:'นโยบายความเป็นส่วนตัว',
-    hdr_search:'ค้นหา',hdr_notif:'แจ้งเตือน',hdr_install:'ติดตั้ง',hdr_cart:'ตะกร้า',
+    hdr_search:'ค้นหา',hdr_notif:'แจ้งเตือน',hdr_install:'ติดตั้ง',hdr_cart:'ตะกร้า',hdr_login:'เข้าสู่ระบบ',hdr_logout:'ออกจากระบบ',
     pt_home:'หน้าแรก',pt_shop:'ร้านค้า',pt_custom:'อะบัทเมนท์สั่งทำพิเศษ',pt_used:'ตลาดมือสอง',pt_forum:'ห้องสนทนาคลินิก',pt_events:'กิจกรรม',pt_factory:'โรงงาน',pt_settings:'ตั้งค่า',
     login_subtitle:'เข้าสู่ระบบทันตแพทย์',login_ph:'ชื่อเล่น',login_password_ph:'รหัสผ่าน',login_btn:'เข้าสู่ระบบ',login_cancel:'ยกเลิก',login_error:'กรุณาใส่ชื่อเล่นและรหัสผ่าน',login_verifying:'กำลังตรวจสอบ...',login_not_found:'ไม่พบชื่อเล่น หรือรหัสผ่านไม่ถูกต้อง',login_network_error:'เกิดข้อผิดพลาดเครือข่าย กรุณาลองใหม่อีกครั้ง',login_register_link:'ขอสิทธิ์เข้าใช้งาน →',
     reg_title:'ขอสิทธิ์เข้าใช้งาน',reg_subtitle:'กรอกข้อมูลแล้วผู้ดูแลจะตรวจสอบและติดต่อกลับภายใน 24 ชั่วโมง',reg_license_ph:'หมายเลขใบอนุญาต (จำเป็น)',reg_name_ph:'ชื่อทันตแพทย์ (จำเป็น)',reg_clinic_ph:'ชื่อคลินิก (จำเป็น)',reg_contact_ph:'โทรศัพท์ หรือ Line ID (จำเป็น)',reg_password_ph:'รหัสผ่าน (จำเป็น)',reg_password_confirm_ph:'ยืนยันรหัสผ่าน (จำเป็น)',reg_submit:'ส่งคำขอ',reg_submitting:'กำลังส่ง...',reg_success:'ส่งคำขอเรียบร้อย!\nเราจะติดต่อกลับภายใน 24 ชั่วโมงหลังการอนุมัติ',reg_error:'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน',reg_pwd_mismatch:'รหัสผ่านไม่ตรงกัน',reg_duplicate:'ชื่อเล่นนี้ถูกลงทะเบียนแล้ว',reg_network_error:'เกิดข้อผิดพลาดเครือข่าย กรุณาลองใหม่อีกครั้ง',
@@ -404,7 +404,7 @@ const LANG = {
   },
   vi: {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'THẢO LUẬN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',nav_login:'Đăng nhập',privacy_btn:'Chính sách bảo mật',
-    hdr_search:'Tìm kiếm',hdr_notif:'Thông báo',hdr_install:'Cài đặt',hdr_cart:'Giỏ hàng',
+    hdr_search:'Tìm kiếm',hdr_notif:'Thông báo',hdr_install:'Cài đặt',hdr_cart:'Giỏ hàng',hdr_login:'Đăng nhập',hdr_logout:'Đăng xuất',
     pt_home:'Trang chủ',pt_shop:'Cửa hàng',pt_custom:'Custom Abutment',pt_used:'Thị trường cũ',pt_forum:'Thảo luận lâm sàng',pt_events:'Sự kiện',pt_factory:'Nhà máy',pt_settings:'Cài đặt',
     login_subtitle:'ĐĂNG NHẬP BÁC SĨ',login_ph:'Tên đăng nhập',login_password_ph:'Mật khẩu',login_btn:'ĐĂNG NHẬP',login_cancel:'Hủy',login_error:'Vui lòng nhập tên đăng nhập và mật khẩu.',login_verifying:'Đang xác thực...',login_not_found:'Không tìm thấy tên đăng nhập hoặc mật khẩu sai.',login_network_error:'Lỗi mạng. Vui lòng thử lại.',login_register_link:'Yêu cầu truy cập →',
     reg_title:'Yêu cầu truy cập',reg_subtitle:'Điền thông tin. Quản trị viên sẽ phê duyệt trong 24 giờ.',reg_license_ph:'Số giấy phép (bắt buộc)',reg_name_ph:'Tên bác sĩ (bắt buộc)',reg_clinic_ph:'Tên phòng khám (bắt buộc)',reg_contact_ph:'Điện thoại hoặc Line ID (bắt buộc)',reg_password_ph:'Mật khẩu (bắt buộc)',reg_password_confirm_ph:'Xác nhận mật khẩu (bắt buộc)',reg_submit:'Gửi yêu cầu',reg_submitting:'Đang gửi...',reg_success:'Đã gửi yêu cầu!\nChúng tôi sẽ liên hệ trong 24 giờ sau khi phê duyệt.',reg_error:'Vui lòng điền tất cả các trường bắt buộc.',reg_pwd_mismatch:'Mật khẩu không khớp.',reg_duplicate:'Tên đăng nhập này đã được đăng ký.',reg_network_error:'Lỗi mạng. Vui lòng thử lại.',
@@ -504,7 +504,7 @@ const LANG = {
   },
   es: {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'DISCUSIÓN',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',nav_login:'Iniciar sesión',privacy_btn:'Política de privacidad',
-    hdr_search:'Buscar',hdr_notif:'Alertas',hdr_install:'Instalar',hdr_cart:'Carrito',
+    hdr_search:'Buscar',hdr_notif:'Alertas',hdr_install:'Instalar',hdr_cart:'Carrito',hdr_login:'Entrar',hdr_logout:'Salir',
     pt_home:'Inicio',pt_shop:'Tienda',pt_custom:'Custom Abutment',pt_used:'Mercado Usado',pt_forum:'Discusión Clínica',pt_events:'Eventos',pt_factory:'Fábrica',pt_settings:'Ajustes',
     login_subtitle:'ACCESO MÉDICO',login_ph:'Usuario',login_password_ph:'Contraseña',login_btn:'ACCEDER',login_cancel:'Cancelar',login_error:'Por favor, introduce tu usuario y contraseña.',login_verifying:'Verificando...',login_not_found:'Usuario no encontrado o contraseña incorrecta.',login_network_error:'Error de red. Inténtalo de nuevo.',login_register_link:'Solicitar acceso →',
     reg_title:'Solicitar acceso',reg_subtitle:'Rellena tus datos. El administrador aprobará en 24 horas.',reg_license_ph:'Número de licencia (obligatorio)',reg_name_ph:'Nombre del médico (obligatorio)',reg_clinic_ph:'Nombre de la clínica (obligatorio)',reg_contact_ph:'Teléfono o Line ID (obligatorio)',reg_password_ph:'Contraseña (obligatorio)',reg_password_confirm_ph:'Confirmar contraseña (obligatorio)',reg_submit:'Enviar solicitud',reg_submitting:'Enviando...',reg_success:'¡Solicitud enviada!\nNos pondremos en contacto en 24 horas tras la aprobación.',reg_error:'Por favor, completa todos los campos obligatorios.',reg_pwd_mismatch:'Las contraseñas no coinciden.',reg_duplicate:'Este usuario ya está registrado.',reg_network_error:'Error de red. Inténtalo de nuevo.',
