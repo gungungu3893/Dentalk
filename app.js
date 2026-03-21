@@ -973,7 +973,7 @@ function sendMsg() {
 // ============================================================
 function selectLang(lang) {
   pendingLang = lang;
-  ['en','ko','zh','th','vi','es'].forEach(function(l){
+  ['en','ko','zh','th','vi','es','tr'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
     if (!b) return;
     b.className = l===lang
@@ -996,7 +996,7 @@ function saveLang() {
   pendingLang = null;
   localStorage.setItem('dentalk_lang', currentLang);
   // 저장된 언어 버튼 스타일 업데이트
-  ['en','ko','zh','th','vi','es'].forEach(function(l){
+  ['en','ko','zh','th','vi','es','tr'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
     if (!b) return;
     b.className = l===currentLang
@@ -1058,7 +1058,7 @@ function applyLang() {
   var saveBtn = document.getElementById('saveLangBtn');
   if (saveBtn) saveBtn.textContent = t('settings_save_btn');
   // 저장된 언어 버튼 스타일 반영
-  ['en','ko','zh','th','vi','es'].forEach(function(l){
+  ['en','ko','zh','th','vi','es','tr'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
     if (!b) return;
     b.className = l===currentLang
