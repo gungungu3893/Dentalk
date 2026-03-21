@@ -57,7 +57,7 @@ function renderShop() {
 async function renderMyShopOrders() {
   var container = document.getElementById('myShopOrdersList');
   if (!container) return;
-  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">로딩 중...</p>';
+  container.innerHTML = dtLoaderHtml();
 
   // Supabase에서 본인 주문만 조회
   var orders = [];

@@ -520,7 +520,7 @@ function adminDeletePost(i) {
 async function renderAdminOrders() {
   var list = document.getElementById('adminTabOrders');
   if (!list) return;
-  list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">로딩 중...</p>';
+  list.innerHTML = dtLoaderHtml();
   await loadOrdersFromSupabase();
   _renderAdminOrdersList();
 }

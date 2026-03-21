@@ -12,7 +12,7 @@ async function renderAdminAds() {
   if (!el) return;
 
   // 로딩 표시
-  el.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">Loading...</p>';
+  el.innerHTML = dtLoaderHtml();
 
   try {
     _adminBanners = await sbGetAllBanners() || [];

@@ -1,7 +1,16 @@
 // app.js — 코어: 유틸리티, PWA, 상수, 상태, 메뉴, 페이지전환, 언어, 홈, 검색, 알림, 무한스크롤, 초기화
 // ============================================================
-// 유틸리티 — XSS 방지 HTML 이스케이핑 + 토스트 알림
+// 유틸리티 — XSS 방지 HTML 이스케이핑 + 토스트 알림 + 로딩 스피너
 // ============================================================
+function dtLoaderHtml(text) {
+  return '<div class="dt-loader">' +
+    '<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M24 4 C24 4 28 6 28 10 L28 14 C29.5 14.5 30.8 15.2 32 16 L35 14 C35 14 38 13 40 16 C42 19 40 22 40 22 L37 24 C37.3 25.3 37.3 26.7 37 28 L40 30 C40 30 42 32 40 35 C38 38 35 37 35 37 L32 35 C30.8 35.8 29.5 36.5 28 37 L28 40 C28 40 28 44 24 44 C20 44 20 40 20 40 L20 37 C18.5 36.5 17.2 35.8 16 35 L13 37 C13 37 10 38 8 35 C6 32 8 30 8 30 L11 28 C10.7 26.7 10.7 25.3 11 24 L8 22 C8 22 6 19 8 16 C10 13 13 14 13 14 L16 16 C17.2 15.2 18.5 14.5 20 14 L20 10 C20 10 20 4 24 4Z" stroke="#D4AF37" stroke-width="2.5" fill="none"/>' +
+      '<circle cx="24" cy="24" r="7" stroke="#D4AF37" stroke-width="2" fill="none"/>' +
+    '</svg>' +
+    '<span class="dt-loader-text">' + (text || t('loading_text')) + '</span>' +
+  '</div>';
+}
 function escHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
