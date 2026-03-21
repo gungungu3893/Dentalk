@@ -439,7 +439,7 @@ function goPage(id) {
   if (btnMenu) btnMenu.classList.remove('hidden');
   closeMenu();
   window.scrollTo(0, 0);
-  if (id === 'home')   { renderHomePage(); initHomeBanner(); }
+  if (id === 'home')   { renderHomePage(); initHomeBanner(); refreshScrollReveal(); }
   if (id === 'shop')     renderShop();
   if (id === 'used')     renderUsed();
   if (id === 'forum')  { renderForum(); updateNicknameDisplays(); }
@@ -1647,4 +1647,58 @@ window.addEventListener('DOMContentLoaded', function() {
   _prevIsDesktop = _isDesktop();
   renderDesktopSidebar('home');
   updateDesktopHero('home');
+  // Dark mode: restore from localStorage or system preference
+  initDarkMode();
+  // Scroll reveal: observe elements
+  initScrollReveal();
 });
+
+// ============================================================
+// DARK MODE
+// ============================================================
+function initDarkMode() {
+  var saved = localStorage.getItem('dentalk_darkmode');
+  var isDark;
+  if (saved !== null) {
+    isDark = saved === '1';
+  } else {
+    isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  applyDarkMode(isDark);
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) toggle.checked = isDark;
+}
+function toggleDarkMode(on) {
+  localStorage.setItem('dentalk_darkmode', on ? '1' : '0');
+  applyDarkMode(on);
+}
+function applyDarkMode(on) {
+  document.body.classList.toggle('dark', on);
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) toggle.checked = on;
+}
+
+// ============================================================
+// SCROLL REVEAL — IntersectionObserver
+// ============================================================
+function initScrollReveal() {
+  var els = document.querySelectorAll('.scroll-reveal');
+  if (!els.length) return;
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(function(el) { el.classList.add('revealed'); });
+    return;
+  }
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(function(el) { observer.observe(el); });
+}
+// Re-init scroll reveal when navigating to home (elements may be re-rendered)
+function refreshScrollReveal() {
+  setTimeout(function() { initScrollReveal(); }, 50);
+}

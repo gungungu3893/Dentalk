@@ -185,6 +185,64 @@ body { font-family: var(--font-sans); }
 [style*="color:rgba(180,205,255,0.9)"] { color: rgba(200,220,255,1) !important; }
 
 /* ============================================================
+   DARK MODE
+   ============================================================ */
+body.dark { background: #0f172a; color: #e2e8f0; }
+body.dark .bg-slate-100 { background: #0f172a !important; }
+body.dark .bg-white,
+body.dark .bg-slate-50 { background: #1e293b !important; }
+body.dark .text-slate-900,
+body.dark .text-slate-800 { color: #e2e8f0 !important; }
+body.dark .text-slate-700 { color: #cbd5e1 !important; }
+body.dark .text-slate-600 { color: #94a3b8 !important; }
+body.dark .text-slate-500 { color: #94a3b8 !important; }
+body.dark .border-slate-100,
+body.dark .border-slate-200 { border-color: #334155 !important; }
+body.dark input, body.dark textarea, body.dark select {
+  background: #334155 !important; border-color: #475569 !important; color: #e2e8f0 !important;
+}
+body.dark input::placeholder, body.dark textarea::placeholder {
+  color: #64748b !important;
+}
+body.dark .modal > div,
+body.dark .bg-white.rounded-3xl { background: #1e293b !important; }
+body.dark .shadow-sm, body.dark .shadow-md { box-shadow: 0 1px 4px rgba(0,0,0,0.4) !important; }
+body.dark .bg-gradient-to-br.from-\[\#001d4a\] { background: linear-gradient(to bottom right,#0f172a,#1e3a5f) !important; }
+body.dark #siteFooter { background: #020617; }
+body.dark .sidebar-card { background: #1e293b !important; box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important; }
+body.dark .sidebar-mini-item { border-color: #334155; }
+body.dark .sidebar-mini-item .smi-title { color: #e2e8f0; }
+
+/* Dark mode toggle switch */
+.dm-switch { position:relative; width:48px; height:26px; cursor:pointer; }
+.dm-switch input { display:none; }
+.dm-switch .dm-track { position:absolute; inset:0; background:#cbd5e1; border-radius:13px; transition:background .2s; }
+.dm-switch input:checked + .dm-track { background:#D4AF37; }
+.dm-switch .dm-thumb {
+  position:absolute; top:2px; left:2px; width:22px; height:22px; background:#fff;
+  border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.dm-switch input:checked ~ .dm-thumb { transform:translateX(22px); }
+
+/* ============================================================
+   SCROLL REVEAL ANIMATION
+   ============================================================ */
+@keyframes scrollReveal {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.scroll-reveal.revealed {
+  animation: scrollReveal 0.5s ease forwards;
+}
+.scroll-reveal.delay-1 { animation-delay: 0.08s; }
+.scroll-reveal.delay-2 { animation-delay: 0.16s; }
+.scroll-reveal.delay-3 { animation-delay: 0.24s; }
+
+/* ============================================================
    LOADING ANIMATION — Implant fixture spinner
    ============================================================ */
 @keyframes fixtureSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -1382,7 +1440,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
 
       <!-- ─── PRODUCT CATEGORIES (2-col grid, 7 items) ─────────── -->
-      <div class="px-4 pt-5 pb-1">
+      <div class="px-4 pt-5 pb-1 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_categories">Product Categories</h2>
           <button onclick="goPage('shop')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_see_more">See All ›</button>
@@ -1397,7 +1455,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="mobileAdMid1" class="hidden px-4 pt-3 mobile-ad-slot"></div>
 
       <!-- ─── FORUM PREVIEW (3 latest posts) ───────────────────── -->
-      <div class="px-4 pt-5 pb-1">
+      <div class="px-4 pt-5 pb-1 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_forum_preview">Clinical Discussion</h2>
           <button onclick="goPage('forum')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_forum_more">View All ›</button>
@@ -1409,7 +1467,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="mobileAdMid2" class="hidden px-4 pt-3 mobile-ad-slot"></div>
 
       <!-- ─── EVENTS PREVIEW ────────────────────────────────────── -->
-      <div class="px-4 pt-5 pb-1">
+      <div class="px-4 pt-5 pb-1 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_events_preview">Upcoming Events</h2>
           <button onclick="goPage('events')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_events_more">View All ›</button>
@@ -1418,7 +1476,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
 
       <!-- ─── WEBZINE PREVIEW ─────────────────────────────────── -->
-      <div class="px-4 pt-5 pb-2">
+      <div class="px-4 pt-5 pb-2 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_webzine">Webzine</h2>
@@ -1430,7 +1488,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
 
       <!-- ─── LINE FRIEND BANNER ───────────────────────────────── -->
-      <div class="px-4 pt-5 pb-2">
+      <div class="px-4 pt-5 pb-2 scroll-reveal">
         <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
           class="block rounded-2xl p-4 shadow-sm active:scale-[.98] transition"
           style="background:linear-gradient(135deg,#06C755 0%,#04a648 100%)">
@@ -2127,6 +2185,20 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <button onclick="saveLang()" id="saveLangBtn" class="mt-4 w-full py-3.5 rounded-2xl bg-[#001d4a] text-white font-black text-sm shadow active:scale-95 transition" data-i18n="settings_save_btn">Save Language</button>
         <p id="savedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="settings_saved_msg">Language saved!</p>
       </div>
+      <!-- 다크모드 토글 -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-black text-slate-800" data-i18n="settings_darkmode">Dark Mode</h3>
+            <p class="text-[10px] text-slate-400 font-bold mt-0.5" data-i18n="settings_darkmode_desc">Switch to dark theme</p>
+          </div>
+          <label class="dm-switch">
+            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+            <span class="dm-track"></span>
+            <span class="dm-thumb"></span>
+          </label>
+        </div>
+      </div>
       <!-- 나의 주문 목록 요약 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
@@ -2246,18 +2318,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=27" defer></script>
-<script src="lang.js?v=27" defer></script>
-<script src="auth.js?v=27" defer></script>
-<script src="shop.js?v=27" defer></script>
-<script src="custom.js?v=27" defer></script>
-<script src="forum.js?v=27" defer></script>
-<script src="jobs.js?v=27" defer></script>
-<script src="webzine.js?v=27" defer></script>
-<script src="events.js?v=27" defer></script>
-<script src="ads.js?v=27" defer></script>
-<script src="admin.js?v=27" defer></script>
-<script src="app.js?v=27" defer></script>
+<script src="supabase.js?v=28" defer></script>
+<script src="lang.js?v=28" defer></script>
+<script src="auth.js?v=28" defer></script>
+<script src="shop.js?v=28" defer></script>
+<script src="custom.js?v=28" defer></script>
+<script src="forum.js?v=28" defer></script>
+<script src="jobs.js?v=28" defer></script>
+<script src="webzine.js?v=28" defer></script>
+<script src="events.js?v=28" defer></script>
+<script src="ads.js?v=28" defer></script>
+<script src="admin.js?v=28" defer></script>
+<script src="app.js?v=28" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
