@@ -992,7 +992,7 @@ function renderUsed() {
   list.innerHTML = usedItems.map(function(item) {
     var thumb = item.image
       ? '<img src="' + item.image + '" class="w-full h-full object-cover" loading="lazy">'
-      : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-2xl">📷</span></div>';
+      : '<div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300"><span class="text-3xl mb-1">📷</span><span class="text-[8px] font-bold text-slate-500">' + t('used_no_photo') + '</span></div>';
     var badge = '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full ' + condMap[item.cond||'fair'] + '">' + condLabel[item.cond||'fair'] + '</span>';
     var date   = (item.date||'').slice(5); // MM-DD
     return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + item.id + ')">' +

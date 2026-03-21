@@ -3,12 +3,12 @@
 // WEBZINE
 // ============================================================
 var WEBZINE_CATEGORIES = [
-  { key:'all',       labelKey:'wz_cat_all',       icon:'📰' },
-  { key:'implant',   labelKey:'wz_cat_implant',   icon:'🦷' },
-  { key:'prosthetic',labelKey:'wz_cat_prosthetic', icon:'🔧' },
-  { key:'review',    labelKey:'wz_cat_review',    icon:'⭐' },
-  { key:'news',      labelKey:'wz_cat_news',      icon:'📢' },
-  { key:'education', labelKey:'wz_cat_education', icon:'📚' },
+  { key:'all',       labelKey:'wz_cat_all',       icon:'📰', grad:'from-slate-400 to-slate-600' },
+  { key:'implant',   labelKey:'wz_cat_implant',   icon:'🦷', grad:'from-blue-400 to-blue-700' },
+  { key:'prosthetic',labelKey:'wz_cat_prosthetic', icon:'🔧', grad:'from-amber-400 to-amber-700' },
+  { key:'review',    labelKey:'wz_cat_review',    icon:'⭐', grad:'from-purple-400 to-purple-700' },
+  { key:'news',      labelKey:'wz_cat_news',      icon:'📢', grad:'from-cyan-400 to-cyan-700' },
+  { key:'education', labelKey:'wz_cat_education', icon:'📚', grad:'from-teal-400 to-teal-700' },
 ];
 var webzineArticles = [];
 var webzineCatFilter = 'all';
@@ -41,7 +41,7 @@ function renderWebzine() {
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     var thumb = a.thumbnail_url
       ? '<img src="' + a.thumbnail_url + '" class="w-full h-full object-cover" loading="lazy">'
-      : '<div class="w-full h-full flex items-center justify-center bg-slate-100"><span class="text-3xl opacity-20">📰</span></div>';
+      : '<div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br ' + (catCfg.grad || 'from-slate-400 to-slate-600') + '"><span class="text-4xl mb-1 opacity-80">' + (catCfg.icon || '📰') + '</span><span class="text-[9px] font-bold text-white/60">' + (catCfg.key !== 'all' ? t(catCfg.labelKey) : '') + '</span></div>';
     var dateStr = a.date ? a.date.slice(0,10) : '';
     var aid = typeof a.id === 'string' ? "'" + a.id + "'" : a.id;
     return '<div class="bg-white rounded-2xl shadow-sm overflow-hidden cursor-pointer active:scale-[.97] transition" onclick="openWebzineDetail(' + aid + ')">' +
@@ -136,7 +136,7 @@ function renderHomeWebzinePreview() {
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     var thumb = a.thumbnail_url
       ? '<img src="' + a.thumbnail_url + '" class="w-full h-full object-cover" loading="lazy">'
-      : '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-50"><span class="text-2xl opacity-20">📰</span></div>';
+      : '<div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br ' + (catCfg.grad || 'from-slate-400 to-slate-600') + '"><span class="text-3xl opacity-80">' + (catCfg.icon || '📰') + '</span></div>';
     var dateStr = a.date ? a.date.slice(5, 10).replace('-', '/') : '';
     var aid = typeof a.id === 'string' ? "'" + a.id + "'" : a.id;
     return '<div class="rounded-xl overflow-hidden bg-white shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openWebzineDetail(' + aid + ')">' +
@@ -253,7 +253,7 @@ function renderAdminWebzine() {
     var aid = typeof a.id === 'string' ? "'" + a.id + "'" : a.id;
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm flex items-center gap-3">' +
-      (a.thumbnail_url ? '<img src="' + a.thumbnail_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0" loading="lazy">' : '<div class="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0"><span class="text-lg opacity-30">📰</span></div>') +
+      (a.thumbnail_url ? '<img src="' + a.thumbnail_url + '" class="w-12 h-12 rounded-lg object-cover shrink-0" loading="lazy">' : '<div class="w-12 h-12 rounded-lg bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center shrink-0"><span class="text-xl">📰</span></div>') +
       '<div class="flex-1 min-w-0">' +
         '<p class="font-black text-xs text-slate-800 truncate">' + escHtml(a.title) + '</p>' +
         '<p class="text-[9px] text-slate-400">' + (catCfg.icon || '') + ' ' + t(catCfg.labelKey || '') + ' · 👁 ' + (a.views || 0) + '</p>' +

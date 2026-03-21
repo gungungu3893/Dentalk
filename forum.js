@@ -142,12 +142,16 @@ function renderForum() {
     var imgCount = hasImg ? p.images.length : 0;
     var commentCount = p.comments ? p.comments.length : 0;
     // 썸네일 영역
+    var _fcCfg = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
+    var _fcGrad = {'implant':'from-blue-400 to-blue-600','prosthetic':'from-amber-400 to-amber-600','conservative':'from-green-400 to-green-600','orthodontics':'from-cyan-400 to-cyan-600','oral_surgery':'from-red-400 to-red-600','periodontics':'from-emerald-400 to-emerald-600','pediatric':'from-pink-400 to-pink-600','radiology':'from-indigo-400 to-indigo-600','oral_medicine':'from-violet-400 to-violet-600','preventive':'from-teal-400 to-teal-600','general':'from-slate-400 to-slate-600'};
     var thumbHtml = hasImg
       ? '<div class="relative shrink-0">' +
           '<img src="' + p.images[0] + '" class="w-[72px] h-[72px] rounded-2xl object-cover" loading="lazy">' +
           (imgCount > 1 ? '<span class="absolute bottom-1 right-1 text-[9px] font-black bg-black/60 text-white px-1.5 py-0.5 rounded-full">+' + (imgCount - 1) + '</span>' : '') +
         '</div>'
-      : '';
+      : '<div class="w-[56px] h-[56px] rounded-2xl bg-gradient-to-br ' + (_fcGrad[p.category] || 'from-slate-400 to-slate-600') + ' flex items-center justify-center shrink-0">' +
+          '<span class="text-2xl opacity-90">' + (_fcCfg.icon || '💬') + '</span>' +
+        '</div>';
     // 카테고리 뱃지
     var catCfg  = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
     var catIcon  = catCfg.icon || '📌';

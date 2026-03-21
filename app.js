@@ -694,7 +694,7 @@ function renderProfileSettings() {
         myUsedEl.innerHTML = myUsed.map(function(u) {
           var thumb = u.image
             ? '<img src="' + u.image + '" class="w-full h-full object-cover" loading="lazy">'
-            : '<div class="w-full h-full flex items-center justify-center"><span class="text-slate-300 text-xl">📷</span></div>';
+            : '<div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300"><span class="text-xl">📷</span></div>';
           return '<div class="bg-slate-50 rounded-xl overflow-hidden cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + u.id + ')">' +
             '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
             '<div class="p-1.5">' +
@@ -867,7 +867,7 @@ function renderMyUsed2() {
   el.innerHTML = '<div class="grid grid-cols-2 gap-2.5">' + myUsed.map(function(u){
     var thumb = u.image
       ? '<img src="' + u.image + '" class="w-full h-full object-cover" loading="lazy">'
-      : '<div class="w-full h-full flex items-center justify-center bg-slate-100"><span class="text-slate-300 text-2xl">📷</span></div>';
+      : '<div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300"><span class="text-2xl">📷</span></div>';
     return '<div class="bg-white rounded-xl overflow-hidden shadow-sm cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + u.id + ')">' +
       '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
       '<div class="p-2"><p class="text-[10px] font-black text-slate-700 truncate">' + escHtml(u.name) + '</p><p class="text-[10px] font-black text-blue-700 font-mono">฿' + u.price.toLocaleString() + '</p></div>' +
@@ -1105,24 +1105,15 @@ function renderHomeCategories() {
     'multi-unit': 'cat_multi_unit_desc',
     '3d-analog':  'cat_3d_analog_desc'
   };
-  var catEmoji = {
-    'scan-body':  '🔬',
-    'q-base':     '💎',
-    'ready-made': '🔩',
-    'ti-base':    '⚙️',
-    'pre-milled': '🔧',
-    'multi-unit': '🦷',
-    '3d-analog':  '🖨️'
-  };
   el.innerHTML = SHOP_CATEGORIES.map(function(cat) {
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
-      'class="bg-white rounded-2xl px-3.5 py-3 shadow-sm flex items-center gap-3 text-left active:bg-slate-50 transition border border-slate-100/80">' +
-      '<span class="text-2xl leading-none shrink-0">' + (catEmoji[cat.id] || '📦') + '</span>' +
-      '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-slate-800 text-xs leading-snug">' + cat.name + '</p>' +
-        '<p class="text-[9px] text-slate-400 font-medium mt-0.5 leading-snug">' + t(catDescKeys[cat.id] || '') + '</p>' +
+      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' p-4 shadow-sm text-left active:scale-[.97] transition">' +
+      '<div class="absolute -bottom-3 -right-3 w-20 h-20 opacity-[0.12]">' + (cat.svg || '') + '</div>' +
+      '<div class="relative">' +
+        '<div class="w-10 h-10 mb-2 opacity-90">' + (cat.svg || '') + '</div>' +
+        '<p class="font-black text-white text-sm leading-snug">' + cat.name + '</p>' +
+        '<p class="text-[10px] font-medium mt-0.5 leading-snug" style="color:rgba(255,255,255,0.75)">' + t(catDescKeys[cat.id] || '') + '</p>' +
       '</div>' +
-      '<span class="text-slate-300 text-sm shrink-0">›</span>' +
     '</button>';
   }).join('');
 }

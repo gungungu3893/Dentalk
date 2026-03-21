@@ -41,14 +41,15 @@ function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
-      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' flex items-center gap-4 px-4 py-4 text-left shadow-sm active:scale-[.97] transition">' +
-      '<div class="w-12 h-12 shrink-0 flex items-center justify-center">' + cat.svg + '</div>' +
-      '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-white text-sm leading-tight">' + cat.name + '</p>' +
-        '<p class="text-[9px] font-medium mt-0.5 leading-snug" style="color:rgba(255,255,255,0.6)">' + cat.desc + '</p>' +
-        '<p class="text-[9px] font-black mt-2" style="color:rgba(255,255,255,0.45)">' + count + ' ' + t('shop_product_count') + '</p>' +
+      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' flex items-center gap-4 px-5 py-5 text-left shadow-md active:scale-[.97] transition">' +
+      '<div class="absolute -bottom-4 -right-4 w-28 h-28 opacity-[0.08]">' + cat.svg + '</div>' +
+      '<div class="w-16 h-16 shrink-0 flex items-center justify-center opacity-90">' + cat.svg + '</div>' +
+      '<div class="flex-1 min-w-0 relative">' +
+        '<p class="font-black text-white text-base leading-tight">' + cat.name + '</p>' +
+        '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:rgba(255,255,255,0.75)">' + cat.desc + '</p>' +
+        '<p class="text-[10px] font-black mt-2" style="color:rgba(255,255,255,0.6)">' + count + ' ' + t('shop_product_count') + '</p>' +
       '</div>' +
-      '<span class="text-lg leading-none shrink-0" style="color:rgba(255,255,255,0.35)">›</span>' +
+      '<span class="text-lg leading-none shrink-0" style="color:rgba(255,255,255,0.5)">›</span>' +
     '</button>';
   }).join('');
   renderMyShopOrders();
@@ -142,8 +143,9 @@ function renderShopItems(catId) {
       : '<span class="text-[9px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full">❌ ' + t('shop_out_of_stock') + '</span>';
     var clickAttr = inStock ? 'onclick="openOrder(\'' + p.id + '\')"' : '';
     return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
-      '<div class="h-1 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
+      '<div class="h-1.5 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
       '<div class="p-4 flex items-center gap-3">' +
+        (cat ? '<div class="w-10 h-10 shrink-0 opacity-70 flex items-center justify-center">' + cat.svg + '</div>' : '') +
         '<div class="flex-1 min-w-0">' +
           '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
           '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
@@ -183,7 +185,10 @@ function renderProductPage() {
   var hero = document.getElementById('shopProductHero');
   if (hero) hero.style.background = _catGrads[p.category] || _catGrads['scan-body'];
   var iconArea = document.getElementById('shopProductIconArea');
-  if (iconArea && cat) iconArea.innerHTML = cat.svg;
+  if (iconArea && cat) {
+    iconArea.innerHTML = '<div class="w-16 h-16 opacity-90">' + cat.svg + '</div>';
+    iconArea.className = 'w-20 h-20 mb-3 flex items-center justify-center';
+  }
   var badge = document.getElementById('shopProductStockBadge');
   if (badge) {
     badge.textContent = (inStock ? '✅ ' : '❌ ') + t(inStock ? 'shop_in_stock' : 'shop_out_of_stock');
