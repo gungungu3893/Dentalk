@@ -156,6 +156,33 @@
 
 * { -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font-sans); }
+
+/* ============================================================
+   COLOR CONTRAST FIX — WCAG AA (4.5:1 minimum)
+   ============================================================ */
+/* Remap low-contrast Tailwind text colors to readable values */
+/* slate-200 (#e2e8f0) on white = 1.4:1 → upgrade to slate-500 */
+.text-slate-200 { color: #64748b !important; }
+/* slate-300 (#cbd5e1) on white = 1.8:1 → upgrade to slate-500 */
+.text-slate-300 { color: #64748b !important; }
+/* slate-400 (#94a3b8) on white = 3.0:1 → upgrade to slate-500 */
+.text-slate-400 { color: #64748b !important; }
+/* Placeholder text: too faint → make readable */
+::placeholder { color: #94a3b8 !important; opacity: 1; }
+.placeholder\:text-slate-300::placeholder,
+.placeholder\:text-white\/40::placeholder { color: #94a3b8 !important; }
+/* White-on-dark text with low alpha → boost */
+.text-white\/40 { color: rgba(255,255,255,0.65) !important; }
+.text-white\/30 { color: rgba(255,255,255,0.55) !important; }
+/* Hero banner sub-text: boost contrast on dark navy bg */
+[style*="color:rgba(191,219,254,0.62)"] { color: rgba(191,219,254,0.85) !important; }
+[style*="color:rgba(216,180,254,0.62)"] { color: rgba(216,180,254,0.85) !important; }
+[style*="color:rgba(255,255,255,0.28)"] { color: rgba(255,255,255,0.55) !important; }
+[style*="color:rgba(255,255,255,0.45)"] { color: rgba(255,255,255,0.7) !important; }
+[style*="color:rgba(255,255,255,0.55)"] { color: rgba(255,255,255,0.75) !important; }
+[style*="color:rgba(255,255,255,0.35)"] { color: rgba(255,255,255,0.6) !important; }
+/* Side menu / header dim text */
+[style*="color:rgba(180,205,255,0.9)"] { color: rgba(200,220,255,1) !important; }
 /* 태국어 모드: Noto Sans Thai 우선, 영문/숫자는 Inter로 자동 폴백 */
 html[lang="th"] body,
 html[lang="th"] input,
@@ -607,7 +634,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   }
   .sidebar-mini-item .smi-sub {
     font-size: 12px;
-    color: #94a3b8;
+    color: #64748b;
     font-weight: 600;
   }
 }
@@ -2119,18 +2146,18 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="supabase.js?v=24" defer></script>
-<script src="lang.js?v=24" defer></script>
-<script src="auth.js?v=24" defer></script>
-<script src="shop.js?v=24" defer></script>
-<script src="custom.js?v=24" defer></script>
-<script src="forum.js?v=24" defer></script>
-<script src="jobs.js?v=24" defer></script>
-<script src="webzine.js?v=24" defer></script>
-<script src="events.js?v=24" defer></script>
-<script src="ads.js?v=24" defer></script>
-<script src="admin.js?v=24" defer></script>
-<script src="app.js?v=24" defer></script>
+<script src="supabase.js?v=25" defer></script>
+<script src="lang.js?v=25" defer></script>
+<script src="auth.js?v=25" defer></script>
+<script src="shop.js?v=25" defer></script>
+<script src="custom.js?v=25" defer></script>
+<script src="forum.js?v=25" defer></script>
+<script src="jobs.js?v=25" defer></script>
+<script src="webzine.js?v=25" defer></script>
+<script src="events.js?v=25" defer></script>
+<script src="ads.js?v=25" defer></script>
+<script src="admin.js?v=25" defer></script>
+<script src="app.js?v=25" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
