@@ -446,6 +446,7 @@ create policy "licenses: anon update"
 -- events: anon insert/delete 정책 추가 (관리자 이벤트 관리)
 drop policy if exists "events: anon insert" on public.events;
 drop policy if exists "events: anon delete" on public.events;
+drop policy if exists "events: anon update" on public.events;
 create policy "events: anon insert"
   on public.events for insert
   to anon
@@ -454,6 +455,193 @@ create policy "events: anon delete"
   on public.events for delete
   to anon
   using (true);
+create policy "events: anon update"
+  on public.events for update
+  to anon
+  using (true)
+  with check (true);
+
+-- events: type/region 컬럼 추가 (오프라인 모임 지원)
+alter table public.events
+  add column if not exists type text not null default 'event';  -- 'event' | 'meetup'
+alter table public.events
+  add column if not exists region text not null default 'all';
+
+-- ============================================================
+-- 10. events_rsvp (이벤트 참석 관리)
+-- ============================================================
+create table if not exists public.events_rsvp (
+  id          uuid        primary key default uuid_generate_v4(),
+  event_id    uuid        not null references public.events(id) on delete cascade,
+  user_id     text        not null references public.licenses(nickname) on delete cascade,
+  status      text        not null default 'attending',  -- 'attending' | 'not_attending'
+  created_at  timestamptz not null default now(),
+  unique(event_id, user_id)
+);
+
+alter table public.events_rsvp enable row level security;
+
+drop policy if exists "events_rsvp: public read"             on public.events_rsvp;
+drop policy if exists "events_rsvp: anon insert"             on public.events_rsvp;
+drop policy if exists "events_rsvp: anon update"             on public.events_rsvp;
+drop policy if exists "events_rsvp: anon delete"             on public.events_rsvp;
+drop policy if exists "events_rsvp: service_role full access" on public.events_rsvp;
+
+create policy "events_rsvp: public read"
+  on public.events_rsvp for select
+  to anon
+  using (true);
+
+create policy "events_rsvp: anon insert"
+  on public.events_rsvp for insert
+  to anon
+  with check (true);
+
+create policy "events_rsvp: anon update"
+  on public.events_rsvp for update
+  to anon
+  using (true)
+  with check (true);
+
+create policy "events_rsvp: anon delete"
+  on public.events_rsvp for delete
+  to anon
+  using (true);
+
+create policy "events_rsvp: service_role full access"
+  on public.events_rsvp for all
+  to service_role
+  using (true)
+  with check (true);
+
+create index if not exists idx_events_rsvp_event_id on public.events_rsvp(event_id);
+create index if not exists idx_events_rsvp_user_id  on public.events_rsvp(user_id);
+
+-- ============================================================
+-- Phase 3-#3: 지역 리더 시스템
+-- ============================================================
+
+-- licenses: leader_region 컬럼 추가 (role='region_leader'일 때 지역 지정)
+alter table public.licenses
+  add column if not exists leader_region text;
+
+-- licenses: leader_title 컬럼 추가 (리더 직책: president, vice_president, secretary, director, auditor)
+alter table public.licenses
+  add column if not exists leader_title text;
+
+-- forum_posts: is_pinned 컬럼 추가 (지역 리더가 글 고정)
+alter table public.forum_posts
+  add column if not exists is_pinned boolean not null default false;
+
+-- ============================================================
+-- Phase 3-#4: 웹진 시스템
+-- ============================================================
+create table if not exists public.webzine_articles (
+  id            uuid        primary key default uuid_generate_v4(),
+  category      text        not null default 'news',
+  title         text        not null,
+  body_md       text        not null default '',
+  thumbnail_url text,
+  author_id     text        references public.licenses(nickname) on delete set null,
+  views         integer     not null default 0,
+  is_published  boolean     not null default true,
+  created_at    timestamptz not null default now()
+);
+
+alter table public.webzine_articles enable row level security;
+
+drop policy if exists "webzine: public read"             on public.webzine_articles;
+drop policy if exists "webzine: anon insert"             on public.webzine_articles;
+drop policy if exists "webzine: anon update"             on public.webzine_articles;
+drop policy if exists "webzine: anon delete"             on public.webzine_articles;
+drop policy if exists "webzine: service_role full access" on public.webzine_articles;
+
+create policy "webzine: public read"
+  on public.webzine_articles for select
+  to anon
+  using (true);
+
+create policy "webzine: anon insert"
+  on public.webzine_articles for insert
+  to anon
+  with check (true);
+
+create policy "webzine: anon update"
+  on public.webzine_articles for update
+  to anon
+  using (true)
+  with check (true);
+
+create policy "webzine: anon delete"
+  on public.webzine_articles for delete
+  to anon
+  using (true);
+
+create policy "webzine: service_role full access"
+  on public.webzine_articles for all
+  to service_role
+  using (true)
+  with check (true);
+
+create index if not exists idx_webzine_category   on public.webzine_articles(category);
+create index if not exists idx_webzine_created_at on public.webzine_articles(created_at desc);
+
+-- ============================================================
+-- Phase 3-#5: 구인구직 게시판 (Jobs Board)
+-- ============================================================
+create table if not exists public.jobs (
+  id            uuid        primary key default uuid_generate_v4(),
+  user_id       text        references public.licenses(nickname) on delete set null,
+  type          text        not null default 'dentist_hire',
+  region        text,
+  province      text,
+  title         text        not null,
+  description   text        not null default '',
+  salary_range  text,
+  requirements  text,
+  contact       text,
+  is_active     boolean     not null default true,
+  created_at    timestamptz not null default now()
+);
+
+alter table public.jobs enable row level security;
+
+drop policy if exists "jobs: public read"              on public.jobs;
+drop policy if exists "jobs: anon insert"              on public.jobs;
+drop policy if exists "jobs: anon update"              on public.jobs;
+drop policy if exists "jobs: anon delete"              on public.jobs;
+drop policy if exists "jobs: service_role full access"  on public.jobs;
+
+create policy "jobs: public read"
+  on public.jobs for select
+  to anon
+  using (true);
+
+create policy "jobs: anon insert"
+  on public.jobs for insert
+  to anon
+  with check (true);
+
+create policy "jobs: anon update"
+  on public.jobs for update
+  to anon
+  using (true)
+  with check (true);
+
+create policy "jobs: anon delete"
+  on public.jobs for delete
+  to anon
+  using (true);
+
+create policy "jobs: service_role full access"
+  on public.jobs for all
+  to service_role
+  using (true)
+  with check (true);
+
+create index if not exists idx_jobs_type       on public.jobs(type);
+create index if not exists idx_jobs_region     on public.jobs(region);
+create index if not exists idx_jobs_created_at on public.jobs(created_at desc);
 
 -- ============================================================
 -- 완료!

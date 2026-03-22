@@ -17,7 +17,7 @@ where role is null;
 --    ↓ 실제 admin 닉네임으로 변경하세요
 update public.licenses
 set role = 'admin'
-where nickname = 'admin'
+where nickname = 'Admin'
    or nickname = '관리자';
 
 -- 결과 확인
