@@ -880,13 +880,13 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="stlViewerModal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm z-[900] items-center justify-center p-4">
   <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col" style="max-height:88vh">
     <div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center flex-shrink-0">
-      <p id="fileViewerTitle" class="font-black text-white text-sm">🧊 파일 미리보기</p>
+      <p id="fileViewerTitle" class="font-black text-white text-sm" data-i18n="stl_viewer_3d">🧊 3D Preview</p>
       <button onclick="closeStlViewer()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
     </div>
     <!-- 3D viewer -->
     <div id="stlViewerContainer" class="flex-1 relative bg-slate-900" style="min-height:320px">
       <canvas id="stlCanvas" class="w-full h-full block" style="min-height:320px"></canvas>
-      <div id="stlViewerMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-bold">불러오는 중...</div>
+      <div id="stlViewerMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-bold" data-i18n="stl_loading">Loading...</div>
     </div>
     <!-- Image viewer -->
     <div id="viewerImagePanel" class="hidden flex-1 bg-slate-900 flex items-center justify-center overflow-auto p-2" style="min-height:320px">
@@ -900,11 +900,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="viewerOtherPanel" class="hidden flex-1 flex flex-col items-center justify-center bg-slate-50 p-8 gap-3" style="min-height:200px">
       <p class="text-4xl">📎</p>
       <p id="viewerOtherName" class="text-sm font-black text-slate-700 text-center break-all"></p>
-      <p class="text-xs text-slate-400 font-bold">미리보기를 지원하지 않는 파일 형식입니다</p>
+      <p class="text-xs text-slate-400 font-bold" data-i18n="stl_unsupported">File format not supported for preview</p>
     </div>
     <div id="fileViewerFooter" class="px-4 py-3 bg-slate-50 flex gap-2 flex-shrink-0">
-      <p id="fileViewerHint" class="text-[9px] text-slate-400 flex-1 self-center font-bold">드래그: 회전 · 스크롤: 줌</p>
-      <a id="stlDownloadBtn" href="#" download class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-black text-xs active:scale-95 transition">📥 다운로드</a>
+      <p id="fileViewerHint" class="text-[9px] text-slate-400 flex-1 self-center font-bold" data-i18n="stl_viewer_hint">Drag: Rotate · Scroll: Zoom</p>
+      <a id="stlDownloadBtn" href="#" download class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-black text-xs active:scale-95 transition" data-i18n="stl_download">📥 Download</a>
     </div>
   </div>
 </div>
@@ -1121,7 +1121,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <input id="clinicName" type="text" data-i18n-ph="addr_clinic_ph" placeholder="Clinic Name" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
       <input id="clinicPhone" type="tel" data-i18n-ph="addr_phone_ph" placeholder="Phone Number" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
       <textarea id="fullAddress" rows="3" data-i18n-ph="addr_addr_ph" placeholder="Full Address" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold resize-none"></textarea>
-      <input id="clinicLineId" type="text" placeholder="Line ID (선택 · 주문 알림용)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+      <input id="clinicLineId" type="text" data-i18n-ph="line_id_optional_ph" placeholder="Line ID (optional · for order notifications)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
     </div>
     <button onclick="requestPay()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mt-5 shadow-xl" data-i18n="addr_qr_btn">GENERATE QR</button>
     <button onclick="closeModal('addressModal')" class="w-full text-slate-300 text-[10px] font-black mt-3 uppercase" data-i18n="addr_back">← Back</button>
@@ -1187,12 +1187,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="myActivityModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[700] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
     <div class="px-5 py-4 border-b flex justify-between items-center shrink-0">
-      <h3 class="font-black text-slate-800 text-base">내 활동</h3>
+      <h3 class="font-black text-slate-800 text-base" data-i18n="ma_activity_title">My Activity</h3>
       <button onclick="closeModal('myActivityModal')" class="text-slate-400 font-black text-xl leading-none">✕</button>
     </div>
     <div class="flex gap-2 px-4 py-3 border-b shrink-0">
-      <button id="atab-msg"   onclick="activityTab('msg')"   class="flex-1 py-2 rounded-xl font-black text-xs bg-[#001d4a] text-white">✉️ 쪽지</button>
-      <button id="atab-posts" onclick="activityTab('posts')" class="flex-1 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📝 내 게시물</button>
+      <button id="atab-msg"   onclick="activityTab('msg')"   class="flex-1 py-2 rounded-xl font-black text-xs bg-[#001d4a] text-white" data-i18n="ma_tab_msg">Messages</button>
+      <button id="atab-posts" onclick="activityTab('posts')" class="flex-1 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="ma_tab_posts">My Posts</button>
     </div>
     <div class="flex-1 overflow-y-auto no-scroll">
       <div id="activity-msg"   class="p-4"></div>
@@ -1359,7 +1359,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <p id="sideNickname" class="text-sm font-black text-white mb-0.5"></p>
           <p id="sideTimer" class="text-xs font-black text-blue-300"></p>
         </div>
-        <button onclick="goPage('settings');closeMenu();" class="w-full py-3 rounded-2xl bg-white/10 text-white font-black text-sm">👤 내 정보 수정</button>
+        <button onclick="goPage('settings');closeMenu();" class="w-full py-3 rounded-2xl bg-white/10 text-white font-black text-sm" data-i18n="settings_edit_profile">👤 Edit Profile</button>
         <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-500/20 text-red-300 font-black text-sm" data-i18n="side_logout">Logout</button>
       </div>
     </div>
@@ -1652,8 +1652,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <div id="wiz-stl-drop" onclick="document.getElementById('wiz-stl-input').click()" ondragover="wizOnStlDragOver(event)" ondragleave="wizOnStlDragLeave(event)" ondrop="wizOnStlDrop(event)"
               class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer bg-slate-50 transition-colors">
               <p class="text-3xl mb-2">📁</p>
-              <p class="text-xs font-black text-slate-500 mb-1">모든 파일 형식 지원</p>
-              <p class="text-[9px] text-slate-400">STL · 이미지 · PDF · 기타 · 최대 10개</p>
+              <p class="text-xs font-black text-slate-500 mb-1" data-i18n="wiz_stl_all_formats">All file formats supported</p>
+              <p class="text-[9px] text-slate-400" data-i18n="wiz_stl_formats_hint">STL · Image · PDF · Other · Max 10</p>
             </div>
             <input type="file" id="wiz-stl-input" class="hidden" multiple onchange="wizOnStlSelect(this)">
           </div>
@@ -1708,19 +1708,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="editOrderModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeEditModal()">
       <div class="bg-white rounded-t-3xl w-full p-5 max-h-[88vh] overflow-y-auto pb-8">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800 text-sm">주문 수정</h3>
+          <h3 class="font-black text-slate-800 text-sm" data-i18n="edit_order_title">Edit Order</h3>
           <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 font-black text-sm">✕</button>
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-1">클리닉 / 랩 이름</p>
+          <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_clinic_ph">Clinic / Lab Name</p>
           <input id="edit-clinic" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-1">배송 주소</p>
+          <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_addr_ph">Delivery Address</p>
           <input id="edit-addr" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-1">연락처</p>
+          <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_phone_ph">Contact Number</p>
           <input id="edit-phone" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-4">
@@ -1728,7 +1728,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <input id="edit-line" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div id="editCases" class="mb-4 space-y-3"></div>
-        <button onclick="saveEditOrder()" class="w-full py-3.5 bg-[#001d4a] text-white rounded-2xl font-black text-sm active:scale-95 transition">저장</button>
+        <button onclick="saveEditOrder()" class="w-full py-3.5 bg-[#001d4a] text-white rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="pe_save">Save</button>
       </div>
     </div>
     <!-- 배송 정보 모달 -->
@@ -1765,11 +1765,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="shopShippingModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeShopShippingModal()">
       <div class="bg-white rounded-t-3xl w-full p-5 pb-8">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800 text-sm">🚚 쇼핑몰 배송 정보 입력</h3>
+          <h3 class="font-black text-slate-800 text-sm" data-i18n="shop_ship_title">🚚 Shop Shipping Info</h3>
           <button onclick="closeShopShippingModal()" class="text-slate-400 font-black text-lg leading-none">✕</button>
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-2">배송사</p>
+          <p class="text-xs font-black text-slate-600 mb-2" data-i18n="carrier_label">Carrier</p>
           <select id="sship-carrier" onchange="toggleShopCustomCarrier()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
             <option value="">Select...</option>
             <option>Kerry Express</option>
@@ -1778,17 +1778,17 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <option>DHL</option>
             <option>FedEx</option>
             <option>Thailand Post</option>
-            <option value="custom">직접 입력</option>
+            <option value="custom" data-i18n="custom_carrier_direct">Enter manually</option>
           </select>
         </div>
         <div id="sship-carrier-custom-wrap" class="mb-3 hidden">
-          <input id="sship-carrier-custom" type="text" placeholder="배송사 이름 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <input id="sship-carrier-custom" type="text" data-i18n-ph="ship_carrier_ph" placeholder="Carrier name" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-4">
-          <p class="text-xs font-black text-slate-600 mb-2">송장번호</p>
-          <input id="sship-tracking" type="text" placeholder="송장번호 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <p class="text-xs font-black text-slate-600 mb-2" data-i18n="ship_tracking_label">Tracking Number</p>
+          <input id="sship-tracking" type="text" data-i18n-ph="ship_tracking_ph" placeholder="Enter tracking number" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
-        <button onclick="adminConfirmShopShipping()" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>
+        <button onclick="adminConfirmShopShipping()" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="ship_process_btn">🚚 Process Shipping → Send LINE</button>
       </div>
     </div>
     <!-- ==================== USED MARKET ==================== -->
@@ -2116,12 +2116,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <!-- 보조 탭 버튼 -->
         <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품</button>
-          <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">♻️ 중고</button>
-          <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💬 포럼</button>
-          <button onclick="adminShowTab('jobs')" id="adminTabBtn-jobs" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💼 구인구직</button>
-          <button onclick="adminShowTab('webzine')" id="adminTabBtn-webzine" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📰 웹진</button>
-          <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📅 이벤트</button>
+          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_products">🛍 Products</button>
+          <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_used">♻️ Used</button>
+          <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_forum">💬 Forum</button>
+          <button onclick="adminShowTab('jobs')" id="adminTabBtn-jobs" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_jobs">💼 Jobs</button>
+          <button onclick="adminShowTab('webzine')" id="adminTabBtn-webzine" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_webzine">📰 Webzine</button>
+          <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_events">📅 Events</button>
           <button onclick="adminShowTab('ads')" id="adminTabBtn-ads" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_ads">📢 광고 관리</button>
           <button onclick="adminShowTab('stats')" id="adminTabBtn-stats" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_stats">📊 통계</button>
         </div>
@@ -2213,16 +2213,16 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <!-- 내가 쓴 게시물 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-black text-slate-800">✍️ 내가 쓴 게시물</h3>
-          <button onclick="goPage('forum')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100">모두 보기 ›</button>
+          <h3 class="font-black text-slate-800" data-i18n="settings_my_posts">✍️ My Posts</h3>
+          <button onclick="goPage('forum')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsMyPosts" class="space-y-2"></div>
       </div>
       <!-- 내 중고물품 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-black text-slate-800">♻️ 내 중고물품</h3>
-          <button onclick="goPage('used')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100">모두 보기 ›</button>
+          <h3 class="font-black text-slate-800" data-i18n="settings_my_used">♻️ My Used Items</h3>
+          <button onclick="goPage('used')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsMyUsed" class="grid grid-cols-3 gap-2"></div>
       </div>
@@ -2362,26 +2362,26 @@ function _showViewerPanel(type) {
   document.getElementById('viewerPdfPanel').style.display     = type === 'pdf'    ? '' : 'none';
   document.getElementById('viewerOtherPanel').style.display   = type === 'other'  ? '' : 'none';
   var hint = document.getElementById('fileViewerHint');
-  if (hint) hint.textContent = type === '3d' ? '드래그: 회전 · 스크롤: 줌' : '';
+  if (hint) hint.textContent = type === '3d' ? t('stl_viewer_hint') : '';
 }
 
 function openFileViewer(url, filename) {
   var type = _fileViewerType(filename || url);
-  var titleMap = { '3d':'🧊 3D 미리보기', 'image':'🖼 이미지', 'pdf':'📄 PDF', 'other':'📎 파일' };
+  var titleMap = { '3d':t('stl_viewer_3d'), 'image':t('stl_viewer_image'), 'pdf':t('stl_viewer_pdf'), 'other':t('stl_viewer_file') };
   var titleEl = document.getElementById('fileViewerTitle');
-  if (titleEl) titleEl.textContent = (titleMap[type] || '📎 파일') + ' — ' + (filename || '');
+  if (titleEl) titleEl.textContent = (titleMap[type] || t('stl_viewer_file')) + ' — ' + (filename || '');
   document.getElementById('stlDownloadBtn').href = url;
   document.getElementById('stlDownloadBtn').download = filename || '';
   document.getElementById('stlViewerModal').classList.add('open');
   _showViewerPanel(type);
   if (type === '3d') {
     document.getElementById('stlViewerMsg').style.display = 'flex';
-    document.getElementById('stlViewerMsg').textContent = '불러오는 중...';
+    document.getElementById('stlViewerMsg').textContent = t('stl_loading');
     _initStlScene();
     fetch(url)
       .then(function(r){ return r.arrayBuffer(); })
       .then(function(buf){ _loadStlBuffer(buf); })
-      .catch(function(){ document.getElementById('stlViewerMsg').textContent = '파일을 불러올 수 없습니다.'; });
+      .catch(function(){ document.getElementById('stlViewerMsg').textContent = t('stl_load_error'); });
   } else if (type === 'image') {
     document.getElementById('viewerImg').src = url;
   } else if (type === 'pdf') {
@@ -2448,7 +2448,7 @@ function _loadStlBuffer(buf) {
   if (!loader) {
     // STLLoader not bundled in three.min; parse manually (binary STL)
     var geometry = _parseBinaryStl(buf) || _parseAsciiStl(buf);
-    if (!geometry) { document.getElementById('stlViewerMsg').textContent = '파싱 오류'; return; }
+    if (!geometry) { document.getElementById('stlViewerMsg').textContent = t('stl_parse_error'); return; }
     _showStlGeometry(geometry);
   } else {
     var geometry = loader.parse(buf);

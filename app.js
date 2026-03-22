@@ -451,6 +451,7 @@ function goPage(id) {
   if (id === 'settings') renderProfileSettings();
   renderDesktopSidebar(id);
   updateDesktopHero(id);
+  applyLang();
 }
 function goDetailPage(pageId, title, fromPage) {
   prevPage = fromPage || currentPage;
@@ -676,7 +677,7 @@ function renderProfileSettings() {
     } else {
       var myPosts = posts.filter(function(p){ return p.author === currentUser.nickname; }).slice(0, 5);
       if (!myPosts.length) {
-        myPostsEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">작성한 게시물이 없습니다.</p>';
+        myPostsEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('ma_no_posts') + '</p>';
       } else {
         myPostsEl.innerHTML = myPosts.map(function(p) {
           return '<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 cursor-pointer active:bg-slate-50" onclick="openForumDetail(' + p.id + ')">' +
@@ -698,7 +699,7 @@ function renderProfileSettings() {
     } else {
       var myUsed = usedItems.filter(function(u){ return u.seller === 'Me' || u.seller === currentUser.nickname; }).slice(0, 6);
       if (!myUsed.length) {
-        myUsedEl.innerHTML = '<p class="col-span-3 text-sm text-slate-400 font-bold">등록한 중고물품이 없습니다.</p>';
+        myUsedEl.innerHTML = '<p class="col-span-3 text-sm text-slate-400 font-bold">' + t('ma_no_used') + '</p>';
       } else {
         myUsedEl.innerHTML = myUsed.map(function(u) {
           var thumb = u.image
@@ -889,8 +890,8 @@ function renderMyMsgs() {
   var nick  = currentUser.nickname;
   var inbox = messages.filter(function(m){ return m.to===nick; });
   var sent  = messages.filter(function(m){ return m.from===nick; });
-  var html = '<button onclick="openCompose()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-xl font-black text-xs mb-4 active:scale-95 transition">✉️ 새 쪽지 보내기</button>';
-  html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">받은 쪽지 (' + inbox.length + ')</p>';
+  var html = '<button onclick="openCompose()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-xl font-black text-xs mb-4 active:scale-95 transition">' + t('ma_compose_btn') + '</button>';
+  html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('ma_inbox_label') + ' (' + inbox.length + ')</p>';
   if (inbox.length) {
     html += inbox.slice().reverse().map(function(m){
       return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm border-l-4 ' + (m.read?'border-slate-100':'border-blue-500') + '">' +
@@ -900,13 +901,13 @@ function renderMyMsgs() {
         '</div>' +
         '<p class="text-xs font-bold text-slate-600 mb-1">' + m.subject + '</p>' +
         '<p class="text-[10px] text-slate-500 leading-relaxed">' + m.body + '</p>' +
-        '<button onclick="openCompose(\'' + m.from + '\')" class="mt-2 text-[9px] text-blue-500 font-black">← 답장</button>' +
+        '<button onclick="openCompose(\'' + m.from + '\')" class="mt-2 text-[9px] text-blue-500 font-black">' + t('ma_reply_btn') + '</button>' +
       '</div>';
     }).join('');
   } else {
-    html += '<p class="text-[10px] text-slate-300 font-bold py-3 text-center">받은 쪽지가 없습니다.</p>';
+    html += '<p class="text-[10px] text-slate-300 font-bold py-3 text-center">' + t('ma_no_inbox') + '</p>';
   }
-  html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-4">보낸 쪽지 (' + sent.length + ')</p>';
+  html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 mt-4">' + t('ma_sent_label') + ' (' + sent.length + ')</p>';
   if (sent.length) {
     html += sent.slice().reverse().map(function(m){
       return '<div class="bg-slate-50 rounded-xl p-3 mb-2">' +
@@ -919,7 +920,7 @@ function renderMyMsgs() {
       '</div>';
     }).join('');
   } else {
-    html += '<p class="text-[10px] text-slate-300 font-bold py-3 text-center">보낸 쪽지가 없습니다.</p>';
+    html += '<p class="text-[10px] text-slate-300 font-bold py-3 text-center">' + t('ma_no_sent') + '</p>';
   }
   el.innerHTML = html;
 }
@@ -929,16 +930,16 @@ function renderMyPosts() {
   var nick = currentUser.nickname;
   var items = [];
   usedItems.filter(function(x){ return x.seller===nick||x.seller==='Me'; }).forEach(function(x){
-    items.push({ type:'중고마켓', icon:'♻️', title:x.name, sub:x.price.toLocaleString()+' THB', date:x.date });
+    items.push({ type:t('ma_type_used'), icon:'♻️', title:x.name, sub:x.price.toLocaleString()+' THB', date:x.date });
   });
   posts.filter(function(p){ return p.author===nick; }).forEach(function(p){
-    items.push({ type:'임상토론방', icon:'💬', title:p.title, sub:p.category==='implant'?'🦷 임플란트':'💎 보철', date:p.date||'' });
+    items.push({ type:t('ma_type_forum'), icon:'💬', title:p.title, sub:p.category==='implant'?t('ma_cat_implant'):t('ma_cat_prosthetic'), date:p.date||'' });
   });
   customOrders.forEach(function(o){
     items.push({ type:'CNC Custom', icon:'⚙️', title:o.clinic+' · '+o.id, sub:t('stage_'+o.stage)||o.stage, date:o.date });
   });
   items.sort(function(a,b){ return b.date>a.date?1:b.date<a.date?-1:0; });
-  if (!items.length) { el.innerHTML='<p class="text-sm text-slate-300 font-bold text-center py-10">게시물이 없습니다.</p>'; return; }
+  if (!items.length) { el.innerHTML='<p class="text-sm text-slate-300 font-bold text-center py-10">' + t('ma_no_activity') + '</p>'; return; }
   el.innerHTML = items.map(function(item){
     return '<div class="bg-white rounded-xl p-3 mb-2 shadow-sm">' +
       '<div class="flex justify-between items-start mb-1">' +
@@ -961,11 +962,11 @@ function sendMsg() {
   var to      = document.getElementById('compose-to').value.trim();
   var subject = document.getElementById('compose-subj').value.trim();
   var body    = document.getElementById('compose-body').value.trim();
-  if (!to||!subject||!body) { showToast('받는 사람, 제목, 내용을 모두 입력해주세요.', 'warning'); return; }
+  if (!to||!subject||!body) { showToast(t('compose_fill_error'), 'warning'); return; }
   messages.push({ id:Date.now(), from:currentUser.nickname, to:to, subject:subject, body:body, date:new Date().toLocaleDateString(), read:false });
   closeModal('composeModal');
   renderMyMsgs();
-  showToast('쪽지를 보냈습니다!', 'success');
+  showToast(t('compose_sent_msg'), 'success');
 }
 
 // ============================================================

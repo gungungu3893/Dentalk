@@ -94,7 +94,7 @@ async function renderMyShopOrders() {
 }
 function _renderMyShopOrdersList(container, orders) {
   if (!orders.length) {
-    container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">주문 내역이 없습니다.</p>';
+    container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">' + t('shop_no_orders_msg') + '</p>';
     return;
   }
   var html = SHOP_STAGES.map(function(stage){
@@ -112,19 +112,19 @@ function _renderMyShopOrdersList(container, orders) {
         '</div>' +
         '<p class="text-[9px] text-slate-400 mb-2">📅 ' + (o.date||'') + (o.carrier ? ' · 🚚 ' + o.carrier + (o.tracking ? ' ' + o.tracking : '') : '') + '</p>' +
         '<div class="space-y-0.5 mb-2">' + itemsHtml + '</div>' +
-        '<p class="text-xs font-black text-blue-800 text-right">합계 ' + total.toLocaleString() + ' THB</p>' +
+        '<p class="text-xs font-black text-blue-800 text-right">' + t('shop_total_label') + ' ' + total.toLocaleString() + ' THB</p>' +
       '</div>';
     }).join('');
     return '<div class="mb-4">' +
       '<div class="flex items-center gap-2 mb-2">' +
         '<span>' + stage.icon + '</span>' +
-        '<span class="font-black text-slate-700 text-xs">' + stage.label + '</span>' +
-        '<span class="bg-blue-100 text-blue-700 font-black text-[9px] px-2 py-0.5 rounded-full">' + stageOrders.length + '건</span>' +
+        '<span class="font-black text-slate-700 text-xs">' + t(stage.labelKey) + '</span>' +
+        '<span class="bg-blue-100 text-blue-700 font-black text-[9px] px-2 py-0.5 rounded-full">' + stageOrders.length + (t('shop_count_suffix') ? ' ' + t('shop_count_suffix') : '') + '</span>' +
       '</div>' +
       ordersHtml +
     '</div>';
   }).join('');
-  container.innerHTML = html || '<p class="text-center text-slate-400 text-xs py-3 font-bold">주문 내역이 없습니다.</p>';
+  container.innerHTML = html || '<p class="text-center text-slate-400 text-xs py-3 font-bold">' + t('shop_no_orders_msg') + '</p>';
 }
 function openShopCategory(catId) {
   if (LOCKED.includes('shop') && !isLoggedIn()) { openLoginModal('shop'); return; }
@@ -482,20 +482,20 @@ function completePayment() {
   var itemFields = order.items.map(function(i){
     return { label: i.name, value: '[' + i.code + '] ×' + i.qty + '  ' + (i.price*i.qty).toLocaleString() + ' THB' };
   });
-  itemFields.push({ label: '합계', value: order.totalAmount.toLocaleString() + ' THB' });
+  itemFields.push({ label: t('shop_total_label'), value: order.totalAmount.toLocaleString() + ' THB' });
   var adminFields = [
-    { label: '주문번호', value: order.id },
-    { label: '클리닉', value: order.clinic },
-    { label: '날짜', value: order.date },
-    { label: '연락처', value: order.phone },
-    { label: '주소', value: order.address },
+    { label: t('shop_receipt_order_no'), value: order.id },
+    { label: t('shop_receipt_clinic'), value: order.clinic },
+    { label: t('shop_receipt_date'), value: order.date },
+    { label: t('shop_receipt_contact'), value: order.phone },
+    { label: t('shop_receipt_address'), value: order.address },
   ].concat(order.lineId ? [{ label: 'Line ID', value: order.lineId }] : []).concat(itemFields);
   sendLineMessage(LINE_USER_ID, [buildFlexMessage('🛒', 'คำสั่งซื้อใหม่จากร้านค้า', adminFields, 'ลูกค้าชำระเงินผ่าน QR เรียบร้อยแล้ว', 'Shop Order')]);
   // 결제완료 팝업
   document.getElementById('payCompleteSummary').innerHTML =
-    '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">주문번호: ' + order.id + '</p>' +
+    '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">' + t('shop_receipt_order_no') + ': ' + order.id + '</p>' +
     order.items.map(function(i){ return '<div class="flex justify-between text-xs gap-2"><span class="flex-1 font-bold">' + i.name + '</span><span class="font-mono text-slate-500">' + i.code + '</span><span class="font-black ml-1">×' + i.qty + '</span><span class="font-mono font-black ml-1">' + (i.price*i.qty).toLocaleString() + '</span></div>'; }).join('') +
-    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-blue-800"><span>합계</span><span class="font-mono">' + order.totalAmount.toLocaleString() + ' THB</span></div>';
+    '<div class="border-t mt-2 pt-2 flex justify-between font-black text-blue-800"><span>' + t('shop_total_label') + '</span><span class="font-mono">' + order.totalAmount.toLocaleString() + ' THB</span></div>';
   cart=[]; updateBadge(); closeModal('qrModal');
   openModal('payCompleteModal');
 }
@@ -505,12 +505,12 @@ function closePayComplete() { closeModal('payCompleteModal'); goPage('shop'); }
 // 쇼핑몰 주문 관리
 // ============================================================
 var SHOP_STAGES = [
-  { key:'submitted',         label:'주문접수',   icon:'📥', next:'payment_pending' },
-  { key:'payment_pending',   label:'입금대기',   icon:'🏦', next:'payment_confirmed' },
-  { key:'payment_confirmed', label:'입금확인',   icon:'💳', next:'preparing' },
-  { key:'preparing',         label:'제품준비중', icon:'📦', next:'shipped' },
-  { key:'shipped',           label:'배송중',     icon:'🚚', next:'delivered' },
-  { key:'delivered',         label:'배송완료',   icon:'✅', next:null },
+  { key:'submitted',         labelKey:'shop_stage_submitted',         icon:'📥', next:'payment_pending' },
+  { key:'payment_pending',   labelKey:'shop_stage_payment_pending',   icon:'🏦', next:'payment_confirmed' },
+  { key:'payment_confirmed', labelKey:'shop_stage_payment_confirmed', icon:'💳', next:'preparing' },
+  { key:'preparing',         labelKey:'shop_stage_preparing',         icon:'📦', next:'shipped' },
+  { key:'shipped',           labelKey:'shop_stage_shipped',           icon:'🚚', next:'delivered' },
+  { key:'delivered',         labelKey:'shop_stage_delivered',         icon:'✅', next:null },
 ];
 // ── 태국어 상태 라벨 (LINE 알림용) ──────────────────────────
 var SHOP_STAGE_TH = {
@@ -573,14 +573,14 @@ async function renderAdminShopOrders() {
       var hasOrders = counts[s.key] > 0;
       return '<button onclick="adminShopStageTab(\'' + s.key + '\')" class="shrink-0 px-3 py-2 rounded-xl font-black text-xs transition ' +
         (active ? 'bg-[#001d4a] text-white shadow' : 'bg-slate-100 text-slate-500') + '">' +
-        s.icon + ' ' + s.label +
+        s.icon + ' ' + t(s.labelKey) +
         '<span class="ml-1 font-mono ' + (hasOrders ? 'text-amber-400' : (active ? 'text-slate-300' : 'text-slate-400')) + '">(' + counts[s.key] + ')</span>' +
       '</button>';
     }).join('') + '</div>';
   var filtered = orders.filter(function(o){ return o.stage === currentShopStageTab; });
   var contentHtml;
   if (!filtered.length) {
-    contentHtml = '<p class="text-center text-slate-400 text-sm py-8 font-bold">해당 단계의 주문이 없습니다.</p>';
+    contentHtml = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('shop_no_stage_orders') + '</p>';
   } else {
     // Stage badge colors
     var stageBadgeClass = {
@@ -597,13 +597,13 @@ async function renderAdminShopOrders() {
         return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + (i.price*i.qty).toLocaleString() + '</span></div>';
       }).join('');
       var advanceBtn = nextStage
-        ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-2 py-2 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + nextStage.label + ' → LINE</button>'
+        ? '<button onclick="adminAdvanceShopOrder(\'' + o.id + '\')" class="w-full mt-2 py-2 bg-blue-600 text-white rounded-xl font-black text-xs active:scale-95 transition">' + nextStage.icon + ' ' + t(nextStage.labelKey) + ' → LINE</button>'
         : '<div class="mt-2 text-center"><p class="text-[10px] font-black text-green-500">✅ ' + t('shipped_status') + '</p></div>';
       var stageDropdown = '<div class="mt-2">' +
         '<label class="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-1">' + t('admin_change_status') + '</label>' +
         '<select onchange="adminChangeShopOrderStage(\'' + o.id + '\',this.value)" class="w-full border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-blue-400 bg-white">' +
         SHOP_STAGES.map(function(s) {
-          return '<option value="' + s.key + '"' + (s.key === o.stage ? ' selected' : '') + '>' + s.icon + ' ' + s.label + '</option>';
+          return '<option value="' + s.key + '"' + (s.key === o.stage ? ' selected' : '') + '>' + s.icon + ' ' + t(s.labelKey) + '</option>';
         }).join('') +
         '</select></div>';
       var badgeCls = stageBadgeClass[o.stage] || 'bg-slate-100 text-slate-600';
@@ -611,7 +611,7 @@ async function renderAdminShopOrders() {
         // Table-style header row: status badge | customer name | date | total
         '<div class="px-4 py-3 border-b border-slate-50">' +
           '<div class="flex items-center justify-between gap-2 mb-1">' +
-            '<span class="text-[10px] font-black px-2 py-0.5 rounded-full ' + badgeCls + '">' + stage.icon + ' ' + stage.label + '</span>' +
+            '<span class="text-[10px] font-black px-2 py-0.5 rounded-full ' + badgeCls + '">' + stage.icon + ' ' + t(stage.labelKey) + '</span>' +
             '<span class="text-[9px] font-mono text-slate-400">' + o.date + '</span>' +
           '</div>' +
           '<div class="flex items-end justify-between gap-2">' +
@@ -684,8 +684,8 @@ function adminConfirmShopShipping() {
     ? document.getElementById('sship-carrier-custom').value.trim()
     : sel.value;
   var tracking = document.getElementById('sship-tracking').value.trim();
-  if (!carrier) { showToast('배송사를 선택해주세요.', 'warning'); return; }
-  if (!tracking) { showToast('송장번호를 입력해주세요.', 'warning'); return; }
+  if (!carrier) { showToast(t('shop_carrier_select_err'), 'warning'); return; }
+  if (!tracking) { showToast(t('shop_tracking_input_err'), 'warning'); return; }
   closeShopShippingModal();
   _doAdvanceShopOrder(orderId, 'shipped', carrier, tracking);
 }
