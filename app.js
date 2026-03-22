@@ -817,7 +817,7 @@ async function openMyActivity() {
     var sbMsgs = await sbGetMessages(currentUser.nickname);
     if (sbMsgs && sbMsgs.length) {
       messages = sbMsgs.map(function(m) {
-        return { id: m.id, from: m.sender_id, to: m.receiver_id, subject: m.subject, body: m.content, date: m.created_at ? m.created_at.slice(0, 10) : '', read: m.is_read, _sbId: m.id };
+        return { id: m.id, from: m.from_user, to: m.to_user, subject: m.subject, body: m.body, date: m.created_at ? m.created_at.slice(0, 10) : '', read: m.is_read, _sbId: m.id };
       });
     }
   } catch(e) { console.error('[Messages Load]', e); }
@@ -1008,7 +1008,7 @@ async function sendMsg() {
   renderMyMsgs();
   showToast(t('compose_sent_msg'), 'success');
   // Supabase 저장 (비동기)
-  sbSendMessage({ sender_id: currentUser.nickname, receiver_id: to, subject: subject, content: body }).catch(function(e){ console.error('[Message Save]', e); });
+  sbSendMessage({ from_user: currentUser.nickname, to_user: to, subject: subject, body: body }).catch(function(e){ console.error('[Message Save]', e); });
   // LINE 알림: 수신자에게 쪽지 알림
   sendLinePushText(to, '✉️ 새 쪽지가 도착했습니다.\nYou have a new message.\nคุณมีข้อความใหม่\n\n📨 ' + escHtml(currentUser.nickname) + ': ' + escHtml(subject));
 }

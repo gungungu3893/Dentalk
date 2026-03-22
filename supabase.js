@@ -276,7 +276,7 @@ async function sbSaveUsedComment(comment) {
 // ============================================================
 
 async function sbGetMessages(nickname) {
-  return sbGet('messages', 'or=(sender_id.eq.' + encodeURIComponent(nickname) + ',receiver_id.eq.' + encodeURIComponent(nickname) + ')&select=id,sender_id,receiver_id,subject,content,is_read,created_at&order=created_at.desc');
+  return sbGet('messages', 'or=(from_user.eq.' + encodeURIComponent(nickname) + ',to_user.eq.' + encodeURIComponent(nickname) + ')&select=id,from_user,to_user,subject,body,is_read,created_at&order=created_at.desc');
 }
 
 async function sbSendMessage(msg) {
@@ -284,10 +284,10 @@ async function sbSendMessage(msg) {
     method: 'POST',
     headers: sbHeaders({ 'Prefer': 'return=representation' }),
     body: JSON.stringify({
-      sender_id: msg.sender_id,
-      receiver_id: msg.receiver_id,
+      from_user: msg.from_user,
+      to_user: msg.to_user,
       subject: msg.subject,
-      content: msg.content,
+      body: msg.body,
     }),
   });
   if (!res.ok) throw new Error('[sbSendMessage] HTTP ' + res.status);
@@ -300,7 +300,7 @@ async function sbMarkMessageRead(msgId) {
 }
 
 async function sbGetUnreadMessageCount(nickname) {
-  var rows = await sbGet('messages', 'receiver_id=eq.' + encodeURIComponent(nickname) + '&is_read=eq.false&select=id');
+  var rows = await sbGet('messages', 'to_user=eq.' + encodeURIComponent(nickname) + '&is_read=eq.false&select=id');
   return rows ? rows.length : 0;
 }
 

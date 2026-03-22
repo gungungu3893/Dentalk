@@ -1,5 +1,7 @@
--- used_comments + messages 테이블 생성
+-- used_comments 테이블 생성
 -- 실행: Supabase Dashboard → SQL Editor
+-- NOTE: messages 테이블은 이미 존재하므로 여기서 생성하지 않음
+-- 기존 messages 컬럼: id, from_user, to_user, topic, subject, body, is_read, created_at, extension, payload, event, private
 
 -- ① used_comments 테이블 (중고마켓 댓글)
 CREATE TABLE IF NOT EXISTS used_comments (
@@ -28,36 +30,8 @@ CREATE POLICY "used_comments_delete" ON used_comments
 
 COMMENT ON TABLE used_comments IS '중고마켓 게시물 댓글';
 
--- ② messages 테이블 (쪽지 시스템)
-CREATE TABLE IF NOT EXISTS messages (
-  id BIGSERIAL PRIMARY KEY,
-  sender_id TEXT NOT NULL,
-  receiver_id TEXT NOT NULL,
-  subject TEXT NOT NULL DEFAULT '',
-  content TEXT NOT NULL DEFAULT '',
-  is_read BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id);
-CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id);
-CREATE INDEX IF NOT EXISTS idx_messages_created ON messages(created_at DESC);
-
--- RLS 활성화
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "messages_select" ON messages
-  FOR SELECT USING (true);
-
-CREATE POLICY "messages_insert" ON messages
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "messages_update" ON messages
-  FOR UPDATE USING (true) WITH CHECK (true);
-
-CREATE POLICY "messages_delete" ON messages
-  FOR DELETE USING (true);
-
-COMMENT ON TABLE messages IS '유저간 쪽지(DM) 시스템';
-COMMENT ON COLUMN messages.sender_id IS '보낸 사람 닉네임';
-COMMENT ON COLUMN messages.receiver_id IS '받는 사람 닉네임';
+-- ② messages 테이블은 이미 존재함 (CREATE TABLE 생략)
+-- 기존 컬럼: id(uuid), from_user(text), to_user(text), topic(text), subject(text),
+--            body(text), is_read(boolean), created_at(timestamp), extension(text),
+--            payload(jsonb), event(text), private(boolean)
+-- 쪽지 기능에서 사용하는 컬럼: from_user, to_user, subject, body, is_read, created_at
