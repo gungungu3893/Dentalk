@@ -248,14 +248,14 @@ export default {
               // 매칭 안 됨 — 환영 메시지 발송
               await lineReplyMessage(token, event.replyToken, {
                 type: 'text',
-                text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\nOrder via the app and receive notifications through LINE.\n\n🔗 https://dentalk.app',
+                text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\nOrder via the app and receive notifications through LINE.\n🔗 https://dentalk.app',
               });
             }
           } else if (event.replyToken) {
             // 텍스트가 아닌 메시지 (이미지, 스티커 등) — 환영 메시지 발송
             await lineReplyMessage(token, event.replyToken, {
               type: 'text',
-              text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\nOrder via the app and receive notifications through LINE.\n\n🔗 https://dentalk.app',
+              text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\nOrder via the app and receive notifications through LINE.\n🔗 https://dentalk.app',
             });
           }
         }
