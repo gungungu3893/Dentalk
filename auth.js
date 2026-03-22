@@ -277,6 +277,7 @@ async function handleLogin() {
   closeModal('loginModal');
   // 알림 배지 업데이트
   updateNotifBadge();
+  updateMsgBadge();
   // 로그인 직후 CNC 주문 로드 → 설정 페이지 요약에 반영
   loadOrdersFromSupabase().then(function() { renderProfileSettings(); });
   renderProfileSettings(); // 로딩 전 빈 화면 방지용 즉시 렌더

@@ -75,7 +75,7 @@ function renderJobs() {
             (j.salary_range ? '<span class="text-green-500 font-black">' + escHtml(j.salary_range) + '</span><span>·</span>' : '') +
             '<span>' + dateStr + '</span>' +
             '<span>·</span>' +
-            '<span>' + escHtml(j.user_id || '') + '</span>' +
+            '<span class="cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(j.user_id || '') + '\')">' + escHtml(j.user_id || '') + '</span>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -105,7 +105,10 @@ function openJobDetail(id) {
   document.getElementById('jd-typeBadge').textContent = typeCfg.icon + ' ' + t(typeCfg.labelKey);
   document.getElementById('jd-regionBadge').textContent = regionLabel + provinceLbl;
   document.getElementById('jd-title').textContent = job.title;
-  document.getElementById('jd-author').textContent = job.user_id || '';
+  var jdAuthorEl = document.getElementById('jd-author');
+  jdAuthorEl.textContent = job.user_id || '';
+  jdAuthorEl.className = (jdAuthorEl.className || '') + ' cursor-pointer hover:text-blue-600';
+  jdAuthorEl.onclick = function(){ openCompose(job.user_id); };
   document.getElementById('jd-date').textContent = job.date ? job.date.slice(0,10) : '';
 
   // 급여

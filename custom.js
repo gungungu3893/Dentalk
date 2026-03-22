@@ -1001,6 +1001,7 @@ function renderUsed() {
         badge +
         '<p class="font-black text-slate-800 text-[10px] leading-snug line-clamp-2">' + item.name + '</p>' +
         '<p class="font-black text-blue-700 text-[10px] font-mono">฿' + item.price.toLocaleString() + '</p>' +
+        '<p class="text-[8px] text-slate-400 font-bold truncate">👤 ' + escHtml(item.seller) + '</p>' +
         '<p class="text-[8px] text-slate-300 font-bold">' + date + '</p>' +
       '</div>' +
     '</div>';
@@ -1104,8 +1105,12 @@ function openUsedDetail(id) {
   document.getElementById('udp-cond').textContent   = condLabel[item.cond];
   document.getElementById('udp-cond').className     = 'text-xs font-black px-2 py-1 rounded-lg ' + condColor[item.cond];
   document.getElementById('udp-desc').textContent   = item.desc;
-  document.getElementById('udp-meta').textContent   = item.seller + ' · ' + item.date;
+  document.getElementById('udp-meta').textContent   = item.date;
   document.getElementById('udp-views').textContent  = item.views;
+  // 판매자 프로필
+  document.getElementById('udp-sellerName').textContent = item.seller;
+  var isMine = isLoggedIn() && (item.seller === 'Me' || item.seller === currentUser.nickname);
+  document.getElementById('udp-msgBtn').style.display = isMine ? 'none' : '';
   document.getElementById('udp-contactBtn').onclick = function(){ showContact(item.contact, item.seller); };
   var deleteBtn = document.getElementById('udp-deleteBtn');
   // 삭제 버튼: 로그인 상태이고 본인 게시물일 때만 표시
@@ -1128,7 +1133,76 @@ function openUsedDetail(id) {
   var imgEl   = document.getElementById('udp-image');
   if (item.image) { imgEl.src = item.image; imgWrap.classList.remove('hidden'); }
   else { imgWrap.classList.add('hidden'); imgEl.src = ''; }
+  // 댓글 폼 표시 (로그인 시)
+  var commentForm = document.getElementById('udp-commentForm');
+  if (commentForm) commentForm.classList.toggle('hidden', !isLoggedIn());
+  var commentNick = document.getElementById('usedCommentNick');
+  if (commentNick && isLoggedIn()) commentNick.textContent = currentUser.nickname;
+  // 현재 열린 중고 아이템 ID 저장
+  _currentUsedDetailId = item.id;
+  _currentUsedDetailItem = item;
   goDetailPage('used-detail', item.name, 'used');
+  // 댓글 로드
+  _loadUsedComments(item);
+}
+
+// ── 중고마켓 댓글 ─────────────────────────────────────────────
+var _currentUsedDetailId = null;
+var _currentUsedDetailItem = null;
+
+async function _loadUsedComments(item) {
+  var el = document.getElementById('udp-comments');
+  if (!el) return;
+  var sbId = item._sbId || item.id;
+  if (typeof sbId !== 'string') {
+    el.innerHTML = '<p class="text-xs text-slate-300 font-bold">' + t('used_comment_empty') + '</p>';
+    return;
+  }
+  try {
+    var comments = await sbGetUsedComments(sbId);
+    if (!comments || !comments.length) {
+      el.innerHTML = '<p class="text-xs text-slate-300 font-bold">' + t('used_comment_empty') + '</p>';
+      return;
+    }
+    el.innerHTML = comments.map(function(c) {
+      var dateStr = c.created_at ? c.created_at.slice(0, 10) : '';
+      return '<div class="bg-slate-50 rounded-2xl p-3">' +
+        '<div class="flex items-center gap-2 mb-1">' +
+          '<span class="text-xs font-black text-slate-700 cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(c.author_name) + '\')">' + escHtml(c.author_name) + '</span>' +
+          '<span class="text-[10px] text-slate-300">' + dateStr + '</span>' +
+        '</div>' +
+        '<p class="text-sm text-slate-600 leading-relaxed">' + escHtml(c.content) + '</p>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<p class="text-xs text-slate-300 font-bold">' + t('used_comment_empty') + '</p>';
+  }
+}
+
+async function submitUsedComment() {
+  var input = document.getElementById('usedCommentInput');
+  var text = input ? input.value.trim() : '';
+  if (!text || !isLoggedIn() || !_currentUsedDetailItem) return;
+  var item = _currentUsedDetailItem;
+  var sbId = item._sbId || item.id;
+  if (typeof sbId !== 'string') { showToast(t('err_generic'), 'error'); return; }
+  input.value = '';
+  try {
+    await sbSaveUsedComment({
+      used_item_id: sbId,
+      author_id: currentUser.nickname,
+      author_name: currentUser.nickname,
+      content: text,
+    });
+    _loadUsedComments(item);
+    // LINE 알림: 판매자에게 댓글 알림 (자기 글에 자기가 댓글 달면 발송 안 함)
+    if (item.seller && item.seller !== currentUser.nickname && item.seller !== 'Me') {
+      sendLinePushText(item.seller, '🏷️ 중고물품에 새 댓글이 달렸습니다.\nNew comment on your listing.\nมีความคิดเห็นใหม่เกี่ยวกับสินค้ามือสองของคุณ');
+    }
+  } catch(e) {
+    console.error('[Used Comment]', e);
+    showToast(t('err_generic'), 'error');
+  }
 }
 function openForumDetail(id) {
   if (LOCKED.includes('forum') && !isLoggedIn()) { openLoginModal('forum'); return; }

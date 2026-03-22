@@ -187,7 +187,7 @@ function renderForum() {
           '<p class="font-black text-slate-800 text-sm leading-snug mb-1 line-clamp-2">' + escHtml(p.title) + '</p>' +
           '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + escHtml(p.body) + '</p>' +
           '<div class="flex items-center gap-2 text-[10px] text-slate-300 font-bold">' +
-            '<span class="text-slate-500 font-black">' + escHtml(p.author) + '</span>' +
+            '<span class="text-slate-500 font-black cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(p.author) + '\')">' + escHtml(p.author) + '</span>' +
             authorLeaderBadge +
             '<span>·</span>' +
             '<span>' + (p.date||'') + '</span>' +
@@ -281,7 +281,7 @@ function renderComments(post) {
   el.innerHTML = post.comments.map(function(c){
     return '<div class="bg-slate-50 rounded-2xl p-3">' +
       '<div class="flex items-center gap-2 mb-1">' +
-        '<span class="text-xs font-black text-slate-700">' + escHtml(c.author) + '</span>' +
+        '<span class="text-xs font-black text-slate-700 cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(c.author) + '\')">' + escHtml(c.author) + '</span>' +
         '<span class="text-[10px] text-slate-300">' + escHtml(c.date) + '</span>' +
       '</div>' +
       '<p class="text-sm text-slate-600 leading-relaxed">' + escHtml(c.text) + '</p>' +

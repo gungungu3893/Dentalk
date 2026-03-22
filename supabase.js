@@ -248,6 +248,63 @@ async function sbUpdateUsedItem(id, updates) {
 }
 
 // ============================================================
+// Used Comments (중고마켓 댓글) — used_comments 테이블
+// ============================================================
+
+async function sbGetUsedComments(usedItemId) {
+  return sbGet('used_comments', 'used_item_id=eq.' + encodeURIComponent(usedItemId) + '&select=id,used_item_id,author_id,author_name,content,created_at&order=created_at.asc');
+}
+
+async function sbSaveUsedComment(comment) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/used_comments', {
+    method: 'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body: JSON.stringify({
+      used_item_id: comment.used_item_id,
+      author_id: comment.author_id,
+      author_name: comment.author_name,
+      content: comment.content,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveUsedComment] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+// ============================================================
+// Messages (쪽지) — messages 테이블
+// ============================================================
+
+async function sbGetMessages(nickname) {
+  return sbGet('messages', 'or=(sender_id.eq.' + encodeURIComponent(nickname) + ',receiver_id.eq.' + encodeURIComponent(nickname) + ')&select=id,sender_id,receiver_id,subject,content,is_read,created_at&order=created_at.desc');
+}
+
+async function sbSendMessage(msg) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/messages', {
+    method: 'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body: JSON.stringify({
+      sender_id: msg.sender_id,
+      receiver_id: msg.receiver_id,
+      subject: msg.subject,
+      content: msg.content,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSendMessage] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbMarkMessageRead(msgId) {
+  return sbPatch('messages', 'id=eq.' + encodeURIComponent(msgId), { is_read: true });
+}
+
+async function sbGetUnreadMessageCount(nickname) {
+  var rows = await sbGet('messages', 'receiver_id=eq.' + encodeURIComponent(nickname) + '&is_read=eq.false&select=id');
+  return rows ? rows.length : 0;
+}
+
+// ============================================================
 // Forum Posts (커뮤니티) — forum_posts 테이블
 // ============================================================
 

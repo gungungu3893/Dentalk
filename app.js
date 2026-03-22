@@ -810,9 +810,25 @@ async function saveProfile() {
 // ============================================================
 // 쪽지 & 내 활동 모달
 // ============================================================
-function openMyActivity() {
+async function openMyActivity() {
   if (!isLoggedIn()) { openLoginModal(); return; }
-  messages.forEach(function(m){ if (m.to===currentUser.nickname) m.read=true; });
+  // Supabase에서 쪽지 로드
+  try {
+    var sbMsgs = await sbGetMessages(currentUser.nickname);
+    if (sbMsgs && sbMsgs.length) {
+      messages = sbMsgs.map(function(m) {
+        return { id: m.id, from: m.sender_id, to: m.receiver_id, subject: m.subject, body: m.content, date: m.created_at ? m.created_at.slice(0, 10) : '', read: m.is_read, _sbId: m.id };
+      });
+    }
+  } catch(e) { console.error('[Messages Load]', e); }
+  // 읽음 처리
+  messages.forEach(function(m){
+    if (m.to === currentUser.nickname && !m.read) {
+      m.read = true;
+      if (m._sbId) sbMarkMessageRead(m._sbId).catch(function(){});
+    }
+  });
+  updateMsgBadge();
   goDetailPage('myactivity', t('nav_myactivity'), currentPage);
   myActivityTab('msg');
 }
@@ -981,15 +997,20 @@ function openCompose(toNick) {
   document.getElementById('compose-body').value = '';
   openModal('composeModal');
 }
-function sendMsg() {
+async function sendMsg() {
   var to      = document.getElementById('compose-to').value.trim();
   var subject = document.getElementById('compose-subj').value.trim();
   var body    = document.getElementById('compose-body').value.trim();
   if (!to||!subject||!body) { showToast(t('compose_fill_error'), 'warning'); return; }
-  messages.push({ id:Date.now(), from:currentUser.nickname, to:to, subject:subject, body:body, date:new Date().toLocaleDateString(), read:false });
+  var msg = { id:Date.now(), from:currentUser.nickname, to:to, subject:subject, body:body, date:new Date().toLocaleDateString(), read:false };
+  messages.push(msg);
   closeModal('composeModal');
   renderMyMsgs();
   showToast(t('compose_sent_msg'), 'success');
+  // Supabase 저장 (비동기)
+  sbSendMessage({ sender_id: currentUser.nickname, receiver_id: to, subject: subject, content: body }).catch(function(e){ console.error('[Message Save]', e); });
+  // LINE 알림: 수신자에게 쪽지 알림
+  sendLinePushText(to, '✉️ 새 쪽지가 도착했습니다.\nYou have a new message.\nคุณมีข้อความใหม่\n\n📨 ' + escHtml(currentUser.nickname) + ': ' + escHtml(subject));
 }
 
 // ============================================================
@@ -1512,6 +1533,24 @@ async function updateNotifBadge() {
   } catch(e) { badge.classList.add('hidden'); }
 }
 
+// ── 쪽지 미읽음 배지 (notifBadge에 합산 표시) ─────────────────
+async function updateMsgBadge() {
+  if (!isLoggedIn() || !currentUser || !currentUser.nickname) return;
+  try {
+    var count = await sbGetUnreadMessageCount(currentUser.nickname);
+    var badge = document.getElementById('notifBadge');
+    if (!badge) return;
+    // 기존 알림 카운트 + 쪽지 카운트 합산
+    var existingCount = parseInt(badge.textContent) || 0;
+    if (badge.classList.contains('hidden')) existingCount = 0;
+    var total = existingCount + count;
+    if (total > 0) {
+      badge.textContent = total > 99 ? '99+' : total;
+      badge.classList.remove('hidden');
+    }
+  } catch(e) { /* ignore */ }
+}
+
 // ============================================================
 // 무한 스크롤
 // ============================================================
@@ -1649,6 +1688,7 @@ window.addEventListener('DOMContentLoaded', function() {
         sessionTimer = setInterval(tickSession, 1000);
         // 비동기 데이터 로드
         updateNotifBadge();
+        updateMsgBadge();
         loadOrdersFromSupabase().then(function() { renderProfileSettings(); });
       } else {
         localStorage.removeItem('dentalk_session');
