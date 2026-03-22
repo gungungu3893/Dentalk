@@ -26,6 +26,7 @@ const STATIC_ASSETS = [
   './lang-vi.js',
   './lang-es.js',
   './lang-tr.js',
+  './lang-ar.js',
   './supabase.js',
   './icon.svg',
   './icon-192.png',
