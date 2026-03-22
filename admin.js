@@ -139,6 +139,10 @@ function adminConfirmOrder(orderId) {
     orderId: ord.id, icon: '✅', statusTh: 'ยืนยันแล้ว',
     clinic: ord.clinic, note: 'เมื่อออกแบบเสร็จแล้ว คุณสามารถตรวจสอบได้ในแอป', subtitle: 'CNC Custom Order'
   });
+  // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송
+  if (!ord.lineId && ord.userNickname) {
+    sendLinePushText(ord.userNickname, '🦷 คำสั่งซื้อ ' + ord.id + ' สถานะเปลี่ยนเป็น ยืนยันแล้ว\nYour order ' + ord.id + ' status changed to Confirmed.');
+  }
 }
 async function adminUploadDesign(orderId, input) {
   var file = input.files[0]; if (!file) return;
@@ -653,6 +657,10 @@ async function adminChangeCustomOrderStage(orderId, newStage) {
       orderId: ord.id, icon: stageObj.icon, statusTh: stageTh,
       clinic: ord.clinic, note: 'สถานะคำสั่งซื้อของคุณมีการเปลี่ยนแปลง', subtitle: 'CNC Custom Order'
     });
+    // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송
+    if (!ord.lineId && ord.userNickname) {
+      sendLinePushText(ord.userNickname, '🦷 คำสั่งซื้อ ' + ord.id + ' สถานะเปลี่ยนเป็น ' + stageTh + '\nYour order ' + ord.id + ' status changed to ' + newStage + '.');
+    }
   }
   // 관리자에게도 알림
   var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });

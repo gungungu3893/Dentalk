@@ -44,6 +44,8 @@ const WELCOME_MESSAGE = {
         { type: 'separator', margin: 'lg' },
         { type: 'text', text: 'Welcome to Dentalk! 🎉', weight: 'bold', size: 'sm', margin: 'lg' },
         { type: 'text', text: 'To receive order notifications:\n① Sign up on the Dentalk app\n② Register your LINE ID in your profile\n③ Get order status updates via LINE', size: 'xs', color: '#555555', wrap: true, margin: 'sm' },
+        { type: 'separator', margin: 'lg' },
+        { type: 'text', text: '📌 알림을 받으시려면 이 채팅에 아무 메시지 하나를 보내주세요!\nPlease send any message here to activate notifications!\nส่งข้อความใดก็ได้เพื่อเปิดใช้งานการแจ้งเตือน!', size: 'xs', color: '#D4AF37', weight: 'bold', wrap: true, margin: 'lg' },
       ],
       paddingAll: '16px',
     },
@@ -248,14 +250,14 @@ export default {
               // 매칭 안 됨 — 환영 메시지 발송
               await lineReplyMessage(token, event.replyToken, {
                 type: 'text',
-                text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\nOrder via the app and receive notifications through LINE.\n🔗 https://dentalk.app',
+                text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\n📌 알림을 받으시려면 이 채팅에 아무 메시지 하나를 보내주세요!\nPlease send any message here to activate notifications!\nส่งข้อความใดก็ได้เพื่อเปิดใช้งานการแจ้งเตือน!\n\n🔗 https://dentalk.app',
               });
             }
           } else if (event.replyToken) {
             // 텍스트가 아닌 메시지 (이미지, 스티커 등) — 환영 메시지 발송
             await lineReplyMessage(token, event.replyToken, {
               type: 'text',
-              text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\nOrder via the app and receive notifications through LINE.\n🔗 https://dentalk.app',
+              text: '🦷 ยินดีต้อนรับสู่ Dentalk! Welcome to Dentalk!\nสั่งซื้อผ่านแอปแล้วรับการแจ้งเตือนผ่าน LINE\n\n📌 알림을 받으시려면 이 채팅에 아무 메시지 하나를 보내주세요!\nPlease send any message here to activate notifications!\nส่งข้อความใดก็ได้เพื่อเปิดใช้งานการแจ้งเตือน!\n\n🔗 https://dentalk.app',
             });
           }
         }

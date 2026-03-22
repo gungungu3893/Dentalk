@@ -186,6 +186,10 @@ async function toggleRsvp(status) {
     await sbUpsertRsvp(sbId, currentUser.nickname, status);
     _updateRsvpButtons(status);
     _loadEventDetailRsvp(ev);
+    // LINE 알림: 이벤트 주최자에게 RSVP 알림 (참석 시에만, 본인 이벤트가 아닐 때)
+    if (status === 'attending' && ev.createdBy && ev.createdBy !== currentUser.nickname) {
+      sendLinePushText(ev.createdBy, '📅 ' + (ev.event || '') + ' — มีผู้สมัครเข้าร่วมใหม่\nNew RSVP for ' + (ev.event || '') + '.');
+    }
   } catch(e) {
     handleSupabaseError(e, 'RSVP');
     showToast(t('rsvp_error'), 'error');

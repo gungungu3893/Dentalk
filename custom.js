@@ -1080,7 +1080,14 @@ function deleteUsed(i) {
     sbDeleteUsedItem(item._sbId || item.id).catch(function(e){ console.error('[Used Delete]', e); });
   }
 }
-function showContact(c) { document.getElementById('usedContactText').textContent=c; openModal('usedContactModal'); }
+function showContact(c, sellerNickname) {
+  document.getElementById('usedContactText').textContent=c;
+  openModal('usedContactModal');
+  // LINE 알림: 판매자에게 문의 알림 (본인 물품이 아닐 때)
+  if (sellerNickname && isLoggedIn() && sellerNickname !== currentUser.nickname && sellerNickname !== 'Me') {
+    sendLinePushText(sellerNickname, '🏷️ 중고물품에 새 문의가 있습니다.\nNew inquiry on your listing.\nมีคำถามใหม่เกี่ยวกับสินค้ามือสองของคุณ');
+  }
+}
 function openUsedDetail(id) {
   var item = usedItems.find(function(x){ return x.id===id; });
   if (!item) return;
@@ -1099,7 +1106,7 @@ function openUsedDetail(id) {
   document.getElementById('udp-desc').textContent   = item.desc;
   document.getElementById('udp-meta').textContent   = item.seller + ' · ' + item.date;
   document.getElementById('udp-views').textContent  = item.views;
-  document.getElementById('udp-contactBtn').onclick = function(){ showContact(item.contact); };
+  document.getElementById('udp-contactBtn').onclick = function(){ showContact(item.contact, item.seller); };
   var deleteBtn = document.getElementById('udp-deleteBtn');
   // 삭제 버튼: 로그인 상태이고 본인 게시물일 때만 표시
   var canDelete = isLoggedIn() && (item.seller === 'Me' || item.seller === currentUser.nickname);

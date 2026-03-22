@@ -150,6 +150,28 @@ const ORDER_STAGES   = [
 const LINE_PROXY_URL = 'https://dentalk-line.gungungu.workers.dev';
 const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
 // ── Supabase 상수는 supabase.js에서 정의됩니다 ──────────────────
+
+// ── LINE Push 알림 헬퍼: 닉네임으로 line_user_id 조회 후 발송 ────
+async function getLineUserIdByNickname(nickname) {
+  if (!nickname) return null;
+  try {
+    var rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(nickname) + '&select=line_user_id');
+    if (rows && rows.length > 0 && rows[0].line_user_id) return rows[0].line_user_id;
+  } catch(e) { console.error('[getLineUserIdByNickname]', e); }
+  return null;
+}
+async function sendLinePushText(nickname, text) {
+  if (!nickname || !LINE_PROXY_URL) return;
+  var lineUserId = await getLineUserIdByNickname(nickname);
+  if (!lineUserId) return; // line_user_id 없으면 건너뛰기
+  try {
+    await fetch(LINE_PROXY_URL + '/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: lineUserId, messages: [{ type: 'text', text: text }] })
+    });
+  } catch(e) { console.error('[LINE Push]', e); }
+}
 // ============================================================
 // 상태
 // ============================================================
