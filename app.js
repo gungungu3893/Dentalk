@@ -469,6 +469,7 @@ function goDetailPage(pageId, title, fromPage) {
   window.scrollTo(0, 0);
   renderDesktopSidebar(pageId);
   updateDesktopHero(pageId);
+  applyLang();
 }
 function goBack() {
   goPage(prevPage || 'home');
@@ -1636,7 +1637,6 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   updateNavLocks();
-  applyLang();
   renderUsed();
   renderForum();
   renderEvents();
@@ -1654,6 +1654,8 @@ window.addEventListener('DOMContentLoaded', function() {
   initDarkMode();
   // Scroll reveal: observe elements
   initScrollReveal();
+  // i18n: must run AFTER all render functions to translate dynamic elements
+  applyLang();
 });
 
 // ============================================================
