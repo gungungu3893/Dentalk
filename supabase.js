@@ -663,11 +663,7 @@ async function sbGetOrderStats() {
 }
 
 async function sbGetAllUsersCount() {
-  var res = await fetch(SUPABASE_URL + '/rest/v1/licenses?select=license_number&status=eq.active', {
-    method: 'GET',
-    headers: sbHeaders(),
-  });
-  return (await res.json()) || [];
+  return sbGet('licenses', 'select=license_number&is_active=eq.true');
 }
 
 async function sbGetForumStats() {
