@@ -259,6 +259,8 @@ function submitPost() {
   document.getElementById('forumPhotoPreview').classList.add('hidden');
   document.getElementById('forumPhotos').value = '';
   forumPhotos = [];
+  // GA4 post_create tracking
+  if (typeof gtag === 'function') gtag('event', 'post_create', { category: cat, region: reg });
   // 글 작성 후 지역 필터 & 폼 닫기
   if (reg && reg !== 'all') { forumRegion = reg; forumProvince = prv || 'all'; }
   var form = document.getElementById('forumWriteForm');

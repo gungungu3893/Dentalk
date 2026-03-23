@@ -455,6 +455,8 @@ function goPage(id) {
   document.getElementById('pageTitle') && (document.getElementById('pageTitle').textContent = t('pt_' + id));
   updateNavTabs(id);
   currentPage = id;
+  // GA4 page_view tracking
+  if (typeof gtag === 'function') gtag('event', 'page_view', { page_title: id, page_location: location.href });
   var btnBack = document.getElementById('btnBack');
   var btnMenu = document.getElementById('btnMenu');
   if (btnBack) { btnBack.classList.add('hidden'); btnBack.classList.remove('flex'); }
@@ -483,6 +485,8 @@ function goDetailPage(pageId, title, fromPage) {
   document.getElementById('pageTitle') && (document.getElementById('pageTitle').textContent = title);
   document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
   currentPage = pageId;
+  // GA4 page_view tracking (detail pages)
+  if (typeof gtag === 'function') gtag('event', 'page_view', { page_title: pageId + ': ' + title, page_location: location.href });
   var btnBack = document.getElementById('btnBack');
   var btnMenu = document.getElementById('btnMenu');
   if (btnMenu) btnMenu.classList.add('hidden');
@@ -1370,6 +1374,8 @@ async function doSearch() {
     return;
   }
   container.innerHTML = '<p class="text-center text-slate-400 text-sm font-bold py-8">' + t('search_searching') + '</p>';
+  // GA4 search tracking
+  if (typeof gtag === 'function') gtag('event', 'search', { search_term: keyword });
   try {
     var results = await sbSearchAll(keyword);
     var html = '';

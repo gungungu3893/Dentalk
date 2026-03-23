@@ -166,6 +166,8 @@ function openOrder(pid) {
   tableQtys = {};
   renderProductPage();
   goDetailPage('shop-product', currentProd.title, 'shop-items');
+  // GA4 view_item tracking
+  if (typeof gtag === 'function') gtag('event', 'view_item', { currency: 'THB', value: currentProd.price, items: [{ item_id: currentProd.id, item_name: currentProd.title, price: currentProd.price }] });
 }
 
 // ── Product detail page ───────────────────────────────────────
@@ -297,6 +299,8 @@ function addProductToCart() {
     else cart.push({name:currentProd.title, code:code, price:currentProd.price, qty:qty});
   });
   updateBadge();
+  // GA4 add_to_cart tracking
+  if (typeof gtag === 'function') gtag('event', 'add_to_cart', { currency: 'THB', value: items.reduce(function(s,e){ return s + e[1] * currentProd.price; }, 0), items: items.map(function(e){ return { item_id: e[0], item_name: currentProd.title, price: currentProd.price, quantity: e[1] }; }) });
   tableQtys = {};
   document.querySelectorAll('#shopProductTable .qty-input').forEach(function(inp){ inp.value = 0; });
   var btn = document.getElementById('shopProductAddBtn');
@@ -476,6 +480,8 @@ function completePayment() {
   var saved = JSON.parse(localStorage.getItem('dentalk_shop_orders') || '[]');
   saved.unshift(order);
   localStorage.setItem('dentalk_shop_orders', JSON.stringify(saved));
+  // GA4 purchase tracking
+  if (typeof gtag === 'function') gtag('event', 'purchase', { transaction_id: order.id, currency: 'THB', value: order.totalAmount, items: order.items.map(function(i){ return { item_id: i.code, item_name: i.name, price: i.price, quantity: i.qty }; }) });
   // Supabase에도 저장
   sbSaveShopOrder(order).catch(function(e){ console.error('[Shop Order Save]', e); });
   // 관리자에게 LINE flex 발송

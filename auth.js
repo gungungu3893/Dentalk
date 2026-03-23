@@ -196,6 +196,8 @@ async function submitRegistration() {
     if (res.status === 409) { showRegError(t('reg_duplicate')); return; }
     if (!res.ok) { showRegError(t('reg_network_error')); return; }
     showToast(t('reg_success'), 'success');
+    // GA4 sign_up tracking
+    if (typeof gtag === 'function') gtag('event', 'sign_up', { method: 'license' });
     closeModal('registerModal');
   } catch(e) {
     btn.disabled = false;
