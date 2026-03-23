@@ -87,32 +87,49 @@ function _catBg(cat, size) {
   return '<div class="opacity-[0.12]" style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
 }
 
+// Premium dark palette — dental B2B professional tones
+var _CAT_BG = {
+  'scan-body':  'linear-gradient(150deg,#0a1628 0%,#122040 60%,#1a2a4a 100%)',
+  'q-base':     'linear-gradient(150deg,#1a1a2e 0%,#23233d 60%,#2a2a4a 100%)',
+  'ready-made': 'linear-gradient(150deg,#16213e 0%,#1a2744 60%,#1e2d4e 100%)',
+  'ti-base':    'linear-gradient(150deg,#0f3460 0%,#133a6a 60%,#1a4478 100%)',
+  'pre-milled': 'linear-gradient(150deg,#2c2c3a 0%,#333348 60%,#3a3a52 100%)',
+  'multi-unit': 'linear-gradient(150deg,#1a1a3e 0%,#222250 60%,#2a2a5e 100%)',
+  '3d-analog':  'linear-gradient(150deg,#1b2838 0%,#1e3040 60%,#23384a 100%)',
+};
+var _CAT_BAR = {
+  'scan-body':'#0a1628','q-base':'#1a1a2e','ready-made':'#16213e','ti-base':'#0f3460',
+  'pre-milled':'#2c2c3a','multi-unit':'#1a1a3e','3d-analog':'#1b2838'
+};
 const SHOP_CATEGORIES = [
-  { id:'scan-body',   name:'Scan Body',   desc:'Intra-Oral / Model / GeoMedi', color:'from-blue-500 to-blue-800',
+  { id:'scan-body',   name:'Scan Body',   desc:'Intra-Oral / Model / GeoMedi',
     svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="13" rx="20" ry="8" fill="white" opacity=".9"/><path d="M6 13 L14 54 L38 54 L46 13 Z" fill="white" opacity=".82"/><rect x="18" y="53" width="16" height="7" rx="2" fill="white" opacity=".7"/><rect x="16" y="59" width="20" height="7" rx="2.5" fill="white" opacity=".5"/></svg>' },
-  { id:'q-base',      name:'Q-Base',      desc:'Zirconia Abutment',            color:'from-amber-400 to-amber-700',
+  { id:'q-base',      name:'Q-Base',      desc:'Zirconia Abutment',
     svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="21" y="6" width="10" height="20" rx="2" fill="white" opacity=".85"/><rect x="18" y="11" width="16" height="1.5" rx="1" fill="white" opacity=".4"/><rect x="18" y="15" width="16" height="1.5" rx="1" fill="white" opacity=".4"/><rect x="18" y="19" width="16" height="1.5" rx="1" fill="white" opacity=".4"/><rect x="16" y="26" width="20" height="14" rx="2" fill="white" opacity=".82"/><rect x="12" y="39" width="28" height="8" rx="2" fill="white" opacity=".78"/><ellipse cx="26" cy="47" rx="19" ry="7" fill="white" opacity=".92"/><rect x="17" y="47" width="18" height="8" rx="1" fill="white" opacity=".65"/><ellipse cx="26" cy="55" rx="13" ry="5" fill="white" opacity=".5"/></svg>' },
-  { id:'ready-made',  name:'Ready Made',  desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',  color:'from-slate-500 to-slate-800',
+  { id:'ready-made',  name:'Ready Made',  desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',
     svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 4 L13 22 L31 22 Z" fill="white" opacity=".9"/><rect x="13" y="21" width="18" height="27" rx="2" fill="white" opacity=".85"/><rect x="11" y="47" width="22" height="7" rx="2" fill="white" opacity=".7"/><rect x="9" y="53" width="26" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
-  { id:'ti-base',     name:'Ti-Base',     desc:'CAD/CAM · Ti+Zr',             color:'from-cyan-500 to-cyan-800',
+  { id:'ti-base',     name:'Ti-Base',     desc:'CAD/CAM · Ti+Zr',
     svg:'<svg viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="25" cy="13" rx="15" ry="7" fill="white" opacity=".8"/><rect x="10" y="13" width="30" height="18" rx="2" fill="white" opacity=".85"/><rect x="13" y="30" width="24" height="8" rx="2" fill="white" opacity=".7"/><rect x="11" y="37" width="28" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
-  { id:'pre-milled',  name:'Pre-Milled',  desc:'N · H10 / R · H10',           color:'from-indigo-600 to-indigo-900',
+  { id:'pre-milled',  name:'Pre-Milled',  desc:'N · H10 / R · H10',
     svg:'<svg viewBox="0 0 58 62" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="29" cy="14" rx="23" ry="11" fill="white" opacity=".9"/><rect x="21" y="14" width="16" height="20" rx="2" fill="white" opacity=".82"/><rect x="17" y="33" width="24" height="8" rx="2" fill="white" opacity=".7"/><rect x="15" y="40" width="28" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
-  { id:'multi-unit',  name:'Multi Unit',  desc:'All-on-X',                    color:'from-violet-600 to-violet-900',
+  { id:'multi-unit',  name:'Multi Unit',  desc:'All-on-X',
     svg:'<svg viewBox="0 0 62 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="3" width="10" height="16" rx="2" fill="white" opacity=".9"/><rect x="14" y="17" width="34" height="10" rx="3" fill="white" opacity=".78"/><rect x="7" y="25" width="10" height="22" rx="2" fill="white" opacity=".72"/><rect x="22" y="25" width="18" height="22" rx="2" fill="white" opacity=".72"/><rect x="45" y="25" width="10" height="22" rx="2" fill="white" opacity=".72"/></svg>' },
-  { id:'3d-analog',   name:'3D Analog',   desc:'GeoMedi',                     color:'from-teal-500 to-teal-800',
+  { id:'3d-analog',   name:'3D Analog',   desc:'GeoMedi',
     svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="5" width="12" height="12" rx="2" fill="white" opacity=".9"/><rect x="12" y="16" width="20" height="30" rx="2" fill="white" opacity=".82"/><rect x="15" y="20" width="5" height="22" rx="1" fill="white" opacity=".4"/><rect x="24" y="20" width="5" height="22" rx="1" fill="white" opacity=".4"/><rect x="13" y="45" width="18" height="7" rx="2" fill="white" opacity=".7"/><rect x="11" y="51" width="22" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
 ];
 function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
+    var bg = _CAT_BG[cat.id] || _CAT_BG['scan-body'];
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
-      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' text-left shadow-md active:scale-[.97] transition">' +
-      '<div class="flex items-center justify-center py-4 px-3">' + _catIcon(cat, 140) + '</div>' +
-      '<div class="px-4 pb-4 relative">' +
-        '<p class="font-black text-white text-base leading-tight">' + cat.name + '</p>' +
-        '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:rgba(255,255,255,0.75)">' + cat.desc + '</p>' +
-        '<p class="text-[10px] font-black mt-1.5" style="color:rgba(255,255,255,0.6)">' + count + ' ' + t('shop_product_count') + '</p>' +
+      'class="shop-cat-card relative overflow-hidden rounded-2xl text-left active:scale-[.97] transition-all duration-200" ' +
+      'style="background:' + bg + ';border:1px solid rgba(212,175,55,0.2)">' +
+      '<div class="flex items-center justify-center py-4 px-3 bg-white/[0.04] rounded-t-xl">' + _catIcon(cat, 140) + '</div>' +
+      '<div class="h-[2px]" style="background:linear-gradient(90deg,transparent,#D4AF37,transparent)"></div>' +
+      '<div class="px-4 pb-4 pt-3">' +
+        '<p class="font-black text-white text-sm leading-tight">' + cat.name + '</p>' +
+        '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:rgba(212,175,55,0.7)">' + cat.desc + '</p>' +
+        '<p class="text-[10px] font-black mt-1.5" style="color:rgba(255,255,255,0.4)">' + count + ' ' + t('shop_product_count') + '</p>' +
       '</div>' +
     '</button>';
   }).join('');
@@ -207,7 +224,7 @@ function renderShopItems(catId) {
       : '<span class="text-[9px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full">❌ ' + t('shop_out_of_stock') + '</span>';
     var clickAttr = inStock ? 'onclick="openOrder(\'' + p.id + '\')"' : '';
     return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
-      '<div class="h-1 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
+      '<div class="h-1" style="background:' + (_CAT_BAR[catId] || '#0a1628') + '"></div>' +
       (cat ? '<div class="flex items-center justify-center pt-4 px-4">' + _catIcon(cat, 120) + '</div>' : '') +
       '<div class="p-4">' +
         '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
@@ -235,15 +252,7 @@ function openOrder(pid) {
 }
 
 // ── Product detail page ───────────────────────────────────────
-var _catGrads = {
-  'scan-body':  'linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%)',
-  'q-base':     'linear-gradient(135deg,#f59e0b 0%,#92400e 100%)',
-  'ready-made': 'linear-gradient(135deg,#64748b 0%,#1e293b 100%)',
-  'ti-base':    'linear-gradient(135deg,#06b6d4 0%,#164e63 100%)',
-  'pre-milled': 'linear-gradient(135deg,#4f46e5 0%,#312e81 100%)',
-  'multi-unit': 'linear-gradient(135deg,#7c3aed 0%,#4c1d95 100%)',
-  '3d-analog':  'linear-gradient(135deg,#14b8a6 0%,#134e4a 100%)',
-};
+var _catGrads = _CAT_BG;
 function renderProductPage() {
   var p = currentProd;
   var cat = SHOP_CATEGORIES.find(function(c){ return c.id === p.category; });
