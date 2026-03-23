@@ -1214,74 +1214,75 @@ async function renderAdminStats() {
       }
     }
 
-    // ─── Render HTML ───────────────────────────────────────
-    var periodLabel = _statsPeriod === 7 ? '7 Days' : _statsPeriod === 30 ? '30 Days' : '90 Days';
+    // ─── Render HTML (compact single-screen layout) ────────
     var html = '';
 
-    // Period filter buttons
-    html += '<div class="flex gap-1.5 mb-4">';
+    // ① Period filter tabs (top bar)
+    html += '<div class="flex items-center gap-1 mb-3">';
     [7,30,90].forEach(function(d) {
       var active = _statsPeriod === d;
       var lbl = d === 7 ? '7D' : d === 30 ? '30D' : '90D';
-      html += '<button onclick="statsSetPeriod(' + d + ')" class="px-4 py-2 rounded-xl font-black text-xs transition ' +
-        (active ? 'bg-[#001d4a] text-white shadow' : 'bg-slate-100 text-slate-500 hover:bg-slate-200') + '">' + lbl + '</button>';
+      html += '<button onclick="statsSetPeriod(' + d + ')" class="px-3 py-1.5 rounded-lg font-black text-[10px] transition ' +
+        (active ? 'bg-[#001d4a] text-white shadow' : 'bg-slate-100 text-slate-400 hover:bg-slate-200') + '">' + lbl + '</button>';
     });
+    html += '<span class="ml-auto text-[9px] text-slate-300 font-bold">' + (t('stats_dashboard') || 'DASHBOARD') + '</span>';
     html += '</div>';
 
-    // Summary cards
-    html += '<div class="grid grid-cols-2 gap-3 mb-5">';
-    html += _statCard('💰', t('stats_monthly_revenue'), periodRevenue.toLocaleString() + ' THB', 'bg-gradient-to-br from-green-500 to-emerald-700');
-    html += _statCard('👥', t('stats_total_members'), displayMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
-    html += _statCard('✨', t('stats_weekly_signups'), periodSignups, 'bg-gradient-to-br from-purple-500 to-violet-700');
-    html += _statCard('📦', t('stats_monthly_orders'), periodOrders.length, 'bg-gradient-to-br from-amber-500 to-orange-700');
+    // ② Summary cards — 4 in a row
+    html += '<div class="grid grid-cols-4 gap-2 mb-3">';
+    html += _statCard('💰', t('stats_monthly_revenue') || 'Revenue', periodRevenue.toLocaleString() + '฿', 'bg-gradient-to-br from-green-500 to-emerald-700');
+    html += _statCard('📦', t('stats_monthly_orders') || 'Orders', periodOrders.length, 'bg-gradient-to-br from-amber-500 to-orange-700');
+    html += _statCard('✨', t('stats_weekly_signups') || 'Signups', periodSignups, 'bg-gradient-to-br from-purple-500 to-violet-700');
+    html += _statCard('👥', t('stats_total_members') || 'Members', displayMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
     html += '</div>';
 
-    // Orders line chart
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
-    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('stats_monthly_trend') + '</p>';
-    html += '<canvas id="chartOrders" height="180"></canvas>';
+    // ③ Charts — 2x2 grid (desktop), 1 col (mobile)
+    html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">';
+    // Top-left: Orders line chart
+    html += '<div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100">';
+    html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">' + (t('stats_monthly_trend') || 'ORDERS & REVENUE') + '</p>';
+    html += '<div style="height:200px"><canvas id="chartOrders"></canvas></div>';
+    html += '</div>';
+    // Top-right: Category pie chart
+    html += '<div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100">';
+    html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">' + (t('stats_category_revenue') || 'REVENUE BY CATEGORY') + '</p>';
+    html += '<div style="height:200px"><canvas id="chartCategoryPie"></canvas></div>';
+    html += '</div>';
+    // Bottom-left: Signups bar chart
+    html += '<div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100">';
+    html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">' + (t('stats_signup_trend') || 'NEW SIGNUPS') + '</p>';
+    html += '<div style="height:200px"><canvas id="chartSignups"></canvas></div>';
+    html += '</div>';
+    // Bottom-right: Forum activity chart
+    html += '<div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100">';
+    html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">' + (t('stats_forum_activity') || 'FORUM ACTIVITY') + '</p>';
+    html += '<div style="height:200px"><canvas id="chartForum"></canvas></div>';
+    html += '</div>';
     html += '</div>';
 
-    // Category pie chart
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
-    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + (t('stats_category_revenue') || 'REVENUE BY CATEGORY') + '</p>';
-    html += '<canvas id="chartCategoryPie" height="220"></canvas>';
-    html += '</div>';
-
-    // Signups bar chart
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
-    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + (t('stats_signup_trend') || 'NEW SIGNUPS') + '</p>';
-    html += '<canvas id="chartSignups" height="180"></canvas>';
-    html += '</div>';
-
-    // Forum activity chart
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
-    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + (t('stats_forum_activity') || 'FORUM ACTIVITY') + '</p>';
-    html += '<canvas id="chartForum" height="180"></canvas>';
-    html += '</div>';
-
-    // Top 5 products
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
-    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('stats_top_products') + '</p>';
+    // ④ Top 5 products — compact table
+    html += '<div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100">';
+    html += '<p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + (t('stats_top_products') || 'TOP PRODUCTS') + '</p>';
     if (topProducts.length) {
-      html += topProducts.map(function(p, i) {
-        var medals = ['🥇','🥈','🥉','④','⑤'];
-        var maxQty = topProducts[0].qty || 1;
-        var barPct = Math.max(8, (p.qty / maxQty) * 100);
-        return '<div class="flex items-center gap-2.5 py-2.5 ' + (i < topProducts.length - 1 ? 'border-b border-slate-50' : '') + '">' +
-          '<span class="text-sm w-6 text-center">' + medals[i] + '</span>' +
-          '<div class="flex-1 min-w-0">' +
-            '<p class="font-bold text-xs text-slate-700 truncate">' + p.name + '</p>' +
-            '<div class="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" style="width:' + barPct + '%"></div></div>' +
-          '</div>' +
-          '<div class="text-right shrink-0 pl-2">' +
-            '<span class="font-mono font-black text-xs text-blue-600 block">' + p.qty + '</span>' +
-            '<span class="font-mono text-[9px] text-slate-400">' + p.revenue.toLocaleString() + '฿</span>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+      html += '<table class="w-full text-[10px]">';
+      html += '<thead><tr class="text-slate-400 font-bold border-b border-slate-100">' +
+        '<th class="text-left py-1 pl-1 w-5">#</th>' +
+        '<th class="text-left py-1">' + (t('product_name') || 'Product') + '</th>' +
+        '<th class="text-right py-1 pr-1">' + (t('qty') || 'Qty') + '</th>' +
+        '<th class="text-right py-1 pr-1">' + (t('stats_monthly_revenue') || 'Revenue') + '</th>' +
+      '</tr></thead><tbody>';
+      var medals = ['🥇','🥈','🥉','4','5'];
+      topProducts.forEach(function(p, i) {
+        html += '<tr class="' + (i < topProducts.length - 1 ? 'border-b border-slate-50' : '') + '">' +
+          '<td class="py-1 pl-1 text-center">' + medals[i] + '</td>' +
+          '<td class="py-1 font-bold text-slate-700 truncate max-w-[120px]">' + p.name + '</td>' +
+          '<td class="py-1 pr-1 text-right font-mono font-black text-blue-600">' + p.qty + '</td>' +
+          '<td class="py-1 pr-1 text-right font-mono text-slate-500">' + p.revenue.toLocaleString() + '฿</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table>';
     } else {
-      html += '<p class="text-center text-slate-400 text-xs py-4">' + t('stats_no_data') + '</p>';
+      html += '<p class="text-center text-slate-400 text-[10px] py-3">' + (t('stats_no_data') || 'No data') + '</p>';
     }
     html += '</div>';
 
@@ -1296,8 +1297,9 @@ async function renderAdminStats() {
       return;
     }
 
-    var chartFont = { family: "'Inter','Noto Sans Thai',sans-serif", size: 10 };
+    var chartFont = { family: "'Inter','Noto Sans Thai',sans-serif", size: 9 };
     var gridColor = 'rgba(0,0,0,0.04)';
+    var compactLegend = { labels: { font: chartFont, boxWidth: 8, padding: 4 } };
 
     // 1. Orders line chart (count + revenue dual axis)
     var ctxOrders = document.getElementById('chartOrders');
@@ -1313,9 +1315,9 @@ async function renderAdminStats() {
         },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { font: chartFont, boxWidth: 12 } } },
+          plugins: { legend: compactLegend },
           scales: {
-            x: { grid: { color: gridColor }, ticks: { font: chartFont } },
+            x: { grid: { color: gridColor }, ticks: { font: chartFont, maxRotation: 0 } },
             y: { position: 'left', beginAtZero: true, grid: { color: gridColor }, ticks: { font: chartFont, stepSize: 1 } },
             y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { font: chartFont, callback: function(v){ return (v/1000).toFixed(0) + 'k'; } } }
           }
@@ -1341,7 +1343,7 @@ async function renderAdminStats() {
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { font: chartFont, boxWidth: 10, padding: 8 } },
+            legend: { position: 'bottom', labels: { font: chartFont, boxWidth: 8, padding: 4 } },
             tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed.toLocaleString() + ' THB'; } } }
           }
         }
@@ -1359,9 +1361,9 @@ async function renderAdminStats() {
         },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { font: chartFont, boxWidth: 12 } } },
+          plugins: { legend: compactLegend },
           scales: {
-            x: { grid: { color: gridColor }, ticks: { font: chartFont } },
+            x: { grid: { color: gridColor }, ticks: { font: chartFont, maxRotation: 0 } },
             y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: chartFont, stepSize: 1 } }
           }
         }
@@ -1379,9 +1381,9 @@ async function renderAdminStats() {
         },
         options: {
           responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { labels: { font: chartFont, boxWidth: 12 } } },
+          plugins: { legend: compactLegend },
           scales: {
-            x: { grid: { color: gridColor }, ticks: { font: chartFont } },
+            x: { grid: { color: gridColor }, ticks: { font: chartFont, maxRotation: 0 } },
             y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: chartFont, stepSize: 1 } }
           }
         }
@@ -1400,10 +1402,10 @@ async function renderAdminStats() {
 }
 
 function _statCard(icon, label, value, bgClass) {
-  return '<div class="' + bgClass + ' rounded-2xl p-4 text-white shadow-lg">' +
-    '<div class="text-2xl mb-1">' + icon + '</div>' +
-    '<div class="font-black text-xl leading-none mb-1">' + value + '</div>' +
-    '<div class="text-[9px] font-bold opacity-80 leading-tight">' + label + '</div>' +
+  return '<div class="' + bgClass + ' rounded-xl p-2.5 text-white shadow">' +
+    '<div class="text-base mb-0.5">' + icon + '</div>' +
+    '<div class="font-black text-sm leading-none mb-0.5 truncate">' + value + '</div>' +
+    '<div class="text-[8px] font-bold opacity-75 leading-tight truncate">' + label + '</div>' +
   '</div>';
 }
 
