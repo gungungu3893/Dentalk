@@ -1092,17 +1092,27 @@ async function renderAdminStats() {
   // Destroy previous chart instances
   Object.keys(_statsCharts).forEach(function(k) { if (_statsCharts[k]) { _statsCharts[k].destroy(); delete _statsCharts[k]; } });
 
+  // Each query is wrapped to return [] on failure so one broken table doesn't crash everything
+  function safeFetch(promise, label) {
+    return promise.then(function(data) {
+      return Array.isArray(data) ? data : [];
+    }).catch(function(e) {
+      console.warn('[Stats:' + label + '] query failed, using empty data:', e.message || e);
+      return [];
+    });
+  }
+
   try {
     var results = await Promise.all([
-      sbGetOrderStats(),
-      sbGetAllUsers(),
-      sbGetForumStats(),
-      sbGetForumCommentStats(),
+      safeFetch(sbGetOrderStats(), 'orders'),
+      safeFetch(sbGetAllUsers(), 'users'),
+      safeFetch(sbGetForumStats(), 'forum_posts'),
+      safeFetch(sbGetForumCommentStats(), 'forum_comments'),
     ]);
-    var allOrders = results[0] || [];
-    var allUsers  = results[1] || [];
-    var forumPosts = results[2] || [];
-    var forumComments = results[3] || [];
+    var allOrders = results[0];
+    var allUsers  = results[1];
+    var forumPosts = results[2];
+    var forumComments = results[3];
 
     var now = new Date();
     var periodStart = new Date(now - _statsPeriod * 24*60*60*1000).toISOString().slice(0,10);
@@ -1114,7 +1124,7 @@ async function renderAdminStats() {
     periodOrders.forEach(function(o) {
       if (o.items) o.items.forEach(function(i){ periodRevenue += (i.price||0)*(i.qty||1); });
     });
-    var totalMembers = allUsers.filter(function(u){ return u.is_active; }).length;
+    var totalMembers = allUsers.filter(function(u){ return u.is_active === true || u.is_active === 'true'; }).length || allUsers.length;
     var periodSignups = allUsers.filter(function(u){ return u.created_at && u.created_at.slice(0,10) >= periodStart; }).length;
     var periodForumPosts = forumPosts.filter(function(p){ return p.created_at && p.created_at.slice(0,10) >= periodStart; }).length;
 
@@ -1275,7 +1285,13 @@ async function renderAdminStats() {
     container.innerHTML = html;
 
     // ─── Create Chart.js charts ────────────────────────────
-    if (typeof Chart === 'undefined') return; // Chart.js not loaded
+    if (typeof Chart === 'undefined') {
+      console.warn('[Admin Stats] Chart.js not loaded yet');
+      container.querySelectorAll('canvas').forEach(function(c) {
+        c.parentElement.innerHTML = '<p class="text-center text-slate-400 text-xs py-6 font-bold">Chart.js loading... please retry in a moment.</p>';
+      });
+      return;
+    }
 
     var chartFont = { family: "'Inter','Noto Sans Thai',sans-serif", size: 10 };
     var gridColor = 'rgba(0,0,0,0.04)';
@@ -1310,6 +1326,9 @@ async function renderAdminStats() {
       var catLabels = Object.keys(catRevenue);
       var catValues = catLabels.map(function(k){ return catRevenue[k]; });
       var pieColors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+      if (catLabels.length === 0) {
+        catLabels = ['No data']; catValues = [1]; pieColors = ['#e2e8f0'];
+      }
       _statsCharts.categoryPie = new Chart(ctxPie, {
         type: 'doughnut',
         data: {
@@ -1367,8 +1386,13 @@ async function renderAdminStats() {
     }
 
   } catch(e) {
+    console.error('[Admin Stats] Render error:', e, e.stack || '');
     handleSupabaseError(e, 'Admin Stats');
-    container.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_error') + '</p>';
+    container.innerHTML = '<div class="text-center py-8">' +
+      '<p class="text-red-400 text-sm font-bold mb-2">' + t('admin_error') + '</p>' +
+      '<p class="text-slate-400 text-[10px] font-mono">' + (e.message || String(e)) + '</p>' +
+      '<button onclick="renderAdminStats()" class="mt-3 px-4 py-2 bg-slate-100 rounded-xl text-xs font-black text-slate-600">🔄 Retry</button>' +
+    '</div>';
   }
 }
 
