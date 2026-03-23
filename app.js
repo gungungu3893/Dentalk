@@ -126,18 +126,17 @@ function showInstallGuide(type) {
   document.body.appendChild(popup);
 }
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js').then(function(reg) {
-      // Check for SW updates every 60s
-      setInterval(function() { reg.update(); }, 60000);
-      // When new SW is waiting, tell it to activate immediately
-      reg.addEventListener('updatefound', function() {
-        var nw = reg.installing;
-        if (nw) nw.addEventListener('statechange', function() {
-          if (nw.state === 'activated') location.reload();
-        });
-      });
-    });
+  // sw.js 자체는 브라우저 HTTP 캐시를 사용하지 않음 (항상 서버에서 확인)
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(function(reg) {
+    // 30초마다 SW 업데이트 확인
+    setInterval(function() { reg.update(); }, 30000);
+  });
+  // 새 SW가 제어권을 획득하면 자동 새로고침 — 사용자 개입 불필요
+  var _swRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (_swRefreshing) return;
+    _swRefreshing = true;
+    window.location.reload();
   });
 }
 

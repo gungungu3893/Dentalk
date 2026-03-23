@@ -5,7 +5,8 @@
 // ============================================================
 
 // ★ Bump this on every deploy — triggers install → old cache purge → skipWaiting
-const CACHE_VERSION = 'dentalk-v31';
+// ★ Keep in sync with APP_VERSION in index.html
+const CACHE_VERSION = 'dentalk-v32';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -75,21 +76,22 @@ button:active{transform:scale(.96)}
 </html>`;
 
 // ── Install: 정적 자산 프리캐시 + 오프라인 페이지 ──
+// skipWaiting() → 새 SW 즉시 활성화 (대기 건너뜀)
 self.addEventListener('install', function(e) {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_VERSION)
       .then(function(cache) {
-        // 오프라인 폴백 페이지 저장
         cache.put(new Request('/_offline'), new Response(OFFLINE_PAGE, {
           headers: { 'Content-Type': 'text/html; charset=utf-8' }
         }));
         return cache.addAll(STATIC_ASSETS);
       })
-      .then(function() { return self.skipWaiting(); })
   );
 });
 
-// ── Activate: 이전 버전 캐시 삭제 ──
+// ── Activate: 이전 버전 캐시 모두 삭제 + 즉시 제어권 획득 ──
+// clients.claim() → 현재 열린 탭도 즉시 새 SW가 제어
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
@@ -135,33 +137,10 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // 정적 자산 → Cache First (strip ?v= query for cache matching)
-  e.respondWith(cacheFirst(e.request, { ignoreSearch: true }));
+  // 정적 자산 → Network First (새 버전 우선, 오프라인 시 캐시)
+  // ?v= 파라미터로 캐시 버스팅 — 네트워크 우선이어야 새 파일 즉시 반영
+  e.respondWith(networkFirst(e.request));
 });
-
-// ── Cache First 전략: 캐시 우선, 없으면 네트워크 ──
-// opts.ignoreSearch: true → ?v=xxx 무시하고 캐시 매칭
-function cacheFirst(request, opts) {
-  var matchOpts = (opts && opts.ignoreSearch) ? { ignoreSearch: true } : undefined;
-  return caches.match(request, matchOpts).then(function(cached) {
-    if (cached) return cached;
-    return fetch(request).then(function(response) {
-      if (response && response.status === 200) {
-        var clone = response.clone();
-        caches.open(CACHE_VERSION).then(function(cache) {
-          cache.put(request, clone);
-        });
-      }
-      return response;
-    }).catch(function() {
-      // 이미지 요청 실패 시 빈 응답 반환
-      if (request.destination === 'image') {
-        return new Response('', { status: 200, headers: { 'Content-Type': 'image/svg+xml' } });
-      }
-      return caches.match('./index.html');
-    });
-  });
-}
 
 // ── Network First 전략: 네트워크 우선, 실패 시 캐시 ──
 function networkFirst(request) {
