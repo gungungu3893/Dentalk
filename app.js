@@ -1154,6 +1154,7 @@ function initHomeBanner() {
 function renderHomeCategories() {
   var el = document.getElementById('homeCategories');
   if (!el) return;
+  if (typeof SHOP_CATEGORIES === 'undefined' || !SHOP_CATEGORIES.length) return;
   var catDescKeys = {
     'scan-body':  'cat_scan_body_desc',
     'q-base':     'cat_q_base_desc',
@@ -1225,10 +1226,11 @@ function renderHomeEventsPreview() {
 }
 
 function renderHomePage() {
-  renderHomeCategories();
-  renderHomeForumPreview();
-  renderHomeEventsPreview();
-  renderHomeWebzinePreview();
+  // 각 섹션 독립 렌더링 — 하나가 실패해도 나머지는 표시됨
+  try { renderHomeCategories(); } catch(e) { console.warn('[Home] categories render failed:', e); }
+  try { renderHomeForumPreview(); } catch(e) { console.warn('[Home] forum preview render failed:', e); }
+  try { renderHomeEventsPreview(); } catch(e) { console.warn('[Home] events preview render failed:', e); }
+  try { renderHomeWebzinePreview(); } catch(e) { console.warn('[Home] webzine preview render failed:', e); }
 }
 // ============================================================
 // Supabase 공개 데이터 초기화 (로그인 불필요)
@@ -1348,6 +1350,9 @@ async function initSupabasePublicData() {
     await loadAdBanners();
     renderAllAdSlots();
   } catch(e) { handleSupabaseError(e, 'Banners Init'); }
+
+  // ── 데이터 로드 완료 후 사이드바 재렌더 (이벤트·포럼 데이터 반영) ──
+  try { renderDesktopSidebar(currentPage); } catch(e) {}
 }
 
 
@@ -1660,7 +1665,9 @@ function resetInfiniteScroll(pageType) {
 // ============================================================
 // 초기화
 // ============================================================
-window.addEventListener('DOMContentLoaded', function() {
+// ★ 동적 스크립트(async=false)는 DOMContentLoaded를 차단하지 않으므로
+//    이벤트가 이미 발생한 경우도 처리해야 함
+function _initApp() {
   var saved = localStorage.getItem('dentalk_lang') || 'th';
   currentLang = saved;
   document.documentElement.lang = currentLang; // 폰트 CSS 즉시 적용
@@ -1726,7 +1733,13 @@ window.addEventListener('DOMContentLoaded', function() {
   initScrollReveal();
   // i18n: must run AFTER all render functions to translate dynamic elements
   applyLang();
-});
+}
+// DOMContentLoaded가 이미 발생했으면 즉시 실행, 아니면 이벤트 대기
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initApp);
+} else {
+  _initApp();
+}
 
 // ============================================================
 // DARK MODE
