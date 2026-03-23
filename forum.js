@@ -200,7 +200,7 @@ function renderForum() {
         thumbHtml +
       '</div>' +
     '</div>';
-  }).join('') : '<p class="text-center text-slate-400 text-sm py-12">' + t('forum_empty') + '</p>';
+  }).join('') : '<div class="text-center py-16"><p class="text-4xl mb-3 opacity-30">💬</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_forum') + '</p><p class="text-xs text-slate-300">' + t('empty_forum_sub') + '</p></div>';
 }
 function previewForumPhotos() {
   var input = document.getElementById('forumPhotos');

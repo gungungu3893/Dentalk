@@ -984,7 +984,7 @@ function renderUsed() {
   var list = document.getElementById('usedList');
   if (!list) return;
   if (!usedItems.length) {
-    list.innerHTML = '<div class="col-span-5 text-center text-slate-400 font-bold text-sm py-12">' + t('used_empty') + '</div>';
+    list.innerHTML = '<div class="col-span-5 text-center py-16"><p class="text-4xl mb-3 opacity-30">♻️</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_used') + '</p><p class="text-xs text-slate-300">' + t('empty_used_sub') + '</p></div>';
     return;
   }
   var condMap   = {new:'bg-green-100 text-green-700',good:'bg-blue-100 text-blue-700',fair:'bg-yellow-100 text-yellow-700'};

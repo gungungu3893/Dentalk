@@ -548,66 +548,52 @@ function renderDesktopSidebar(pageId) {
       '<p style="color:rgba(255,255,255,.75);font-size:10px;font-weight:600">' + t('line_add_desc') + '</p></div>' +
     '</div></a>';
 
-  // ── Ad slots ──
-  var adHtml = '<div class="sidebar-card" id="sidebarAdSlot"></div>';
+  // ── Ad slots (only show if banners are loaded) ──
+  var adHtml = (typeof _adBanners !== 'undefined' && (_adBanners['home_mid'] || []).length) ? '<div class="sidebar-card" id="sidebarAdSlot"></div>' : '';
+
+  // Helper: wrap sidebar card only if content exists
+  function _sbCard(title, content) {
+    if (!content) return '';
+    return '<div class="sidebar-card"><h4>' + title + '</h4>' + content + '</div>';
+  }
 
   // ── Page-specific content ──
   if (pageId === 'home' || pageId === 'shop' || pageId === 'shop-items' || pageId === 'shop-product') {
-    // Popular products
-    html += '<div class="sidebar-card"><h4>' + t('sb_popular_products') + '</h4>';
-    html += _sidebarPopularProducts();
-    html += '</div>';
+    html += _sbCard(t('sb_popular_products'), _sidebarPopularProducts());
     html += lineHtml;
-    // Upcoming events
-    html += '<div class="sidebar-card"><h4>' + t('sb_upcoming_events') + '</h4>';
-    html += _sidebarUpcomingEvents();
-    html += '</div>';
+    html += _sbCard(t('sb_upcoming_events'), _sidebarUpcomingEvents());
     html += adHtml;
 
   } else if (pageId === 'forum' || pageId === 'forum-detail') {
-    // Latest posts
-    html += '<div class="sidebar-card"><h4>' + t('sb_latest_posts') + '</h4>';
-    html += _sidebarLatestPosts();
-    html += '</div>';
+    html += _sbCard(t('sb_latest_posts'), _sidebarLatestPosts());
     html += lineHtml;
     html += adHtml;
 
   } else if (pageId === 'webzine' || pageId === 'webzine-detail') {
-    html += '<div class="sidebar-card"><h4>' + t('sb_popular_products') + '</h4>';
-    html += _sidebarPopularProducts();
-    html += '</div>';
+    html += _sbCard(t('sb_popular_products'), _sidebarPopularProducts());
     html += lineHtml;
     html += adHtml;
 
   } else if (pageId === 'jobs' || pageId === 'job-detail') {
-    html += '<div class="sidebar-card"><h4>' + t('sb_latest_posts') + '</h4>';
-    html += _sidebarLatestPosts();
-    html += '</div>';
+    html += _sbCard(t('sb_latest_posts'), _sidebarLatestPosts());
     html += lineHtml;
     html += adHtml;
 
   } else if (pageId === 'events' || pageId === 'event-detail') {
-    html += '<div class="sidebar-card"><h4>' + t('sb_popular_products') + '</h4>';
-    html += _sidebarPopularProducts();
-    html += '</div>';
+    html += _sbCard(t('sb_popular_products'), _sidebarPopularProducts());
     html += lineHtml;
 
   } else {
-    // Default: settings, custom, used, myactivity, etc.
     html += lineHtml;
-    html += '<div class="sidebar-card"><h4>' + t('sb_upcoming_events') + '</h4>';
-    html += _sidebarUpcomingEvents();
-    html += '</div>';
-    html += '<div class="sidebar-card"><h4>' + t('sb_popular_products') + '</h4>';
-    html += _sidebarPopularProducts();
-    html += '</div>';
+    html += _sbCard(t('sb_upcoming_events'), _sidebarUpcomingEvents());
+    html += _sbCard(t('sb_popular_products'), _sidebarPopularProducts());
   }
 
   sb.innerHTML = html;
 }
 
 function _sidebarPopularProducts() {
-  if (typeof SHOP_CATEGORIES === 'undefined' || !SHOP_CATEGORIES.length) return '<p class="text-xs text-slate-300 font-bold">' + t('sb_no_data') + '</p>';
+  if (typeof SHOP_CATEGORIES === 'undefined' || !SHOP_CATEGORIES.length) return '';
   return SHOP_CATEGORIES.slice(0, 3).map(function(cat, i) {
     return '<div class="sidebar-mini-item" onclick="goShopSub(\'' + cat.id + '\')">' +
       '<span class="smi-rank">' + (i + 1) + '</span>' +
@@ -618,7 +604,7 @@ function _sidebarPopularProducts() {
 
 function _sidebarUpcomingEvents() {
   var evts = (typeof events_ !== 'undefined' ? events_ : []).slice(0, 3);
-  if (!evts.length) return '<p class="text-xs text-slate-300 font-bold">' + t('sb_no_data') + '</p>';
+  if (!evts.length) return '';
   return evts.map(function(ev) {
     return '<div class="sidebar-mini-item" onclick="openEventDetail(' + ev.id + ')">' +
       '<span class="smi-rank">📅</span>' +
@@ -629,7 +615,7 @@ function _sidebarUpcomingEvents() {
 
 function _sidebarLatestPosts() {
   var p = (typeof posts !== 'undefined' ? posts : []).slice(0, 4);
-  if (!p.length) return '<p class="text-xs text-slate-300 font-bold">' + t('sb_no_data') + '</p>';
+  if (!p.length) return '';
   return p.map(function(post) {
     return '<div class="sidebar-mini-item" onclick="openForumDetail(' + post.id + ')">' +
       '<span class="smi-rank">💬</span>' +
@@ -1181,11 +1167,13 @@ function renderHomeCategories() {
 function renderHomeForumPreview() {
   var el = document.getElementById('homeForumPreview');
   if (!el) return;
+  var wrap = el.parentElement;
   var recent = posts.slice().sort(function(a, b) { return b.id - a.id; }).slice(0, 3);
   if (!recent.length) {
-    el.innerHTML = '<p class="text-center text-slate-400 text-xs py-6 font-medium">' + t('home_forum_empty') + '</p>';
+    if (wrap) wrap.style.display = 'none';
     return;
   }
+  if (wrap) wrap.style.display = '';
   el.innerHTML = recent.map(function(p) {
     var emoji = p.category === 'prosthetic' ? '💎' : '🦷';
     var commentCount = p.comments ? p.comments.length : 0;
@@ -1205,11 +1193,13 @@ function renderHomeForumPreview() {
 function renderHomeEventsPreview() {
   var el = document.getElementById('homeEventsPreview');
   if (!el) return;
+  var wrap = el.parentElement;
   var upcoming = events_.slice(0, 2);
   if (!upcoming.length) {
-    el.innerHTML = '<p class="text-center text-slate-400 text-xs py-6 font-medium">' + t('home_events_empty') + '</p>';
+    if (wrap) wrap.style.display = 'none';
     return;
   }
+  if (wrap) wrap.style.display = '';
   el.innerHTML = upcoming.map(function(e) {
     return '<div class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm flex items-start gap-3 border border-slate-100" ' +
       'style="border-left:4px solid var(--color-primary-dark)">' +

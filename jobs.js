@@ -52,7 +52,7 @@ function renderJobs() {
   var list = document.getElementById('jobsList');
   if (!list) return;
   if (!filtered.length) {
-    list.innerHTML = '<p class="text-center text-slate-400 font-bold text-sm py-12">' + t('job_empty') + '</p>';
+    list.innerHTML = '<div class="text-center py-16"><p class="text-4xl mb-3 opacity-30">💼</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_jobs') + '</p><p class="text-xs text-slate-300">' + t('empty_jobs_sub') + '</p></div>';
     return;
   }
   list.innerHTML = filtered.map(function(j) {

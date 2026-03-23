@@ -34,7 +34,7 @@ function renderWebzine() {
   var list = document.getElementById('webzineList');
   if (!list) return;
   if (!filtered.length) {
-    list.innerHTML = '<p class="col-span-2 text-center text-slate-400 font-bold text-sm py-12">' + t('wz_empty') + '</p>';
+    list.innerHTML = '<div class="col-span-2 text-center py-16"><p class="text-4xl mb-3 opacity-30">📰</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_webzine') + '</p><p class="text-xs text-slate-300">' + t('empty_webzine_sub') + '</p></div>';
     return;
   }
   list.innerHTML = filtered.map(function(a) {
@@ -123,15 +123,13 @@ function _renderMarkdown(md) {
 function renderHomeWebzinePreview() {
   var el = document.getElementById('homeWebzinePreview');
   if (!el) return;
+  var wrap = el.parentElement;
   var latest = webzineArticles.filter(function(a){ return a.title; }).slice(0, 3);
   if (!latest.length) {
-    el.innerHTML =
-      '<div class="col-span-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-8 text-center">' +
-        '<p class="text-2xl mb-1 opacity-30">📰</p>' +
-        '<p class="text-[11px] font-black text-slate-300">' + t('wz_home_empty') + '</p>' +
-      '</div>';
+    if (wrap) wrap.style.display = 'none';
     return;
   }
+  if (wrap) wrap.style.display = '';
   el.innerHTML = latest.map(function(a) {
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     var thumb = a.thumbnail_url

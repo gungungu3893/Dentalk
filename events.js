@@ -6,7 +6,7 @@ function renderEvents() {
   var el = document.getElementById('eventList');
   if (!el) return;
   if (!events_.length) {
-    el.innerHTML = '<p class="text-center text-slate-400 font-bold text-sm py-12">' + t('home_events_empty') + '</p>';
+    el.innerHTML = '<div class="text-center py-16"><p class="text-4xl mb-3 opacity-30">📅</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_events') + '</p><p class="text-xs text-slate-300">' + t('empty_events_sub') + '</p></div>';
     return;
   }
   // 모임 생성 버튼 (로그인 유저)
