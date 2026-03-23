@@ -1281,12 +1281,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span class="text-base leading-none">🏠</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_home">HOME</span>
       </button>
-      <button onclick="openNavDropdown('shop',event)"   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+      <button onclick="goPage('shop')"                   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
         <span class="text-base leading-none">🦷</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_shop">SHOP</span>
         <span id="ntab-lock-shop" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="openNavDropdown('custom',event)"  id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+      <button onclick="goPage('custom')"                  id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
         <span class="text-base leading-none">🔧</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_custom">CUSTOM</span>
         <span id="ntab-lock-custom" class="nav-lock hidden">🔒</span>
@@ -1295,7 +1295,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span class="text-base leading-none">♻️</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_used">USED</span>
       </button>
-      <button onclick="openNavDropdown('forum',event)"  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+      <button onclick="goPage('forum')"                  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
         <span class="text-base leading-none">💬</span>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_forum">토론방</span>
         <span id="ntab-lock-forum" class="nav-lock hidden">🔒</span>
