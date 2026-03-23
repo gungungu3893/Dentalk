@@ -4,7 +4,8 @@
 // 오프라인 폴백 페이지 개선
 // ============================================================
 
-const CACHE_VERSION = 'dentalk-v30';
+// ★ Bump this on every deploy — triggers install → old cache purge → skipWaiting
+const CACHE_VERSION = 'dentalk-v31';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -13,6 +14,7 @@ const STATIC_ASSETS = [
   './shop.js',
   './custom.js',
   './forum.js',
+  './leaders.js',
   './admin.js',
   './jobs.js',
   './webzine.js',
@@ -133,13 +135,15 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // 정적 자산 → Cache First
-  e.respondWith(cacheFirst(e.request));
+  // 정적 자산 → Cache First (strip ?v= query for cache matching)
+  e.respondWith(cacheFirst(e.request, { ignoreSearch: true }));
 });
 
 // ── Cache First 전략: 캐시 우선, 없으면 네트워크 ──
-function cacheFirst(request) {
-  return caches.match(request).then(function(cached) {
+// opts.ignoreSearch: true → ?v=xxx 무시하고 캐시 매칭
+function cacheFirst(request, opts) {
+  var matchOpts = (opts && opts.ignoreSearch) ? { ignoreSearch: true } : undefined;
+  return caches.match(request, matchOpts).then(function(cached) {
     if (cached) return cached;
     return fetch(request).then(function(response) {
       if (response && response.status === 200) {

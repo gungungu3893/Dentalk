@@ -2385,28 +2385,23 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
-<script src="supabase.js?v=30" defer></script>
-<script src="lang.js?v=30" defer></script>
-<script src="lang-en.js?v=30" defer></script>
-<script src="lang-ko.js?v=30" defer></script>
-<script src="lang-zh.js?v=30" defer></script>
-<script src="lang-th.js?v=30" defer></script>
-<script src="lang-vi.js?v=30" defer></script>
-<script src="lang-es.js?v=30" defer></script>
-<script src="lang-tr.js?v=30" defer></script>
-<script src="lang-ar.js?v=30" defer></script>
-<script src="lang-fa.js?v=30" defer></script>
-<script src="auth.js?v=30" defer></script>
-<script src="shop.js?v=30" defer></script>
-<script src="custom.js?v=30" defer></script>
-<script src="forum.js?v=30" defer></script>
-<script src="leaders.js?v=30" defer></script>
-<script src="jobs.js?v=30" defer></script>
-<script src="webzine.js?v=30" defer></script>
-<script src="events.js?v=30" defer></script>
-<script src="ads.js?v=30" defer></script>
-<script src="admin.js?v=30" defer></script>
-<script src="app.js?v=30" defer></script>
+<!-- APP_VERSION: bump this on each deploy to bust caches -->
+<script>var APP_VERSION='20260323';</script>
+<script>
+(function(){
+  var files=[
+    'supabase.js','lang.js',
+    'lang-en.js','lang-ko.js','lang-zh.js','lang-th.js','lang-vi.js','lang-es.js','lang-tr.js','lang-ar.js','lang-fa.js',
+    'auth.js','shop.js','custom.js','forum.js','leaders.js','jobs.js','webzine.js','events.js','ads.js','admin.js','app.js'
+  ];
+  files.forEach(function(f){
+    var s=document.createElement('script');
+    s.src=f+'?v='+APP_VERSION;
+    s.defer=true;
+    document.head.appendChild(s);
+  });
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────

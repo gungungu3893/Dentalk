@@ -127,7 +127,17 @@ function showInstallGuide(type) {
 }
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js');
+    navigator.serviceWorker.register('./sw.js').then(function(reg) {
+      // Check for SW updates every 60s
+      setInterval(function() { reg.update(); }, 60000);
+      // When new SW is waiting, tell it to activate immediately
+      reg.addEventListener('updatefound', function() {
+        var nw = reg.installing;
+        if (nw) nw.addEventListener('statechange', function() {
+          if (nw.state === 'activated') location.reload();
+        });
+      });
+    });
   });
 }
 
