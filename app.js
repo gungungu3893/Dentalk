@@ -1156,9 +1156,9 @@ function renderHomeCategories() {
   el.innerHTML = SHOP_CATEGORIES.map(function(cat) {
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' p-4 shadow-sm text-left active:scale-[.97] transition">' +
-      '<div class="absolute -bottom-3 -right-3 w-20 h-20 opacity-[0.12]">' + (cat.svg || '') + '</div>' +
+      '<div class="absolute -bottom-3 -right-3 w-20 h-20">' + (typeof _catBg==='function' ? _catBg(cat,80) : (cat.svg||'')) + '</div>' +
       '<div class="relative">' +
-        '<div class="w-10 h-10 mb-2 opacity-90">' + (cat.svg || '') + '</div>' +
+        '<div class="w-10 h-10 mb-2 opacity-90 flex items-center justify-center">' + (typeof _catIcon==='function' ? _catIcon(cat,40) : (cat.svg||'')) + '</div>' +
         '<p class="font-black text-white text-sm leading-snug">' + cat.name + '</p>' +
         '<p class="text-[10px] font-medium mt-0.5 leading-snug" style="color:rgba(255,255,255,0.75)">' + t(catDescKeys[cat.id] || '') + '</p>' +
       '</div>' +

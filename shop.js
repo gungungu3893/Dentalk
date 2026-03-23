@@ -68,6 +68,24 @@ const PRODUCTS = [
 // ============================================================
 // SHOP
 // ============================================================
+// Category product images — add URLs here as photos become available
+var CATEGORY_IMAGES = {
+  'q-base':  'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Q-base.png',
+  'ti-base': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Ti-base%20Abutment.png'
+};
+// Render category icon: image if available, otherwise SVG
+function _catIcon(cat, size) {
+  var url = CATEGORY_IMAGES[cat.id];
+  if (url) return '<img src="' + url + '" alt="' + cat.name + '" class="object-contain" style="width:' + size + 'px;height:' + size + 'px" loading="lazy">';
+  return '<div style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
+}
+// Background decoration: image blurred or SVG faded
+function _catBg(cat, size) {
+  var url = CATEGORY_IMAGES[cat.id];
+  if (url) return '<img src="' + url + '" alt="" class="object-contain opacity-[0.15]" style="width:' + size + 'px;height:' + size + 'px" loading="lazy">';
+  return '<div style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
+}
+
 const SHOP_CATEGORIES = [
   { id:'scan-body',   name:'Scan Body',   desc:'Intra-Oral / Model / GeoMedi', color:'from-blue-500 to-blue-800',
     svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="13" rx="20" ry="8" fill="white" opacity=".9"/><path d="M6 13 L14 54 L38 54 L46 13 Z" fill="white" opacity=".82"/><rect x="18" y="53" width="16" height="7" rx="2" fill="white" opacity=".7"/><rect x="16" y="59" width="20" height="7" rx="2.5" fill="white" opacity=".5"/></svg>' },
@@ -89,8 +107,8 @@ function renderShop() {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' flex items-center gap-4 px-5 py-5 text-left shadow-md active:scale-[.97] transition">' +
-      '<div class="absolute -bottom-4 -right-4 w-28 h-28 opacity-[0.08]">' + cat.svg + '</div>' +
-      '<div class="w-16 h-16 shrink-0 flex items-center justify-center opacity-90">' + cat.svg + '</div>' +
+      '<div class="absolute -bottom-4 -right-4 w-28 h-28">' + _catBg(cat, 112) + '</div>' +
+      '<div class="w-16 h-16 shrink-0 flex items-center justify-center opacity-90">' + _catIcon(cat, 64) + '</div>' +
       '<div class="flex-1 min-w-0 relative">' +
         '<p class="font-black text-white text-base leading-tight">' + cat.name + '</p>' +
         '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:rgba(255,255,255,0.75)">' + cat.desc + '</p>' +
@@ -192,7 +210,7 @@ function renderShopItems(catId) {
     return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
       '<div class="h-1.5 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
       '<div class="p-4 flex items-center gap-3">' +
-        (cat ? '<div class="w-10 h-10 shrink-0 opacity-70 flex items-center justify-center">' + cat.svg + '</div>' : '') +
+        (cat ? '<div class="w-10 h-10 shrink-0 opacity-70 flex items-center justify-center">' + _catIcon(cat, 40) + '</div>' : '') +
         '<div class="flex-1 min-w-0">' +
           '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
           '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
@@ -235,7 +253,7 @@ function renderProductPage() {
   if (hero) hero.style.background = _catGrads[p.category] || _catGrads['scan-body'];
   var iconArea = document.getElementById('shopProductIconArea');
   if (iconArea && cat) {
-    iconArea.innerHTML = '<div class="w-16 h-16 opacity-90">' + cat.svg + '</div>';
+    iconArea.innerHTML = '<div class="w-16 h-16 opacity-90 flex items-center justify-center">' + _catIcon(cat, 64) + '</div>';
     iconArea.className = 'w-20 h-20 mb-3 flex items-center justify-center';
   }
   var badge = document.getElementById('shopProductStockBadge');
