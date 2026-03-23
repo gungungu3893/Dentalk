@@ -467,6 +467,7 @@ function goPage(id) {
   if (id === 'shop')     renderShop();
   if (id === 'used')     renderUsed();
   if (id === 'forum')  { renderForum(); updateNicknameDisplays(); }
+  if (id === 'leaders') { if (typeof renderLeadersPage === 'function') renderLeadersPage(); }
   if (id === 'jobs')     renderJobs();
   if (id === 'webzine')  renderWebzine();
   if (id === 'events')   renderEvents();
@@ -493,6 +494,7 @@ function goDetailPage(pageId, title, fromPage) {
   if (btnBack) { btnBack.classList.remove('hidden'); btnBack.classList.add('flex'); }
   closeMenu();
   window.scrollTo(0, 0);
+  if (pageId === 'leaders' && typeof renderLeadersPage === 'function') renderLeadersPage();
   renderDesktopSidebar(pageId);
   updateDesktopHero(pageId);
   applyLang();

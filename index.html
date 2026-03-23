@@ -1849,6 +1849,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="forumRegionBar" class="grid grid-cols-3 md:grid-cols-4 gap-1.5 mb-2"></div>
       <!-- 주(province) 서브탭 -->
       <div id="forumProvinceBar" class="hidden grid grid-cols-3 md:grid-cols-4 gap-1.5 mb-3"></div>
+      <!-- 지역 임원 보기 버튼 -->
+      <button onclick="goDetailPage('leaders', t('leaders_title'), 'forum')" class="w-full mb-3 py-2.5 rounded-2xl font-black text-xs bg-gradient-to-r from-purple-600 to-indigo-600 text-white active:scale-[.97] transition flex items-center justify-center gap-2 shadow-sm">
+        <span>⭐</span> <span data-i18n="leaders_view_btn">View Regional Leaders</span>
+      </button>
       <!-- 글쓰기 버튼 -->
       <button onclick="forumToggleWrite()" id="forumWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
         <span data-i18n="forum_write_btn">✍️ Write Post</span>
@@ -1957,6 +1961,32 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           </div>
         </div>
       </div>
+    </div>
+    <!-- ==================== LEADERS PAGE ==================== -->
+    <div id="page-leaders" class="page p-4">
+      <!-- 지도 (데스크톱) / 드롭다운 (모바일) -->
+      <div class="mb-4">
+        <!-- 모바일: 드롭다운 선택 -->
+        <div class="md:hidden mb-3 space-y-2">
+          <select id="leadersRegionSelect" onchange="leadersRegionChanged()" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-black focus:outline-none focus:border-purple-400">
+            <option value="" data-i18n="leaders_select_region">Select Region</option>
+          </select>
+          <select id="leadersProvinceSelect" onchange="leadersProvinceChanged()" class="hidden w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-black focus:outline-none focus:border-purple-400">
+            <option value="" data-i18n="leaders_select_province">Select Province</option>
+          </select>
+        </div>
+        <!-- 데스크톱: 태국 지도 SVG -->
+        <div class="hidden md:block">
+          <div id="thailandMapWrap" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative" style="max-width:520px;margin:0 auto">
+            <div id="thailandMap"></div>
+            <div id="mapTooltip" class="absolute hidden text-[10px] font-black bg-slate-800 text-white px-2 py-1 rounded-lg pointer-events-none z-50 whitespace-nowrap" style="transform:translate(-50%,-120%)"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 선택된 지역/주 임원 카드 -->
+      <div id="leadersSelected" class="mb-4"></div>
+      <!-- 전체 임원 목록 (아코디언) -->
+      <div id="leadersAccordion"></div>
     </div>
     <!-- ==================== FORUM DETAIL PAGE ==================== -->
     <div id="page-forum-detail" class="page">
@@ -2370,6 +2400,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <script src="shop.js?v=30" defer></script>
 <script src="custom.js?v=30" defer></script>
 <script src="forum.js?v=30" defer></script>
+<script src="leaders.js?v=30" defer></script>
 <script src="jobs.js?v=30" defer></script>
 <script src="webzine.js?v=30" defer></script>
 <script src="events.js?v=30" defer></script>

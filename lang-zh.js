@@ -103,4 +103,5 @@ LANG.zh = {
     ma_compose_btn:'✉️ 发新消息',ma_inbox_label:'收件箱',ma_sent_label:'已发送',ma_reply_btn:'← 回复',ma_type_used:'二手市场',ma_type_forum:'临床讨论',ma_cat_implant:'🦷 种植',ma_cat_prosthetic:'💎 修复',ma_no_activity:'暂无帖子。',compose_fill_error:'请填写收件人、主题和内容。',compose_sent_msg:'消息已发送！',shop_receipt_order_no:'订单号',shop_receipt_clinic:'诊所',shop_receipt_date:'日期',shop_receipt_contact:'联系方式',shop_receipt_address:'地址',shop_carrier_select_err:'请选择快递公司。',shop_tracking_input_err:'请输入运单号。',
     used_seller:'卖家',used_comment_title:'💬 评论',used_comment_ph:'写评论...',used_comment_submit:'回复',used_comment_empty:'暂无评论',used_comment_writing_as:'评论者',used_send_msg:'✉️ 发送消息',
     empty_forum:'暂无帖子',empty_forum_sub:'成为第一个发起讨论的人！',empty_jobs:'暂无招聘信息',empty_jobs_sub:'发布第一个招聘岗位！',empty_webzine:'暂无文章',empty_webzine_sub:'新文章即将发布！',empty_events:'暂无活动',empty_events_sub:'请期待新活动！',empty_used:'暂无二手配件',empty_used_sub:'发布您的第一个二手商品！',
+    leaders_title:'地区负责人',leaders_view_btn:'⭐ 查看地区负责人',leaders_select_region:'选择地区',leaders_select_province:'选择省份',leaders_all_provinces:'所有省份',leaders_clear:'✕ 清除',leaders_none:'暂无负责人',leaders_all_list:'所有地区负责人',pt_leaders:'地区负责人',
 };
