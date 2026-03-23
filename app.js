@@ -605,7 +605,8 @@ function renderDesktopSidebar(pageId) {
 }
 
 function _sidebarPopularProducts() {
-  if (typeof SHOP_CATEGORIES === 'undefined' || !SHOP_CATEGORIES.length) return '';
+  if (typeof SHOP_CATEGORIES === 'undefined' || !SHOP_CATEGORIES.length)
+    return '<p class="text-xs text-slate-300 font-medium py-2">Loading...</p>';
   return SHOP_CATEGORIES.slice(0, 3).map(function(cat, i) {
     return '<div class="sidebar-mini-item" onclick="goShopSub(\'' + cat.id + '\')">' +
       '<span class="smi-rank">' + (i + 1) + '</span>' +
@@ -1183,13 +1184,11 @@ function renderHomeCategories() {
 function renderHomeForumPreview() {
   var el = document.getElementById('homeForumPreview');
   if (!el) return;
-  var wrap = el.parentElement;
   var recent = posts.slice().sort(function(a, b) { return b.id - a.id; }).slice(0, 3);
   if (!recent.length) {
-    if (wrap) wrap.style.display = 'none';
+    el.innerHTML = '<div class="text-center py-6 text-slate-300 text-xs font-medium">No posts yet</div>';
     return;
   }
-  if (wrap) wrap.style.display = '';
   el.innerHTML = recent.map(function(p) {
     var emoji = p.category === 'prosthetic' ? '💎' : '🦷';
     var commentCount = p.comments ? p.comments.length : 0;
@@ -1209,13 +1208,11 @@ function renderHomeForumPreview() {
 function renderHomeEventsPreview() {
   var el = document.getElementById('homeEventsPreview');
   if (!el) return;
-  var wrap = el.parentElement;
   var upcoming = events_.slice(0, 2);
   if (!upcoming.length) {
-    if (wrap) wrap.style.display = 'none';
+    el.innerHTML = '<div class="text-center py-6 text-slate-300 text-xs font-medium">No upcoming events</div>';
     return;
   }
-  if (wrap) wrap.style.display = '';
   el.innerHTML = upcoming.map(function(e) {
     return '<div class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm flex items-start gap-3 border border-slate-100" ' +
       'style="border-left:4px solid var(--color-primary-dark)">' +

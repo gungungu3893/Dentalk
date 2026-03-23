@@ -123,13 +123,11 @@ function _renderMarkdown(md) {
 function renderHomeWebzinePreview() {
   var el = document.getElementById('homeWebzinePreview');
   if (!el) return;
-  var wrap = el.parentElement;
   var latest = webzineArticles.filter(function(a){ return a.title; }).slice(0, 3);
   if (!latest.length) {
-    if (wrap) wrap.style.display = 'none';
+    el.innerHTML = '<div class="col-span-full text-center py-6 text-slate-300 text-xs font-medium">No articles yet</div>';
     return;
   }
-  if (wrap) wrap.style.display = '';
   el.innerHTML = latest.map(function(a) {
     var catCfg = WEBZINE_CATEGORIES.find(function(c){ return c.key === a.category; }) || {};
     var thumb = a.thumbnail_url
