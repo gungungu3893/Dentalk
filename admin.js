@@ -1124,7 +1124,10 @@ async function renderAdminStats() {
     periodOrders.forEach(function(o) {
       if (o.items) o.items.forEach(function(i){ periodRevenue += (i.price||0)*(i.qty||1); });
     });
-    var totalMembers = allUsers.filter(function(u){ return u.is_active === true || u.is_active === 'true'; }).length || allUsers.length;
+    var activeMembers = allUsers.filter(function(u){ return u.is_active === true; }).length;
+    var totalMembers = allUsers.length;
+    // Use active count if available, otherwise total count for display
+    var displayMembers = activeMembers > 0 ? activeMembers : totalMembers;
     var periodSignups = allUsers.filter(function(u){ return u.created_at && u.created_at.slice(0,10) >= periodStart; }).length;
     var periodForumPosts = forumPosts.filter(function(p){ return p.created_at && p.created_at.slice(0,10) >= periodStart; }).length;
 
@@ -1228,7 +1231,7 @@ async function renderAdminStats() {
     // Summary cards
     html += '<div class="grid grid-cols-2 gap-3 mb-5">';
     html += _statCard('💰', t('stats_monthly_revenue'), periodRevenue.toLocaleString() + ' THB', 'bg-gradient-to-br from-green-500 to-emerald-700');
-    html += _statCard('👥', t('stats_total_members'), totalMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
+    html += _statCard('👥', t('stats_total_members'), displayMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
     html += _statCard('✨', t('stats_weekly_signups'), periodSignups, 'bg-gradient-to-br from-purple-500 to-violet-700');
     html += _statCard('📦', t('stats_monthly_orders'), periodOrders.length, 'bg-gradient-to-br from-amber-500 to-orange-700');
     html += '</div>';
