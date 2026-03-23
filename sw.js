@@ -109,6 +109,9 @@ self.addEventListener('fetch', function(e) {
 
   var url = e.request.url;
 
+  // chrome-extension://, moz-extension:// 등 비표준 스킴은 캐시 불가 → 무시
+  if (url.indexOf('http') !== 0) return;
+
   // API/외부 요청 → Network First
   var isApi = API_PATTERNS.some(function(p) { return url.indexOf(p) !== -1; });
   if (isApi) {
@@ -148,7 +151,7 @@ function networkFirst(request) {
     if (response && response.status === 200) {
       var clone = response.clone();
       caches.open(CACHE_VERSION).then(function(cache) {
-        cache.put(request, clone);
+        try { cache.put(request, clone); } catch(e) { /* unsupported scheme */ }
       });
     }
     return response;

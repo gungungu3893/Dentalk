@@ -1,5 +1,6 @@
 // i18n - 다국어 지원 (core)
-const LANG = {};
+// ★ window.LANG 전역 선언 — 모든 lang-xx.js 보다 먼저 로드되어야 함
+window.LANG = window.LANG || {};
 
 function t(key) { return (LANG[currentLang] && LANG[currentLang][key]) || (LANG.en && LANG.en[key]) || key; }
 function tf(key) {

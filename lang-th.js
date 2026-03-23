@@ -1,4 +1,5 @@
 // Dentalk i18n - Thai
+window.LANG = window.LANG || {};
 LANG.th = {
     nav_home:'หน้าแรก',nav_shop:'ร้านค้า',nav_custom:'อะบัทเมนท์ CNC',nav_used:'ตลาดมือสอง',nav_forum:'ห้องสนทนา',nav_events:'กิจกรรม',nav_factory:'โรงงาน',nav_settings:'ตั้งค่า',nav_login:'เข้าสู่ระบบ',privacy_btn:'นโยบายความเป็นส่วนตัว',
     hdr_search:'ค้นหา',hdr_notif:'แจ้งเตือน',hdr_install:'ติดตั้ง',hdr_cart:'ตะกร้า',hdr_login:'เข้าสู่ระบบ',hdr_logout:'ออกจากระบบ',

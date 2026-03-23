@@ -1,4 +1,5 @@
 // Dentalk i18n - Korean
+window.LANG = window.LANG || {};
 LANG.ko = {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'중고마켓',nav_forum:'임상토론방',nav_events:'이벤트',nav_factory:'공장',nav_settings:'설정',nav_login:'로그인',privacy_btn:'개인정보 처리방침',
     hdr_search:'검색',hdr_notif:'알림',hdr_install:'설치',hdr_cart:'장바구니',hdr_login:'로그인',hdr_logout:'로그아웃',

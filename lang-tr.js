@@ -1,4 +1,5 @@
 // Dentalk i18n - Turkish (Part 1)
+window.LANG = window.LANG || {};
 LANG.tr = {
     nav_home:'ANA SAYFA',nav_shop:'MAĞAZA',nav_custom:'CNC Özel Dayanak',nav_used:'İKİNCİ EL',nav_forum:'TARTIŞMA',nav_events:'ETKİNLİKLER',nav_factory:'FABRİKA',nav_settings:'AYARLAR',nav_login:'Giriş',privacy_btn:'Gizlilik Politikası',
     hdr_search:'Ara',hdr_notif:'Bildirimler',hdr_install:'Yükle',hdr_cart:'Sepet',hdr_login:'Giriş',hdr_logout:'Çıkış',

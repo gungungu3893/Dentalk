@@ -1,4 +1,5 @@
 // Dentalk i18n - Chinese
+window.LANG = window.LANG || {};
 LANG.zh = {
     nav_home:'主页',nav_shop:'商城',nav_custom:'CNC Custom Abut',nav_used:'二手市场',nav_forum:'临床讨论',nav_events:'活动',nav_factory:'工厂',nav_settings:'设置',nav_login:'登录',privacy_btn:'隐私政策',
     hdr_search:'搜索',hdr_notif:'通知',hdr_install:'安装',hdr_cart:'购物车',hdr_login:'登录',hdr_logout:'退出',

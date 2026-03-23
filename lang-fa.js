@@ -1,4 +1,5 @@
 // Dentalk i18n - Farsi/Persian (Part 1)
+window.LANG = window.LANG || {};
 LANG.fa = {
     nav_home:'خانه',nav_shop:'فروشگاه',nav_custom:'اباتمنت سفارشی CNC',nav_used:'بازار دست دوم',nav_forum:'گفتگو',nav_events:'رویدادها',nav_factory:'کارخانه',nav_settings:'تنظیمات',nav_login:'ورود',privacy_btn:'سیاست حفظ حریم خصوصی',
     hdr_search:'جستجو',hdr_notif:'اعلان‌ها',hdr_install:'نصب',hdr_cart:'سبد خرید',hdr_login:'ورود',hdr_logout:'خروج',

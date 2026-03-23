@@ -1,4 +1,5 @@
 // Dentalk i18n - Arabic (Part 1)
+window.LANG = window.LANG || {};
 LANG.ar = {
     nav_home:'الرئيسية',nav_shop:'المتجر',nav_custom:'دعامة CNC مخصصة',nav_used:'سوق المستعمل',nav_forum:'النقاشات',nav_events:'الفعاليات',nav_factory:'المصنع',nav_settings:'الإعدادات',nav_login:'تسجيل الدخول',privacy_btn:'سياسة الخصوصية',
     hdr_search:'بحث',hdr_notif:'التنبيهات',hdr_install:'تثبيت',hdr_cart:'السلة',hdr_login:'دخول',hdr_logout:'خروج',

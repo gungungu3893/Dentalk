@@ -1,4 +1,5 @@
 // Dentalk i18n - Spanish
+window.LANG = window.LANG || {};
 LANG.es = {
     nav_home:'INICIO',nav_shop:'TIENDA',nav_custom:'CNC Custom Abut',nav_used:'MERCADO USADO',nav_forum:'DISCUSIÓN',nav_events:'EVENTOS',nav_factory:'FÁBRICA',nav_settings:'AJUSTES',nav_login:'Iniciar sesión',privacy_btn:'Política de privacidad',
     hdr_search:'Buscar',hdr_notif:'Alertas',hdr_install:'Instalar',hdr_cart:'Carrito',hdr_login:'Entrar',hdr_logout:'Salir',

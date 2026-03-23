@@ -1,4 +1,5 @@
 // Dentalk i18n - English
+window.LANG = window.LANG || {};
 LANG.en = {
     nav_home:'HOME',nav_shop:'SHOP',nav_custom:'CNC Custom Abut',nav_used:'USED MARKET',nav_forum:'DISCUSSION',nav_events:'EVENTS',nav_factory:'FACTORY',nav_settings:'SETTINGS',nav_login:'Login',privacy_btn:'Privacy Policy',
     hdr_search:'Search',hdr_notif:'Alerts',hdr_install:'Install',hdr_cart:'Cart',hdr_login:'Login',hdr_logout:'Logout',

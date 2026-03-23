@@ -2407,7 +2407,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   files.forEach(function(f){
     var s=document.createElement('script');
     s.src=f+'?v='+APP_VERSION;
-    s.defer=true;
+    s.async=false; // ★ 순서 보장: defer는 동적 스크립트에서 무시됨, async=false로 삽입 순서대로 실행
     document.head.appendChild(s);
   });
 })();

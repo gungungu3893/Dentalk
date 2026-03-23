@@ -1,4 +1,5 @@
 // Dentalk i18n - Vietnamese
+window.LANG = window.LANG || {};
 LANG.vi = {
     nav_home:'TRANG CHỦ',nav_shop:'CỬA HÀNG',nav_custom:'CNC Custom Abut',nav_used:'THỊ TRƯỜNG CŨ',nav_forum:'THẢO LUẬN',nav_events:'SỰ KIỆN',nav_factory:'NHÀ MÁY',nav_settings:'CÀI ĐẶT',nav_login:'Đăng nhập',privacy_btn:'Chính sách bảo mật',
     hdr_search:'Tìm kiếm',hdr_notif:'Thông báo',hdr_install:'Cài đặt',hdr_cart:'Giỏ hàng',hdr_login:'Đăng nhập',hdr_logout:'Đăng xuất',
