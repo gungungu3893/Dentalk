@@ -100,7 +100,7 @@ function renderForum() {
   if (regionBar) {
     regionBar.innerHTML = FORUM_REGIONS.map(function(r) {
       var active = forumRegion === r.key;
-      return '<button onclick="forumRegionTab(\'' + r.key + '\')" class="shrink-0 px-4 py-2 rounded-2xl font-black text-xs transition ' +
+      return '<button onclick="forumRegionTab(\'' + r.key + '\')" class="w-full px-2 py-2 rounded-xl font-black text-[11px] transition text-center truncate ' +
         (active ? 'bg-emerald-600 text-white shadow' : 'bg-white text-slate-500 border border-slate-200') + '">' +
         r.icon + ' ' + t(r.labelKey) + '</button>';
     }).join('');
@@ -113,12 +113,12 @@ function renderForum() {
     if (provinces.length) {
       provinceBar.classList.remove('hidden');
       provinceBar.innerHTML =
-        '<button onclick="forumProvinceTab(\'all\')" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-[11px] transition ' +
+        '<button onclick="forumProvinceTab(\'all\')" class="w-full px-2 py-1.5 rounded-lg font-black text-[10px] transition text-center truncate ' +
         (forumProvince === 'all' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-white text-slate-400 border border-slate-200') + '">' +
         t('forum_region_all') + '</button>' +
         provinces.map(function(p) {
           var active = forumProvince === p.key;
-          return '<button onclick="forumProvinceTab(\'' + p.key + '\')" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-[11px] transition ' +
+          return '<button onclick="forumProvinceTab(\'' + p.key + '\')" class="w-full px-2 py-1.5 rounded-lg font-black text-[10px] transition text-center truncate ' +
             (active ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-white text-slate-400 border border-slate-200') + '">' +
             p.label + '</button>';
         }).join('');
