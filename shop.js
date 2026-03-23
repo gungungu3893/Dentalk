@@ -1,5 +1,52 @@
 // shop.js — 제품 카탈로그 + 장바구니 + 주문 + 리뷰
 // ============================================================
+// PromptPay QR Code Generator (EMVCo Standard)
+// ============================================================
+function generatePromptPayQR(id, amount) {
+  // PromptPay uses EMVCo QR code standard
+  // id: phone number (10 digits, 0-prefix) or National ID (13 digits)
+  var sanitized = id.replace(/[^0-9]/g, '');
+  var aid, accountId;
+  if (sanitized.length === 13) {
+    // National ID (citizen ID)
+    aid = '0208A000000677010113' + _tlv('02', sanitized);
+  } else {
+    // Phone number: convert 0xx → 0066xx (PromptPay format uses 0066 + last 9 digits)
+    var phone66 = '0066' + sanitized.slice(-9);
+    aid = '0208A000000677010111' + _tlv('01', phone66);
+  }
+  var payload = '';
+  payload += _tlv('00', '01');                     // Payload Format Indicator
+  payload += _tlv('01', '12');                     // Point of Initiation (12=dynamic)
+  payload += _tlv('29', aid);                      // Merchant Account Info (PromptPay=29)
+  payload += _tlv('53', '764');                    // Transaction Currency (THB=764)
+  if (amount && amount > 0) {
+    payload += _tlv('54', amount.toFixed(2));       // Transaction Amount
+  }
+  payload += _tlv('58', 'TH');                     // Country Code
+  payload += _tlv('63', '');                       // CRC placeholder
+  // Calculate CRC16-CCITT
+  var crc = _crc16(payload + '6304');
+  payload += '6304' + crc;
+  return payload;
+}
+function _tlv(tag, value) {
+  var len = value.length.toString().padStart(2, '0');
+  return tag + len + value;
+}
+function _crc16(str) {
+  var crc = 0xFFFF;
+  for (var i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (var j = 0; j < 8; j++) {
+      if (crc & 0x8000) crc = (crc << 1) ^ 0x1021;
+      else crc <<= 1;
+      crc &= 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+// ============================================================
 // 제품 DB
 // ============================================================
 const PRODUCTS = [
@@ -445,15 +492,13 @@ async function requestPay() {
     totalAmount: amt,
     stage: 'payment_pending'
   };
-  // PromptPay QR 생성 (금액+참조번호 포함)
-  var ppData = '00020101021230140016A00000067701011301' + '0208' + oid.slice(-8) + '5303764' + '5404' + amt.toFixed(2) + '5802TH6304';
-  var qrUrl;
-  try {
-    var res = await fetch('http://localhost:3000/pay',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart,address:clinic,phone,detailAddress:addr})});
-    qrUrl = (await res.json()).qr_image;
-  } catch(e) {
-    qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('PROMPTPAY|' + oid + '|' + amt + 'THB');
-  }
+  // PromptPay QR 생성 (EMVCo 표준)
+  // PromptPay ID: 전화번호 (0-prefix → 66-prefix) 또는 국민ID (13자리)
+  // ⚠️ 실제 운영 시 아래 PROMPTPAY_ID를 실제 전화번호 또는 국민ID로 교체하세요
+  // 예시: '0812345678' (전화번호) 또는 '1234567890123' (국민ID)
+  var PROMPTPAY_ID = '0000000000'; // ← PLACEHOLDER: 실제 PromptPay ID로 교체 필요
+  var ppPayload = generatePromptPayQR(PROMPTPAY_ID, amt);
+  var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(ppPayload);
   document.getElementById('qrSummary').innerHTML =
     '<p class="font-black text-slate-500 uppercase text-[9px] mb-2">' + t('qr_summary_title') + '</p>' +
     cart.map(function(c){ return '<div class="flex justify-between gap-2 text-[10px]"><span class="flex-1">' + c.name + '</span><span class="font-mono text-slate-500">' + c.code + '</span><span class="font-black ml-1">×' + c.qty + '</span><span class="font-mono font-black ml-1">' + (c.price*c.qty).toLocaleString() + '</span></div>'; }).join('') +
@@ -496,7 +541,7 @@ function completePayment() {
     { label: t('shop_receipt_contact'), value: order.phone },
     { label: t('shop_receipt_address'), value: order.address },
   ].concat(order.lineId ? [{ label: 'Line ID', value: order.lineId }] : []).concat(itemFields);
-  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🛒', 'คำสั่งซื้อใหม่จากร้านค้า', adminFields, 'ลูกค้าชำระเงินผ่าน QR เรียบร้อยแล้ว', 'Shop Order')]);
+  sendLineMessage(LINE_USER_ID, [buildFlexMessage('🛒', 'คำสั่งซื้อใหม่จากร้านค้า', adminFields, '⏳ รอยืนยันการชำระเงิน — กรุณาตรวจสอบและเปลี่ยนสถานะ', 'Shop Order')]);
   // 결제완료 팝업
   document.getElementById('payCompleteSummary').innerHTML =
     '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">' + t('shop_receipt_order_no') + ': ' + order.id + '</p>' +
@@ -591,7 +636,8 @@ async function renderAdminShopOrders() {
     // Stage badge colors
     var stageBadgeClass = {
       submitted:'bg-amber-100 text-amber-700',
-      paid:'bg-blue-100 text-blue-700',
+      payment_pending:'bg-orange-100 text-orange-700',
+      payment_confirmed:'bg-blue-100 text-blue-700',
       preparing:'bg-purple-100 text-purple-700',
       shipped:'bg-cyan-100 text-cyan-700',
       delivered:'bg-green-100 text-green-700'

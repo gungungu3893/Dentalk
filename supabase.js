@@ -669,3 +669,15 @@ async function sbGetAllUsersCount() {
   });
   return (await res.json()) || [];
 }
+
+async function sbGetForumStats() {
+  return sbGet('forum_posts', 'select=id,author,category,created_at&order=created_at.desc&limit=500');
+}
+
+async function sbGetForumCommentStats() {
+  return sbGet('forum_comments', 'select=id,post_id,created_at&order=created_at.desc&limit=500');
+}
+
+async function sbGetAllUsers() {
+  return sbGet('licenses', 'select=license_number,nickname,created_at,is_active,role');
+}

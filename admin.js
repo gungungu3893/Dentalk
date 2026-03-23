@@ -1074,95 +1074,197 @@ function adminDeleteEvent(id) {
 }
 
 // ============================================================
-// 관리자 통계 대시보드
+// 관리자 통계 대시보드 (Chart.js)
 // ============================================================
+var _statsCharts = {};
+var _statsPeriod = 30; // default: last 30 days
+
+function statsSetPeriod(days) {
+  _statsPeriod = days;
+  renderAdminStats();
+}
+
 async function renderAdminStats() {
   var container = document.getElementById('adminTabStats');
   if (!container) return;
   container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-bold">' + t('admin_loading') + '</p>';
+
+  // Destroy previous chart instances
+  Object.keys(_statsCharts).forEach(function(k) { if (_statsCharts[k]) { _statsCharts[k].destroy(); delete _statsCharts[k]; } });
+
   try {
     var results = await Promise.all([
       sbGetOrderStats(),
-      sbGet('licenses', 'select=license_number,created_at,status'),
-      sbGetShopOrders(currentUser.nickname, true),
+      sbGetAllUsers(),
+      sbGetForumStats(),
+      sbGetForumCommentStats(),
     ]);
     var allOrders = results[0] || [];
-    var allUsers = results[1] || [];
-    var shopOrders = results[2] || [];
+    var allUsers  = results[1] || [];
+    var forumPosts = results[2] || [];
+    var forumComments = results[3] || [];
 
     var now = new Date();
+    var periodStart = new Date(now - _statsPeriod * 24*60*60*1000).toISOString().slice(0,10);
     var thisMonth = now.toISOString().slice(0,7);
-    var oneWeekAgo = new Date(now - 7*24*60*60*1000).toISOString().slice(0,10);
 
-    // 이번 달 매출
-    var monthlyRevenue = 0;
-    allOrders.forEach(function(o) {
-      if (o.created_at && o.created_at.slice(0,7) === thisMonth && o.items) {
-        o.items.forEach(function(item) {
-          monthlyRevenue += (item.price || 0) * (item.qty || 1);
-        });
-      }
+    // ─── Summary calculations ──────────────────────────────
+    var periodOrders = allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,10) >= periodStart; });
+    var periodRevenue = 0;
+    periodOrders.forEach(function(o) {
+      if (o.items) o.items.forEach(function(i){ periodRevenue += (i.price||0)*(i.qty||1); });
     });
+    var totalMembers = allUsers.filter(function(u){ return u.is_active; }).length;
+    var periodSignups = allUsers.filter(function(u){ return u.created_at && u.created_at.slice(0,10) >= periodStart; }).length;
+    var periodForumPosts = forumPosts.filter(function(p){ return p.created_at && p.created_at.slice(0,10) >= periodStart; }).length;
 
-    // 총 회원수
-    var totalMembers = allUsers.filter(function(u){ return u.status === 'active'; }).length;
-
-    // 이번 주 신규 가입
-    var weeklySignups = allUsers.filter(function(u) {
-      return u.created_at && u.created_at.slice(0,10) >= oneWeekAgo;
-    }).length;
-
-    // 주문 건수 (이번 달)
-    var monthlyOrders = allOrders.filter(function(o) {
-      return o.created_at && o.created_at.slice(0,7) === thisMonth;
-    }).length;
-
-    // 인기 제품 Top 5
+    // ─── Top 5 products ────────────────────────────────────
     var productCount = {};
+    var productRevenue = {};
     allOrders.forEach(function(o) {
       if (o.items) o.items.forEach(function(item) {
         var key = item.name || item.code || 'Unknown';
         productCount[key] = (productCount[key] || 0) + (item.qty || 1);
+        productRevenue[key] = (productRevenue[key] || 0) + (item.price||0) * (item.qty||1);
       });
     });
-    var topProducts = Object.keys(productCount).map(function(k){ return { name:k, qty:productCount[k] }; })
+    var topProducts = Object.keys(productCount).map(function(k){ return { name:k, qty:productCount[k], revenue:productRevenue[k]||0 }; })
       .sort(function(a,b){ return b.qty - a.qty; }).slice(0,5);
 
-    // 월별 주문 추이 (최근 6개월)
-    var monthlyData = [];
-    for (var m = 5; m >= 0; m--) {
-      var d = new Date(now.getFullYear(), now.getMonth() - m, 1);
-      var monthKey = d.toISOString().slice(0,7);
-      var label = d.toLocaleString('en', { month:'short' });
-      var count = allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,7) === monthKey; }).length;
-      var revenue = 0;
-      allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,7) === monthKey; }).forEach(function(o) {
-        if (o.items) o.items.forEach(function(item){ revenue += (item.price||0)*(item.qty||1); });
+    // ─── Category revenue (for pie chart) ──────────────────
+    var catRevenue = {};
+    allOrders.forEach(function(o) {
+      if (o.items) o.items.forEach(function(item) {
+        var cat = _guessCategoryFromName(item.name || item.code || '');
+        catRevenue[cat] = (catRevenue[cat] || 0) + (item.price||0) * (item.qty||1);
       });
-      monthlyData.push({ label:label, count:count, revenue:revenue });
-    }
-    var maxCount = Math.max.apply(null, monthlyData.map(function(m){ return m.count; })) || 1;
+    });
 
-    // 렌더
+    // ─── Daily/Weekly/Monthly grouping ─────────────────────
+    var groupLabels = [], groupOrderCounts = [], groupRevenues = [];
+    var groupSignups = [], groupForumActivity = [];
+    if (_statsPeriod <= 14) {
+      // Daily grouping
+      for (var d = _statsPeriod - 1; d >= 0; d--) {
+        var dt = new Date(now - d * 24*60*60*1000);
+        var key = dt.toISOString().slice(0,10);
+        var label = (dt.getMonth()+1) + '/' + dt.getDate();
+        groupLabels.push(label);
+        groupOrderCounts.push(allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,10) === key; }).length);
+        var rev = 0;
+        allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,10) === key; }).forEach(function(o){
+          if(o.items) o.items.forEach(function(i){ rev += (i.price||0)*(i.qty||1); });
+        });
+        groupRevenues.push(rev);
+        groupSignups.push(allUsers.filter(function(u){ return u.created_at && u.created_at.slice(0,10) === key; }).length);
+        var fp = forumPosts.filter(function(p){ return p.created_at && p.created_at.slice(0,10) === key; }).length;
+        var fc = forumComments.filter(function(c){ return c.created_at && c.created_at.slice(0,10) === key; }).length;
+        groupForumActivity.push(fp + fc);
+      }
+    } else if (_statsPeriod <= 60) {
+      // Weekly grouping
+      var weeks = Math.ceil(_statsPeriod / 7);
+      for (var w = weeks - 1; w >= 0; w--) {
+        var wEnd = new Date(now - w * 7 * 24*60*60*1000);
+        var wStart = new Date(wEnd - 6 * 24*60*60*1000);
+        var ws = wStart.toISOString().slice(0,10);
+        var we = wEnd.toISOString().slice(0,10);
+        groupLabels.push((wStart.getMonth()+1) + '/' + wStart.getDate());
+        groupOrderCounts.push(allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,10) >= ws && o.created_at.slice(0,10) <= we; }).length);
+        var revW = 0;
+        allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,10) >= ws && o.created_at.slice(0,10) <= we; }).forEach(function(o){
+          if(o.items) o.items.forEach(function(i){ revW += (i.price||0)*(i.qty||1); });
+        });
+        groupRevenues.push(revW);
+        groupSignups.push(allUsers.filter(function(u){ return u.created_at && u.created_at.slice(0,10) >= ws && u.created_at.slice(0,10) <= we; }).length);
+        var fpW = forumPosts.filter(function(p){ return p.created_at && p.created_at.slice(0,10) >= ws && p.created_at.slice(0,10) <= we; }).length;
+        var fcW = forumComments.filter(function(c){ return c.created_at && c.created_at.slice(0,10) >= ws && c.created_at.slice(0,10) <= we; }).length;
+        groupForumActivity.push(fpW + fcW);
+      }
+    } else {
+      // Monthly grouping
+      var months = Math.ceil(_statsPeriod / 30);
+      for (var m = months - 1; m >= 0; m--) {
+        var md = new Date(now.getFullYear(), now.getMonth() - m, 1);
+        var mk = md.toISOString().slice(0,7);
+        groupLabels.push(md.toLocaleString('en', { month:'short' }));
+        groupOrderCounts.push(allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,7) === mk; }).length);
+        var revM = 0;
+        allOrders.filter(function(o){ return o.created_at && o.created_at.slice(0,7) === mk; }).forEach(function(o){
+          if(o.items) o.items.forEach(function(i){ revM += (i.price||0)*(i.qty||1); });
+        });
+        groupRevenues.push(revM);
+        groupSignups.push(allUsers.filter(function(u){ return u.created_at && u.created_at.slice(0,7) === mk; }).length);
+        var fpM = forumPosts.filter(function(p){ return p.created_at && p.created_at.slice(0,7) === mk; }).length;
+        var fcM = forumComments.filter(function(c){ return c.created_at && c.created_at.slice(0,7) === mk; }).length;
+        groupForumActivity.push(fpM + fcM);
+      }
+    }
+
+    // ─── Render HTML ───────────────────────────────────────
+    var periodLabel = _statsPeriod === 7 ? '7 Days' : _statsPeriod === 30 ? '30 Days' : '90 Days';
     var html = '';
-    // 요약 카드 (4개)
-    html += '<div class="grid grid-cols-2 gap-3 mb-5">';
-    html += _statCard('💰', t('stats_monthly_revenue'), monthlyRevenue.toLocaleString() + ' THB', 'bg-gradient-to-br from-green-500 to-emerald-700');
-    html += _statCard('👥', t('stats_total_members'), totalMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
-    html += _statCard('✨', t('stats_weekly_signups'), weeklySignups, 'bg-gradient-to-br from-purple-500 to-violet-700');
-    html += _statCard('📦', t('stats_monthly_orders'), monthlyOrders, 'bg-gradient-to-br from-amber-500 to-orange-700');
+
+    // Period filter buttons
+    html += '<div class="flex gap-1.5 mb-4">';
+    [7,30,90].forEach(function(d) {
+      var active = _statsPeriod === d;
+      var lbl = d === 7 ? '7D' : d === 30 ? '30D' : '90D';
+      html += '<button onclick="statsSetPeriod(' + d + ')" class="px-4 py-2 rounded-xl font-black text-xs transition ' +
+        (active ? 'bg-[#001d4a] text-white shadow' : 'bg-slate-100 text-slate-500 hover:bg-slate-200') + '">' + lbl + '</button>';
+    });
     html += '</div>';
 
-    // 인기 제품 Top 5
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-5">';
+    // Summary cards
+    html += '<div class="grid grid-cols-2 gap-3 mb-5">';
+    html += _statCard('💰', t('stats_monthly_revenue'), periodRevenue.toLocaleString() + ' THB', 'bg-gradient-to-br from-green-500 to-emerald-700');
+    html += _statCard('👥', t('stats_total_members'), totalMembers, 'bg-gradient-to-br from-blue-500 to-indigo-700');
+    html += _statCard('✨', t('stats_weekly_signups'), periodSignups, 'bg-gradient-to-br from-purple-500 to-violet-700');
+    html += _statCard('📦', t('stats_monthly_orders'), periodOrders.length, 'bg-gradient-to-br from-amber-500 to-orange-700');
+    html += '</div>';
+
+    // Orders line chart
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
+    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('stats_monthly_trend') + '</p>';
+    html += '<canvas id="chartOrders" height="180"></canvas>';
+    html += '</div>';
+
+    // Category pie chart
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
+    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + (t('stats_category_revenue') || 'REVENUE BY CATEGORY') + '</p>';
+    html += '<canvas id="chartCategoryPie" height="220"></canvas>';
+    html += '</div>';
+
+    // Signups bar chart
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
+    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + (t('stats_signup_trend') || 'NEW SIGNUPS') + '</p>';
+    html += '<canvas id="chartSignups" height="180"></canvas>';
+    html += '</div>';
+
+    // Forum activity chart
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
+    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + (t('stats_forum_activity') || 'FORUM ACTIVITY') + '</p>';
+    html += '<canvas id="chartForum" height="180"></canvas>';
+    html += '</div>';
+
+    // Top 5 products
+    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">';
     html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">' + t('stats_top_products') + '</p>';
     if (topProducts.length) {
       html += topProducts.map(function(p, i) {
         var medals = ['🥇','🥈','🥉','④','⑤'];
-        return '<div class="flex items-center gap-2.5 py-2 ' + (i < topProducts.length - 1 ? 'border-b border-slate-50' : '') + '">' +
+        var maxQty = topProducts[0].qty || 1;
+        var barPct = Math.max(8, (p.qty / maxQty) * 100);
+        return '<div class="flex items-center gap-2.5 py-2.5 ' + (i < topProducts.length - 1 ? 'border-b border-slate-50' : '') + '">' +
           '<span class="text-sm w-6 text-center">' + medals[i] + '</span>' +
-          '<span class="flex-1 font-bold text-xs text-slate-700 truncate">' + p.name + '</span>' +
-          '<span class="font-mono font-black text-xs text-blue-600">' + p.qty + '</span>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="font-bold text-xs text-slate-700 truncate">' + p.name + '</p>' +
+            '<div class="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" style="width:' + barPct + '%"></div></div>' +
+          '</div>' +
+          '<div class="text-right shrink-0 pl-2">' +
+            '<span class="font-mono font-black text-xs text-blue-600 block">' + p.qty + '</span>' +
+            '<span class="font-mono text-[9px] text-slate-400">' + p.revenue.toLocaleString() + '฿</span>' +
+          '</div>' +
         '</div>';
       }).join('');
     } else {
@@ -1170,22 +1272,100 @@ async function renderAdminStats() {
     }
     html += '</div>';
 
-    // 월별 주문 추이 차트 (CSS bar chart)
-    html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">';
-    html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">' + t('stats_monthly_trend') + '</p>';
-    html += '<div class="flex items-end gap-2 h-32">';
-    html += monthlyData.map(function(m) {
-      var pct = Math.max(8, (m.count / maxCount) * 100);
-      return '<div class="flex-1 flex flex-col items-center gap-1">' +
-        '<span class="text-[9px] font-black text-slate-600">' + m.count + '</span>' +
-        '<div class="w-full rounded-t-lg transition-all" style="height:' + pct + '%;background:linear-gradient(to top,#001d4a,#3b82f6)"></div>' +
-        '<span class="text-[8px] font-bold text-slate-400 mt-1">' + m.label + '</span>' +
-      '</div>';
-    }).join('');
-    html += '</div>';
-    html += '</div>';
-
     container.innerHTML = html;
+
+    // ─── Create Chart.js charts ────────────────────────────
+    if (typeof Chart === 'undefined') return; // Chart.js not loaded
+
+    var chartFont = { family: "'Inter','Noto Sans Thai',sans-serif", size: 10 };
+    var gridColor = 'rgba(0,0,0,0.04)';
+
+    // 1. Orders line chart (count + revenue dual axis)
+    var ctxOrders = document.getElementById('chartOrders');
+    if (ctxOrders) {
+      _statsCharts.orders = new Chart(ctxOrders, {
+        type: 'line',
+        data: {
+          labels: groupLabels,
+          datasets: [
+            { label: t('stats_monthly_orders') || 'Orders', data: groupOrderCounts, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#3b82f6', yAxisID: 'y' },
+            { label: t('stats_monthly_revenue') || 'Revenue', data: groupRevenues, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#10b981', yAxisID: 'y1' },
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { font: chartFont, boxWidth: 12 } } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { font: chartFont } },
+            y: { position: 'left', beginAtZero: true, grid: { color: gridColor }, ticks: { font: chartFont, stepSize: 1 } },
+            y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, ticks: { font: chartFont, callback: function(v){ return (v/1000).toFixed(0) + 'k'; } } }
+          }
+        }
+      });
+    }
+
+    // 2. Category pie chart
+    var ctxPie = document.getElementById('chartCategoryPie');
+    if (ctxPie) {
+      var catLabels = Object.keys(catRevenue);
+      var catValues = catLabels.map(function(k){ return catRevenue[k]; });
+      var pieColors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+      _statsCharts.categoryPie = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: catLabels,
+          datasets: [{ data: catValues, backgroundColor: pieColors.slice(0, catLabels.length), borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { font: chartFont, boxWidth: 10, padding: 8 } },
+            tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed.toLocaleString() + ' THB'; } } }
+          }
+        }
+      });
+    }
+
+    // 3. Signups bar chart
+    var ctxSignups = document.getElementById('chartSignups');
+    if (ctxSignups) {
+      _statsCharts.signups = new Chart(ctxSignups, {
+        type: 'bar',
+        data: {
+          labels: groupLabels,
+          datasets: [{ label: t('stats_weekly_signups') || 'New Signups', data: groupSignups, backgroundColor: 'rgba(139,92,246,0.7)', borderRadius: 6, borderSkipped: false }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { font: chartFont, boxWidth: 12 } } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { font: chartFont } },
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: chartFont, stepSize: 1 } }
+          }
+        }
+      });
+    }
+
+    // 4. Forum activity bar chart
+    var ctxForum = document.getElementById('chartForum');
+    if (ctxForum) {
+      _statsCharts.forum = new Chart(ctxForum, {
+        type: 'bar',
+        data: {
+          labels: groupLabels,
+          datasets: [{ label: t('stats_forum_activity') || 'Posts + Comments', data: groupForumActivity, backgroundColor: 'rgba(245,158,11,0.7)', borderRadius: 6, borderSkipped: false }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { font: chartFont, boxWidth: 12 } } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { font: chartFont } },
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { font: chartFont, stepSize: 1 } }
+          }
+        }
+      });
+    }
+
   } catch(e) {
     handleSupabaseError(e, 'Admin Stats');
     container.innerHTML = '<p class="text-center text-red-400 text-sm py-8 font-bold">' + t('admin_error') + '</p>';
@@ -1198,5 +1378,17 @@ function _statCard(icon, label, value, bgClass) {
     '<div class="font-black text-xl leading-none mb-1">' + value + '</div>' +
     '<div class="text-[9px] font-bold opacity-80 leading-tight">' + label + '</div>' +
   '</div>';
+}
+
+function _guessCategoryFromName(name) {
+  var n = name.toLowerCase();
+  if (n.indexOf('scan') !== -1) return 'Scan Body';
+  if (n.indexOf('q-base') !== -1 || n.indexOf('qbase') !== -1 || n.indexOf('zirconia') !== -1) return 'Q-Base';
+  if (n.indexOf('ti-base') !== -1 || n.indexOf('tibase') !== -1) return 'Ti-Base';
+  if (n.indexOf('ready') !== -1) return 'Ready Made';
+  if (n.indexOf('pre-mill') !== -1 || n.indexOf('premill') !== -1) return 'Pre-Milled';
+  if (n.indexOf('multi') !== -1 || n.indexOf('mua') !== -1) return 'Multi Unit';
+  if (n.indexOf('analog') !== -1 || n.indexOf('3d') !== -1) return '3D Analog';
+  return 'Other';
 }
 
