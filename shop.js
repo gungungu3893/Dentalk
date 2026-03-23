@@ -73,17 +73,18 @@ var CATEGORY_IMAGES = {
   'q-base':  'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Q-base.png',
   'ti-base': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Ti-base%20Abutment.png'
 };
-// Render category icon: image if available, otherwise SVG
+// Render category icon: image with white bg box, or SVG scaled
 function _catIcon(cat, size) {
   var url = CATEGORY_IMAGES[cat.id];
-  if (url) return '<img src="' + url + '" alt="' + cat.name + '" class="object-contain" style="width:' + size + 'px;height:' + size + 'px" loading="lazy">';
-  return '<div style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
+  if (url) return '<div class="bg-white rounded-xl shadow-sm flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px;padding:6px">' +
+    '<img src="' + url + '" alt="' + cat.name + '" class="object-contain w-full h-full" loading="lazy"></div>';
+  return '<div class="flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
 }
-// Background decoration: image blurred or SVG faded
+// Background decoration: image faded or SVG faded
 function _catBg(cat, size) {
   var url = CATEGORY_IMAGES[cat.id];
   if (url) return '<img src="' + url + '" alt="" class="object-contain opacity-[0.15]" style="width:' + size + 'px;height:' + size + 'px" loading="lazy">';
-  return '<div style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
+  return '<div class="opacity-[0.12]" style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
 }
 
 const SHOP_CATEGORIES = [
@@ -106,15 +107,13 @@ function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
-      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' flex items-center gap-4 px-5 py-5 text-left shadow-md active:scale-[.97] transition">' +
-      '<div class="absolute -bottom-4 -right-4 w-28 h-28">' + _catBg(cat, 112) + '</div>' +
-      '<div class="w-16 h-16 shrink-0 flex items-center justify-center opacity-90">' + _catIcon(cat, 64) + '</div>' +
-      '<div class="flex-1 min-w-0 relative">' +
+      'class="relative overflow-hidden rounded-2xl bg-gradient-to-br ' + cat.color + ' text-left shadow-md active:scale-[.97] transition">' +
+      '<div class="flex items-center justify-center py-4 px-3">' + _catIcon(cat, 140) + '</div>' +
+      '<div class="px-4 pb-4 relative">' +
         '<p class="font-black text-white text-base leading-tight">' + cat.name + '</p>' +
         '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:rgba(255,255,255,0.75)">' + cat.desc + '</p>' +
-        '<p class="text-[10px] font-black mt-2" style="color:rgba(255,255,255,0.6)">' + count + ' ' + t('shop_product_count') + '</p>' +
+        '<p class="text-[10px] font-black mt-1.5" style="color:rgba(255,255,255,0.6)">' + count + ' ' + t('shop_product_count') + '</p>' +
       '</div>' +
-      '<span class="text-lg leading-none shrink-0" style="color:rgba(255,255,255,0.5)">›</span>' +
     '</button>';
   }).join('');
   renderMyShopOrders();
@@ -208,19 +207,19 @@ function renderShopItems(catId) {
       : '<span class="text-[9px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full">❌ ' + t('shop_out_of_stock') + '</span>';
     var clickAttr = inStock ? 'onclick="openOrder(\'' + p.id + '\')"' : '';
     return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
-      '<div class="h-1.5 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
-      '<div class="p-4 flex items-center gap-3">' +
-        (cat ? '<div class="w-10 h-10 shrink-0 opacity-70 flex items-center justify-center">' + _catIcon(cat, 40) + '</div>' : '') +
-        '<div class="flex-1 min-w-0">' +
-          '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
-          '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
-          '<div class="mt-2">' + stockHtml + '</div>' +
+      '<div class="h-1 bg-gradient-to-r ' + (cat ? cat.color : 'from-slate-400 to-slate-600') + '"></div>' +
+      (cat ? '<div class="flex items-center justify-center pt-4 px-4">' + _catIcon(cat, 120) + '</div>' : '') +
+      '<div class="p-4">' +
+        '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
+        '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
+        '<div class="flex items-center justify-between mt-3">' +
+          '<div>' + stockHtml + '</div>' +
+          '<div class="text-right">' +
+            '<span class="text-[10px] text-slate-400 font-bold">฿</span>' +
+            '<span class="font-black text-blue-700 text-lg font-mono">' + p.price.toLocaleString() + '</span>' +
+          '</div>' +
         '</div>' +
-        '<div class="text-right shrink-0 pl-2">' +
-          '<p class="text-[10px] text-slate-400 font-bold leading-none">฿</p>' +
-          '<p class="font-black text-blue-700 text-base font-mono leading-tight">' + p.price.toLocaleString() + '</p>' +
-          (inStock ? '<p class="text-[9px] text-blue-400 font-black mt-1.5 uppercase">' + t('shop_select') + '</p>' : '') +
-        '</div>' +
+        (inStock ? '<p class="text-[9px] text-blue-400 font-black mt-2 uppercase text-center">' + t('shop_select') + ' ›</p>' : '') +
       '</div>' +
     '</div>';
   }).join('');
@@ -253,8 +252,7 @@ function renderProductPage() {
   if (hero) hero.style.background = _catGrads[p.category] || _catGrads['scan-body'];
   var iconArea = document.getElementById('shopProductIconArea');
   if (iconArea && cat) {
-    iconArea.innerHTML = '<div class="w-16 h-16 opacity-90 flex items-center justify-center">' + _catIcon(cat, 64) + '</div>';
-    iconArea.className = 'w-20 h-20 mb-3 flex items-center justify-center';
+    iconArea.innerHTML = _catIcon(cat, 200);
   }
   var badge = document.getElementById('shopProductStockBadge');
   if (badge) {
