@@ -321,6 +321,9 @@ html[lang="th"] select,
 html[lang="th"] button {
   font-family: 'Noto Sans Thai', 'Inter', sans-serif;
 }
+/* ── Sticky footer: 콘텐츠가 적어도 푸터가 항상 화면 하단에 위치 ── */
+#desktopMain { display: flex; flex-direction: column; min-height: calc(100vh - 120px); }
+#siteFooter { margin-top: auto; }
 .page { display: none; }
 .page.active { display: block; }
 .modal { display: none !important; }
