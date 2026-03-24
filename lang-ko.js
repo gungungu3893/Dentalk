@@ -15,7 +15,7 @@ LANG.ko = {
     home_vision_label:'비전',home_vision:'동남아시아 임플란트 정밀도의 새 기준을 제시합니다',home_stat1:'인증',home_stat2:'원산지',home_stat3:'공급 범위',home_biotem_short:'임플란트 전문 · 한국',home_bioplant_short:'생산 센터 · 방콕',home_mission_label:'미션',home_mission:'한국 제조 프리미엄 치과 임플란트 부품을 태국 및 동남아시아 전역 치과에 신속하고 신뢰할 수 있는 서비스로 공급합니다.',home_footer:'© 2026 Dentalk · BIOTEM × BIOPLANT',
     hero_bioplant_tag:'BIOPLANT Thailand',hero_bioplant_title:'프리미엄 치과 임플란트 부품',hero_bioplant_desc:'한국 ISO 인증 제조, 클리닉 빠른 배송',hero_bioplant_cta:'쇼핑몰로',
     hero_cnc_tag:'CNC 커스텀 어버트먼트',hero_cnc_title:'정밀 맞춤 제작',hero_cnc_desc:'스캔바디부터 최종 보철까지 사양에 맞게 제작',hero_cnc_cta:'주문하기',
-    sec_categories:'제품 카테고리',sec_see_more:'전체 보기 ›',cat_scan_body_desc:'구강 내 · 모델용',cat_q_base_desc:'지르코니아 어버트먼트 H=7mm',cat_ready_made_desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',cat_ti_base_desc:'CAD/CAM · Ti+Zr',cat_pre_milled_desc:'밀링 호환 · N · R 타입',cat_multi_unit_desc:'All-on-X · MUA · 스캔바디',cat_3d_analog_desc:'GeoMedi 스톤 & 3D 모델',
+    sec_categories:'제품 카테고리',sec_see_more:'전체 보기 ›',cat_scan_body_desc:'구강 내 · 모델용',cat_q_base_desc:'지르코니아 어버트먼트 H=7mm',cat_ready_made_desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',cat_ti_base_desc:'CAD/CAM · Ti+Zr',cat_pre_milled_desc:'밀링 호환 · N · R 타입',cat_multi_unit_desc:'All-on-X · MUA · 스캔바디',cat_3d_analog_desc:'스톤 & 3D 프린트 모델',
     sec_forum_preview:'임상 토론방',sec_forum_more:'전체 보기 ›',home_forum_empty:'아직 게시물이 없습니다.',
     sec_events_preview:'예정 이벤트',sec_events_more:'전체 보기 ›',home_events_empty:'예정된 이벤트가 없습니다.',
     sec_webzine:'웹진',sec_webzine_sub:'임상 케이스 & 제품 업데이트',sec_webzine_coming:'준비 중 — 곧 공개됩니다',ad_label:'광고',

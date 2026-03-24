@@ -15,7 +15,7 @@ LANG.zh = {
     home_about:'关于我们',home_biotem_desc:'韩国牙科种植体制造商，专注于尖端数字化工作流解决方案。',home_bioplant_desc:'曼谷高端牙科配件制造中心，服务东南亚各地诊所。',home_categories:'产品类别',home_contact:'联系方式与地址',home_address:'泰国曼谷',home_hours:'周一至周五 09:00–18:00',home_line_label:'Line 官方账号',
     hero_bioplant_tag:'BIOPLANT Thailand',hero_bioplant_title:'优质牙科种植体配件',hero_bioplant_desc:'韩国ISO认证制造，快速配送至您的诊所',hero_bioplant_cta:'立即购买',
     hero_cnc_tag:'CNC定制基台',hero_cnc_title:'精密定制解决方案',hero_cnc_desc:'从扫描体到最终修复，按您规格制造',hero_cnc_cta:'定制订购',
-    sec_categories:'产品类别',sec_see_more:'查看全部 ›',cat_scan_body_desc:'口内 & 模型型',cat_q_base_desc:'氧化锦基台 H=7mm',cat_ready_made_desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',cat_ti_base_desc:'CAD/CAM · Ti+Zr',cat_pre_milled_desc:'铣切兼容 · N & R',cat_multi_unit_desc:'All-on-X · MUA · 扫描体',cat_3d_analog_desc:'GeoMedi 石膏 & 3D模型',
+    sec_categories:'产品类别',sec_see_more:'查看全部 ›',cat_scan_body_desc:'口内 & 模型型',cat_q_base_desc:'氧化锦基台 H=7mm',cat_ready_made_desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',cat_ti_base_desc:'CAD/CAM · Ti+Zr',cat_pre_milled_desc:'铣切兼容 · N & R',cat_multi_unit_desc:'All-on-X · MUA · 扫描体',cat_3d_analog_desc:'石膏 & 3D打印模型',
     sec_forum_preview:'临床讨论',sec_forum_more:'查看全部 ›',home_forum_empty:'暂无帖子，快来发帖吧！',
     sec_events_preview:'近期活动',sec_events_more:'查看全部 ›',home_events_empty:'暂无近期活动',
     sec_webzine:'网络杂志',sec_webzine_sub:'临床案例 & 产品更新',sec_webzine_coming:'即将推出，敬请期待',ad_label:'广告',
