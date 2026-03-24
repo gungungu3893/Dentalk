@@ -49,7 +49,8 @@ function renderWebzine() {
       '<div class="p-3">' +
         '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 mb-1">' + (catCfg.icon || '') + ' ' + t(catCfg.labelKey || 'wz_cat_news') + '</span>' +
         '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-2 mb-1">' + escHtml(a.title) + '</p>' +
-        '<div class="flex items-center gap-1.5 text-[9px] text-slate-300 font-bold">' +
+        '<div class="flex items-center gap-1.5 flex-wrap text-[9px] text-slate-300 font-bold">' +
+          (a.author_id ? '<span class="text-slate-500 font-black">' + escHtml(a.author_id) + '</span><span>·</span>' : '') +
           '<span>' + dateStr + '</span>' +
           '<span>·</span>' +
           '<span>👁 ' + (a.views || 0) + '</span>' +
@@ -141,7 +142,7 @@ function renderHomeWebzinePreview() {
       '</div>' +
       '<div class="p-1.5">' +
         '<p class="font-black text-[9px] text-slate-700 leading-tight line-clamp-2 mb-0.5">' + escHtml(a.title) + '</p>' +
-        '<p class="text-[8px] text-slate-300 font-bold">' + dateStr + '</p>' +
+        '<p class="text-[8px] text-slate-300 font-bold">' + dateStr + ' · 👁 ' + (a.views||0) + '</p>' +
       '</div>' +
     '</div>';
   }).join('');

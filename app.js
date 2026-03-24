@@ -1197,7 +1197,7 @@ function renderHomeForumPreview() {
       '<div class="flex-1 min-w-0">' +
         '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-1">' + p.title + '</p>' +
         '<p class="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-1">' + p.body + '</p>' +
-        '<p class="text-[9px] text-slate-300 font-medium mt-1.5">' + p.author + ' · ' + (p.date || '') + ' · 💬 ' + commentCount + '</p>' +
+        '<p class="text-[9px] text-slate-300 font-medium mt-1.5">' + p.author + ' · ' + (p.date || '') + ' · 👁 ' + (p.views||0) + ' · 💬 ' + commentCount + '</p>' +
       '</div>' +
       '<span class="text-slate-300 text-sm shrink-0 mt-0.5">›</span>' +
     '</div>';
@@ -1219,6 +1219,7 @@ function renderHomeEventsPreview() {
         '<p class="text-[9px] font-bold text-slate-400 font-mono uppercase mb-0.5">' + e.date + '</p>' +
         '<p class="font-black text-slate-800 text-xs leading-snug">' + e.event + '</p>' +
         '<p class="text-[10px] text-slate-400 mt-1">📍 ' + e.loc + '</p>' +
+        '<p class="text-[9px] text-slate-300 font-medium mt-1">' + (e.createdBy||'') + (e.createdBy ? ' · ' : '') + '👁 ' + (e.views||0) + (e._rsvpCount ? ' · 👥 ' + e._rsvpCount : '') + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1302,6 +1303,7 @@ async function initSupabasePublicData() {
           type:  r.type || 'event',
           region: r.region || 'all',
           createdBy: r.created_by || '',
+          views: r.views || 0,
           _sbId: r.id,
         };
       });
@@ -1337,7 +1339,7 @@ async function initSupabasePublicData() {
           region: r.region || null, province: r.province || null,
           title: r.title, description: r.description || '',
           salary_range: r.salary_range || null, requirements: r.requirements || null,
-          contact: r.contact || null, date: r.created_at || '',
+          contact: r.contact || null, date: r.created_at || '', views: r.views || 0,
         };
       });
       renderJobs();

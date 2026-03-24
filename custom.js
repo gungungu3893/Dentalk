@@ -1001,8 +1001,8 @@ function renderUsed() {
         badge +
         '<p class="font-black text-slate-800 text-[10px] leading-snug line-clamp-2">' + item.name + '</p>' +
         '<p class="font-black text-blue-700 text-[10px] font-mono">฿' + item.price.toLocaleString() + '</p>' +
-        '<p class="text-[8px] text-slate-400 font-bold truncate">👤 ' + escHtml(item.seller) + '</p>' +
-        '<p class="text-[8px] text-slate-300 font-bold">' + date + '</p>' +
+        '<p class="text-[8px] text-slate-300 font-bold truncate">' + escHtml(item.seller) + ' · ' + (item.date||'').slice(0,10) + '</p>' +
+        '<p class="text-[8px] text-slate-300 font-bold">👁 ' + (item.views||0) + ' · 💬 ' + (item._commentCount||0) + '</p>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1160,6 +1160,7 @@ async function _loadUsedComments(item) {
   }
   try {
     var comments = await sbGetUsedComments(sbId);
+    item._commentCount = comments ? comments.length : 0;
     if (!comments || !comments.length) {
       el.innerHTML = '<p class="text-xs text-slate-300 font-bold">' + t('used_comment_empty') + '</p>';
       return;

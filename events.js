@@ -25,7 +25,6 @@ function renderEvents() {
       ? '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 mb-1">🤝 ' + t('meetup_badge') + '</span>'
       : '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 mb-1">📅 ' + t('event_badge') + '</span>';
     var rsvpCount = (e._rsvpCount !== undefined) ? e._rsvpCount : '';
-    var rsvpLabel = rsvpCount !== '' ? '<span class="text-[9px] font-black text-green-600 mt-1">👥 ' + rsvpCount + ' ' + t('rsvp_attendees') + '</span>' : '';
     var evId = typeof e.id === 'string' ? "'" + e.id + "'" : e.id;
     // 리더/관리자 삭제 버튼
     var canDel = canManageRegion(e.region || 'all') || (isLoggedIn() && e.createdBy === currentUser.nickname);
@@ -43,7 +42,11 @@ function renderEvents() {
           typeBadge +
           '<p class="font-black text-slate-800 text-sm leading-snug">' + escHtml(e.event) + '</p>' +
           '<p class="text-xs text-slate-400 font-bold mt-1">📍 ' + escHtml(e.loc) + '</p>' +
-          rsvpLabel +
+          '<div class="flex items-center gap-1.5 flex-wrap text-[9px] text-slate-300 font-bold mt-1">' +
+            (e.createdBy ? '<span class="text-slate-500 font-black">' + escHtml(e.createdBy) + '</span><span>·</span>' : '') +
+            '<span>👁 ' + (e.views||0) + '</span>' +
+            (rsvpCount !== '' ? '<span>·</span><span class="text-green-600 font-black">👥 ' + rsvpCount + '</span>' : '') +
+          '</div>' +
         '</div>' +
         '<span class="text-slate-300 text-lg font-black shrink-0 ml-2">›</span>' +
         delBtn +
@@ -76,6 +79,11 @@ async function _loadEventRsvpCounts() {
 function openEventDetail(id) {
   var ev = events_.find(function(e){ return e.id === id; });
   if (!ev) return;
+  // 조회수 증가
+  ev.views = (ev.views||0) + 1;
+  if (typeof id === 'string') {
+    sbUpdateEvent(id, { views: ev.views }).catch(function(){});
+  }
   var parts = (ev.date||'').split('-');
   var monthNames = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   var monthIdx = parseInt(parts[1]||1, 10) - 1;

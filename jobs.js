@@ -71,11 +71,11 @@ function renderJobs() {
             (regionLabel ? '<span class="text-[8px] font-bold text-slate-400">' + regionLabel + provinceLbl + '</span>' : '') +
           '</div>' +
           '<p class="font-black text-slate-800 text-sm leading-snug mb-1 truncate">' + escHtml(j.title) + '</p>' +
-          '<div class="flex items-center gap-2 text-[9px] text-slate-300 font-bold">' +
-            (j.salary_range ? '<span class="text-green-500 font-black">' + escHtml(j.salary_range) + '</span><span>·</span>' : '') +
-            '<span>' + dateStr + '</span>' +
-            '<span>·</span>' +
-            '<span class="cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(j.user_id || '') + '\')">' + escHtml(j.user_id || '') + '</span>' +
+          (j.salary_range ? '<p class="text-[9px] font-black text-green-500 mb-1">' + escHtml(j.salary_range) + '</p>' : '') +
+          '<div class="flex items-center gap-1.5 flex-wrap text-[9px] text-slate-300 font-bold">' +
+            '<span class="text-slate-500 font-black cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(j.user_id || '') + '\')">' + escHtml(j.user_id || '') + '</span>' +
+            '<span>·</span><span>' + dateStr + '</span>' +
+            '<span>·</span><span>👁 ' + (j.views||0) + '</span>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -96,6 +96,11 @@ function openJobDetail(id) {
   var job = jobsList.find(function(j){ return j.id === id; });
   if (!job) return;
   _viewingJobId = id;
+  // 조회수 증가
+  job.views = (job.views||0) + 1;
+  if (typeof id === 'string') {
+    sbUpdateJob(id, { views: job.views }).catch(function(){});
+  }
   var typeCfg = JOB_TYPES.find(function(jt){ return jt.key === job.type; }) || JOB_TYPES[1];
   var regionCfg = FORUM_REGIONS.find(function(r){ return r.key === job.region; });
   var regionLabel = regionCfg ? (regionCfg.icon + ' ' + t(regionCfg.labelKey)) : '';

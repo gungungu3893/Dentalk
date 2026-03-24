@@ -351,7 +351,7 @@ async function sbUpdateForumPost(id, updates) {
 async function sbGetEvents(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('events', 'select=id,title,location,event_date,description,created_by,type,region,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
+  return sbGet('events', 'select=id,title,location,event_date,description,created_by,type,region,views,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveEvent(ev) {
@@ -464,7 +464,7 @@ async function sbDeleteWebzineArticle(id) {
 async function sbGetJobs(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGet('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,views,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveJob(job) {
