@@ -551,9 +551,13 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   /* Review stars bigger touch target */
   .review-star { font-size: 28px !important; padding: 4px; }
 
-  /* Shop category cards — gold hover glow */
-  .shop-cat-card:hover { box-shadow: 0 4px 24px rgba(212,175,55,0.25); border-color: rgba(212,175,55,0.45) !important; }
-  .shop-cat-card:active { box-shadow: 0 2px 12px rgba(212,175,55,0.2); }
+  /* Shop category cards — premium hover lift + gold accent */
+  .shop-cat-card { box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.25s cubic-bezier(.4,0,.2,1); }
+  .shop-cat-card:hover { box-shadow: 0 8px 28px rgba(0,18,32,0.12), 0 2px 8px rgba(212,175,55,0.15); transform: translateY(-3px); border-color: #D4AF37 !important; }
+  .shop-cat-card:active { box-shadow: 0 2px 12px rgba(0,18,32,0.1); transform: translateY(-1px); }
+  /* Dark mode: darken light category cards */
+  body.dark .shop-cat-card { background: #1e293b !important; border-color: #334155 !important; border-bottom-color: #D4AF37 !important; }
+  body.dark .shop-cat-card:hover { border-color: #D4AF37 !important; box-shadow: 0 8px 28px rgba(0,0,0,0.3), 0 2px 8px rgba(212,175,55,0.2); }
 
   /* Forum region/province bar buttons */
   #forumRegionBar button,

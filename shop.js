@@ -84,35 +84,40 @@ function _catBg(cat, size) {
   return '<div class="opacity-[0.12]" style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
 }
 
-// Premium dark palette — dental B2B professional tones
+// Premium light palette — soft gradient backgrounds
 var _CAT_BG = {
-  'scan-body':  'linear-gradient(150deg,#0a1628 0%,#122040 60%,#1a2a4a 100%)',
-  'q-base':     'linear-gradient(150deg,#1a1a2e 0%,#23233d 60%,#2a2a4a 100%)',
-  'ready-made': 'linear-gradient(150deg,#16213e 0%,#1a2744 60%,#1e2d4e 100%)',
-  'ti-base':    'linear-gradient(150deg,#0f3460 0%,#133a6a 60%,#1a4478 100%)',
-  'pre-milled': 'linear-gradient(150deg,#2c2c3a 0%,#333348 60%,#3a3a52 100%)',
-  'multi-unit': 'linear-gradient(150deg,#1a1a3e 0%,#222250 60%,#2a2a5e 100%)',
-  '3d-analog':  'linear-gradient(150deg,#1b2838 0%,#1e3040 60%,#23384a 100%)',
+  'scan-body':  'linear-gradient(150deg,#e8f4fd 0%,#c5e3f6 100%)',
+  'q-base':     'linear-gradient(150deg,#faf5eb 0%,#f0e6d0 100%)',
+  'ready-made': 'linear-gradient(150deg,#e8f8f5 0%,#c5ede4 100%)',
+  'ti-base':    'linear-gradient(150deg,#f0ecf8 0%,#d9d0ee 100%)',
+  'pre-milled': 'linear-gradient(150deg,#eef1f5 0%,#d5dce6 100%)',
+  'multi-unit': 'linear-gradient(150deg,#fdf0ec 0%,#f5d8cf 100%)',
+  '3d-analog':  'linear-gradient(150deg,#eef3ec 0%,#d4e4cf 100%)',
+};
+// SVG icon fill color per category (dark tone for light bg)
+var _CAT_SVG_FILL = {
+  'scan-body':'#2a6fa8','q-base':'#8a6d3b','ready-made':'#2d8a70',
+  'ti-base':'#5b4a9e','pre-milled':'#4a5a72','multi-unit':'#a85a3a','3d-analog':'#4a7a42'
 };
 var _CAT_BAR = {
-  'scan-body':'#0a1628','q-base':'#1a1a2e','ready-made':'#16213e','ti-base':'#0f3460',
-  'pre-milled':'#2c2c3a','multi-unit':'#1a1a3e','3d-analog':'#1b2838'
+  'scan-body':'#2a6fa8','q-base':'#8a6d3b','ready-made':'#2d8a70','ti-base':'#5b4a9e',
+  'pre-milled':'#4a5a72','multi-unit':'#a85a3a','3d-analog':'#4a7a42'
 };
 const SHOP_CATEGORIES = [
   { id:'scan-body',   name:'Scan Body',   desc:'Intra-Oral / Model',
-    svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="13" rx="20" ry="8" fill="white" opacity=".9"/><path d="M6 13 L14 54 L38 54 L46 13 Z" fill="white" opacity=".82"/><rect x="18" y="53" width="16" height="7" rx="2" fill="white" opacity=".7"/><rect x="16" y="59" width="20" height="7" rx="2.5" fill="white" opacity=".5"/></svg>' },
+    svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="13" rx="20" ry="8" fill="#2a6fa8" opacity=".85"/><path d="M6 13 L14 54 L38 54 L46 13 Z" fill="#2a6fa8" opacity=".7"/><rect x="18" y="53" width="16" height="7" rx="2" fill="#2a6fa8" opacity=".55"/><rect x="16" y="59" width="20" height="7" rx="2.5" fill="#2a6fa8" opacity=".4"/></svg>' },
   { id:'q-base',      name:'Q-Base',      desc:'Zirconia Abutment',
-    svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="21" y="6" width="10" height="20" rx="2" fill="white" opacity=".85"/><rect x="18" y="11" width="16" height="1.5" rx="1" fill="white" opacity=".4"/><rect x="18" y="15" width="16" height="1.5" rx="1" fill="white" opacity=".4"/><rect x="18" y="19" width="16" height="1.5" rx="1" fill="white" opacity=".4"/><rect x="16" y="26" width="20" height="14" rx="2" fill="white" opacity=".82"/><rect x="12" y="39" width="28" height="8" rx="2" fill="white" opacity=".78"/><ellipse cx="26" cy="47" rx="19" ry="7" fill="white" opacity=".92"/><rect x="17" y="47" width="18" height="8" rx="1" fill="white" opacity=".65"/><ellipse cx="26" cy="55" rx="13" ry="5" fill="white" opacity=".5"/></svg>' },
+    svg:'<svg viewBox="0 0 52 72" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="21" y="6" width="10" height="20" rx="2" fill="#8a6d3b" opacity=".8"/><rect x="18" y="11" width="16" height="1.5" rx="1" fill="#8a6d3b" opacity=".35"/><rect x="18" y="15" width="16" height="1.5" rx="1" fill="#8a6d3b" opacity=".35"/><rect x="18" y="19" width="16" height="1.5" rx="1" fill="#8a6d3b" opacity=".35"/><rect x="16" y="26" width="20" height="14" rx="2" fill="#8a6d3b" opacity=".7"/><rect x="12" y="39" width="28" height="8" rx="2" fill="#8a6d3b" opacity=".65"/><ellipse cx="26" cy="47" rx="19" ry="7" fill="#8a6d3b" opacity=".8"/><rect x="17" y="47" width="18" height="8" rx="1" fill="#8a6d3b" opacity=".5"/><ellipse cx="26" cy="55" rx="13" ry="5" fill="#8a6d3b" opacity=".4"/></svg>' },
   { id:'ready-made',  name:'Ready Made',  desc:'Ø3.0 · Ø4.5 · Ø5.5 · Ø6.5',
-    svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 4 L13 22 L31 22 Z" fill="white" opacity=".9"/><rect x="13" y="21" width="18" height="27" rx="2" fill="white" opacity=".85"/><rect x="11" y="47" width="22" height="7" rx="2" fill="white" opacity=".7"/><rect x="9" y="53" width="26" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+    svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 4 L13 22 L31 22 Z" fill="#2d8a70" opacity=".8"/><rect x="13" y="21" width="18" height="27" rx="2" fill="#2d8a70" opacity=".7"/><rect x="11" y="47" width="22" height="7" rx="2" fill="#2d8a70" opacity=".55"/><rect x="9" y="53" width="26" height="8" rx="2.5" fill="#2d8a70" opacity=".4"/></svg>' },
   { id:'ti-base',     name:'Ti-Base',     desc:'CAD/CAM · Ti+Zr',
-    svg:'<svg viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="25" cy="13" rx="15" ry="7" fill="white" opacity=".8"/><rect x="10" y="13" width="30" height="18" rx="2" fill="white" opacity=".85"/><rect x="13" y="30" width="24" height="8" rx="2" fill="white" opacity=".7"/><rect x="11" y="37" width="28" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+    svg:'<svg viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="25" cy="13" rx="15" ry="7" fill="#5b4a9e" opacity=".7"/><rect x="10" y="13" width="30" height="18" rx="2" fill="#5b4a9e" opacity=".75"/><rect x="13" y="30" width="24" height="8" rx="2" fill="#5b4a9e" opacity=".55"/><rect x="11" y="37" width="28" height="8" rx="2.5" fill="#5b4a9e" opacity=".4"/></svg>' },
   { id:'pre-milled',  name:'Pre-Milled',  desc:'N · H10 / R · H10',
-    svg:'<svg viewBox="0 0 58 62" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="29" cy="14" rx="23" ry="11" fill="white" opacity=".9"/><rect x="21" y="14" width="16" height="20" rx="2" fill="white" opacity=".82"/><rect x="17" y="33" width="24" height="8" rx="2" fill="white" opacity=".7"/><rect x="15" y="40" width="28" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+    svg:'<svg viewBox="0 0 58 62" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="29" cy="14" rx="23" ry="11" fill="#4a5a72" opacity=".8"/><rect x="21" y="14" width="16" height="20" rx="2" fill="#4a5a72" opacity=".7"/><rect x="17" y="33" width="24" height="8" rx="2" fill="#4a5a72" opacity=".55"/><rect x="15" y="40" width="28" height="8" rx="2.5" fill="#4a5a72" opacity=".4"/></svg>' },
   { id:'multi-unit',  name:'Multi Unit',  desc:'All-on-X',
-    svg:'<svg viewBox="0 0 62 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="3" width="10" height="16" rx="2" fill="white" opacity=".9"/><rect x="14" y="17" width="34" height="10" rx="3" fill="white" opacity=".78"/><rect x="7" y="25" width="10" height="22" rx="2" fill="white" opacity=".72"/><rect x="22" y="25" width="18" height="22" rx="2" fill="white" opacity=".72"/><rect x="45" y="25" width="10" height="22" rx="2" fill="white" opacity=".72"/></svg>' },
+    svg:'<svg viewBox="0 0 62 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="3" width="10" height="16" rx="2" fill="#a85a3a" opacity=".8"/><rect x="14" y="17" width="34" height="10" rx="3" fill="#a85a3a" opacity=".65"/><rect x="7" y="25" width="10" height="22" rx="2" fill="#a85a3a" opacity=".6"/><rect x="22" y="25" width="18" height="22" rx="2" fill="#a85a3a" opacity=".6"/><rect x="45" y="25" width="10" height="22" rx="2" fill="#a85a3a" opacity=".6"/></svg>' },
   { id:'3d-analog',   name:'3D Analog',   desc:'Stone & 3D Model',
-    svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="5" width="12" height="12" rx="2" fill="white" opacity=".9"/><rect x="12" y="16" width="20" height="30" rx="2" fill="white" opacity=".82"/><rect x="15" y="20" width="5" height="22" rx="1" fill="white" opacity=".4"/><rect x="24" y="20" width="5" height="22" rx="1" fill="white" opacity=".4"/><rect x="13" y="45" width="18" height="7" rx="2" fill="white" opacity=".7"/><rect x="11" y="51" width="22" height="8" rx="2.5" fill="white" opacity=".5"/></svg>' },
+    svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="5" width="12" height="12" rx="2" fill="#4a7a42" opacity=".8"/><rect x="12" y="16" width="20" height="30" rx="2" fill="#4a7a42" opacity=".7"/><rect x="15" y="20" width="5" height="22" rx="1" fill="#4a7a42" opacity=".35"/><rect x="24" y="20" width="5" height="22" rx="1" fill="#4a7a42" opacity=".35"/><rect x="13" y="45" width="18" height="7" rx="2" fill="#4a7a42" opacity=".55"/><rect x="11" y="51" width="22" height="8" rx="2.5" fill="#4a7a42" opacity=".4"/></svg>' },
 ];
 function renderShop() {
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
@@ -120,13 +125,12 @@ function renderShop() {
     var bg = _CAT_BG[cat.id] || _CAT_BG['scan-body'];
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="shop-cat-card relative overflow-hidden rounded-2xl text-left active:scale-[.97] transition-all duration-200" ' +
-      'style="background:' + bg + ';border:1px solid rgba(212,175,55,0.2)">' +
-      '<div class="flex items-center justify-center py-4 px-3 bg-white/[0.04] rounded-t-xl">' + _catIcon(cat, 140) + '</div>' +
-      '<div class="h-[2px]" style="background:linear-gradient(90deg,transparent,#D4AF37,transparent)"></div>' +
+      'style="background:' + bg + ';border:1px solid #e2e8f0;border-bottom:2px solid #D4AF37">' +
+      '<div class="flex items-center justify-center py-4 px-3 bg-white/80 rounded-t-xl">' + _catIcon(cat, 140) + '</div>' +
       '<div class="px-4 pb-4 pt-3">' +
-        '<p class="font-black text-white text-sm leading-tight">' + cat.name + '</p>' +
-        '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:rgba(212,175,55,0.7)">' + cat.desc + '</p>' +
-        '<p class="text-[10px] font-black mt-1.5" style="color:rgba(255,255,255,0.4)">' + count + ' ' + t('shop_product_count') + '</p>' +
+        '<p class="font-black text-sm leading-tight" style="color:#001D4A">' + cat.name + '</p>' +
+        '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:#4a5568">' + cat.desc + '</p>' +
+        '<p class="text-[10px] font-black mt-1.5" style="color:#94a3b8">' + count + ' ' + t('shop_product_count') + '</p>' +
       '</div>' +
     '</button>';
   }).join('');
