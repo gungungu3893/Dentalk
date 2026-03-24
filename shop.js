@@ -73,7 +73,7 @@ var CATEGORY_IMAGES = {
 // Render category icon: image with white bg box, or SVG scaled
 function _catIcon(cat, size) {
   var url = CATEGORY_IMAGES[cat.id];
-  if (url) return '<div class="bg-white rounded-xl shadow-sm flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px;padding:6px">' +
+  if (url) return '<div class="bg-white rounded-xl shadow-sm flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px;padding:8px">' +
     '<img src="' + url + '" alt="' + cat.name + '" class="object-contain w-full h-full" loading="lazy"></div>';
   return '<div class="flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
 }
@@ -126,7 +126,7 @@ function renderShop() {
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="shop-cat-card relative overflow-hidden rounded-2xl text-left active:scale-[.97] transition-all duration-200" ' +
       'style="background:' + bg + ';border:1px solid #e2e8f0;border-bottom:2px solid #D4AF37">' +
-      '<div class="flex items-center justify-center py-4 px-3 bg-white/80 rounded-t-xl">' + _catIcon(cat, 140) + '</div>' +
+      '<div class="flex items-center justify-center py-4 px-3 bg-white/80 rounded-t-xl">' + _catIcon(cat, 150) + '</div>' +
       '<div class="px-4 pb-4 pt-3">' +
         '<p class="font-black text-sm leading-tight" style="color:#001D4A">' + cat.name + '</p>' +
         '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:#4a5568">' + cat.desc + '</p>' +
@@ -226,7 +226,7 @@ function renderShopItems(catId) {
     var clickAttr = inStock ? 'onclick="openOrder(\'' + p.id + '\')"' : '';
     return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
       '<div class="h-1" style="background:' + (_CAT_BAR[catId] || '#0a1628') + '"></div>' +
-      (cat ? '<div class="flex items-center justify-center pt-4 px-4">' + _catIcon(cat, 120) + '</div>' : '') +
+      (cat ? '<div class="flex items-center justify-center pt-4 px-4">' + _catIcon(cat, 150) + '</div>' : '') +
       '<div class="p-4">' +
         '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
         '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
@@ -259,16 +259,16 @@ function renderProductPage() {
   var cat = SHOP_CATEGORIES.find(function(c){ return c.id === p.category; });
   var inStock = isInStock(p.id);
   var hero = document.getElementById('shopProductHero');
-  if (hero) hero.style.background = _catGrads[p.category] || _catGrads['scan-body'];
+  if (hero) hero.style.background = '#f8fafc';
   var iconArea = document.getElementById('shopProductIconArea');
   if (iconArea && cat) {
-    iconArea.innerHTML = _catIcon(cat, 200);
+    iconArea.innerHTML = _catIcon(cat, 400);
   }
   var badge = document.getElementById('shopProductStockBadge');
   if (badge) {
     badge.textContent = (inStock ? '✅ ' : '❌ ') + t(inStock ? 'shop_in_stock' : 'shop_out_of_stock');
     badge.className = 'inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-full mb-3 ' +
-      (inStock ? 'bg-green-500/20 text-green-200' : 'bg-red-500/20 text-red-200');
+      (inStock ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600');
   }
   var titleEl = document.getElementById('shopProductTitle');
   if (titleEl) titleEl.textContent = p.title;
@@ -279,7 +279,7 @@ function renderProductPage() {
   var errEl = document.getElementById('productOrderError');
   if (errEl) errEl.classList.add('hidden');
   var addBtn = document.getElementById('shopProductAddBtn');
-  if (addBtn) { addBtn.disabled = !inStock; addBtn.style.opacity = inStock ? '1' : '0.5'; addBtn.textContent = t('order_add_cart'); }
+  if (addBtn) { addBtn.disabled = !inStock; addBtn.style.opacity = inStock ? '1' : '0.5'; addBtn.style.background = '#D4AF37'; addBtn.style.color = '#001D4A'; addBtn.textContent = t('order_add_cart'); }
   renderProductTable();
   loadProductReviews(p.id);
 }
@@ -288,7 +288,7 @@ function renderProductTable() {
   var qCell = function(code) {
     var safe = code.replace(/\s/g,'_');
     return '<div class="flex flex-col items-center gap-1">' +
-      '<p class="text-[8px] font-mono text-slate-400 leading-none whitespace-nowrap">' + code + '</p>' +
+      '<p class="text-[8px] font-mono leading-none whitespace-nowrap" style="color:#4a5568">' + code + '</p>' +
       '<div class="flex items-center gap-0.5">' +
         '<button onclick="stepQ(\'' + code + '\',-1)" class="w-6 h-6 rounded-full bg-slate-100 font-black text-xs leading-none flex items-center justify-center active:bg-slate-200" type="button">−</button>' +
         '<input type="number" min="0" value="0" class="qty-input w-10 h-7 rounded-lg bg-slate-50 text-xs font-black text-center border border-slate-200 outline-none focus:border-blue-400" id="qi-' + safe + '" oninput="tableQtys[\'' + code + '\']=parseInt(this.value)||0">' +
@@ -299,11 +299,11 @@ function renderProductTable() {
   var html = '';
   if (p.tableType2 === 'hxc') {
     html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr>' +
-      '<th class="text-left pb-3 text-[10px] font-bold text-slate-400 pr-3 whitespace-nowrap sticky left-0 bg-white">H / C</th>';
-    p.colLabels.forEach(function(c){ html += '<th class="pb-3 text-[10px] font-black text-slate-500 px-2 whitespace-nowrap">' + c + '</th>'; });
+      '<th class="text-left pb-3 text-[10px] font-bold pr-3 whitespace-nowrap sticky left-0 bg-white" style="color:#4a5568">H / C</th>';
+    p.colLabels.forEach(function(c){ html += '<th class="pb-3 text-[10px] font-black px-2 whitespace-nowrap" style="color:#1a202c">' + c + '</th>'; });
     html += '</tr></thead><tbody>';
     p.rowLabels.forEach(function(row, ri) {
-      html += '<tr class="border-t border-slate-100"><td class="py-2 pr-3 font-black text-xs text-slate-700 whitespace-nowrap sticky left-0 bg-white">' + row + '</td>';
+      html += '<tr class="border-t border-slate-100"><td class="py-2 pr-3 font-black text-xs whitespace-nowrap sticky left-0 bg-white" style="color:#1a202c">' + row + '</td>';
       p.colLabels.forEach(function(col, ci) {
         var code = p.codeMatrix[ri][ci];
         html += '<td class="py-2 px-1 text-center">' + (code ? qCell(code) : '<span class="text-slate-200">—</span>') + '</td>';
@@ -313,14 +313,14 @@ function renderProductTable() {
     html += '</tbody></table></div>';
   } else if (p.tableType === 'dh') {
     html = '<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr>' +
-      '<th class="text-left pb-3 text-[10px] font-bold text-slate-400 pr-3 whitespace-nowrap sticky left-0 bg-white">D / H</th>';
-    p.heights.forEach(function(h){ html += '<th class="pb-3 text-[10px] font-black text-slate-500 px-2">' + h + '</th>'; });
+      '<th class="text-left pb-3 text-[10px] font-bold pr-3 whitespace-nowrap sticky left-0 bg-white" style="color:#4a5568">D / H</th>';
+    p.heights.forEach(function(h){ html += '<th class="pb-3 text-[10px] font-black px-2" style="color:#1a202c">' + h + '</th>'; });
     html += '</tr></thead><tbody>';
     p.connections.forEach(function(conn, ci) {
       html += '<tr class="border-t border-slate-100">' +
         '<td class="py-2 pr-3 whitespace-nowrap sticky left-0 bg-white">' +
           '<div class="flex items-center gap-1.5"><span class="text-[9px] font-black px-1.5 py-0.5 rounded-md tag-' + conn.type + '">' + conn.type + '</span>' +
-          '<span class="font-black text-xs text-slate-700">' + conn.label + '</span></div>' +
+          '<span class="font-black text-xs" style="color:#1a202c">' + conn.label + '</span></div>' +
         '</td>';
       p.heights.forEach(function(h, hi) {
         var code = p.codes[ci][hi];
@@ -335,14 +335,14 @@ function renderProductTable() {
       html += '<div class="bg-slate-50 rounded-xl p-3.5">' +
         '<div class="flex items-center gap-2 mb-3">' +
           '<span class="text-[9px] font-black px-2 py-0.5 rounded-md tag-' + row.type + '">' + row.type + '</span>' +
-          '<span class="font-black text-xs text-slate-700">' + row.label + '</span>' +
+          '<span class="font-black text-xs" style="color:#1a202c">' + row.label + '</span>' +
         '</div>' +
         '<div class="space-y-2">';
       row.items.forEach(function(item) {
         html += '<div class="flex items-center justify-between gap-2">' +
           '<div class="min-w-0">' +
-            '<p class="text-[10px] font-black text-slate-700 font-mono">' + item.code + '</p>' +
-            '<p class="text-[9px] text-slate-400 font-medium">' + (item.size||'') + '</p>' +
+            '<p class="text-[10px] font-black font-mono" style="color:#4a5568">' + item.code + '</p>' +
+            '<p class="text-[9px] font-medium" style="color:#718096">' + (item.size||'') + '</p>' +
           '</div>' +
           '<div class="flex items-center gap-0.5 shrink-0">' +
             '<button onclick="stepQ(\'' + item.code + '\',-1)" class="w-6 h-6 rounded-full bg-slate-200 font-black text-xs leading-none flex items-center justify-center active:bg-slate-300" type="button">−</button>' +
