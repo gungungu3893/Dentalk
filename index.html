@@ -1856,7 +1856,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
       <div id="usedList" class="grid grid-cols-5 gap-2"></div>
-      <div id="usedLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
+      <div id="usedPagination"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
@@ -1933,7 +1933,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <!-- 게시글 목록 (카드형) -->
       <div id="postList" class="space-y-3"></div>
-      <div id="forumLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
+      <div id="forumPagination"></div>
     </div>
     <!-- ==================== USED DETAIL PAGE ==================== -->
     <div id="page-used-detail" class="page">
@@ -2058,7 +2058,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="jobRegionBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
       <!-- 목록 -->
       <div id="jobsList" class="flex flex-col gap-2.5"></div>
-      <div id="jobsLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
+      <div id="jobsPagination"></div>
     </div>
     <!-- ==================== JOB DETAIL ==================== -->
     <div id="page-job-detail" class="page p-5">
@@ -2112,7 +2112,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div id="webzineCatBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
       <!-- 기사 목록 -->
       <div id="webzineList" class="grid grid-cols-2 gap-3"></div>
-      <div id="webzineLoadMore" class="hidden text-center py-4"><span class="text-slate-400 text-xs font-bold" data-i18n="load_more_loading">Loading...</span></div>
+      <div id="webzinePagination"></div>
     </div>
     <!-- ==================== WEBZINE DETAIL ==================== -->
     <div id="page-webzine-detail" class="page">
@@ -2139,6 +2139,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <h2 class="font-black text-slate-800 text-base" data-i18n="nav_events">Events</h2>
       </div>
       <div id="eventList" class="space-y-3"></div>
+      <div id="eventsPagination"></div>
     </div>
     <!-- ==================== EVENT DETAIL PAGE ==================== -->
     <div id="page-event-detail" class="page">

@@ -1238,7 +1238,10 @@ function renderHomePage() {
 async function initSupabasePublicData() {
   // ── Used Items ─────────────────────────────────────────────
   try {
-    var sbUsed = await sbGetUsedItems();
+    var usedResult = await sbGetUsedItems();
+    var sbUsed = usedResult.data || usedResult;
+    _pagination.used.total = usedResult.count || 0;
+    _pagination.used.page = 1;
     if (sbUsed && sbUsed.length) {
       usedItems = sbUsed.map(function(r) {
         return {
@@ -1257,12 +1260,16 @@ async function initSupabasePublicData() {
         };
       });
       renderUsed();
+      renderPagination('usedPagination', 'used', 'goUsedPage');
     }
   } catch(e) { handleSupabaseError(e, 'Used Items Init'); }
 
   // ── Forum Posts ────────────────────────────────────────────
   try {
-    var sbPosts = await sbGetForumPosts();
+    var forumResult = await sbGetForumPosts();
+    var sbPosts = forumResult.data || forumResult;
+    _pagination.forum.total = forumResult.count || 0;
+    _pagination.forum.page = 1;
     if (sbPosts && sbPosts.length) {
       posts = sbPosts.map(function(r) {
         return {
@@ -1282,6 +1289,7 @@ async function initSupabasePublicData() {
         };
       });
       renderForum();
+      renderPagination('forumPagination', 'forum', 'goForumPage');
       renderHomeForumPreview();
     }
   } catch(e) { handleSupabaseError(e, 'Forum Posts Init'); }
@@ -1291,7 +1299,10 @@ async function initSupabasePublicData() {
 
   // ── Events ─────────────────────────────────────────────────
   try {
-    var sbEvs = await sbGetEvents();
+    var evResult = await sbGetEvents();
+    var sbEvs = evResult.data || evResult;
+    _pagination.events.total = evResult.count || 0;
+    _pagination.events.page = 1;
     if (sbEvs && sbEvs.length) {
       events_ = sbEvs.map(function(r) {
         return {
@@ -1308,13 +1319,17 @@ async function initSupabasePublicData() {
         };
       });
       renderEvents();
+      renderPagination('eventsPagination', 'events', 'goEventsPage');
       renderHomeEventsPreview();
     }
   } catch(e) { handleSupabaseError(e, 'Events Init'); }
 
   // ── Webzine Articles ──────────────────────────────────────
   try {
-    var sbArticles = await sbGetWebzineArticles();
+    var wzResult = await sbGetWebzineArticles();
+    var sbArticles = wzResult.data || wzResult;
+    _pagination.webzine.total = wzResult.count || 0;
+    _pagination.webzine.page = 1;
     if (sbArticles && sbArticles.length) {
       webzineArticles = sbArticles.map(function(r) {
         return {
@@ -1325,13 +1340,17 @@ async function initSupabasePublicData() {
         };
       });
       renderWebzine();
+      renderPagination('webzinePagination', 'webzine', 'goWebzinePage');
     }
     renderHomeWebzinePreview();
   } catch(e) { handleSupabaseError(e, 'Webzine Init'); renderHomeWebzinePreview(); }
 
   // ── Jobs (구인구직) ────────────────────────────────────────
   try {
-    var sbJobs = await sbGetJobs();
+    var jobResult = await sbGetJobs();
+    var sbJobs = jobResult.data || jobResult;
+    _pagination.jobs.total = jobResult.count || 0;
+    _pagination.jobs.page = 1;
     if (sbJobs && sbJobs.length) {
       jobsList = sbJobs.map(function(r) {
         return {
@@ -1343,6 +1362,7 @@ async function initSupabasePublicData() {
         };
       });
       renderJobs();
+      renderPagination('jobsPagination', 'jobs', 'goJobsPage');
     }
   } catch(e) { handleSupabaseError(e, 'Jobs Init'); }
 
@@ -1566,101 +1586,152 @@ async function updateMsgBadge() {
 }
 
 // ============================================================
-// 무한 스크롤
+// 페이지네이션
 // ============================================================
-var _infiniteScroll = {
-  used:    { page: 1, loading: false, hasMore: true },
-  forum:   { page: 1, loading: false, hasMore: true },
-  jobs:    { page: 1, loading: false, hasMore: true },
-  webzine: { page: 1, loading: false, hasMore: true },
+var _pagination = {
+  used:    { page: 1, total: 0, perPage: 20 },
+  forum:   { page: 1, total: 0, perPage: 20 },
+  jobs:    { page: 1, total: 0, perPage: 20 },
+  webzine: { page: 1, total: 0, perPage: 20 },
+  events:  { page: 1, total: 0, perPage: 20 },
 };
 
-function _getCurrentPage() {
-  var pages = ['used', 'forum', 'jobs', 'webzine'];
+function _totalPages(key) {
+  var s = _pagination[key];
+  return Math.max(1, Math.ceil(s.total / s.perPage));
+}
+
+function renderPagination(containerId, pageKey, onPageFn) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var cur = _pagination[pageKey].page;
+  var tp = _totalPages(pageKey);
+  if (tp <= 1) { el.innerHTML = ''; return; }
+
+  // Build page numbers with ellipsis for mobile
+  var pages = [];
+  if (tp <= 7) {
+    for (var i = 1; i <= tp; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (cur > 3) pages.push('...');
+    var start = Math.max(2, cur - 1);
+    var end = Math.min(tp - 1, cur + 1);
+    for (var i = start; i <= end; i++) pages.push(i);
+    if (cur < tp - 2) pages.push('...');
+    pages.push(tp);
+  }
+
+  var prevDis = cur <= 1 ? ' opacity-40 pointer-events-none' : ' cursor-pointer active:scale-90';
+  var nextDis = cur >= tp ? ' opacity-40 pointer-events-none' : ' cursor-pointer active:scale-90';
+
+  var html = '<div class="flex items-center justify-center gap-1 mt-4 mb-2 flex-wrap">';
+  html += '<button onclick="' + onPageFn + '(' + (cur - 1) + ')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-xs font-black text-slate-500 flex items-center justify-center' + prevDis + '">«</button>';
+
   for (var i = 0; i < pages.length; i++) {
-    var el = document.getElementById('page-' + pages[i]);
-    if (el && el.style.display !== 'none' && !el.classList.contains('hidden')) return pages[i];
-  }
-  return null;
-}
-
-function _isNearBottom() {
-  return (window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 300);
-}
-
-window.addEventListener('scroll', function() {
-  if (!_isNearBottom()) return;
-  var page = _getCurrentPage();
-  if (!page) return;
-  var state = _infiniteScroll[page];
-  if (!state || state.loading || !state.hasMore) return;
-  loadMoreItems(page);
-});
-
-async function loadMoreItems(pageType) {
-  var state = _infiniteScroll[pageType];
-  state.loading = true;
-  state.page++;
-  var loader = document.getElementById(pageType === 'used' ? 'usedLoadMore' : pageType === 'forum' ? 'forumLoadMore' : pageType === 'jobs' ? 'jobsLoadMore' : 'webzineLoadMore');
-  if (loader) loader.classList.remove('hidden');
-
-  try {
-    var data;
-    if (pageType === 'used') {
-      data = await sbGetUsedItems(state.page);
-      if (!data || data.length < 20) state.hasMore = false;
-      if (data && data.length) {
-        var mapped = data.map(function(r) {
-          return { id:r.id, name:r.name, code:r.code||'-', price:parseFloat(r.price)||0, cond:r.condition||'good', desc:r.description||'-', contact:r.contact||'', seller:r.seller||'', date:r.date||(r.created_at?r.created_at.slice(0,10):''), views:r.views||0, image:r.image_url||null, _sbId:r.id };
-        });
-        usedItems = usedItems.concat(mapped);
-        renderUsed();
-      }
-    } else if (pageType === 'forum') {
-      data = await sbGetForumPosts(state.page);
-      if (!data || data.length < 20) state.hasMore = false;
-      if (data && data.length) {
-        var mapped = data.map(function(r) {
-          return { id:r.id, category:r.category||'general', region:r.region||'all', province:r.province||'all', title:r.title, body:r.body, author:r.author||'', images:r.images||[], comments:r.comments||[], views:r.views||0, date:r.date||(r.created_at?r.created_at.slice(0,10):''), is_pinned:r.is_pinned||false, _sbId:r.id };
-        });
-        posts = posts.concat(mapped);
-        renderForum();
-      }
-    } else if (pageType === 'jobs') {
-      data = await sbGetJobs(state.page);
-      if (!data || data.length < 20) state.hasMore = false;
-      if (data && data.length) {
-        var mapped = data.map(function(r) {
-          return { id:r.id, user_id:r.user_id, type:r.type||'dentist_hire', region:r.region||null, province:r.province||null, title:r.title, description:r.description||'', salary_range:r.salary_range||null, requirements:r.requirements||null, contact:r.contact||null, date:r.created_at||'' };
-        });
-        jobsList = jobsList.concat(mapped);
-        renderJobs();
-      }
-    } else if (pageType === 'webzine') {
-      data = await sbGetWebzineArticles(state.page);
-      if (!data || data.length < 20) state.hasMore = false;
-      if (data && data.length) {
-        var mapped = data.map(function(r) {
-          return { id:r.id, category:r.category||'news', title:r.title, body_md:r.body_md||'', thumbnail_url:r.thumbnail_url||null, author_id:r.author_id||'', views:r.views||0, date:r.created_at||'' };
-        });
-        webzineArticles = webzineArticles.concat(mapped);
-        renderWebzine();
-      }
+    var p = pages[i];
+    if (p === '...') {
+      html += '<span class="w-6 h-8 flex items-center justify-center text-xs text-slate-300 font-bold">…</span>';
+    } else {
+      var isActive = p === cur;
+      var cls = isActive
+        ? 'bg-[#D4AF37] text-white border-[#D4AF37]'
+        : 'bg-white text-slate-600 border-slate-200 cursor-pointer active:scale-90 hover:border-[#D4AF37] hover:text-[#D4AF37]';
+      html += '<button onclick="' + onPageFn + '(' + p + ')" class="w-8 h-8 rounded-lg border text-xs font-black flex items-center justify-center ' + cls + '">' + p + '</button>';
     }
-  } catch(e) {
-    handleSupabaseError(e, 'InfiniteScroll');
   }
-  state.loading = false;
-  if (loader) loader.classList.toggle('hidden', !state.hasMore);
+
+  html += '<button onclick="' + onPageFn + '(' + (cur + 1) + ')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-xs font-black text-slate-500 flex items-center justify-center' + nextDis + '">»</button>';
+  html += '</div>';
+  html += '<p class="text-center text-[10px] text-slate-300 font-bold mb-4">' + cur + ' / ' + tp + ' 페이지</p>';
+
+  el.innerHTML = html;
 }
 
-// Reset infinite scroll when navigating to a page
-function resetInfiniteScroll(pageType) {
-  if (_infiniteScroll[pageType]) {
-    _infiniteScroll[pageType].page = 1;
-    _infiniteScroll[pageType].hasMore = true;
-    _infiniteScroll[pageType].loading = false;
-  }
+// ── 페이지 전환 함수 ─────────────────────────────────────────
+async function goUsedPage(page) {
+  var tp = _totalPages('used');
+  if (page < 1 || page > tp) return;
+  _pagination.used.page = page;
+  try {
+    var result = await sbGetUsedItems(page);
+    var rows = result.data || result;
+    _pagination.used.total = result.count || 0;
+    usedItems = (rows || []).map(function(r) {
+      return { id:r.id, name:r.name, code:r.code||'-', price:parseFloat(r.price)||0, cond:r.condition||'good', desc:r.description||'-', contact:r.contact||'', seller:r.seller||'', date:r.date||(r.created_at?r.created_at.slice(0,10):''), views:r.views||0, image:r.image_url||null, _sbId:r.id };
+    });
+  } catch(e) { handleSupabaseError(e, 'Used Page'); }
+  renderUsed();
+  renderPagination('usedPagination', 'used', 'goUsedPage');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function goForumPage(page) {
+  var tp = _totalPages('forum');
+  if (page < 1 || page > tp) return;
+  _pagination.forum.page = page;
+  try {
+    var result = await sbGetForumPosts(page);
+    var rows = result.data || result;
+    _pagination.forum.total = result.count || 0;
+    posts = (rows || []).map(function(r) {
+      return { id:r.id, category:r.category||'general', region:r.region||'all', province:r.province||'all', title:r.title, body:r.body, author:r.author||'', images:r.images||[], comments:r.comments||[], views:r.views||0, date:r.date||(r.created_at?r.created_at.slice(0,10):''), is_pinned:r.is_pinned||false, _sbId:r.id };
+    });
+  } catch(e) { handleSupabaseError(e, 'Forum Page'); }
+  renderForum();
+  renderPagination('forumPagination', 'forum', 'goForumPage');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function goJobsPage(page) {
+  var tp = _totalPages('jobs');
+  if (page < 1 || page > tp) return;
+  _pagination.jobs.page = page;
+  try {
+    var result = await sbGetJobs(page);
+    var rows = result.data || result;
+    _pagination.jobs.total = result.count || 0;
+    jobsList = (rows || []).map(function(r) {
+      return { id:r.id, user_id:r.user_id, type:r.type||'dentist_hire', region:r.region||null, province:r.province||null, title:r.title, description:r.description||'', salary_range:r.salary_range||null, requirements:r.requirements||null, contact:r.contact||null, date:r.created_at||'', views:r.views||0 };
+    });
+  } catch(e) { handleSupabaseError(e, 'Jobs Page'); }
+  renderJobs();
+  renderPagination('jobsPagination', 'jobs', 'goJobsPage');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function goWebzinePage(page) {
+  var tp = _totalPages('webzine');
+  if (page < 1 || page > tp) return;
+  _pagination.webzine.page = page;
+  try {
+    var result = await sbGetWebzineArticles(page);
+    var rows = result.data || result;
+    _pagination.webzine.total = result.count || 0;
+    webzineArticles = (rows || []).map(function(r) {
+      return { id:r.id, category:r.category||'news', title:r.title, body_md:r.body_md||'', thumbnail_url:r.thumbnail_url||null, author_id:r.author_id||'', views:r.views||0, date:r.created_at||'' };
+    });
+  } catch(e) { handleSupabaseError(e, 'Webzine Page'); }
+  renderWebzine();
+  renderPagination('webzinePagination', 'webzine', 'goWebzinePage');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function goEventsPage(page) {
+  var tp = _totalPages('events');
+  if (page < 1 || page > tp) return;
+  _pagination.events.page = page;
+  try {
+    var result = await sbGetEvents(page);
+    var rows = result.data || result;
+    _pagination.events.total = result.count || 0;
+    events_ = (rows || []).map(function(r) {
+      return { id:r.id, date:r.event_date||'', event:r.title, loc:r.location||'', desc:r.description||'', type:r.type||'event', region:r.region||'all', createdBy:r.created_by||'', views:r.views||0, _sbId:r.id };
+    });
+  } catch(e) { handleSupabaseError(e, 'Events Page'); }
+  renderEvents();
+  renderPagination('eventsPagination', 'events', 'goEventsPage');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============================================================

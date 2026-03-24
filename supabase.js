@@ -29,6 +29,25 @@ async function sbGet(table, params) {
   return res.json();
 }
 
+// ── GET with total count (for pagination) ─────────────────────
+async function sbGetWithCount(table, params) {
+  var url = SUPABASE_URL + '/rest/v1/' + table + (params ? '?' + params : '');
+  var res = await fetch(url, { headers: sbHeaders({ 'Prefer': 'count=exact' }) });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || body.hint || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbGetWithCount] ' + table + ' HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
+  var data = await res.json();
+  var count = 0;
+  var cr = res.headers.get('content-range');
+  if (cr) {
+    var parts = cr.split('/');
+    if (parts[1] && parts[1] !== '*') count = parseInt(parts[1], 10);
+  }
+  return { data: data, count: count };
+}
+
 // ── POST (insert) ─────────────────────────────────────────────
 async function sbPost(table, body) {
   var res = await fetch(SUPABASE_URL + '/rest/v1/' + table, {
@@ -215,7 +234,7 @@ async function sbUpdateShopOrder(orderId, updates) {
 async function sbGetUsedItems(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('used_items', 'select=id,seller,name,code,price,condition,description,contact,views,image_url,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('used_items', 'select=id,seller,name,code,price,condition,description,contact,views,image_url,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveUsedItem(item) {
@@ -311,7 +330,7 @@ async function sbGetUnreadMessageCount(nickname) {
 async function sbGetForumPosts(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('forum_posts', 'select=id,author,category,region,province,title,body,images,views,comments,date,is_pinned,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('forum_posts', 'select=id,author,category,region,province,title,body,images,views,comments,date,is_pinned,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveForumPost(post) {
@@ -351,7 +370,7 @@ async function sbUpdateForumPost(id, updates) {
 async function sbGetEvents(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('events', 'select=id,title,location,event_date,description,created_by,type,region,views,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('events', 'select=id,title,location,event_date,description,created_by,type,region,views,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveEvent(ev) {
@@ -427,7 +446,7 @@ async function sbGetRsvpAttendees(eventId) {
 async function sbGetWebzineArticles(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('webzine_articles', 'select=id,category,title,body_md,thumbnail_url,author_id,views,is_published,created_at&is_published=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('webzine_articles', 'select=id,category,title,body_md,thumbnail_url,author_id,views,is_published,created_at&is_published=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveWebzineArticle(article) {
@@ -464,7 +483,7 @@ async function sbDeleteWebzineArticle(id) {
 async function sbGetJobs(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,views,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,views,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveJob(job) {
