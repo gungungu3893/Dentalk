@@ -1423,31 +1423,15 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
       </div>
 
-      <!-- ─── HERO BANNER (2 slides, auto-rotate) ────────────── -->
+      <!-- ─── HERO BANNER — CNC Custom Abutment ────────────── -->
       <div class="relative overflow-hidden">
-        <div id="homeBannerTrack" class="flex" style="transition:transform .48s cubic-bezier(.4,0,.2,1)">
-
-          <!-- Slide 1 — BIOPLANT Products -->
-          <div class="shrink-0 w-full relative overflow-hidden text-white" style="background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 55%,#0f1f3d 100%);padding:30px 22px 50px">
-            <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(79,142,247,0.13) 0%,transparent 70%)"></div>
-            <div class="relative fade-up">
-              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(212,175,55,0.16);border:1px solid rgba(212,175,55,0.28)">
-                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--color-accent)" data-i18n="hero_bioplant_tag">BIOPLANT Thailand</span>
-              </div>
-              <h1 class="font-black leading-tight mb-2 text-white" style="font-size:27px;letter-spacing:-0.8px" data-i18n="hero_bioplant_title">Premium Dental Implant Parts</h1>
-              <div style="width:28px;height:2px;border-radius:99px;background:var(--color-accent);opacity:0.85;margin-bottom:10px"></div>
-              <p class="text-xs leading-relaxed mb-5" style="color:rgba(191,219,254,0.62);max-width:280px" data-i18n="hero_bioplant_desc">ISO-certified Korean manufacturing, delivered fast to your clinic.</p>
-              <button onclick="isLoggedIn()?goPage('shop'):openLoginModal('shop')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:var(--color-accent);color:var(--color-primary-dark);touch-action:manipulation">
-                <span data-i18n="hero_bioplant_cta">Shop Now</span>
-                <span class="opacity-60">›</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Slide 2 — CNC Custom Abutment -->
-          <div class="shrink-0 w-full relative overflow-hidden text-white" style="background:linear-gradient(150deg,#18083a 0%,#2c1860 55%,#0d1535 100%);padding:30px 22px 50px">
-            <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(180,100,255,0.12) 0%,transparent 70%)"></div>
-            <div class="relative fade-up">
+        <div class="relative text-white" style="background:linear-gradient(150deg,#18083a 0%,#2c1860 55%,#0d1535 100%);padding:30px 22px 40px">
+          <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(180,100,255,0.12) 0%,transparent 70%)"></div>
+          <!-- 모바일: 배경 이미지 (반투명) -->
+          <img id="heroBgMobile" src="" alt="" class="absolute right-0 bottom-0 w-48 h-48 object-contain opacity-[0.12] pointer-events-none md:hidden" loading="lazy">
+          <div class="relative flex items-center gap-4">
+            <!-- 왼쪽: 텍스트 -->
+            <div class="flex-1 min-w-0 fade-up">
               <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(192,132,252,0.18);border:1px solid rgba(192,132,252,0.28)">
                 <span class="text-[9px] font-bold uppercase tracking-widest" style="color:#c084fc" data-i18n="hero_cnc_tag">CNC Custom Abutment</span>
               </div>
@@ -1459,13 +1443,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
                 <span class="opacity-60">›</span>
               </button>
             </div>
+            <!-- 오른쪽: 제품 이미지 (데스크톱/태블릿) -->
+            <div class="hidden md:block shrink-0 relative" style="width:220px;height:200px">
+              <img id="heroImgDesktop" src="" alt="Custom Abutment" class="absolute inset-0 w-full h-full object-contain drop-shadow-2xl" style="transform:rotate(-6deg) translateY(-8px)" loading="lazy">
+            </div>
           </div>
-
-        </div>
-        <!-- Slide dot indicators -->
-        <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-          <button id="bannerDot0" onclick="setBannerSlide(0)" class="w-2 h-2 rounded-full bg-white transition-all pointer-events-auto"></button>
-          <button id="bannerDot1" onclick="setBannerSlide(1)" class="w-1.5 h-1.5 rounded-full transition-all pointer-events-auto" style="background:rgba(255,255,255,0.3)"></button>
         </div>
       </div>
 

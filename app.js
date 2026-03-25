@@ -523,20 +523,14 @@ function updateDesktopHero(pageId) {
   var homeHero = document.querySelector('#page-home > .relative.overflow-hidden');
   if (!heroSlot || !homeHero) return;
   if (pageId === 'home' && _isDesktop()) {
-    // Clone hero into full-width slot, hide original
     heroSlot.innerHTML = homeHero.outerHTML;
     heroSlot.style.display = '';
     homeHero.style.display = 'none';
-    // Re-bind banner dots in clone
-    var cloneDot0 = heroSlot.querySelector('#bannerDot0');
-    var cloneDot1 = heroSlot.querySelector('#bannerDot1');
-    if (cloneDot0) cloneDot0.setAttribute('onclick', 'setBannerSlide(0)');
-    if (cloneDot1) cloneDot1.setAttribute('onclick', 'setBannerSlide(1)');
-    // Make banner track work on clone
-    var cloneTrack = heroSlot.querySelector('#homeBannerTrack');
-    if (cloneTrack) cloneTrack.id = 'homeBannerTrackDesktop';
-    // Override setBannerSlide to update both
-    var origSetBanner = setBannerSlide;
+    // Set image src on cloned elements
+    var cloneImgD = heroSlot.querySelector('#heroImgDesktop');
+    var cloneImgM = heroSlot.querySelector('#heroBgMobile');
+    if (cloneImgD) { cloneImgD.id = 'heroImgDesktopClone'; cloneImgD.src = HERO_IMAGE_URL; }
+    if (cloneImgM) { cloneImgM.id = 'heroBgMobileClone'; cloneImgM.src = HERO_IMAGE_URL; }
     window._desktopHeroActive = true;
   } else {
     heroSlot.style.display = 'none';
@@ -1125,32 +1119,17 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 // ============================================================
 // HOME PAGE — banner + categories + forum/events preview
 // ============================================================
-var _bannerSlide = 0, _bannerInterval = null;
-
-function setBannerSlide(idx) {
-  _bannerSlide = idx;
-  var track = document.getElementById('homeBannerTrack');
-  var trackD = document.getElementById('homeBannerTrackDesktop');
-  if (track) track.style.transform = 'translateX(-' + (idx * 100) + '%)';
-  if (trackD) trackD.style.transform = 'translateX(-' + (idx * 100) + '%)';
-  [0, 1].forEach(function(i) {
-    var dot = document.getElementById('bannerDot' + i);
-    if (!dot) return;
-    if (i === idx) {
-      dot.style.width = '8px'; dot.style.height = '8px'; dot.style.background = 'rgba(255,255,255,0.95)';
-    } else {
-      dot.style.width = '6px'; dot.style.height = '6px'; dot.style.background = 'rgba(255,255,255,0.3)';
-    }
-  });
-}
+var HERO_IMAGE_URL = 'https://placehold.co/500x400/1a1030/D4AF37?text=Custom+Abutment+Photo';
 
 function initHomeBanner() {
-  setBannerSlide(0);
-  if (_bannerInterval) clearInterval(_bannerInterval);
-  _bannerInterval = setInterval(function() {
-    setBannerSlide((_bannerSlide + 1) % 2);
-  }, 4500);
+  var imgD = document.getElementById('heroImgDesktop');
+  var imgM = document.getElementById('heroBgMobile');
+  if (imgD) imgD.src = HERO_IMAGE_URL;
+  if (imgM) imgM.src = HERO_IMAGE_URL;
 }
+
+// Legacy stubs for desktop hero clone compatibility
+function setBannerSlide() {}
 
 function renderHomeCategories() {
   var el = document.getElementById('homeCategories');
