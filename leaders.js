@@ -17,11 +17,11 @@ var PROVINCE_TH = {
 
 // ── Region colors ──────────────────────────────────────────
 var REGION_COLORS = {
-  north:     { base: '#22c55e', hover: '#16a34a', label: '#15803d' },
-  northeast: { base: '#f97316', hover: '#ea580c', label: '#c2410c' },
-  east:      { base: '#ef4444', hover: '#dc2626', label: '#b91c1c' },
-  south:     { base: '#a855f7', hover: '#9333ea', label: '#7e22ce' },
-  central:   { base: '#eab308', hover: '#ca8a04', label: '#a16207' }
+  north:     { base: '#0a3060', hover: '#D4AF37', label: '#ffffff' },
+  northeast: { base: '#154578', hover: '#D4AF37', label: '#ffffff' },
+  east:      { base: '#1f5a90', hover: '#D4AF37', label: '#ffffff' },
+  south:     { base: '#2970a8', hover: '#D4AF37', label: '#ffffff' },
+  central:   { base: '#001D4A', hover: '#D4AF37', label: '#ffffff' }
 };
 
 // ── Province SVG paths (simplified polygons in 400x580 viewbox) ──
@@ -146,8 +146,8 @@ function _buildThailandSVG() {
     var reg = FORUM_REGIONS.find(function(r){ return r.key === rk; });
     if (!reg) return;
     svg += '<text x="' + pos.x + '" y="' + pos.y + '" text-anchor="middle" ' +
-      'font-size="11" font-weight="900" fill="' + REGION_COLORS[rk].label + '" ' +
-      'style="pointer-events:none;text-shadow:0 1px 2px rgba(255,255,255,0.8)">' +
+      'font-size="11" font-weight="900" fill="#ffffff" ' +
+      'style="pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,0.6),0 0 6px rgba(0,0,0,0.3)">' +
       reg.icon + ' ' + t(reg.labelKey) + '</text>';
   });
 
@@ -179,23 +179,27 @@ function mapHover(el, isEnter) {
     var wRect = wrap.getBoundingClientRect();
     tooltip.style.left = (rect.left + rect.width/2 - wRect.left) + 'px';
     tooltip.style.top = (rect.top - wRect.top) + 'px';
-    el.style.opacity = '0.75';
-    el.style.filter = 'brightness(1.15)';
+    el.style.stroke = '#D4AF37';
+    el.style.strokeWidth = '2.5';
+    el.style.opacity = '0.85';
   } else {
     tooltip.classList.add('hidden');
+    el.style.stroke = '#fff';
+    el.style.strokeWidth = '1';
     el.style.opacity = '1';
-    el.style.filter = '';
   }
 }
 
 function mapClickProvince(regionKey, provinceKey) {
   _selectedRegion = regionKey;
   _selectedProvince = provinceKey;
-  // Highlight on map
+  // Highlight on map — selected province gets gold fill
   document.querySelectorAll('#thailandMap path').forEach(function(p) {
-    p.style.opacity = (p.dataset.province === provinceKey) ? '1' : '0.35';
-    p.style.strokeWidth = (p.dataset.province === provinceKey) ? '2.5' : '1';
-    p.style.stroke = (p.dataset.province === provinceKey) ? '#1e293b' : '#fff';
+    var isSelected = p.dataset.province === provinceKey;
+    p.style.opacity = isSelected ? '1' : '0.35';
+    p.style.strokeWidth = isSelected ? '2.5' : '1';
+    p.style.stroke = isSelected ? '#D4AF37' : '#fff';
+    if (isSelected) p.style.fill = '#D4AF37';
   });
   _renderSelectedLeaders();
 }
@@ -205,6 +209,7 @@ function mapResetHighlight() {
     p.style.opacity = '1';
     p.style.strokeWidth = '1';
     p.style.stroke = '#fff';
+    p.style.fill = '';  // reset to original SVG fill attribute
   });
 }
 
@@ -319,14 +324,14 @@ function _leaderCard(u) {
   var titleKey = _titleKeyToLabelKey(u.leader_title || '');
   var title = t(titleKey);
   var regionLabel = _resolveLeaderLabel(u.leader_region);
-  return '<div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-3 border border-purple-100">' +
+  return '<div class="bg-white rounded-xl p-3 border border-slate-200">' +
     '<div class="flex items-start gap-2.5">' +
-      '<div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0">' +
+      '<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background:#001D4A">' +
         '<span class="text-white font-black text-sm">' + (u.nickname ? u.nickname.charAt(0).toUpperCase() : '?') + '</span>' +
       '</div>' +
       '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-slate-800 text-xs">' + escHtml(u.nickname || '') + '</p>' +
-        '<p class="text-[10px] text-purple-600 font-bold">⭐ ' + title + '</p>' +
+        '<p class="font-black text-xs" style="color:#001D4A">' + escHtml(u.nickname || '') + '</p>' +
+        '<p class="text-[10px] font-bold"><span class="inline-block px-1.5 py-0.5 rounded" style="background:#D4AF37;color:#001D4A">⭐ ' + title + '</span></p>' +
         '<p class="text-[9px] text-slate-400 font-medium mt-0.5">' + regionLabel + '</p>' +
         (u.clinic_name ? '<p class="text-[9px] text-slate-500 mt-1">🏥 ' + escHtml(u.clinic_name) + '</p>' : '') +
         (u.phone ? '<p class="text-[9px] text-slate-500">📞 ' + escHtml(u.phone) + '</p>' : '') +
@@ -354,7 +359,7 @@ function _renderLeadersAccordion() {
     });
 
     html += '<div class="mb-2">';
-    html += '<button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-black text-xs text-white transition active:scale-[.98]" style="background:' + color.base + '">';
+    html += '<button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-black text-xs text-white transition active:scale-[.98]" style="background:#001D4A">';
     html += '<span>' + reg.icon + ' ' + t(reg.labelKey) + ' <span class="font-medium opacity-75">(' + regionLeaders.length + ')</span></span>';
     html += '<span class="accordion-arrow transition-transform text-sm">▼</span>';
     html += '</button>';
@@ -390,7 +395,7 @@ function _renderLeadersAccordion() {
   // National leaders section
   var nationalLeaders = _leadersData.filter(function(u) { return u.leader_region === 'all'; });
   if (nationalLeaders.length) {
-    html = '<div class="mb-3"><button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-black text-xs text-white bg-gradient-to-r from-slate-700 to-slate-900 transition active:scale-[.98]">' +
+    html = '<div class="mb-3"><button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-black text-xs text-white transition active:scale-[.98]" style="background:#001D4A">' +
       '<span>🇹🇭 ' + t('leader_level_all') + ' <span class="font-medium opacity-75">(' + nationalLeaders.length + ')</span></span>' +
       '<span class="accordion-arrow transition-transform text-sm">▼</span></button>' +
       '<div class="accordion-body hidden mt-1 space-y-1 pl-2">' +
