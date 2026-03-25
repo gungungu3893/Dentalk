@@ -1167,12 +1167,20 @@ function renderHomeCategories() {
   };
   el.innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var bg = (typeof _CAT_BG!=='undefined' && _CAT_BG[cat.id]) ? _CAT_BG[cat.id] : 'linear-gradient(150deg,#eef1f5 0%,#d5dce6 100%)';
+    var hasImg = typeof CATEGORY_IMAGES !== 'undefined' && CATEGORY_IMAGES[cat.id];
+    var iconHtml;
+    if (hasImg) {
+      iconHtml = '<div class="w-full bg-white rounded-t-xl flex items-center justify-center p-2">' +
+        '<img src="' + CATEGORY_IMAGES[cat.id] + '" alt="' + cat.name + '" class="object-contain w-full" style="max-height:200px" loading="lazy"></div>';
+    } else {
+      iconHtml = '<div class="flex items-center justify-center pt-3 px-3 bg-white/80 rounded-t-xl">' +
+        (typeof _catIcon==='function' ? _catIcon(cat,100) : '<div style="width:100px;height:100px">' + (cat.svg||'') + '</div>') +
+      '</div>';
+    }
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="shop-cat-card relative overflow-hidden rounded-2xl text-left active:scale-[.97] transition-all duration-200" ' +
       'style="background:' + bg + ';border:1px solid #e2e8f0;border-bottom:2px solid #D4AF37">' +
-      '<div class="flex items-center justify-center pt-3 px-3 bg-white/80 rounded-t-xl">' +
-        (typeof _catIcon==='function' ? _catIcon(cat,100,200) : '<div style="width:100px;height:100px">' + (cat.svg||'') + '</div>') +
-      '</div>' +
+      iconHtml +
       '<div class="p-3 pt-2">' +
         '<p class="font-black text-xs leading-snug" style="color:#001D4A">' + cat.name + '</p>' +
         '<p class="text-[9px] font-medium mt-0.5 leading-snug" style="color:#4a5568">' + t(catDescKeys[cat.id] || '') + '</p>' +
