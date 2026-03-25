@@ -165,6 +165,7 @@ async function _loadEventDetailRsvp(ev) {
       }
     }
   } catch(e) {
+    console.error('[RSVP Load] Error:', e.message || e);
     handleSupabaseError(e, 'RSVP Load');
     countEl.textContent = '0 ' + t('rsvp_attendees');
     attendeeList.innerHTML = '';
@@ -189,8 +190,13 @@ async function toggleRsvp(status) {
   if (!isLoggedIn() || !_currentDetailEvent) return;
   var ev = _currentDetailEvent;
   var sbId = ev._sbId || ev.id;
-  if (typeof sbId !== 'string') { showToast(t('rsvp_error'), 'error'); return; }
+  if (typeof sbId !== 'string') {
+    console.error('[RSVP] Invalid event ID type:', typeof sbId, sbId);
+    showToast(t('rsvp_error'), 'error');
+    return;
+  }
   try {
+    console.log('[RSVP] Upserting:', { eventId: sbId, userId: currentUser.nickname, status: status });
     await sbUpsertRsvp(sbId, currentUser.nickname, status);
     _updateRsvpButtons(status);
     _loadEventDetailRsvp(ev);
@@ -199,6 +205,7 @@ async function toggleRsvp(status) {
       sendLinePushText(ev.createdBy, '📅 ' + (ev.event || '') + ' — มีผู้สมัครเข้าร่วมใหม่\nNew RSVP for ' + (ev.event || '') + '.');
     }
   } catch(e) {
+    console.error('[RSVP] Error:', e.message || e);
     handleSupabaseError(e, 'RSVP');
     showToast(t('rsvp_error'), 'error');
   }

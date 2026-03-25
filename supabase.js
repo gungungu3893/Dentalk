@@ -410,12 +410,16 @@ async function sbGetEventRsvps(eventId) {
 
 async function sbUpsertRsvp(eventId, userId, status) {
   // Supabase upsert: on conflict(event_id, user_id)
-  var res = await fetch(SUPABASE_URL + '/rest/v1/events_rsvp', {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/events_rsvp?on_conflict=event_id,user_id', {
     method:  'POST',
     headers: sbHeaders({ 'Prefer': 'return=representation,resolution=merge-duplicates' }),
     body:    JSON.stringify({ event_id: eventId, user_id: userId, status: status }),
   });
-  if (!res.ok) throw new Error('[sbUpsertRsvp] HTTP ' + res.status);
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || body.hint || body.details || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbUpsertRsvp] HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
   var rows = await res.json();
   return rows[0];
 }
