@@ -1736,6 +1736,46 @@ async function goEventsPage(page) {
 }
 
 // ============================================================
+// 도움말 시스템
+// ============================================================
+var HELP_PAGES = ['home','shop','custom','forum','used','jobs','webzine','events','settings','myactivity'];
+
+function openHelp(page) {
+  var titleEl = document.getElementById('helpModalTitle');
+  var bodyEl  = document.getElementById('helpModalBody');
+  if (!titleEl || !bodyEl) return;
+  titleEl.textContent = '📖 ' + t('help_title_' + page);
+  var steps = [];
+  for (var i = 1; i <= 10; i++) {
+    var key = 'help_' + page + '_' + i;
+    var val = t(key);
+    if (val && val !== key) steps.push(val);
+  }
+  var html = '<div class="space-y-3">';
+  steps.forEach(function(s, idx) {
+    html += '<div class="flex gap-3 items-start">' +
+      '<div class="w-6 h-6 rounded-full bg-[#D4AF37] text-white flex items-center justify-center text-xs font-black shrink-0 mt-0.5">' + (idx + 1) + '</div>' +
+      '<p class="flex-1 text-sm text-slate-600 leading-relaxed">' + s + '</p>' +
+    '</div>';
+  });
+  html += '</div>';
+  bodyEl.innerHTML = html;
+  openModal('helpModal');
+}
+
+function dismissHelpBanner() {
+  var el = document.getElementById('helpFirstVisitBanner');
+  if (el) el.classList.add('hidden');
+  localStorage.setItem('dentalk_help_seen', '1');
+}
+
+function showHelpBannerIfNew() {
+  if (localStorage.getItem('dentalk_help_seen')) return;
+  var el = document.getElementById('helpFirstVisitBanner');
+  if (el) el.classList.remove('hidden');
+}
+
+// ============================================================
 // 피드백 폼
 // ============================================================
 var _fbCategory = 'other';
@@ -1875,6 +1915,7 @@ function _initApp() {
   updateNicknameDisplays();
   renderHomePage();
   initHomeBanner();
+  showHelpBannerIfNew();
   // Supabase에서 공개 데이터 비동기 로드
   initSupabasePublicData();
   // Desktop sidebar initial render

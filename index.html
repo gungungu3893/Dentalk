@@ -1104,6 +1104,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <button onclick="closeModal('extendModal')" class="w-full text-slate-300 text-xs font-bold" data-i18n="session_later">Later</button>
   </div>
 </div>
+<!-- ============================== 도움말 모달 ============================== -->
+<div id="helpModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[850] items-center justify-center p-4">
+  <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col" style="max-height:85vh">
+    <div class="p-5 pb-3 border-b border-slate-100 flex items-center justify-between shrink-0">
+      <h3 id="helpModalTitle" class="font-black text-slate-800 text-base">📖 Guide</h3>
+      <button onclick="closeModal('helpModal')" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-sm active:bg-slate-200">✕</button>
+    </div>
+    <div id="helpModalBody" class="p-5 overflow-y-auto flex-1 text-sm text-slate-600 leading-relaxed"></div>
+    <div class="p-4 pt-2 border-t border-slate-100 shrink-0">
+      <button onclick="closeModal('helpModal')" class="w-full py-3 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 transition" data-i18n="help_close">Close</button>
+    </div>
+  </div>
+</div>
 <!-- ============================== 주문 모달 (Shop) ============================== -->
 <div id="orderModal" class="modal fixed inset-0 bg-black/70 z-[500] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
@@ -1397,6 +1410,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <!-- ==================== HOME ==================== -->
     <div id="page-home" class="page active">
 
+      <!-- 첫 방문 도움말 배너 -->
+      <div id="helpFirstVisitBanner" class="hidden mx-4 mt-3 mb-1">
+        <div class="bg-gradient-to-r from-[#D4AF37] to-[#b8952e] rounded-2xl p-4 shadow-lg flex items-center gap-3">
+          <span class="text-2xl shrink-0">📖</span>
+          <div class="flex-1 min-w-0">
+            <p class="font-black text-white text-sm" data-i18n="help_first_visit_title">New to Dentalk?</p>
+            <p class="text-white/80 text-[10px] font-bold" data-i18n="help_first_visit_desc">View the guide to learn how to use</p>
+          </div>
+          <button onclick="openHelp('home')" class="shrink-0 px-3 py-2 bg-white/20 rounded-xl text-white text-xs font-black active:bg-white/30 transition" data-i18n="help_first_visit_btn">View</button>
+          <button onclick="dismissHelpBanner()" class="shrink-0 w-7 h-7 rounded-full bg-white/15 text-white/70 flex items-center justify-center text-xs font-black active:bg-white/30">✕</button>
+        </div>
+      </div>
+
       <!-- ─── HERO BANNER (2 slides, auto-rotate) ────────────── -->
       <div class="relative overflow-hidden">
         <div id="homeBannerTrack" class="flex" style="transition:transform .48s cubic-bezier(.4,0,.2,1)">
@@ -1537,7 +1563,10 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== SHOP ==================== -->
     <div id="page-shop" class="page px-4 pt-5 pb-4">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-1" data-i18n="shop_hint">Select a category to order</p>
+      <div class="flex items-center justify-between mb-4 px-1">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest" data-i18n="shop_hint">Select a category to order</p>
+        <button onclick="openHelp('shop')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- ─── AD SLOT: SHOP BOTTOM ─────────────────────────────── -->
       <div id="adSlotShopBottom" class="hidden mb-4"></div>
       <div id="shopCategoryList" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6"></div>
@@ -1621,6 +1650,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== CUSTOM ABUTMENT ==================== -->
     <div id="page-custom" class="page px-4 pt-5 pb-28">
+      <div class="flex justify-end mb-2">
+        <button onclick="openHelp('custom')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- Tab buttons -->
       <div class="flex gap-1.5 mb-5">
         <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow" data-i18n="custom_tab_new">New Order</button>
@@ -1822,6 +1854,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== USED MARKET ==================== -->
     <div id="page-used" class="page p-4">
+      <div class="flex justify-end mb-2">
+        <button onclick="openHelp('used')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- 등록 토글 버튼 -->
       <button onclick="usedToggleWrite()" id="usedWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
         <span data-i18n="used_post_toggle">📸 List Used Item</span>
@@ -1860,6 +1895,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
+      <div class="flex justify-end mb-2">
+        <button onclick="openHelp('forum')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- ─── AD SLOT: FORUM TOP ──────────────────────────────── -->
       <div id="adSlotForumTop" class="hidden mb-3"></div>
       <!-- 지역 탭 (대분류) -->
@@ -2045,7 +2083,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="page-jobs" class="page p-4">
       <div class="flex items-center gap-2 mb-3">
         <span class="text-xl">💼</span>
-        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_jobs">Jobs</h2>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_jobs">Jobs</h2>
+        <button onclick="openHelp('jobs')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
       </div>
       <!-- 로그인 유저: 글쓰기 버튼 -->
       <div id="jobsWriteBtn" class="hidden mb-3">
@@ -2101,7 +2140,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="page-webzine" class="page p-4">
       <div class="flex items-center gap-2 mb-3">
         <span class="text-xl">📰</span>
-        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_webzine">Webzine</h2>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_webzine">Webzine</h2>
+        <button onclick="openHelp('webzine')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
       </div>
       <!-- 관리자: 글쓰기 버튼 -->
       <div id="webzineAdminBtn" class="hidden mb-3">
@@ -2136,7 +2176,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="page-events" class="page p-4">
       <div class="flex items-center gap-2 mb-4">
         <span class="text-xl">📅</span>
-        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_events">Events</h2>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_events">Events</h2>
+        <button onclick="openHelp('events')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
       </div>
       <div id="eventList" class="space-y-3"></div>
       <div id="eventsPagination"></div>
@@ -2224,6 +2265,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== SETTINGS ==================== -->
     <div id="page-settings" class="page p-4 space-y-4">
+      <div class="flex justify-end">
+        <button onclick="openHelp('settings')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- 프로필 카드 (상단) -->
       <div class="bg-gradient-to-br from-[#001d4a] to-[#0a3d8f] rounded-3xl p-6 shadow-lg">
         <div class="flex items-center gap-4">
@@ -2373,7 +2417,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="page-myactivity" class="page p-4">
       <div class="flex items-center gap-2 mb-4">
         <span class="text-xl">👤</span>
-        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_myactivity">My Activity</h2>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_myactivity">My Activity</h2>
+        <button onclick="openHelp('myactivity')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
       </div>
       <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1 no-scroll">
         <button onclick="myActivityTab('msg')"    id="matab-msg"    class="flex-1 py-2.5 rounded-xl font-black text-xs bg-[#001d4a] text-white whitespace-nowrap px-2" data-i18n="ma_tab_msg">Messages</button>
