@@ -1171,7 +1171,7 @@ function renderHomeCategories() {
       'class="shop-cat-card relative overflow-hidden rounded-2xl text-left active:scale-[.97] transition-all duration-200" ' +
       'style="background:' + bg + ';border:1px solid #e2e8f0;border-bottom:2px solid #D4AF37">' +
       '<div class="flex items-center justify-center pt-3 px-3 bg-white/80 rounded-t-xl">' +
-        (typeof _catIcon==='function' ? _catIcon(cat,100) : '<div style="width:100px;height:100px">' + (cat.svg||'') + '</div>') +
+        (typeof _catIcon==='function' ? _catIcon(cat,100,200) : '<div style="width:100px;height:100px">' + (cat.svg||'') + '</div>') +
       '</div>' +
       '<div class="p-3 pt-2">' +
         '<p class="font-black text-xs leading-snug" style="color:#001D4A">' + cat.name + '</p>' +

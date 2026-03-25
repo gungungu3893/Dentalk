@@ -71,9 +71,11 @@ var CATEGORY_IMAGES = {
   'ti-base': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Ti-base%20Abutment.png'
 };
 // Render category icon: image with white bg box, or SVG scaled
-function _catIcon(cat, size) {
+// imgSize overrides size for categories with product images (Q-Base, Ti-Base)
+function _catIcon(cat, size, imgSize) {
   var url = CATEGORY_IMAGES[cat.id];
-  if (url) return '<div class="bg-white rounded-xl shadow-sm flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px;padding:8px">' +
+  var s = (url && imgSize) ? imgSize : size;
+  if (url) return '<div class="bg-white rounded-xl shadow-sm flex items-center justify-center" style="width:' + s + 'px;height:' + s + 'px;padding:4px">' +
     '<img src="' + url + '" alt="' + cat.name + '" class="object-contain w-full h-full" loading="lazy"></div>';
   return '<div class="flex items-center justify-center" style="width:' + size + 'px;height:' + size + 'px">' + (cat.svg || '') + '</div>';
 }
@@ -126,7 +128,7 @@ function renderShop() {
     return '<button onclick="openShopCategory(\'' + cat.id + '\')" ' +
       'class="shop-cat-card relative overflow-hidden rounded-2xl text-left active:scale-[.97] transition-all duration-200" ' +
       'style="background:' + bg + ';border:1px solid #e2e8f0;border-bottom:2px solid #D4AF37">' +
-      '<div class="flex items-center justify-center py-4 px-3 bg-white/80 rounded-t-xl">' + _catIcon(cat, 150) + '</div>' +
+      '<div class="flex items-center justify-center py-4 px-3 bg-white/80 rounded-t-xl">' + _catIcon(cat, 150, 200) + '</div>' +
       '<div class="px-4 pb-4 pt-3">' +
         '<p class="font-black text-sm leading-tight" style="color:#001D4A">' + cat.name + '</p>' +
         '<p class="text-[10px] font-medium mt-1 leading-snug" style="color:#4a5568">' + cat.desc + '</p>' +
@@ -226,7 +228,7 @@ function renderShopItems(catId) {
     var clickAttr = inStock ? 'onclick="openOrder(\'' + p.id + '\')"' : '';
     return '<div ' + clickAttr + ' class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100' + (inStock ? ' cursor-pointer active:scale-[.98] transition' : ' opacity-55') + '">' +
       '<div class="h-1" style="background:' + (_CAT_BAR[catId] || '#0a1628') + '"></div>' +
-      (cat ? '<div class="flex items-center justify-center pt-4 px-4">' + _catIcon(cat, 150) + '</div>' : '') +
+      (cat ? '<div class="flex items-center justify-center pt-4 px-4">' + _catIcon(cat, 150, 250) + '</div>' : '') +
       '<div class="p-4">' +
         '<h3 class="font-black text-slate-800 text-sm leading-tight">' + p.title + '</h3>' +
         '<p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5 leading-tight">' + p.subtitle + '</p>' +
@@ -262,7 +264,7 @@ function renderProductPage() {
   if (hero) hero.style.background = '#f8fafc';
   var iconArea = document.getElementById('shopProductIconArea');
   if (iconArea && cat) {
-    iconArea.innerHTML = _catIcon(cat, 400);
+    iconArea.innerHTML = _catIcon(cat, 400, 500);
   }
   var badge = document.getElementById('shopProductStockBadge');
   if (badge) {
