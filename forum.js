@@ -101,7 +101,7 @@ function renderForum() {
     regionBar.innerHTML = FORUM_REGIONS.map(function(r) {
       var active = forumRegion === r.key;
       return '<button onclick="forumRegionTab(\'' + r.key + '\')" class="w-full px-2 py-2 rounded-xl font-black text-[11px] transition text-center truncate ' +
-        (active ? 'bg-emerald-600 text-white shadow' : 'bg-white text-slate-500 border border-slate-200') + '">' +
+        (active ? 'text-white shadow' : 'bg-white border border-slate-200') + '" style="' + (active ? 'background:#001D4A;color:white' : 'color:#001D4A') + '">' +
         r.icon + ' ' + t(r.labelKey) + '</button>';
     }).join('');
   }
@@ -114,12 +114,12 @@ function renderForum() {
       provinceBar.classList.remove('hidden');
       provinceBar.innerHTML =
         '<button onclick="forumProvinceTab(\'all\')" class="w-full px-2 py-1.5 rounded-lg font-black text-[10px] transition text-center truncate ' +
-        (forumProvince === 'all' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-white text-slate-400 border border-slate-200') + '">' +
+        (forumProvince === 'all' ? 'border' : 'bg-white text-slate-400 border border-slate-200') + '" style="' + (forumProvince === 'all' ? 'background:rgba(212,175,55,0.12);color:#001D4A;border-color:#D4AF37' : '') + '">' +
         t('forum_region_all') + '</button>' +
         provinces.map(function(p) {
           var active = forumProvince === p.key;
           return '<button onclick="forumProvinceTab(\'' + p.key + '\')" class="w-full px-2 py-1.5 rounded-lg font-black text-[10px] transition text-center truncate ' +
-            (active ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-white text-slate-400 border border-slate-200') + '">' +
+            (active ? 'border' : 'bg-white text-slate-400 border border-slate-200') + '" style="' + (active ? 'background:rgba(212,175,55,0.12);color:#001D4A;border-color:#D4AF37' : '') + '">' +
             p.label + '</button>';
         }).join('');
     } else {
@@ -143,13 +143,12 @@ function renderForum() {
     var commentCount = p.comments ? p.comments.length : 0;
     // 썸네일 영역
     var _fcCfg = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
-    var _fcGrad = {'implant':'from-blue-400 to-blue-600','prosthetic':'from-amber-400 to-amber-600','conservative':'from-green-400 to-green-600','orthodontics':'from-cyan-400 to-cyan-600','oral_surgery':'from-red-400 to-red-600','periodontics':'from-emerald-400 to-emerald-600','pediatric':'from-pink-400 to-pink-600','radiology':'from-indigo-400 to-indigo-600','oral_medicine':'from-violet-400 to-violet-600','preventive':'from-teal-400 to-teal-600','general':'from-slate-400 to-slate-600'};
     var thumbHtml = hasImg
       ? '<div class="relative shrink-0">' +
           '<img src="' + p.images[0] + '" class="w-[72px] h-[72px] rounded-2xl object-cover" loading="lazy">' +
           (imgCount > 1 ? '<span class="absolute bottom-1 right-1 text-[9px] font-black bg-black/60 text-white px-1.5 py-0.5 rounded-full">+' + (imgCount - 1) + '</span>' : '') +
         '</div>'
-      : '<div class="w-[56px] h-[56px] rounded-2xl bg-gradient-to-br ' + (_fcGrad[p.category] || 'from-slate-400 to-slate-600') + ' flex items-center justify-center shrink-0">' +
+      : '<div class="w-[56px] h-[56px] rounded-2xl flex items-center justify-center shrink-0" style="background:#001D4A">' +
           '<span class="text-2xl opacity-90">' + (_fcCfg.icon || '💬') + '</span>' +
         '</div>';
     // 카테고리 뱃지
@@ -158,11 +157,11 @@ function renderForum() {
     var tabLabel = catCfg;
     // 고정 배지
     var pinnedBadge = p.is_pinned
-      ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">📌 ' + t('forum_pinned') + '</span>' : '';
+      ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.15);color:#001D4A">📌 ' + t('forum_pinned') + '</span>' : '';
     // 리더 배지 (작성자가 리더인 경우 — 직책 포함)
     var _pli = _getLeaderInfo(p.author);
     var authorLeaderBadge = _pli
-      ? '<span class="text-[9px] font-black text-purple-600" title="' + _resolveLeaderLabel(_pli.region) + (_pli.title ? ' · ' + t(_titleKeyToLabelKey(_pli.title)) : '') + '">⭐</span>' : '';
+      ? '<span class="text-[9px] font-black" style="color:#D4AF37" title="' + _resolveLeaderLabel(_pli.region) + (_pli.title ? ' · ' + t(_titleKeyToLabelKey(_pli.title)) : '') + '">⭐</span>' : '';
     // 지역/주 뱃지
     var regionBadge = '';
     if (p.region && p.region !== 'all') {
@@ -173,7 +172,7 @@ function renderForum() {
         if (pCfg) pLabel = pCfg.label;
       }
       var rLabel = rCfg ? (rCfg.icon + ' ' + t(rCfg.labelKey)) : p.region;
-      regionBadge = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">' +
+      regionBadge = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.1);color:#001D4A">' +
         rLabel + (pLabel ? ' · ' + pLabel : '') + '</span>';
     }
     return '<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer active:bg-slate-50 transition" onclick="openForumDetail(' + p.id + ')">' +
@@ -181,13 +180,13 @@ function renderForum() {
         '<div class="flex-1 min-w-0">' +
           '<div class="flex items-center gap-1.5 flex-wrap mb-1.5">' +
             pinnedBadge +
-            '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">' + catIcon + ' ' + (tabLabel.key ? t(tabLabel.labelKey) : p.category) + '</span>' +
+            '<span class="text-[10px] font-black px-2 py-0.5 rounded-full text-white" style="background:#001D4A">' + catIcon + ' ' + (tabLabel.key ? t(tabLabel.labelKey) : p.category) + '</span>' +
             regionBadge +
           '</div>' +
           '<p class="font-black text-slate-800 text-sm leading-snug mb-1 line-clamp-2">' + escHtml(p.title) + '</p>' +
           '<p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-2">' + escHtml(p.body) + '</p>' +
           '<div class="flex items-center gap-2 text-[10px] text-slate-300 font-bold">' +
-            '<span class="text-slate-500 font-black cursor-pointer hover:text-blue-600" onclick="event.stopPropagation();openCompose(\'' + escHtml(p.author) + '\')">' + escHtml(p.author) + '</span>' +
+            '<span class="font-black cursor-pointer" style="color:#001D4A" onclick="event.stopPropagation();openCompose(\'' + escHtml(p.author) + '\')">' + escHtml(p.author) + '</span>' +
             authorLeaderBadge +
             '<span>·</span>' +
             '<span>' + (p.date||'') + '</span>' +

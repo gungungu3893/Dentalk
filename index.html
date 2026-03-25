@@ -1887,11 +1887,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <!-- 주(province) 서브탭 -->
       <div id="forumProvinceBar" class="hidden grid grid-cols-3 md:grid-cols-4 gap-1.5 mb-3"></div>
       <!-- 지역 임원 보기 버튼 -->
-      <button onclick="goDetailPage('leaders', t('leaders_title'), 'forum')" class="w-full mb-3 py-2.5 rounded-2xl font-black text-xs bg-gradient-to-r from-purple-600 to-indigo-600 text-white active:scale-[.97] transition flex items-center justify-center gap-2 shadow-sm">
+      <button onclick="goDetailPage('leaders', t('leaders_title'), 'forum')" class="w-full mb-3 py-2.5 rounded-2xl font-black text-xs active:scale-[.97] transition flex items-center justify-center gap-2 shadow-sm" style="background:#D4AF37;color:#001D4A">
         <span>⭐</span> <span data-i18n="leaders_view_btn">View Regional Leaders</span>
       </button>
       <!-- 글쓰기 버튼 -->
-      <button onclick="forumToggleWrite()" id="forumWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
+      <button onclick="forumToggleWrite()" id="forumWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed active:bg-slate-50 transition flex items-center justify-center gap-2" style="border-color:#D4AF37;color:#001D4A">
         <span data-i18n="forum_write_btn">✍️ Write Post</span>
       </button>
       <!-- 새 글 쓰기 폼 (숨김) -->
@@ -1903,11 +1903,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <button onclick="forumToggleWrite()" class="text-slate-400 font-black text-xs px-2 py-1 bg-slate-100 rounded-lg active:bg-slate-200" data-i18n="forum_close_form">✕ Close</button>
           </div>
         </div>
-        <input id="postTitle" type="text" data-i18n-ph="forum_title_ph" placeholder="Title" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2 border-2 border-transparent focus:border-blue-200">
+        <input id="postTitle" type="text" data-i18n-ph="forum_title_ph" placeholder="Title" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2 border-2 border-transparent focus:border-[#D4AF37]/40">
         <!-- 카테고리 선택 -->
         <div class="mb-3">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_cat_label">Category</label>
-          <select id="postCategory" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-200">
+          <select id="postCategory" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-[#D4AF37]/40">
             <option value="implant"       data-i18n="forum_cat_implant">🦷 임플란트</option>
             <option value="prosthetic"    data-i18n="forum_cat_prosthetic">💎 보철</option>
             <option value="conservative"  data-i18n="forum_cat_conservative">🪥 보존</option>
@@ -1924,7 +1924,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <!-- 지역 선택 -->
         <div class="mb-2">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_region_label">Region</label>
-          <select id="postRegion" onchange="_updateProvinceSelect()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-emerald-200">
+          <select id="postRegion" onchange="_updateProvinceSelect()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-[#D4AF37]/40">
             <option value="all" data-i18n="forum_region_all">🌏 All Regions</option>
             <option value="north" data-i18n="forum_region_north">🏔 North</option>
             <option value="northeast" data-i18n="forum_region_northeast">🌾 Northeast</option>
@@ -1936,7 +1936,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <!-- 주(province) 선택 — 지역 선택 시 동적 렌더링 -->
         <div class="mb-3">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_province_label">Province</label>
-          <select id="postProvince" disabled class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-emerald-200 disabled:opacity-40">
+          <select id="postProvince" disabled class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-[#D4AF37]/40 disabled:opacity-40">
             <option value="all">-</option>
           </select>
         </div>
@@ -1948,7 +1948,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <input id="forumPhotos" type="file" accept="image/*" multiple class="hidden" onchange="previewForumPhotos()">
           </label>
         </div>
-        <textarea id="postBody" rows="4" data-i18n-ph="forum_body_ph" placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3 border-2 border-transparent focus:border-blue-200"></textarea>
+        <textarea id="postBody" rows="4" data-i18n-ph="forum_body_ph" placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3 border-2 border-transparent focus:border-[#D4AF37]/40"></textarea>
         <button onclick="submitPost()" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="forum_post_btn">POST</button>
       </div>
       <!-- 게시글 목록 (카드형) -->
