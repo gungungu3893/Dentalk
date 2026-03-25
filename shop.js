@@ -88,22 +88,17 @@ function _catBg(cat, size) {
 
 // Premium light palette — soft gradient backgrounds
 var _CAT_BG = {
-  'scan-body':  'linear-gradient(150deg,#e8f4fd 0%,#c5e3f6 100%)',
-  'q-base':     'linear-gradient(150deg,#faf5eb 0%,#f0e6d0 100%)',
-  'ready-made': 'linear-gradient(150deg,#e8f8f5 0%,#c5ede4 100%)',
-  'ti-base':    'linear-gradient(150deg,#f0ecf8 0%,#d9d0ee 100%)',
-  'pre-milled': 'linear-gradient(150deg,#eef1f5 0%,#d5dce6 100%)',
-  'multi-unit': 'linear-gradient(150deg,#fdf0ec 0%,#f5d8cf 100%)',
-  '3d-analog':  'linear-gradient(150deg,#eef3ec 0%,#d4e4cf 100%)',
+  'scan-body':'#ffffff','q-base':'#ffffff','ready-made':'#ffffff',
+  'ti-base':'#ffffff','pre-milled':'#ffffff','multi-unit':'#ffffff','3d-analog':'#ffffff',
 };
-// SVG icon fill color per category (dark tone for light bg)
+// SVG icon fill color per category — unified navy
 var _CAT_SVG_FILL = {
-  'scan-body':'#2a6fa8','q-base':'#8a6d3b','ready-made':'#2d8a70',
-  'ti-base':'#5b4a9e','pre-milled':'#4a5a72','multi-unit':'#a85a3a','3d-analog':'#4a7a42'
+  'scan-body':'#001D4A','q-base':'#001D4A','ready-made':'#001D4A',
+  'ti-base':'#001D4A','pre-milled':'#001D4A','multi-unit':'#001D4A','3d-analog':'#001D4A'
 };
 var _CAT_BAR = {
-  'scan-body':'#2a6fa8','q-base':'#8a6d3b','ready-made':'#2d8a70','ti-base':'#5b4a9e',
-  'pre-milled':'#4a5a72','multi-unit':'#a85a3a','3d-analog':'#4a7a42'
+  'scan-body':'#D4AF37','q-base':'#D4AF37','ready-made':'#D4AF37','ti-base':'#D4AF37',
+  'pre-milled':'#D4AF37','multi-unit':'#D4AF37','3d-analog':'#D4AF37'
 };
 const SHOP_CATEGORIES = [
   { id:'scan-body',   name:'Scan Body',   desc:'Intra-Oral / Model',

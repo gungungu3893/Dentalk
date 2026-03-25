@@ -1412,33 +1412,33 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 
       <!-- 첫 방문 도움말 배너 -->
       <div id="helpFirstVisitBanner" class="hidden mx-4 mt-3 mb-1">
-        <div class="bg-gradient-to-r from-[#D4AF37] to-[#b8952e] rounded-2xl p-4 shadow-lg flex items-center gap-3">
+        <div class="bg-white rounded-2xl p-4 border-2 border-[#D4AF37]/30 flex items-center gap-3">
           <span class="text-2xl shrink-0">📖</span>
           <div class="flex-1 min-w-0">
-            <p class="font-black text-white text-sm" data-i18n="help_first_visit_title">New to Dentalk?</p>
-            <p class="text-white/80 text-[10px] font-bold" data-i18n="help_first_visit_desc">View the guide to learn how to use</p>
+            <p class="font-black text-[#001D4A] text-sm" data-i18n="help_first_visit_title">New to Dentalk?</p>
+            <p class="text-slate-400 text-[10px] font-bold" data-i18n="help_first_visit_desc">View the guide to learn how to use</p>
           </div>
-          <button onclick="openHelp('home')" class="shrink-0 px-3 py-2 bg-white/20 rounded-xl text-white text-xs font-black active:bg-white/30 transition" data-i18n="help_first_visit_btn">View</button>
-          <button onclick="dismissHelpBanner()" class="shrink-0 w-7 h-7 rounded-full bg-white/15 text-white/70 flex items-center justify-center text-xs font-black active:bg-white/30">✕</button>
+          <button onclick="openHelp('home')" class="shrink-0 px-3 py-2 bg-[#D4AF37] rounded-xl text-[#001D4A] text-xs font-black active:bg-[#b8952e] transition" data-i18n="help_first_visit_btn">View</button>
+          <button onclick="dismissHelpBanner()" class="shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-black active:bg-slate-200">✕</button>
         </div>
       </div>
 
       <!-- ─── HERO BANNER — CNC Custom Abutment ────────────── -->
       <div class="relative overflow-hidden">
-        <div class="relative text-white" style="background:linear-gradient(150deg,#18083a 0%,#2c1860 55%,#0d1535 100%);padding:30px 22px 40px">
-          <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(180,100,255,0.12) 0%,transparent 70%)"></div>
+        <div class="relative text-white" style="background:linear-gradient(150deg,#001D4A 0%,#002a5c 55%,#001230 100%);padding:30px 22px 40px">
+          <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(212,175,55,0.08) 0%,transparent 70%)"></div>
           <!-- 모바일: 배경 이미지 (반투명) -->
           <img id="heroBgMobile" src="" alt="" class="absolute right-0 bottom-0 w-48 h-48 object-contain opacity-[0.12] pointer-events-none md:hidden" loading="lazy">
           <div class="relative flex items-center gap-4">
             <!-- 왼쪽: 텍스트 -->
             <div class="flex-1 min-w-0 fade-up">
-              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(192,132,252,0.18);border:1px solid rgba(192,132,252,0.28)">
-                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:#c084fc" data-i18n="hero_cnc_tag">CNC Custom Abutment</span>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(212,175,55,0.16);border:1px solid rgba(212,175,55,0.28)">
+                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:#D4AF37" data-i18n="hero_cnc_tag">CNC Custom Abutment</span>
               </div>
               <h1 class="font-black leading-tight mb-2 text-white" style="font-size:27px;letter-spacing:-0.8px" data-i18n="hero_cnc_title">Precision-Crafted Custom Solutions</h1>
-              <div style="width:28px;height:2px;border-radius:99px;background:#c084fc;opacity:0.85;margin-bottom:10px"></div>
-              <p class="text-xs leading-relaxed mb-5" style="color:rgba(216,180,254,0.62);max-width:280px" data-i18n="hero_cnc_desc">Made to your exact specs — from scan body to final restoration.</p>
-              <button onclick="isLoggedIn()?goPage('custom'):openLoginModal('custom')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:#c084fc;color:#18083a;touch-action:manipulation">
+              <div style="width:28px;height:2px;border-radius:99px;background:#D4AF37;opacity:0.85;margin-bottom:10px"></div>
+              <p class="text-xs leading-relaxed mb-5" style="color:rgba(255,255,255,0.55);max-width:280px" data-i18n="hero_cnc_desc">Made to your exact specs — from scan body to final restoration.</p>
+              <button onclick="isLoggedIn()?goPage('custom'):openLoginModal('custom')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:#D4AF37;color:#001D4A;touch-action:manipulation">
                 <span data-i18n="hero_cnc_cta">Order Custom</span>
                 <span class="opacity-60">›</span>
               </button>
@@ -1457,15 +1457,15 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <!-- ─── BRAND STAT BAR ──────────────────────────────────── -->
       <div class="bg-white border-b border-slate-100 px-4 py-3 grid grid-cols-3 divide-x divide-slate-100">
         <div class="pr-3 text-center">
-          <p class="font-black text-blue-800 text-base leading-none">ISO</p>
+          <p class="font-black text-base leading-none" style="color:#001D4A">ISO</p>
           <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat1">Certified</p>
         </div>
         <div class="px-3 text-center">
-          <p class="font-black text-blue-800 text-base leading-none">Korea</p>
+          <p class="font-black text-base leading-none" style="color:#001D4A">Korea</p>
           <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat2">Origin</p>
         </div>
         <div class="pl-3 text-center">
-          <p class="font-black text-blue-800 text-base leading-none">SEA</p>
+          <p class="font-black text-base leading-none" style="color:#001D4A">SEA</p>
           <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat3">Coverage</p>
         </div>
       </div>
@@ -2204,9 +2204,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== FACTORY ==================== -->
     <div id="page-factory" class="page p-4">
-      <div id="factoryPromoHeader" class="bg-white rounded-3xl p-8 shadow-sm text-center mb-4">
-        <h2 dir="ltr" style="unicode-bidi:embed" class="text-xl font-black italic text-blue-900 mb-2">BIOPLANT THAILAND</h2>
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose" data-i18n="factory_subtitle">Premium fixture manufacturing center in Bangkok</p>
+      <div id="factoryPromoHeader" class="rounded-3xl p-8 shadow-sm text-center mb-4" style="background:#001D4A">
+        <h2 dir="ltr" style="unicode-bidi:embed;color:#D4AF37" class="text-xl font-black italic mb-2">BIOPLANT THAILAND</h2>
+        <p class="text-[10px] font-bold uppercase tracking-widest leading-loose" style="color:rgba(255,255,255,0.5)" data-i18n="factory_subtitle">Premium fixture manufacturing center in Bangkok</p>
       </div>
       <!-- 관리자 패널 (관리자 로그인 시에만 표시) -->
       <div id="adminPanel">

@@ -1145,7 +1145,7 @@ function renderHomeCategories() {
     '3d-analog':  'cat_3d_analog_desc'
   };
   el.innerHTML = SHOP_CATEGORIES.map(function(cat) {
-    var bg = (typeof _CAT_BG!=='undefined' && _CAT_BG[cat.id]) ? _CAT_BG[cat.id] : 'linear-gradient(150deg,#eef1f5 0%,#d5dce6 100%)';
+    var bg = (typeof _CAT_BG!=='undefined' && _CAT_BG[cat.id]) ? _CAT_BG[cat.id] : '#ffffff';
     var hasImg = typeof CATEGORY_IMAGES !== 'undefined' && CATEGORY_IMAGES[cat.id];
     var iconHtml;
     if (hasImg) {
