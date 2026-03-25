@@ -59,8 +59,8 @@ function renderEvents() {
 async function _loadEventRsvpCounts() {
   for (var i = 0; i < events_.length; i++) {
     var ev = events_[i];
-    var sbId = ev._sbId || ev.id;
-    if (typeof sbId !== 'string') continue;
+    var sbId = String(ev._sbId || ev.id);
+    if (!sbId || sbId === 'undefined' || sbId === 'null') continue;
     try {
       var rsvps = await sbGetEventRsvps(sbId);
       var count = rsvps.filter(function(r){ return r.status === 'attending'; }).length;
@@ -120,7 +120,7 @@ function openEventDetail(id) {
 var _currentDetailEvent = null;
 async function _loadEventDetailRsvp(ev) {
   _currentDetailEvent = ev;
-  var sbId = ev._sbId || ev.id;
+  var sbId = String(ev._sbId || ev.id);
   var rsvpWrap = document.getElementById('edp-rsvpWrap');
   if (!rsvpWrap) return;
   rsvpWrap.classList.remove('hidden');
@@ -135,7 +135,7 @@ async function _loadEventDetailRsvp(ev) {
       '<button id="edp-rsvpNo" onclick="toggleRsvp(\'not_attending\')" class="flex-1 py-2.5 rounded-xl font-black text-xs border-2 transition active:scale-95">' + t('rsvp_not_attend') + '</button>';
   }
   // 참석자 로드
-  if (typeof sbId !== 'string') {
+  if (!sbId || sbId === 'undefined' || sbId === 'null') {
     countEl.textContent = '0 ' + t('rsvp_attendees');
     attendeeList.innerHTML = '';
     return;
@@ -189,9 +189,9 @@ function _updateRsvpButtons(status) {
 async function toggleRsvp(status) {
   if (!isLoggedIn() || !_currentDetailEvent) return;
   var ev = _currentDetailEvent;
-  var sbId = ev._sbId || ev.id;
-  if (typeof sbId !== 'string') {
-    console.error('[RSVP] Invalid event ID type:', typeof sbId, sbId);
+  var sbId = String(ev._sbId || ev.id);
+  if (!sbId || sbId === 'undefined' || sbId === 'null') {
+    console.error('[RSVP] Invalid event ID:', sbId);
     showToast(t('rsvp_error'), 'error');
     return;
   }
