@@ -9,7 +9,7 @@ var productStock    = JSON.parse(localStorage.getItem('adminProductStock') || '{
 
 function adminShowTab(tab) {
   adminCurrentTab = tab;
-  ['orders','shopOrders','products','used','forum','users','jobs','webzine','events','ads','stats'].forEach(function(t) {
+  ['orders','shopOrders','products','used','forum','users','jobs','webzine','events','ads','stats','feedback'].forEach(function(t) {
     var key = t.charAt(0).toUpperCase() + t.slice(1);
     var content = document.getElementById('adminTab' + key);
     var btn     = document.getElementById('adminTabBtn-' + t);
@@ -33,6 +33,7 @@ function adminShowTab(tab) {
   else if (tab === 'events')     renderAdminEventsTab();
   else if (tab === 'ads')        renderAdminAds();
   else if (tab === 'stats')      renderAdminStats();
+  else if (tab === 'feedback')   renderAdminFeedback();
 }
 function isAdmin() {
   return isLoggedIn() && currentUser.role === 'admin';
@@ -1419,5 +1420,96 @@ function _guessCategoryFromName(name) {
   if (n.indexOf('multi') !== -1 || n.indexOf('mua') !== -1) return 'Multi Unit';
   if (n.indexOf('analog') !== -1 || n.indexOf('3d') !== -1) return '3D Analog';
   return 'Other';
+}
+
+// ============================================================
+// 관리자 피드백 관리 탭
+// ============================================================
+var _adminFbPage = 1;
+var _adminFbData = [];
+var _adminFbTotal = 0;
+
+var _FB_CAT_ICONS = { bug:'🐛', feature:'💡', complaint:'😤', praise:'👍', other:'📝' };
+var _FB_STATUS_CLS = {
+  unread:  'bg-red-50 text-red-600',
+  read:    'bg-blue-50 text-blue-600',
+  replied: 'bg-green-50 text-green-600',
+};
+
+async function renderAdminFeedback() {
+  var container = document.getElementById('adminTabFeedback');
+  if (!container) return;
+  container.innerHTML = '<p class="text-center text-slate-400 text-xs py-8">' + t('admin_loading') + '</p>';
+  try {
+    var result = await sbGetFeedback(_adminFbPage);
+    _adminFbData = result.data || [];
+    _adminFbTotal = result.count || 0;
+    var totalPages = Math.max(1, Math.ceil(_adminFbTotal / 20));
+
+    if (!_adminFbData.length) {
+      container.innerHTML = '<div class="text-center py-12"><p class="text-3xl mb-2 opacity-30">💬</p><p class="font-black text-slate-400 text-sm">' + t('feedback_admin_empty') + '</p></div>';
+      return;
+    }
+
+    var html = '<h3 class="font-black text-slate-700 text-sm mb-3">' + t('admin_tab_feedback') + ' (' + _adminFbTotal + ')</h3>';
+    html += '<div class="space-y-2">';
+    _adminFbData.forEach(function(fb, i) {
+      var catIcon = _FB_CAT_ICONS[fb.category] || '📝';
+      var statusCls = _FB_STATUS_CLS[fb.status] || _FB_STATUS_CLS.unread;
+      var stars = '';
+      for (var s = 0; s < 5; s++) stars += s < fb.rating ? '⭐' : '☆';
+      html += '<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">' +
+        '<div class="flex items-start justify-between gap-2 mb-2">' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-center gap-2 mb-1">' +
+              '<span class="text-lg">' + catIcon + '</span>' +
+              '<span class="font-black text-slate-800 text-sm truncate">' + (fb.title || '-') + '</span>' +
+            '</div>' +
+            '<p class="text-[10px] text-slate-400 font-bold">' + (fb.user_nickname || '-') + ' · ' + (fb.created_at ? fb.created_at.slice(0, 10) : '') + '</p>' +
+          '</div>' +
+          '<span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black ' + statusCls + '">' + t('feedback_status_' + fb.status) + '</span>' +
+        '</div>' +
+        '<p class="text-xs text-slate-600 mb-2 line-clamp-3">' + (fb.content || '').replace(/</g, '&lt;') + '</p>' +
+        '<div class="flex items-center justify-between">' +
+          '<span class="text-xs">' + stars + '</span>' +
+          '<div class="flex gap-1">' +
+            (fb.status !== 'read' ? '<button onclick="adminFbStatus(\'' + fb.id + '\',\'read\')" class="px-2 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-black active:scale-95">' + t('feedback_mark_read') + '</button>' : '') +
+            (fb.status !== 'replied' ? '<button onclick="adminFbStatus(\'' + fb.id + '\',\'replied\')" class="px-2 py-1 rounded-lg bg-green-50 text-green-600 text-[10px] font-black active:scale-95">' + t('feedback_mark_replied') + '</button>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+
+    // Pagination
+    if (totalPages > 1) {
+      html += '<div class="flex items-center justify-center gap-1 mt-4">';
+      if (_adminFbPage > 1) html += '<button onclick="adminFbGoPage(' + (_adminFbPage - 1) + ')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-xs font-black text-slate-500">«</button>';
+      for (var p = 1; p <= totalPages; p++) {
+        var cls = p === _adminFbPage ? 'bg-[#D4AF37] text-white border-[#D4AF37]' : 'bg-white text-slate-600 border-slate-200';
+        html += '<button onclick="adminFbGoPage(' + p + ')" class="w-8 h-8 rounded-lg border text-xs font-black ' + cls + '">' + p + '</button>';
+      }
+      if (_adminFbPage < totalPages) html += '<button onclick="adminFbGoPage(' + (_adminFbPage + 1) + ')" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-xs font-black text-slate-500">»</button>';
+      html += '</div>';
+      html += '<p class="text-center text-[10px] text-slate-300 font-bold mt-1">' + _adminFbPage + ' / ' + totalPages + '</p>';
+    }
+
+    container.innerHTML = html;
+  } catch(e) {
+    handleSupabaseError(e, 'Admin Feedback');
+    container.innerHTML = '<p class="text-center text-red-400 text-xs py-8">' + t('admin_load_fail') + '</p>';
+  }
+}
+
+function adminFbGoPage(page) {
+  _adminFbPage = page;
+  renderAdminFeedback();
+}
+
+async function adminFbStatus(id, status) {
+  try {
+    await sbUpdateFeedback(id, { status: status });
+    renderAdminFeedback();
+  } catch(e) { handleSupabaseError(e, 'Feedback Status Update'); }
 }
 

@@ -259,7 +259,7 @@ async function handleLogin() {
   localStorage.setItem('dentalk_profile_' + lic, JSON.stringify(sync));
   sessionEnd = Date.now() + 365*24*60*60*1000;
   extShown   = false;
-  localStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
+  sessionStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
   var licDisp = document.getElementById('licenseDisplay');
   if (licDisp) licDisp.textContent = currentUser.nickname;
   var sideNick = document.getElementById('sideNickname');
@@ -314,12 +314,12 @@ function tickSession() {
 function extendSession() {
   sessionEnd = Date.now() + 30*60*1000;
   extShown   = false;
-  localStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
+  sessionStorage.setItem('dentalk_session', JSON.stringify({ user: currentUser, sessionEnd: sessionEnd }));
   closeModal('extendModal');
 }
 function forceLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
-  localStorage.removeItem('dentalk_session');
+  sessionStorage.removeItem('dentalk_session');
   document.body.classList.remove('is-admin');
   currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
   document.getElementById('sideLoginArea').classList.remove('hidden');
@@ -339,7 +339,7 @@ function forceLogout() {
 }
 function doLogout() {
   clearInterval(sessionTimer); sessionTimer=null; sessionEnd=null; extShown=false;
-  localStorage.removeItem('dentalk_session');
+  sessionStorage.removeItem('dentalk_session');
   currentUser = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
   cart=[]; updateBadge();
   document.getElementById('sideLoginArea').classList.remove('hidden');

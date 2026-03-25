@@ -2205,6 +2205,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_events">📅 Events</button>
           <button onclick="adminShowTab('ads')" id="adminTabBtn-ads" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_ads">📢 광고 관리</button>
           <button onclick="adminShowTab('stats')" id="adminTabBtn-stats" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_stats">📊 통계</button>
+          <button onclick="adminShowTab('feedback')" id="adminTabBtn-feedback" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_feedback">💬 피드백</button>
         </div>
         <!-- 탭 콘텐츠 -->
         <div id="adminTabOrders" class="space-y-4"></div>
@@ -2218,6 +2219,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="adminTabEvents" class="hidden"></div>
         <div id="adminTabAds" class="hidden"></div>
         <div id="adminTabStats" class="hidden"></div>
+        <div id="adminTabFeedback" class="hidden"></div>
       </div>
     </div>
     <!-- ==================== SETTINGS ==================== -->
@@ -2307,6 +2309,17 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <div id="settingsMyUsed" class="grid grid-cols-3 gap-2"></div>
       </div>
+      <!-- 피드백 보내기 버튼 -->
+      <button onclick="goPage('feedback')" class="w-full bg-white rounded-2xl p-5 shadow-sm active:scale-[.98] transition text-left">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">💬</span>
+          <div class="flex-1">
+            <p class="font-black text-slate-800 text-sm" data-i18n="feedback_send_btn">Send Feedback</p>
+            <p class="text-slate-400 text-[10px] font-bold" data-i18n="feedback_send_desc">Bug reports, suggestions, complaints, praise</p>
+          </div>
+          <span class="text-slate-300 text-lg">›</span>
+        </div>
+      </button>
       <!-- LINE 친구 추가 버튼 -->
       <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
         class="block rounded-2xl p-4 shadow-sm active:scale-[.98] transition"
@@ -2319,6 +2332,42 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           </div>
         </div>
       </a>
+    </div>
+    <!-- ==================== FEEDBACK PAGE ==================== -->
+    <div id="page-feedback" class="page p-4 space-y-4">
+      <div class="flex items-center gap-2 mb-2">
+        <button onclick="goPage('settings')" class="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400 active:bg-slate-50">←</button>
+        <span class="text-xl">💬</span>
+        <h2 class="font-black text-slate-800 text-base" data-i18n="feedback_title">Send Feedback</h2>
+      </div>
+      <!-- 카테고리 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_category">Category</label>
+        <div id="feedbackCatBar" class="grid grid-cols-5 gap-1.5"></div>
+      </div>
+      <!-- 제목 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_title_label">Title</label>
+        <input id="fbTitle" type="text" maxlength="100" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none" data-i18n-ph="feedback_title_ph">
+      </div>
+      <!-- 내용 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_content_label">Content</label>
+        <textarea id="fbContent" rows="5" maxlength="2000" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none resize-none" data-i18n-ph="feedback_content_ph"></textarea>
+      </div>
+      <!-- 별점 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_rating_label">Rating</label>
+        <div id="fbStars" class="flex gap-2">
+          <button onclick="setFbRating(1)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(2)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(3)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(4)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(5)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+        </div>
+      </div>
+      <!-- 제출 -->
+      <button onclick="submitFeedback()" class="w-full py-3.5 rounded-2xl font-black text-white text-sm bg-gradient-to-r from-[#0a3072] to-[#0d3880] active:scale-[.98] transition shadow-lg" data-i18n="feedback_submit">Submit Feedback</button>
     </div>
     <!-- ==================== MY ACTIVITY PAGE ==================== -->
     <div id="page-myactivity" class="page p-4">

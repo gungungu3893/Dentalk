@@ -483,6 +483,7 @@ function goPage(id) {
   if (id === 'custom')   { customTab('form'); resetCustomForm(); }
   if (id === 'factory')  renderAdminPanel();
   if (id === 'settings') renderProfileSettings();
+  if (id === 'feedback') renderFeedbackForm();
   renderDesktopSidebar(id);
   updateDesktopHero(id);
   applyLang();
@@ -1735,6 +1736,87 @@ async function goEventsPage(page) {
 }
 
 // ============================================================
+// 피드백 폼
+// ============================================================
+var _fbCategory = 'other';
+var _fbRating = 5;
+
+var FB_CATEGORIES = [
+  { key: 'bug',       icon: '🐛', labelKey: 'feedback_cat_bug' },
+  { key: 'feature',   icon: '💡', labelKey: 'feedback_cat_feature' },
+  { key: 'complaint', icon: '😤', labelKey: 'feedback_cat_complaint' },
+  { key: 'praise',    icon: '👍', labelKey: 'feedback_cat_praise' },
+  { key: 'other',     icon: '📝', labelKey: 'feedback_cat_other' },
+];
+
+function renderFeedbackForm() {
+  // 카테고리 바
+  var catBar = document.getElementById('feedbackCatBar');
+  if (catBar) {
+    catBar.innerHTML = FB_CATEGORIES.map(function(c) {
+      var active = _fbCategory === c.key;
+      return '<button onclick="_fbSelectCat(\'' + c.key + '\')" class="flex flex-col items-center py-2 rounded-xl text-center transition ' +
+        (active ? 'bg-[#D4AF37] text-white shadow' : 'bg-white text-slate-500 border border-slate-200') + '">' +
+        '<span class="text-lg mb-0.5">' + c.icon + '</span>' +
+        '<span class="text-[9px] font-black leading-tight">' + t(c.labelKey) + '</span></button>';
+    }).join('');
+  }
+  // 별점
+  setFbRating(_fbRating);
+}
+
+function _fbSelectCat(key) {
+  _fbCategory = key;
+  renderFeedbackForm();
+}
+
+function setFbRating(n) {
+  _fbRating = n;
+  var stars = document.querySelectorAll('#fbStars .fb-star');
+  for (var i = 0; i < stars.length; i++) {
+    stars[i].style.opacity = i < n ? '1' : '0.3';
+  }
+}
+
+async function submitFeedback() {
+  if (!isLoggedIn()) { openLoginModal('feedback'); return; }
+  var title = document.getElementById('fbTitle').value.trim();
+  var content = document.getElementById('fbContent').value.trim();
+  if (!title) { showToast(t('feedback_title_required'), 'warning'); return; }
+  if (!content) { showToast(t('feedback_content_required'), 'warning'); return; }
+  try {
+    await sbSaveFeedback({
+      user_nickname: currentUser.nickname,
+      category: _fbCategory,
+      title: title,
+      content: content,
+      rating: _fbRating,
+    });
+    // LINE 알림 — 관리자에게 알림
+    if (LINE_PROXY_URL && LINE_USER_ID) {
+      try {
+        fetch(LINE_PROXY_URL + '/push', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: '💬 새 피드백: [' + _fbCategory + '] ' + title + ' (' + currentUser.nickname + ')' }] })
+        });
+      } catch(e) { /* ignore */ }
+    }
+    // 폼 초기화
+    document.getElementById('fbTitle').value = '';
+    document.getElementById('fbContent').value = '';
+    _fbCategory = 'other';
+    _fbRating = 5;
+    renderFeedbackForm();
+    showToast(t('feedback_submit_success'), 'success');
+    goPage('settings');
+  } catch(e) {
+    handleSupabaseError(e, 'Feedback Submit');
+    showToast(t('feedback_submit_error'), 'error');
+  }
+}
+
+// ============================================================
 // 초기화
 // ============================================================
 // ★ 동적 스크립트(async=false)는 DOMContentLoaded를 차단하지 않으므로
@@ -1748,7 +1830,7 @@ function _initApp() {
   updateNavTabs('home');
 
   // 페이지 로드 시 세션 복원 시도
-  var savedSession = localStorage.getItem('dentalk_session');
+  var savedSession = sessionStorage.getItem('dentalk_session');
   if (savedSession) {
     try {
       var sess = JSON.parse(savedSession);
@@ -1778,10 +1860,10 @@ function _initApp() {
         updateMsgBadge();
         loadOrdersFromSupabase().then(function() { renderProfileSettings(); });
       } else {
-        localStorage.removeItem('dentalk_session');
+        sessionStorage.removeItem('dentalk_session');
       }
     } catch(e) {
-      localStorage.removeItem('dentalk_session');
+      sessionStorage.removeItem('dentalk_session');
     }
   }
 

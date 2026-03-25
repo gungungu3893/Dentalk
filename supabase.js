@@ -583,6 +583,38 @@ async function sbBannerImpression(id) {
 }
 
 // ============================================================
+// Feedback (피드백) — feedback 테이블
+// ============================================================
+
+async function sbSaveFeedback(fb) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/feedback', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      user_nickname: fb.user_nickname,
+      category:      fb.category || 'other',
+      title:         fb.title,
+      content:       fb.content || '',
+      rating:        fb.rating  || 5,
+      status:        'unread',
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveFeedback] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbGetFeedback(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('feedback', 'select=id,user_nickname,category,title,content,rating,status,admin_note,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbUpdateFeedback(id, updates) {
+  return sbPatch('feedback', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+// ============================================================
 // 통합 검색 — 여러 테이블 동시 검색
 // ============================================================
 
