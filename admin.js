@@ -1421,18 +1421,19 @@ var _creditChargeTarget = '';
 var _creditChargeCurrentAmount = 0;
 
 function openCreditChargeModal(nickname, currentCredits) {
+  console.log('modal opening', nickname, currentCredits);
   _creditChargeTarget = nickname;
   _creditChargeCurrentAmount = currentCredits || 0;
   var modal = document.getElementById('creditChargeModal');
-  if (!modal) return;
+  if (!modal) { console.error('creditChargeModal not found'); return; }
   document.getElementById('ccm-nickname').textContent = nickname;
   document.getElementById('ccm-current').textContent = _creditChargeCurrentAmount + ' ' + t('credit_unit');
-  modal.style.display = 'flex';
+  modal.classList.add('open');
 }
 
 function closeCreditChargeModal() {
   var modal = document.getElementById('creditChargeModal');
-  if (modal) modal.style.display = '';
+  if (modal) modal.classList.remove('open');
 }
 
 async function chargeCredits(amount) {
