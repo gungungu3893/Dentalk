@@ -134,10 +134,10 @@ Dentalk/
 
 ### Git Rules
 - Git 저장소: https://github.com/gungungu3893/Dentalk
-- 작업 브랜치: claude/admin-supabase-integration-6hSL5
-- 모든 작업은 반드시 claude/admin-supabase-integration-6hSL5 브랜치에서만 진행하고 푸시한다.
+- 작업 브랜치: claude/admin-supabase-integration-icvNm
+- 모든 작업은 반드시 claude/admin-supabase-integration-icvNm 브랜치에서만 진행하고 푸시한다.
 - 새로운 브랜치를 만들거나 다른 브랜치로 전환하지 마라.
-- git push는 항상 origin claude/admin-supabase-integration-6hSL5 로만 한다.
+- git push는 항상 origin claude/admin-supabase-integration-icvNm 로만 한다.
 
 ### General Rules
 - README.md는 절대 수정하지 않는다.
