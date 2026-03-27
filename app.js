@@ -1251,8 +1251,8 @@ function saveLang() {
   pendingLang = null;
   localStorage.setItem('dentalk_lang', currentLang);
   // Supabase licenses 테이블에 lang 업데이트
-  if (typeof currentUser !== 'undefined' && currentUser && currentUser.license_number) {
-    sbPatch('licenses', 'license_number=eq.' + encodeURIComponent(currentUser.license_number), { lang: currentLang }).catch(function(e) { console.error('[saveLang] Supabase update failed', e); });
+  if (typeof currentUser !== 'undefined' && currentUser && currentUser.licenseNum) {
+    sbPatch('licenses', 'license_number=eq.' + encodeURIComponent(currentUser.licenseNum), { lang: currentLang }).catch(function(e) { console.error('[saveLang] Supabase update failed', e); });
   }
   // 저장된 언어 버튼 스타일 업데이트
   ['en','ko','zh','th','vi','es','tr','ar','fa'].forEach(function(l){
