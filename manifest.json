@@ -1,13 +1,18 @@
 {
-  "name": "Dentalk · BIOTEM × BIOPLANT",
+  "name": "Dentalk — BIOTEM × BIOPLANT Digital Dental Supply",
   "short_name": "Dentalk",
-  "description": "BIOTEM × BIOPLANT Dental Supply & CNC Custom Orders",
+  "description": "Premium digital dental implant parts ordering system for clinics in Thailand. CNC custom abutments, clinical discussion, webzine, and more.",
+  "description_th": "ระบบสั่งซื้อชิ้นส่วนรากฟันเทียมดิจิทัลสำหรับคลินิกทันตกรรมในประเทศไทย",
   "start_url": "./",
-  "display": "standalone",
+  "id": "/",
+  "scope": "/",
+  "display": "browser",
   "background_color": "#001220",
   "theme_color": "#001d4a",
   "orientation": "portrait",
-  "lang": "ko",
+  "lang": "th",
+  "dir": "ltr",
+  "categories": ["medical", "shopping", "business"],
   "icons": [
     {
       "src": "icon-192.png",
@@ -27,5 +32,7 @@
       "type": "image/svg+xml",
       "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }

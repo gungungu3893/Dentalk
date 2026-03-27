@@ -1,32 +1,63 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="th">
 <head>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());gtag('config','G-XXXXXXXXXX',{send_page_view:false});
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dentalk</title>
+<title>Dentalk — BIOTEM × BIOPLANT | Digital Dental Implant Parts Thailand</title>
+<!-- SEO Meta Tags -->
+<meta name="description" content="Dentalk by BIOTEM × BIOPLANT — Premium digital dental implant parts ordering system for clinics in Thailand. CNC custom abutments, scan bodies, ti-bases, and more.">
+<meta name="keywords" content="dental implant, Thailand, BIOTEM, BIOPLANT, CNC custom abutment, scan body, ti-base, dental supply, Bangkok, ทันตกรรม, รากฟันเทียม, อะบัทเมนท์, สแกนบอดี, ชิ้นส่วนทันตกรรม">
+<meta name="description" lang="th" content="Dentalk โดย BIOTEM × BIOPLANT — ระบบสั่งซื้อชิ้นส่วนรากฟันเทียมดิจิทัลสำหรับคลินิกทันตกรรมในประเทศไทย อะบัทเมนท์ CNC สแกนบอดี ไท-เบส และอื่นๆ">
+<meta name="author" content="BIOTEM × BIOPLANT">
+<meta name="robots" content="index, follow">
+<meta name="format-detection" content="telephone=no">
+<link rel="canonical" href="https://dentalk.co.th/">
+<!-- JSON-LD Structured Data: Organization -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"BIOTEM × BIOPLANT","alternateName":"Dentalk","url":"https://dentalk.co.th/","logo":"https://dentalk.co.th/icon-512.png","description":"Premium digital dental implant parts ordering system for clinics in Thailand","contactPoint":{"@type":"ContactPoint","contactType":"customer service","availableLanguage":["Thai","English","Korean"]},"sameAs":[]}
+</script>
+<!-- JSON-LD Structured Data: WebApplication -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Dentalk","alternateName":"เดนทอล์ค","description":"Premium digital dental implant parts ordering system for clinics in Thailand","url":"https://dentalk.co.th/","applicationCategory":"BusinessApplication","operatingSystem":"Web","author":{"@type":"Organization","name":"BIOTEM × BIOPLANT","url":"https://dentalk.co.th/"},"offers":{"@type":"AggregateOffer","priceCurrency":"THB","availability":"https://schema.org/InStock"},"inLanguage":["th","en","ko"]}
+</script>
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dentalk — Digital Dental Implant Parts">
+<meta property="og:description" content="Premium BIOTEM implant components delivered to dental clinics across Thailand. Order scan bodies, custom abutments, and more.">
+<meta property="og:image" content="https://dentalk.co.th/icon-512.png">
+<meta property="og:url" content="https://dentalk.co.th/">
+<meta property="og:site_name" content="Dentalk">
+<meta property="og:locale" content="th_TH">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dentalk — BIOTEM × BIOPLANT">
+<meta name="twitter:description" content="Premium digital dental implant parts ordering system for Thailand clinics.">
+<meta name="twitter:image" content="https://dentalk.co.th/icon-512.png">
+<!-- PWA Meta Tags -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#001d4a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Dentalk">
+<meta name="application-name" content="Dentalk">
+<meta name="msapplication-TileColor" content="#001d4a">
+<meta name="msapplication-TileImage" content="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<!-- Capture beforeinstallprompt BEFORE defer scripts load -->
-<script>
-window._pwaInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  window._pwaInstallPrompt = e;
-});
-window.addEventListener('appinstalled', function() {
-  window._pwaInstallPrompt = null;
-});
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;600;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Thai:wght@400;600;700;900&display=swap" rel="stylesheet"></noscript>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 /* ============================================================
@@ -73,7 +104,7 @@ window.addEventListener('appinstalled', function() {
   --color-nav-bg:          var(--color-primary-dark);
   --color-nav-active-bg:   rgba(255, 255, 255, 0.12);
   --color-nav-active-text: var(--color-accent);
-  --color-nav-inactive:    rgba(255, 255, 255, 0.45);
+  --color-nav-inactive:    rgba(255, 255, 255, 0.8);
 
   /* --- Dropdown --- */
   --color-dropdown-bg:     #0a1e3d;
@@ -135,6 +166,153 @@ window.addEventListener('appinstalled', function() {
 
 * { -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font-sans); }
+
+/* ============================================================
+   COLOR CONTRAST FIX — WCAG AA (4.5:1 minimum)
+   ============================================================ */
+/* Remap low-contrast Tailwind text colors to readable values */
+/* slate-200 (#e2e8f0) on white = 1.4:1 → upgrade to slate-500 */
+.text-slate-200 { color: #64748b !important; }
+/* slate-300 (#cbd5e1) on white = 1.8:1 → upgrade to slate-500 */
+.text-slate-300 { color: #64748b !important; }
+/* slate-400 (#94a3b8) on white = 3.0:1 → upgrade to slate-500 */
+.text-slate-400 { color: #64748b !important; }
+/* Placeholder text: too faint → make readable */
+::placeholder { color: #94a3b8 !important; opacity: 1; }
+.placeholder\:text-slate-300::placeholder,
+.placeholder\:text-white\/40::placeholder { color: #94a3b8 !important; }
+/* White-on-dark text with low alpha → boost */
+.text-white\/40 { color: rgba(255,255,255,0.65) !important; }
+.text-white\/30 { color: rgba(255,255,255,0.55) !important; }
+/* Hero banner sub-text: boost contrast on dark navy bg */
+[style*="color:rgba(191,219,254,0.62)"] { color: rgba(191,219,254,0.85) !important; }
+[style*="color:rgba(216,180,254,0.62)"] { color: rgba(216,180,254,0.85) !important; }
+[style*="color:rgba(255,255,255,0.28)"] { color: rgba(255,255,255,0.55) !important; }
+[style*="color:rgba(255,255,255,0.45)"] { color: rgba(255,255,255,0.7) !important; }
+[style*="color:rgba(255,255,255,0.55)"] { color: rgba(255,255,255,0.75) !important; }
+[style*="color:rgba(255,255,255,0.35)"] { color: rgba(255,255,255,0.6) !important; }
+/* Side menu / header dim text */
+[style*="color:rgba(180,205,255,0.9)"] { color: rgba(200,220,255,1) !important; }
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+body.dark { background: #0f172a; color: #e2e8f0; }
+body.dark .bg-slate-100 { background: #0f172a !important; }
+body.dark .bg-white,
+body.dark .bg-slate-50 { background: #1e293b !important; }
+body.dark .text-slate-900,
+body.dark .text-slate-800 { color: #e2e8f0 !important; }
+body.dark .text-slate-700 { color: #cbd5e1 !important; }
+body.dark .text-slate-600 { color: #94a3b8 !important; }
+body.dark .text-slate-500 { color: #94a3b8 !important; }
+body.dark .border-slate-100,
+body.dark .border-slate-200 { border-color: #334155 !important; }
+body.dark input, body.dark textarea, body.dark select {
+  background: #334155 !important; border-color: #475569 !important; color: #e2e8f0 !important;
+}
+body.dark input::placeholder, body.dark textarea::placeholder {
+  color: #64748b !important;
+}
+body.dark .modal > div,
+body.dark .bg-white.rounded-3xl { background: #1e293b !important; }
+body.dark .shadow-sm, body.dark .shadow-md { box-shadow: 0 1px 4px rgba(0,0,0,0.4) !important; }
+body.dark .bg-gradient-to-br.from-\[\#001d4a\] { background: linear-gradient(to bottom right,#0f172a,#1e3a5f) !important; }
+body.dark #siteFooter { background: #020617; }
+body.dark .sidebar-card { background: #1e293b !important; box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important; }
+body.dark .sidebar-mini-item { border-color: #334155; }
+body.dark .sidebar-mini-item .smi-title { color: #e2e8f0; }
+
+/* Dark mode toggle switch */
+.dm-switch { position:relative; width:48px; height:26px; cursor:pointer; }
+.dm-switch input { display:none; }
+.dm-switch .dm-track { position:absolute; inset:0; background:#cbd5e1; border-radius:13px; transition:background .2s; }
+.dm-switch input:checked + .dm-track { background:#D4AF37; }
+.dm-switch .dm-thumb {
+  position:absolute; top:2px; left:2px; width:22px; height:22px; background:#fff;
+  border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.dm-switch input:checked ~ .dm-thumb { transform:translateX(22px); }
+
+/* ============================================================
+   SCROLL REVEAL ANIMATION
+   ============================================================ */
+@keyframes scrollReveal {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.scroll-reveal.revealed {
+  animation: scrollReveal 0.5s ease forwards;
+}
+.scroll-reveal.delay-1 { animation-delay: 0.08s; }
+.scroll-reveal.delay-2 { animation-delay: 0.16s; }
+.scroll-reveal.delay-3 { animation-delay: 0.24s; }
+
+/* ============================================================
+   LOADING ANIMATION — Implant fixture spinner
+   ============================================================ */
+@keyframes fixtureSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.dt-loader {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 16px; gap: 12px;
+}
+.dt-loader svg { animation: fixtureSpin 1.5s linear infinite; }
+.dt-loader-text { font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; }
+
+/* ============================================================
+   BUTTON & CARD INTERACTION EFFECTS
+   ============================================================ */
+button, [role="button"], a.block { transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease; }
+button:hover, [role="button"]:hover { filter: brightness(1.08); }
+button:active, [role="button"]:active { transform: scale(0.97); }
+.bg-white.rounded-2xl, .bg-white.rounded-xl {
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+.bg-white.rounded-2xl:hover, .bg-white.rounded-xl:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* ============================================================
+   SITE FOOTER
+   ============================================================ */
+#siteFooter {
+  background: #001d4a;
+  color: rgba(255,255,255,0.8);
+  padding: 40px 24px 20px;
+}
+#siteFooter a { color: rgba(255,255,255,0.7); text-decoration: none; transition: color 0.15s; }
+#siteFooter a:hover { color: #D4AF37; }
+#siteFooter .footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto 24px;
+}
+#siteFooter .footer-heading {
+  font-size: 12px; font-weight: 900; color: #D4AF37;
+  text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;
+}
+#siteFooter .footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 16px;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+}
+@media (max-width: 768px) {
+  #siteFooter .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+  #siteFooter { padding: 32px 16px 16px; }
+}
+
 /* 태국어 모드: Noto Sans Thai 우선, 영문/숫자는 Inter로 자동 폴백 */
 html[lang="th"] body,
 html[lang="th"] input,
@@ -143,6 +321,9 @@ html[lang="th"] select,
 html[lang="th"] button {
   font-family: 'Noto Sans Thai', 'Inter', sans-serif;
 }
+/* ── Sticky footer: 콘텐츠가 적어도 푸터가 항상 화면 하단에 위치 ── */
+#desktopMain { display: flex; flex-direction: column; min-height: calc(100vh - 120px); }
+#siteFooter { margin-top: auto; }
 .page { display: none; }
 .page.active { display: block; }
 .modal { display: none !important; }
@@ -177,30 +358,562 @@ input[type=number] { -moz-appearance:textfield; }
 .nav-drop-item .sub-desc { font-size:9px; font-weight:var(--font-weight-semibold); color:var(--color-text-on-dark-dim); }
 .nav-lock { position:absolute; top:2px; right:2px; font-size:8px; opacity:0.65; pointer-events:none; }
 #headerNickBadge { display:none; }
-#headerNickBadge.show { display:flex; }
+#headerNickBadge.show { display:flex; flex-direction:column; }
 #headerLoginBtn { display:flex; }
 #headerLoginBtn.hide { display:none; }
+#headerLogoutBtn.show { display:flex; flex-direction:column; }
 #adminPanel { display:none !important; }
 body.is-admin #adminPanel { display:block !important; }
 body.is-admin #factoryPromoHeader { display:none !important; }
+
+/* ============================================================
+   MOBILE HEADER — ≤768px: compact header + icon-only nav
+   ============================================================ */
+@media (max-width: 768px) {
+  /* ── Header: tight layout ── */
+  header.text-white {
+    padding: 6px 10px;
+    gap: 4px;
+  }
+  /* Logo: small on mobile */
+  header .flex-1 > div[onclick] {
+    font-size: 20px !important;
+    letter-spacing: -0.8px !important;
+  }
+  /* Hide BIOTEM subtitle */
+  header .flex-1 > div[onclick] span[style*="font-size:9px"],
+  header .flex-1 > div[onclick] span[style*="font-size:8px"] {
+    display: none !important;
+  }
+  /* Hide timer wrap on mobile */
+  #timerWrap { display: none !important; }
+  /* Hide install button on mobile */
+  #installBtn { display: none !important; }
+  /* Header icon buttons: compact, hide text labels */
+  .header-icon-btn {
+    padding: 4px !important;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  .header-icon-label { display: none !important; }
+
+  /* ── Nav tabs: keep icon + text ── */
+  #navTabBar .nav-tab {
+    min-width: 44px;
+    padding: 6px 5px;
+    gap: 1px;
+  }
+  #navTabBar .nav-tab span.text-base { font-size: 16px; }
+  #navTabBar .nav-tab span[data-i18n] { font-size: 8px; display: block; }
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE — 375px ~ 480px
+   ============================================================ */
+@media (max-width: 480px) {
+  /* ── 1) HEADER: extra compact on small screens ── */
+  header.text-white { padding: 5px 8px; gap: 3px; }
+  header .flex-1 > div[onclick] { font-size: 18px !important; }
+  .header-icon-btn {
+    min-width: 28px !important; min-height: 28px !important;
+    padding: 3px !important;
+  }
+
+  /* ── 2) NAV TABS ── */
+  #navTabBar .nav-tab { min-width: 38px; padding: 5px 4px; }
+  #navTabBar .nav-tab span[data-i18n] { font-size: 7px; }
+
+  /* ── 3) HERO BANNER: fit text, larger CTA ── */
+  #page-home .shrink-0.w-full[style*="padding"] {
+    padding: 24px 16px 44px !important;
+  }
+  #page-home h1[style*="font-size:27px"] {
+    font-size: 22px !important;
+    letter-spacing: -0.5px !important;
+  }
+  #page-home .shrink-0.w-full button[style*="touch-action"] {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  /* ── 4) CATEGORY GRID: ensure 2-col ── */
+  #homeCategories { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+  /* ── 5) SHOP PRODUCT DETAIL: spec table scroll, bigger qty btns ── */
+  #shopProductTable { margin: 0 -12px; padding: 0 12px; }
+  #shopProductTable .qty-input {
+    width: 40px !important;
+    height: 36px !important;
+    font-size: 14px !important;
+  }
+  /* Quantity +/- buttons – enlarge for touch */
+  #shopProductTable button[onclick*="stepQ"],
+  #orderTable button[onclick*="stepQ"] {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 16px !important;
+  }
+
+  /* ── 6) CUSTOM WIZARD: tooth buttons, step bar ── */
+  /* Tooth diagram buttons */
+  #wizToothChart button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 11px !important;
+    border-radius: 10px;
+  }
+  /* Step bar */
+  #wizStepBar > div { gap: 2px; }
+  #wizStepBar .flex-col { min-width: 1.8rem !important; }
+  #wizStepBar .flex-col > div:first-child {
+    width: 28px !important; height: 28px !important;
+  }
+
+  /* ── 7) FORUM: gallery images full-width ── */
+  #fdp-gallery .overflow-hidden { height: 200px; }
+  #fdp-galleryTrack img { width: 100%; height: 100%; object-fit: cover; }
+  /* Gallery nav arrows */
+  #fdp-galleryPrev, #fdp-galleryNext {
+    width: 44px !important; height: 44px !important;
+    font-size: 20px;
+  }
+
+  /* ── 8) FLOATING CART BAR: safe area + no overlap ── */
+  #floatingCartBar {
+    bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  #floatingCartBar > div { padding-bottom: 12px; }
+
+  /* ── 9) MODALS: full-width, scrollable, no overflow ── */
+  .modal > div {
+    max-width: calc(100vw - 24px) !important;
+    max-height: 92vh !important;
+  }
+  /* Bottom-sheet modals */
+  .modal[class*="items-end"] > div {
+    max-width: 100% !important;
+    max-height: 90vh !important;
+  }
+  /* Login/Register modal inner scroll */
+  #loginModal > div,
+  #registerModal > div,
+  #cartModal > div,
+  #addressModal > div,
+  #profileEditModal > div,
+  #composeModal > div {
+    max-height: 90vh !important;
+    overflow-y: auto;
+  }
+
+  /* ── 10) FONT SIZES: minimum legible sizes ── */
+  /* Upgrade very small fonts */
+  .text-\[8px\] { font-size: 10px !important; }
+  .text-\[9px\] { font-size: 11px !important; }
+  .text-\[10px\] { font-size: 11px !important; }
+
+  /* ── 11) TOUCH TARGETS: min 44px tap area ── */
+  /* Generic small buttons that need bigger tap areas */
+  button, a[role="button"], [onclick] {
+    min-height: 32px;
+  }
+  /* Navigation dropdown items */
+  .nav-drop-item {
+    padding: 12px 14px !important;
+    min-height: 44px;
+  }
+
+  /* Side menu buttons */
+  .menu-btn {
+    min-height: 48px;
+    padding: 12px 16px !important;
+  }
+
+  /* Wizard nav buttons */
+  #wizNav button {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  /* Shade grid buttons */
+  #wizShadeGrid button {
+    min-height: 44px;
+  }
+
+  /* Brand grid buttons */
+  #wizBrandGrid button {
+    min-height: 48px;
+    font-size: 13px !important;
+  }
+
+  /* Review stars bigger touch target */
+  .review-star { font-size: 28px !important; padding: 4px; }
+
+  /* Shop category cards — premium hover lift + gold accent */
+  .shop-cat-card { box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: all 0.25s cubic-bezier(.4,0,.2,1); }
+  .shop-cat-card:hover { box-shadow: 0 8px 28px rgba(0,18,32,0.12), 0 2px 8px rgba(212,175,55,0.15); transform: translateY(-3px); border-color: #D4AF37 !important; }
+  .shop-cat-card:active { box-shadow: 0 2px 12px rgba(0,18,32,0.1); transform: translateY(-1px); }
+  /* Dark mode: darken light category cards */
+  body.dark .shop-cat-card { background: #1e293b !important; border-color: #334155 !important; border-bottom-color: #D4AF37 !important; }
+  body.dark .shop-cat-card:hover { border-color: #D4AF37 !important; box-shadow: 0 8px 28px rgba(0,0,0,0.3), 0 2px 8px rgba(212,175,55,0.2); }
+
+  /* Forum region/province bar buttons */
+  #forumRegionBar button,
+  #forumProvinceBar button {
+    min-height: 34px;
+  }
+  #jobTypeBar button,
+  #jobRegionBar button {
+    min-height: 36px;
+    padding: 8px 12px;
+  }
+
+  /* Used market grid: 2 cols instead of 5 on mobile */
+  #usedList { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+
+  /* Webzine grid: 2 cols on mobile */
+  #homeWebzinePreview { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Comment input row */
+  #commentInput { min-height: 44px; }
+  #commentInput + button { min-height: 44px; }
+
+  /* Language selector grid */
+  .grid-cols-3 button[onclick*="selectLang"] {
+    min-height: 64px;
+    font-size: 12px;
+  }
+
+  /* Settings profile edit button */
+  button[onclick*="toggleProfileEdit"] { min-height: 44px; }
+
+  /* Admin summary cards */
+  #adminSummaryCards { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Ultra-small screens (320-374px) */
+@media (max-width: 374px) {
+  header .flex-1 > div[onclick] { font-size: 17px !important; }
+  #homeCategories { grid-template-columns: 1fr; }
+  #usedList { grid-template-columns: 1fr !important; }
+  #wizToothChart button {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 10px !important;
+  }
+  #wizToothChart .flex { gap: 2px !important; }
+}
+
+/* ============================================================
+   DESKTOP 2-COLUMN LAYOUT — ≥1024px (full-width style)
+   ============================================================ */
+@media (min-width: 1024px) {
+  /* ── Header/Nav: full width, no max-width constraint ── */
+  .sticky.top-0.z-\[200\] header {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .sticky.top-0.z-\[200\] nav#navTabBar > div {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  /* ── 2-column layout wrapper: full width ── */
+  #desktopLayout {
+    display: flex;
+    gap: 28px;
+    padding: 0 32px;
+    align-items: flex-start;
+  }
+  #desktopMain {
+    flex: 1;
+    min-width: 0;
+  }
+  #desktopSidebar {
+    display: block !important;
+    width: 350px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 110px;
+    max-height: calc(100vh - 130px);
+    overflow-y: auto;
+    padding-top: 8px;
+  }
+  #desktopSidebar::-webkit-scrollbar { display: none; }
+  #desktopSidebar { scrollbar-width: none; }
+
+  /* ── Home hero: full width ── */
+  #homeHeroFull {
+    display: block !important;
+  }
+
+  /* ── Home grids: expand on desktop ── */
+  #homeCategories { grid-template-columns: repeat(3, 1fr) !important; }
+  #homeWebzinePreview { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* ── Used market: 4-col on desktop ── */
+  #usedList { grid-template-columns: repeat(4, 1fr) !important; }
+
+  /* ── Webzine: 3-col ── */
+  #webzineList { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* ── Forum detail gallery taller ── */
+  #fdp-gallery .overflow-hidden { height: 360px; }
+
+  /* ── Shop product detail: wider spec table ── */
+  #shopProductTable { max-width: 100%; }
+
+  /* ── Post list / event cards: roomier ── */
+  #postList .bg-white,
+  #eventList .bg-white,
+  #jobsList .bg-white { padding: 20px; }
+
+  /* ── Admin summary: 3-col ── */
+  #adminSummaryCards { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* ── Desktop base font size ── */
+  body { font-size: 16px; }
+
+  /* ── Logo: 40% larger on desktop ── */
+  header .flex-1 > div[onclick] {
+    font-size: 40px !important;
+    letter-spacing: -1.8px !important;
+  }
+  header .flex-1 > div[onclick] span[style*="font-size:9px"] {
+    font-size: 11px !important;
+    margin-left: 10px !important;
+  }
+
+  /* ── Desktop font size bump ── */
+  /* Headings */
+  h1, .text-xl { font-size: 24px !important; }
+  h2, .text-lg { font-size: 20px !important; }
+  .text-base { font-size: 17px !important; }
+  /* Body / descriptions */
+  .text-sm { font-size: 15px !important; }
+  .text-xs { font-size: 14px !important; }
+  /* Tiny text floor: minimum 11px */
+  .text-\[8px\] { font-size: 11px !important; }
+  .text-\[9px\] { font-size: 12px !important; }
+  .text-\[10px\] { font-size: 13px !important; }
+  .text-\[11px\] { font-size: 14px !important; }
+
+  /* ── Card padding: roomier ── */
+  #homeCategories .bg-white,
+  #homeCategories > div { padding: 16px !important; }
+  #postList > div { padding: 20px; }
+  #eventList > div { padding: 20px; }
+  #jobsList > div { padding: 20px; }
+  .bg-white.rounded-2xl { padding: 20px; }
+}
+
+/* ── Extra-wide screens ≥1440px ── */
+@media (min-width: 1440px) {
+  #desktopSidebar { width: 380px; }
+  #desktopLayout { gap: 32px; padding: 0 40px; }
+  #homeCategories { grid-template-columns: repeat(4, 1fr) !important; }
+  #usedList { grid-template-columns: repeat(5, 1fr) !important; }
+  #webzineList { grid-template-columns: repeat(4, 1fr) !important; }
+  #homeWebzinePreview { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+@media (min-width: 1024px) {
+  /* ── Sidebar cards ── */
+  .sidebar-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .sidebar-card h4 {
+    font-size: 12px;
+    font-weight: 900;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  .sidebar-mini-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .sidebar-mini-item:last-child { border-bottom: none; }
+  .sidebar-mini-item:active { opacity: 0.7; }
+  .sidebar-mini-item .smi-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    color: #64748b;
+    flex-shrink: 0;
+  }
+  .sidebar-mini-item .smi-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .sidebar-mini-item .smi-sub {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+  }
+}
+/* Hide sidebar on mobile */
+@media (max-width: 1023px) {
+  #desktopSidebar { display: none !important; }
+  #homeHeroFull { display: none !important; }
+}
+
+/* ── Mobile ad banners (≤1023px only) ── */
+.mobile-ad-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background: #fff;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+}
+.mobile-ad-bottom #mobileBottomAdContent {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.mobile-ad-bottom #mobileBottomAdContent img {
+  max-width: 320px;
+  max-height: 100px;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.mobile-ad-close {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.mobile-ad-slot .mobile-mid-banner {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  position: relative;
+  cursor: pointer;
+}
+.mobile-ad-slot .mobile-mid-banner img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  display: block;
+}
+.mobile-ad-slot .mobile-mid-banner .ad-tag {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+/* Hide mobile ads on desktop */
+@media (min-width: 1024px) {
+  .mobile-ad-bottom { display: none !important; }
+  .mobile-ad-slot { display: none !important; }
+}
 </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
+
+<!-- ============================== 통합 검색 모달 ============================== -->
+<div id="searchModal" class="modal fixed inset-0 bg-black/75 backdrop-blur-sm z-[950] items-center justify-start p-0">
+  <div class="w-full max-w-lg mx-auto bg-white rounded-b-2xl shadow-2xl overflow-hidden" style="max-height:90vh">
+    <div class="bg-[#001d4a] px-4 py-3 flex items-center gap-3">
+      <span class="text-lg">🔍</span>
+      <input id="searchInput" type="text" data-i18n-ph="search_ph" placeholder="Search..." class="flex-1 bg-white/10 text-white placeholder-white/40 rounded-xl px-3 py-2 text-sm font-bold outline-none" oninput="debounceSearch()" autocomplete="off">
+      <button onclick="closeSearchModal()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
+    </div>
+    <div id="searchResults" class="overflow-y-auto p-4 space-y-4" style="max-height:calc(90vh - 56px)">
+      <p class="text-center text-slate-400 text-sm font-bold py-8" data-i18n="search_hint">Enter a keyword to search</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== 알림 센터 패널 ============================== -->
+<div id="notifPanel" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[940] items-start justify-end p-0">
+  <div class="w-full max-w-md ml-auto bg-white shadow-2xl overflow-hidden h-full">
+    <div class="bg-[#001d4a] px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🔔</span>
+        <span class="text-white font-black text-sm" data-i18n="notif_title">Notifications</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="markAllNotifsRead()" class="text-[10px] font-bold text-blue-300 hover:text-white transition" data-i18n="notif_mark_all">Mark all read</button>
+        <button onclick="closeNotifPanel()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
+      </div>
+    </div>
+    <div id="notifList" class="overflow-y-auto p-3 space-y-2" style="max-height:calc(100vh - 56px)">
+      <p class="text-center text-slate-400 text-sm font-bold py-12" data-i18n="notif_empty">No notifications</p>
+    </div>
+  </div>
+</div>
+
 <!-- ============================== STL 3D 뷰어 모달 ============================== -->
 <div id="stlViewerModal" class="modal fixed inset-0 bg-black/80 backdrop-blur-sm z-[900] items-center justify-center p-4">
   <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col" style="max-height:88vh">
     <div class="bg-[#001d4a] px-4 py-3 flex justify-between items-center flex-shrink-0">
-      <p id="fileViewerTitle" class="font-black text-white text-sm">🧊 파일 미리보기</p>
+      <p id="fileViewerTitle" class="font-black text-white text-sm" data-i18n="stl_viewer_3d">🧊 3D Preview</p>
       <button onclick="closeStlViewer()" class="text-white/60 hover:text-white font-black text-lg leading-none">✕</button>
     </div>
     <!-- 3D viewer -->
     <div id="stlViewerContainer" class="flex-1 relative bg-slate-900" style="min-height:320px">
       <canvas id="stlCanvas" class="w-full h-full block" style="min-height:320px"></canvas>
-      <div id="stlViewerMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-bold">불러오는 중...</div>
+      <div id="stlViewerMsg" class="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-bold" data-i18n="stl_loading">Loading...</div>
     </div>
     <!-- Image viewer -->
     <div id="viewerImagePanel" class="hidden flex-1 bg-slate-900 flex items-center justify-center overflow-auto p-2" style="min-height:320px">
-      <img id="viewerImg" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+      <img id="viewerImg" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg" loading="lazy">
     </div>
     <!-- PDF viewer -->
     <div id="viewerPdfPanel" class="hidden flex-1" style="min-height:320px">
@@ -210,11 +923,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="viewerOtherPanel" class="hidden flex-1 flex flex-col items-center justify-center bg-slate-50 p-8 gap-3" style="min-height:200px">
       <p class="text-4xl">📎</p>
       <p id="viewerOtherName" class="text-sm font-black text-slate-700 text-center break-all"></p>
-      <p class="text-xs text-slate-400 font-bold">미리보기를 지원하지 않는 파일 형식입니다</p>
+      <p class="text-xs text-slate-400 font-bold" data-i18n="stl_unsupported">File format not supported for preview</p>
     </div>
     <div id="fileViewerFooter" class="px-4 py-3 bg-slate-50 flex gap-2 flex-shrink-0">
-      <p id="fileViewerHint" class="text-[9px] text-slate-400 flex-1 self-center font-bold">드래그: 회전 · 스크롤: 줌</p>
-      <a id="stlDownloadBtn" href="#" download class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-black text-xs active:scale-95 transition">📥 다운로드</a>
+      <p id="fileViewerHint" class="text-[9px] text-slate-400 flex-1 self-center font-bold" data-i18n="stl_viewer_hint">Drag: Rotate · Scroll: Zoom</p>
+      <a id="stlDownloadBtn" href="#" download class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-black text-xs active:scale-95 transition" data-i18n="stl_download">📥 Download</a>
     </div>
   </div>
 </div>
@@ -391,6 +1104,36 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <button onclick="closeModal('extendModal')" class="w-full text-slate-300 text-xs font-bold" data-i18n="session_later">Later</button>
   </div>
 </div>
+<!-- ============================== 도움말 모달 ============================== -->
+<div id="helpModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[850] items-center justify-center p-4">
+  <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col" style="max-height:85vh">
+    <div class="p-5 pb-3 border-b border-slate-100 flex items-center justify-between shrink-0">
+      <h3 id="helpModalTitle" class="font-black text-slate-800 text-base">📖 Guide</h3>
+      <button onclick="closeModal('helpModal')" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-sm active:bg-slate-200">✕</button>
+    </div>
+    <div id="helpModalBody" class="p-5 overflow-y-auto flex-1 text-sm text-slate-600 leading-relaxed"></div>
+    <div class="p-4 pt-2 border-t border-slate-100 shrink-0">
+      <button onclick="closeModal('helpModal')" class="w-full py-3 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 transition" data-i18n="help_close">Close</button>
+    </div>
+  </div>
+</div>
+<!-- ============================== 크레딧 충전 모달 ============================== -->
+<div id="creditChargeModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[860] items-center justify-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+    <h3 class="font-black text-slate-800 text-base mb-1">💰 <span data-i18n="credit_charge_title">Charge Credits</span></h3>
+    <p class="text-xs text-slate-400 font-bold mb-1"><span data-i18n="credit_target_user">User</span>: <span id="ccm-nickname" class="text-slate-700"></span></p>
+    <p class="text-xs text-slate-400 font-bold mb-4"><span data-i18n="credit_current">Current</span>: <span id="ccm-current" class="text-[#D4AF37] font-black"></span></p>
+    <div class="grid grid-cols-3 gap-2 mb-4">
+      <button onclick="chargeCredits(1)" class="py-3 rounded-xl font-black text-sm bg-slate-50 text-slate-700 active:scale-95 transition border border-slate-200">+1</button>
+      <button onclick="chargeCredits(5)" class="py-3 rounded-xl font-black text-sm bg-slate-50 text-slate-700 active:scale-95 transition border border-slate-200">+5</button>
+      <button onclick="chargeCredits(10)" class="py-3 rounded-xl font-black text-sm bg-slate-50 text-slate-700 active:scale-95 transition border border-slate-200">+10</button>
+      <button onclick="chargeCredits(30)" class="py-3 rounded-xl font-black text-sm bg-[#D4AF37]/10 text-[#001D4A] active:scale-95 transition border border-[#D4AF37]/30 font-black">+30</button>
+      <button onclick="chargeCredits(50)" class="py-3 rounded-xl font-black text-sm bg-[#D4AF37]/10 text-[#001D4A] active:scale-95 transition border border-[#D4AF37]/30 font-black">+50</button>
+      <button onclick="chargeCredits(100)" class="py-3 rounded-xl font-black text-sm bg-[#D4AF37] text-[#001D4A] active:scale-95 transition shadow font-black">+100</button>
+    </div>
+    <button onclick="closeCreditChargeModal()" class="w-full py-3 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 transition" data-i18n="help_close">Close</button>
+  </div>
+</div>
 <!-- ============================== 주문 모달 (Shop) ============================== -->
 <div id="orderModal" class="modal fixed inset-0 bg-black/70 z-[500] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
@@ -431,7 +1174,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <input id="clinicName" type="text" data-i18n-ph="addr_clinic_ph" placeholder="Clinic Name" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
       <input id="clinicPhone" type="tel" data-i18n-ph="addr_phone_ph" placeholder="Phone Number" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
       <textarea id="fullAddress" rows="3" data-i18n-ph="addr_addr_ph" placeholder="Full Address" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold resize-none"></textarea>
-      <input id="clinicLineId" type="text" placeholder="Line ID (선택 · 주문 알림용)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
+      <input id="clinicLineId" type="text" data-i18n-ph="line_id_optional_ph" placeholder="Line ID (optional · for order notifications)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm font-bold">
     </div>
     <button onclick="requestPay()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black mt-5 shadow-xl" data-i18n="addr_qr_btn">GENERATE QR</button>
     <button onclick="closeModal('addressModal')" class="w-full text-slate-300 text-[10px] font-black mt-3 uppercase" data-i18n="addr_back">← Back</button>
@@ -441,7 +1184,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="qrModal" class="modal fixed inset-0 bg-slate-900/95 z-[700] items-center justify-center p-6">
   <div class="bg-white p-7 rounded-3xl w-full max-w-sm text-center">
     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4" data-i18n="qr_label">Scan to Pay</p>
-    <img id="qrImg" alt="QR Code for payment" class="mx-auto w-52 h-52 border-4 border-slate-50 rounded-2xl mb-5">
+    <img id="qrImg" alt="QR Code for payment" class="mx-auto w-52 h-52 border-4 border-slate-50 rounded-2xl mb-5" loading="lazy">
     <div id="qrSummary" class="text-left bg-slate-50 rounded-2xl p-4 mb-5 text-xs text-slate-600 space-y-1 max-h-40 overflow-y-auto no-scroll"></div>
     <button onclick="completePayment()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg" data-i18n="qr_complete">PAYMENT COMPLETE</button>
   </div>
@@ -450,11 +1193,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="payCompleteModal" class="modal fixed inset-0 bg-slate-900/95 z-[800] items-center justify-center p-6">
   <div class="bg-white p-7 rounded-3xl w-full max-w-sm text-center">
     <div class="text-5xl mb-3">✅</div>
-    <h2 class="font-black text-slate-800 text-xl mb-1">주문 완료!</h2>
-    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-5">Order Placed Successfully</p>
+    <h2 class="font-black text-slate-800 text-xl mb-1" data-i18n="pay_complete_title">Order Placed!</h2>
+    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-5" data-i18n="pay_complete_sub">Payment Pending Confirmation</p>
     <div id="payCompleteSummary" class="text-left bg-slate-50 rounded-2xl p-4 mb-5 space-y-1 max-h-48 overflow-y-auto no-scroll"></div>
-    <p class="text-[10px] text-slate-400 font-bold mb-5">관리자 확인 후 결제 처리됩니다.<br>Line 알림을 통해 진행 상황을 알려드립니다.</p>
-    <button onclick="closePayComplete()" class="w-full py-4 bg-[#001d4a] text-white rounded-2xl font-black shadow-lg">쇼핑 계속하기</button>
+    <p class="text-[10px] text-slate-400 font-bold mb-5" data-i18n="pay_complete_note">Admin will confirm payment. You will be notified via Line.</p>
+    <button onclick="closePayComplete()" class="w-full py-4 bg-[#001d4a] text-white rounded-2xl font-black shadow-lg" data-i18n="pay_continue_shop">Continue Shopping</button>
   </div>
 </div>
 <!-- ============================== 프로필 수정 모달 ============================== -->
@@ -497,12 +1240,12 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 <div id="myActivityModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[700] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
     <div class="px-5 py-4 border-b flex justify-between items-center shrink-0">
-      <h3 class="font-black text-slate-800 text-base">내 활동</h3>
+      <h3 class="font-black text-slate-800 text-base" data-i18n="ma_activity_title">My Activity</h3>
       <button onclick="closeModal('myActivityModal')" class="text-slate-400 font-black text-xl leading-none">✕</button>
     </div>
     <div class="flex gap-2 px-4 py-3 border-b shrink-0">
-      <button id="atab-msg"   onclick="activityTab('msg')"   class="flex-1 py-2 rounded-xl font-black text-xs bg-[#001d4a] text-white">✉️ 쪽지</button>
-      <button id="atab-posts" onclick="activityTab('posts')" class="flex-1 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📝 내 게시물</button>
+      <button id="atab-msg"   onclick="activityTab('msg')"   class="flex-1 py-2 rounded-xl font-black text-xs bg-[#001d4a] text-white" data-i18n="ma_tab_msg">Messages</button>
+      <button id="atab-posts" onclick="activityTab('posts')" class="flex-1 py-2 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="ma_tab_posts">My Posts</button>
     </div>
     <div class="flex-1 overflow-y-auto no-scroll">
       <div id="activity-msg"   class="p-4"></div>
@@ -531,73 +1274,93 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <span class="text-base font-black leading-none">←</span>
     </button>
     <div class="flex-1 min-w-0">
-      <div onclick="goPage('home')" class="flex items-baseline gap-1 cursor-pointer active:opacity-70 transition select-none" style="font-size:22px;font-weight:900;letter-spacing:-0.8px;line-height:1">
-        <span style="color:white">den</span><span style="color:var(--color-accent)">t</span><span style="color:white">alk</span>
-        <span style="font-size:8px;font-weight:600;color:rgba(255,255,255,0.28);letter-spacing:2.5px;margin-left:5px;align-self:center;text-transform:uppercase">BIOTEM × BIOPLANT</span>
+      <div onclick="goPage('home')" class="flex items-baseline cursor-pointer active:opacity-70 transition select-none" style="font-size:28px;font-weight:900;letter-spacing:-1.2px;line-height:1">
+        <span dir="ltr" style="unicode-bidi:embed;color:white;display:inline-flex"><span style="color:white">den</span><span style="color:var(--color-accent)">t</span><span style="color:white">alk</span></span>
+        <span dir="ltr" style="unicode-bidi:embed;font-size:9px;font-weight:600;color:rgba(255,255,255,0.28);letter-spacing:2.5px;margin-left:8px;align-self:center;text-transform:uppercase">BIOTEM × BIOPLANT</span>
       </div>
     </div>
-    <button id="headerLoginBtn" onclick="openLoginModal(null)" class="flex items-center gap-1.5 bg-white/[0.08] rounded-full px-3 py-1.5 active:bg-white/20 transition shrink-0">
-      <span class="text-xs">🔐</span>
-      <span class="text-[10px] font-bold tracking-wide" style="color:rgba(180,205,255,0.9)" data-i18n="nav_login">Login</span>
-    </button>
-    <div id="headerNickBadge" class="items-center gap-1.5 bg-white/[0.08] rounded-full px-3 py-1.5 cursor-pointer active:bg-white/20 transition shrink-0" onclick="openMyActivity()">
-      <span class="text-xs">👤</span>
-      <span id="headerNickText" class="text-[10px] font-bold truncate max-w-[72px]" style="color:rgba(180,205,255,0.9)"></span>
-    </div>
-    <button id="headerLogoutBtn" onclick="doLogout()" class="hidden items-center gap-1 bg-red-500/[0.18] rounded-full px-2.5 py-1.5 active:bg-red-500/40 transition shrink-0">
-      <span class="text-[10px] font-bold text-red-300" data-i18n="side_logout">Logout</span>
-    </button>
     <div id="timerWrap" class="hidden shrink-0">
       <div id="timerBadge" class="flex items-center gap-1 bg-white/[0.08] rounded-full px-2.5 py-1.5">
         <span class="text-xs">🔑</span>
         <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
       </div>
     </div>
-    <button id="installBtn" onclick="triggerInstall()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0" title="앱 설치">
-      <span class="text-lg leading-none">⬇️</span>
-      <span class="absolute -top-0.5 -right-0.5 bg-blue-400 text-white text-[7px] font-black px-1 py-0.5 rounded-full leading-none">APP</span>
+    <button onclick="openSearchModal()" class="header-icon-btn relative flex flex-col items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0 px-2 py-1.5" title="Search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="header-icon-label text-[9px] font-bold mt-0.5" style="color:rgba(255,255,255,0.5)" data-i18n="hdr_search">Search</span>
     </button>
-    <button onclick="openCart()" class="relative w-9 h-9 flex items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0">
-      <span class="text-lg leading-none">🛒</span>
-      <span id="cartBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden leading-none">0</span>
+    <button onclick="openNotifPanel()" class="header-icon-btn relative flex flex-col items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0 px-2 py-1.5" title="Notifications">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span class="header-icon-label text-[9px] font-bold mt-0.5" style="color:rgba(255,255,255,0.5)" data-i18n="hdr_notif">Alerts</span>
+      <span id="notifBadge" class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden leading-none">0</span>
     </button>
+    <button id="installBtn" onclick="triggerInstall()" class="header-icon-btn relative flex flex-col items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0 px-2 py-1.5" title="Install">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg>
+      <span class="header-icon-label text-[9px] font-bold mt-0.5" style="color:rgba(255,255,255,0.5)" data-i18n="hdr_install">Install</span>
+    </button>
+    <button onclick="openCart()" class="header-icon-btn relative flex flex-col items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0 px-2 py-1.5" title="Cart">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      <span class="header-icon-label text-[9px] font-bold mt-0.5" style="color:rgba(255,255,255,0.5)" data-i18n="hdr_cart">Cart</span>
+      <span id="cartBadge" class="absolute -top-0.5 -right-0.5 bg-[#D4AF37] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden leading-none">0</span>
+    </button>
+    <!-- 로그인/로그아웃 통합 버튼 -->
+    <button id="headerLoginBtn" onclick="openLoginModal(null)" class="header-icon-btn flex flex-col items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0 px-2 py-1.5">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      <span class="header-icon-label text-[9px] font-bold mt-0.5" style="color:#D4AF37" data-i18n="hdr_login">Login</span>
+    </button>
+    <button id="headerLogoutBtn" onclick="doLogout()" class="hidden header-icon-btn flex-col items-center justify-center bg-red-500/[0.15] rounded-xl active:bg-red-500/30 transition shrink-0 px-2 py-1.5">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span class="header-icon-label text-[9px] font-bold mt-0.5 text-red-300" data-i18n="hdr_logout">Logout</span>
+    </button>
+    <div id="headerNickBadge" class="header-icon-btn items-center justify-center bg-white/[0.08] rounded-xl cursor-pointer active:bg-white/20 transition shrink-0 px-2 py-1.5" onclick="openMyActivity()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0112 0v1"/></svg>
+      <span id="headerNickText" class="header-icon-label text-[9px] font-bold mt-0.5 truncate max-w-[48px]" style="color:rgba(255,255,255,0.5)"></span>
+    </div>
   </header>
   <!-- 네비게이션 탭 바 -->
   <nav id="navTabBar" class="border-t border-white/[0.06] overflow-x-auto no-scroll" style="background:var(--color-primary-darkest)">
     <div class="flex px-2 py-1.5 min-w-max gap-0.5">
       <button onclick="goPage('home')"                  id="ntab-home"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">🏠</span>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 21V14h6v7"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_home">HOME</span>
       </button>
-      <button onclick="openNavDropdown('shop',event)"   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">🦷</span>
+      <button onclick="goPage('shop')"                   id="ntab-shop"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_shop">SHOP</span>
         <span id="ntab-lock-shop" class="nav-lock hidden">🔒</span>
       </button>
-      <button onclick="openNavDropdown('custom',event)"  id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">🔧</span>
+      <button onclick="goPage('custom')"                  id="ntab-custom"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3"/><path d="M5.5 21a6.5 6.5 0 0113 0"/><path d="M19 8l1.5 1.5M19 8l-1-1m1 1l1-1m-1 1l-1.5 1.5"/><circle cx="19" cy="8" r="3" stroke-dasharray="2 2"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_custom">CUSTOM</span>
         <span id="ntab-lock-custom" class="nav-lock hidden">🔒</span>
       </button>
       <button onclick="goPage('used')"                  id="ntab-used"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">♻️</span>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="17.5" y1="14.5" x2="17.5" y2="20.5"/><line x1="14.5" y1="17.5" x2="20.5" y2="17.5"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_used">USED</span>
       </button>
-      <button onclick="openNavDropdown('forum',event)"  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">💬</span>
+      <button onclick="goPage('forum')"                  id="ntab-forum"    class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="13" y2="12"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_forum">토론방</span>
         <span id="ntab-lock-forum" class="nav-lock hidden">🔒</span>
       </button>
+      <button onclick="goPage('jobs')"                   id="ntab-jobs"     class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_jobs">JOBS</span>
+      </button>
+      <button onclick="goPage('webzine')"               id="ntab-webzine"  class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg>
+        <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_webzine">WEBZINE</span>
+      </button>
       <button onclick="goPage('events')"                id="ntab-events"   class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">📅</span>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_events">EVENTS</span>
       </button>
       <button onclick="goPage('settings')"              id="ntab-settings" class="nav-tab relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px]">
-        <span class="text-base leading-none">⚙️</span>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider" data-i18n="nav_settings">SET</span>
       </button>
       <button onclick="goPage('factory')" id="ntab-factory" class="nav-tab hidden relative flex flex-col items-center gap-0.5 px-3.5 py-2 rounded-xl min-w-[52px] bg-amber-500/[0.15]">
-        <span class="text-base leading-none">🔧</span>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
         <span class="text-[9px] font-bold uppercase tracking-wider text-amber-400">ADMIN</span>
       </button>
     </div>
@@ -612,22 +1375,30 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   <!-- 사이드 메뉴 -->
   <div id="sideMenu" class="fixed top-0 left-0 h-full w-72 bg-[#001d4a] z-[400] flex flex-col shadow-2xl">
     <div class="p-6 border-b border-white/10">
-      <div class="flex items-baseline" style="font-size:38px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px">
+      <div class="flex items-baseline" style="font-size:38px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px" dir="ltr">
         <span style="color:white">den</span><span style="color:#D4AF37">t</span><span style="color:white">alk</span>
       </div>
       <div style="height:2px;border-radius:99px;background:#D4AF37;opacity:.35;width:110px;margin:-3px 0 6px"></div>
-      <p class="text-blue-300 text-[9px] font-bold uppercase tracking-widest">BIOTEM × BIOPLANT</p>
+      <p dir="ltr" style="unicode-bidi:embed" class="text-blue-300 text-[9px] font-bold uppercase tracking-widest">BIOTEM × BIOPLANT</p>
       <p id="sideUserInfo" class="text-[10px] text-slate-400 mt-1"></p>
     </div>
     <nav class="flex-1 overflow-y-auto p-3 space-y-1">
-      <button onclick="goPage('home')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-home"><span>🏠</span><span data-i18n="nav_home">HOME</span></button>
-      <button onclick="goPage('shop')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-shop"><span>🦷</span><span data-i18n="nav_shop">SHOP</span><span class="ml-auto text-slate-500 text-xs" id="lock-shop">🔒</span></button>
-      <button onclick="goPage('custom')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><span>🔧</span><span data-i18n="nav_custom">CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
-      <button onclick="goPage('used')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><span>♻️</span><span data-i18n="nav_used">USED MARKET</span></button>
-      <button onclick="goPage('forum')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><span>💬</span><span data-i18n="nav_forum">FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
-      <button onclick="goPage('events')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><span>📅</span><span data-i18n="nav_events">EVENTS</span></button>
+      <button onclick="goPage('home')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M9 21V14h6v7"/></svg><span data-i18n="nav_home">HOME</span></button>
+      <button onclick="goPage('shop')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-shop"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><span data-i18n="nav_shop">SHOP</span><span class="ml-auto text-slate-500 text-xs" id="lock-shop">🔒</span></button>
+      <button onclick="goPage('custom')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-custom"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="7" r="3"/><path d="M5.5 21a6.5 6.5 0 0113 0"/><path d="M19 8l1.5 1.5M19 8l-1-1m1 1l1-1m-1 1l-1.5 1.5"/><circle cx="19" cy="8" r="3" stroke-dasharray="2 2"/></svg><span data-i18n="nav_custom">CUSTOM</span><span class="ml-auto text-slate-500 text-xs" id="lock-custom">🔒</span></button>
+      <button onclick="goPage('used')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-used"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><line x1="17.5" y1="14.5" x2="17.5" y2="20.5"/><line x1="14.5" y1="17.5" x2="20.5" y2="17.5"/></svg><span data-i18n="nav_used">USED MARKET</span></button>
+      <button onclick="goPage('forum')"    class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-forum"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="13" y2="12"/></svg><span data-i18n="nav_forum">FORUM</span><span class="ml-auto text-slate-500 text-xs" id="lock-forum">🔒</span></button>
+      <button onclick="goPage('jobs')"     class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-jobs"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/></svg><span data-i18n="nav_jobs">JOBS</span></button>
+      <button onclick="goPage('webzine')"  class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-webzine"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="12" y1="9" x2="12" y2="21"/></svg><span data-i18n="nav_webzine">WEBZINE</span></button>
+      <button onclick="goPage('events')"   class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-events"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg><span data-i18n="nav_events">EVENTS</span></button>
 
-      <button onclick="goPage('settings')" class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><span>⚙️</span><span data-i18n="nav_settings">SETTINGS</span></button>
+      <button onclick="goPage('settings')" class="menu-btn w-full text-left px-4 py-3.5 rounded-2xl text-white font-black text-sm flex items-center gap-3" id="mb-settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span data-i18n="nav_settings">SETTINGS</span></button>
+      <div class="mt-2 pt-2 border-t border-white/10">
+        <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener" class="w-full text-left px-4 py-3.5 rounded-2xl font-black text-sm flex items-center gap-3 active:opacity-80 transition" style="background:#06C755;color:white">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 shrink-0" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          <span data-i18n="line_add_friend">Add LINE Friend</span>
+        </a>
+      </div>
     </nav>
     <div class="p-4 border-t border-white/10">
       <div id="sideLoginArea">
@@ -641,80 +1412,83 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <p id="sideNickname" class="text-sm font-black text-white mb-0.5"></p>
           <p id="sideTimer" class="text-xs font-black text-blue-300"></p>
         </div>
-        <button onclick="goPage('settings');closeMenu();" class="w-full py-3 rounded-2xl bg-white/10 text-white font-black text-sm">👤 내 정보 수정</button>
+        <button onclick="goPage('settings');closeMenu();" class="w-full py-3 rounded-2xl bg-white/10 text-white font-black text-sm" data-i18n="settings_edit_profile">👤 Edit Profile</button>
         <button onclick="doLogout()" class="w-full py-3 rounded-2xl bg-red-500/20 text-red-300 font-black text-sm" data-i18n="side_logout">Logout</button>
       </div>
     </div>
   </div>
   <!-- 페이지 콘텐츠 -->
   <div class="flex-1 overflow-y-auto pb-6">
+    <!-- Full-width hero slot (desktop only) -->
+    <div id="homeHeroFull" style="display:none"></div>
+    <!-- 2-column desktop layout -->
+    <div id="desktopLayout">
+    <div id="desktopMain">
     <!-- ==================== HOME ==================== -->
     <div id="page-home" class="page active">
 
-      <!-- ─── HERO BANNER (2 slides, auto-rotate) ────────────── -->
-      <div class="relative overflow-hidden">
-        <div id="homeBannerTrack" class="flex" style="transition:transform .48s cubic-bezier(.4,0,.2,1)">
-
-          <!-- Slide 1 — BIOPLANT Products -->
-          <div class="shrink-0 w-full relative overflow-hidden text-white" style="background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 55%,#0f1f3d 100%);padding:30px 22px 50px">
-            <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(79,142,247,0.13) 0%,transparent 70%)"></div>
-            <div class="relative fade-up">
-              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(212,175,55,0.16);border:1px solid rgba(212,175,55,0.28)">
-                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--color-accent)" data-i18n="hero_bioplant_tag">BIOPLANT Thailand</span>
-              </div>
-              <h1 class="font-black leading-tight mb-2 text-white" style="font-size:27px;letter-spacing:-0.8px" data-i18n="hero_bioplant_title">Premium Dental Implant Parts</h1>
-              <div style="width:28px;height:2px;border-radius:99px;background:var(--color-accent);opacity:0.85;margin-bottom:10px"></div>
-              <p class="text-xs leading-relaxed mb-5" style="color:rgba(191,219,254,0.62);max-width:280px" data-i18n="hero_bioplant_desc">ISO-certified Korean manufacturing, delivered fast to your clinic.</p>
-              <button onclick="isLoggedIn()?goPage('shop'):openLoginModal('shop')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:var(--color-accent);color:var(--color-primary-dark);touch-action:manipulation">
-                <span data-i18n="hero_bioplant_cta">Shop Now</span>
-                <span class="opacity-60">›</span>
-              </button>
-            </div>
+      <!-- 첫 방문 도움말 배너 -->
+      <div id="helpFirstVisitBanner" class="hidden mx-4 mt-3 mb-1">
+        <div class="bg-white rounded-2xl p-4 border-2 border-[#D4AF37]/30 flex items-center gap-3">
+          <span class="text-2xl shrink-0">📖</span>
+          <div class="flex-1 min-w-0">
+            <p class="font-black text-[#001D4A] text-sm" data-i18n="help_first_visit_title">New to Dentalk?</p>
+            <p class="text-slate-400 text-[10px] font-bold" data-i18n="help_first_visit_desc">View the guide to learn how to use</p>
           </div>
+          <button onclick="openHelp('home')" class="shrink-0 px-3 py-2 bg-[#D4AF37] rounded-xl text-[#001D4A] text-xs font-black active:bg-[#b8952e] transition" data-i18n="help_first_visit_btn">View</button>
+          <button onclick="dismissHelpBanner()" class="shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-black active:bg-slate-200">✕</button>
+        </div>
+      </div>
 
-          <!-- Slide 2 — CNC Custom Abutment -->
-          <div class="shrink-0 w-full relative overflow-hidden text-white" style="background:linear-gradient(150deg,#18083a 0%,#2c1860 55%,#0d1535 100%);padding:30px 22px 50px">
-            <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(180,100,255,0.12) 0%,transparent 70%)"></div>
-            <div class="relative fade-up">
-              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(192,132,252,0.18);border:1px solid rgba(192,132,252,0.28)">
-                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:#c084fc" data-i18n="hero_cnc_tag">CNC Custom Abutment</span>
+      <!-- ─── HERO BANNER — CNC Custom Abutment ────────────── -->
+      <div class="relative overflow-hidden">
+        <div class="relative text-white" style="background:linear-gradient(150deg,#001D4A 0%,#002a5c 55%,#001230 100%);padding:30px 22px 40px">
+          <div class="absolute -top-14 -right-14 w-56 h-56 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(212,175,55,0.08) 0%,transparent 70%)"></div>
+          <!-- 모바일: 배경 이미지 (반투명) -->
+          <img id="heroBgMobile" src="" alt="" class="absolute right-0 bottom-0 w-48 h-48 object-contain opacity-[0.12] pointer-events-none md:hidden" loading="lazy">
+          <div class="relative flex items-center gap-4">
+            <!-- 왼쪽: 텍스트 -->
+            <div class="flex-1 min-w-0 fade-up">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style="background:rgba(212,175,55,0.16);border:1px solid rgba(212,175,55,0.28)">
+                <span class="text-[9px] font-bold uppercase tracking-widest" style="color:#D4AF37" data-i18n="hero_cnc_tag">CNC Custom Abutment</span>
               </div>
               <h1 class="font-black leading-tight mb-2 text-white" style="font-size:27px;letter-spacing:-0.8px" data-i18n="hero_cnc_title">Precision-Crafted Custom Solutions</h1>
-              <div style="width:28px;height:2px;border-radius:99px;background:#c084fc;opacity:0.85;margin-bottom:10px"></div>
-              <p class="text-xs leading-relaxed mb-5" style="color:rgba(216,180,254,0.62);max-width:280px" data-i18n="hero_cnc_desc">Made to your exact specs — from scan body to final restoration.</p>
-              <button onclick="isLoggedIn()?goPage('custom'):openLoginModal('custom')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:#c084fc;color:#18083a;touch-action:manipulation">
+              <div style="width:28px;height:2px;border-radius:99px;background:#D4AF37;opacity:0.85;margin-bottom:10px"></div>
+              <p class="text-xs leading-relaxed mb-5" style="color:rgba(255,255,255,0.55);max-width:280px" data-i18n="hero_cnc_desc">Made to your exact specs — from scan body to final restoration.</p>
+              <button onclick="isLoggedIn()?goPage('custom'):openLoginModal('custom')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-xs active:scale-95 transition shadow-md" style="background:#D4AF37;color:#001D4A;touch-action:manipulation">
                 <span data-i18n="hero_cnc_cta">Order Custom</span>
                 <span class="opacity-60">›</span>
               </button>
             </div>
+            <!-- 오른쪽: 제품 이미지 (데스크톱/태블릿) -->
+            <div class="hidden md:block shrink-0 relative" style="width:220px;height:200px">
+              <img id="heroImgDesktop" src="" alt="Custom Abutment" class="absolute inset-0 w-full h-full object-contain drop-shadow-2xl" style="transform:rotate(-6deg) translateY(-8px)" loading="lazy">
+            </div>
           </div>
-
-        </div>
-        <!-- Slide dot indicators -->
-        <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-          <button id="bannerDot0" onclick="setBannerSlide(0)" class="w-2 h-2 rounded-full bg-white transition-all pointer-events-auto"></button>
-          <button id="bannerDot1" onclick="setBannerSlide(1)" class="w-1.5 h-1.5 rounded-full transition-all pointer-events-auto" style="background:rgba(255,255,255,0.3)"></button>
         </div>
       </div>
+
+      <!-- ─── AD SLOT: HOME TOP ────────────────────────────────── -->
+      <div id="adSlotHomeTop" class="hidden px-4 pt-4"></div>
 
       <!-- ─── BRAND STAT BAR ──────────────────────────────────── -->
       <div class="bg-white border-b border-slate-100 px-4 py-3 grid grid-cols-3 divide-x divide-slate-100">
         <div class="pr-3 text-center">
-          <p class="font-black text-blue-800 text-base leading-none">ISO</p>
+          <p class="font-black text-base leading-none" style="color:#001D4A">ISO</p>
           <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat1">Certified</p>
         </div>
         <div class="px-3 text-center">
-          <p class="font-black text-blue-800 text-base leading-none">Korea</p>
+          <p class="font-black text-base leading-none" style="color:#001D4A">Korea</p>
           <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat2">Origin</p>
         </div>
         <div class="pl-3 text-center">
-          <p class="font-black text-blue-800 text-base leading-none">SEA</p>
+          <p class="font-black text-base leading-none" style="color:#001D4A">SEA</p>
           <p class="text-[8px] text-slate-400 font-medium mt-0.5 uppercase tracking-wide" data-i18n="home_stat3">Coverage</p>
         </div>
       </div>
 
       <!-- ─── PRODUCT CATEGORIES (2-col grid, 7 items) ─────────── -->
-      <div class="px-4 pt-5 pb-1">
+      <div class="px-4 pt-5 pb-1 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_categories">Product Categories</h2>
           <button onclick="goPage('shop')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_see_more">See All ›</button>
@@ -722,8 +1496,14 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="homeCategories" class="grid grid-cols-2 gap-2.5"></div>
       </div>
 
+      <!-- ─── AD SLOT: HOME MID ─────────────────────────────────── -->
+      <div id="adSlotHomeMid" class="hidden px-4 pt-3"></div>
+
+      <!-- ─── MOBILE AD: after categories ─────────────────────────── -->
+      <div id="mobileAdMid1" class="hidden px-4 pt-3 mobile-ad-slot"></div>
+
       <!-- ─── FORUM PREVIEW (3 latest posts) ───────────────────── -->
-      <div class="px-4 pt-5 pb-1">
+      <div class="px-4 pt-5 pb-1 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_forum_preview">Clinical Discussion</h2>
           <button onclick="goPage('forum')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_forum_more">View All ›</button>
@@ -731,8 +1511,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="homeForumPreview"></div>
       </div>
 
+      <!-- ─── MOBILE AD: after forum preview ─────────────────────── -->
+      <div id="mobileAdMid2" class="hidden px-4 pt-3 mobile-ad-slot"></div>
+
       <!-- ─── EVENTS PREVIEW ────────────────────────────────────── -->
-      <div class="px-4 pt-5 pb-1">
+      <div class="px-4 pt-5 pb-1 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_events_preview">Upcoming Events</h2>
           <button onclick="goPage('events')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_events_more">View All ›</button>
@@ -740,31 +1523,34 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="homeEventsPreview"></div>
       </div>
 
-      <!-- ─── WEBZINE PLACEHOLDER ───────────────────────────────── -->
-      <div class="px-4 pt-5 pb-2">
+      <!-- ─── WEBZINE PREVIEW ─────────────────────────────────── -->
+      <div class="px-4 pt-5 pb-2 scroll-reveal">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="font-black text-slate-800 text-sm" data-i18n="sec_webzine">Webzine</h2>
             <p class="text-[9px] text-slate-400 font-medium mt-0.5" data-i18n="sec_webzine_sub">Clinical cases &amp; product updates</p>
           </div>
+          <button onclick="goPage('webzine')" class="text-[10px] font-bold" style="color:var(--color-stage-done)" data-i18n="sec_events_more">View All ›</button>
         </div>
-        <!-- 3 thumbnail placeholder slots + coming soon label -->
-        <div class="rounded-2xl overflow-hidden border-2 border-dashed border-slate-200">
-          <div class="grid grid-cols-3">
-            <div class="aspect-square bg-slate-50 flex items-center justify-center border-r border-b border-dashed border-slate-200">
-              <span class="text-2xl opacity-20">📄</span>
+        <div id="homeWebzinePreview" class="grid grid-cols-3 gap-2"></div>
+      </div>
+
+      <!-- ─── LINE FRIEND BANNER ───────────────────────────────── -->
+      <div class="px-4 pt-5 pb-2 scroll-reveal">
+        <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
+          class="block rounded-2xl p-4 shadow-sm active:scale-[.98] transition"
+          style="background:linear-gradient(135deg,#06C755 0%,#04a648 100%)">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" class="w-8 h-8" fill="#06C755"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
             </div>
-            <div class="aspect-square bg-slate-50 flex items-center justify-center border-r border-b border-dashed border-slate-200">
-              <span class="text-2xl opacity-20">📄</span>
+            <div class="flex-1 min-w-0">
+              <p class="font-black text-white text-sm" data-i18n="line_add_friend">Add LINE Friend</p>
+              <p class="text-white/70 text-[10px] font-bold mt-0.5" data-i18n="line_add_desc">Get order updates & support</p>
             </div>
-            <div class="aspect-square bg-slate-50 flex items-center justify-center border-b border-dashed border-slate-200">
-              <span class="text-2xl opacity-20">📄</span>
-            </div>
+            <span class="text-white/60 text-lg font-black shrink-0">›</span>
           </div>
-          <div class="bg-slate-50 px-5 py-3.5 text-center">
-            <p class="text-xs font-bold text-slate-400" data-i18n="sec_webzine_coming">Coming Soon — Stay tuned</p>
-          </div>
-        </div>
+        </a>
       </div>
 
       <!-- ─── FOOTER LINKS ──────────────────────────────────────── -->
@@ -776,8 +1562,13 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== SHOP ==================== -->
     <div id="page-shop" class="page px-4 pt-5 pb-4">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 px-1" data-i18n="shop_hint">Select a category to order</p>
-      <div id="shopCategoryList" class="flex flex-col gap-3 mb-6"></div>
+      <div class="flex items-center justify-between mb-4 px-1">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest" data-i18n="shop_hint">Select a category to order</p>
+        <button onclick="openHelp('shop')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
+      <!-- ─── AD SLOT: SHOP BOTTOM ─────────────────────────────── -->
+      <div id="adSlotShopBottom" class="hidden mb-4"></div>
+      <div id="shopCategoryList" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6"></div>
       <!-- My Orders section -->
       <div class="mt-4">
         <div class="flex items-center gap-2 mb-3 px-1">
@@ -789,16 +1580,22 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== SHOP ITEMS ==================== -->
     <div id="page-shop-items" class="page px-4 pt-5 pb-28">
-      <div id="shopItemsList" class="space-y-2.5"></div>
+      <div id="shopItemsList" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
     </div>
     <!-- ==================== SHOP PRODUCT DETAIL ==================== -->
     <div id="page-shop-product" class="page">
-      <!-- Hero: gradient + icon + title -->
-      <div id="shopProductHero" class="relative text-white overflow-hidden" style="padding:28px 22px 30px;background:linear-gradient(150deg,var(--color-primary-dark) 0%,var(--color-primary-mid) 100%)">
-        <div id="shopProductIconArea" class="w-14 h-14 mb-3 flex items-center justify-center opacity-90"></div>
-        <div id="shopProductStockBadge" class="inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-full mb-3"></div>
-        <h2 id="shopProductTitle" class="text-xl font-black leading-tight text-white"></h2>
-        <p id="shopProductSub" class="text-[10px] font-bold uppercase tracking-wide mt-1" style="color:rgba(255,255,255,0.55)"></p>
+      <!-- Hero: 2-col (image right, info left) / mobile: image top -->
+      <div id="shopProductHero" class="relative overflow-hidden border-b border-slate-100" style="padding:24px 22px;background:#f8fafc">
+        <div class="flex flex-col-reverse md:flex-row md:items-center md:gap-6">
+          <!-- Left: product info -->
+          <div class="flex-1 min-w-0 mt-4 md:mt-0">
+            <div id="shopProductStockBadge" class="inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-full mb-3"></div>
+            <h2 id="shopProductTitle" class="text-xl font-black leading-tight" style="color:#001D4A"></h2>
+            <p id="shopProductSub" class="text-[10px] font-bold uppercase tracking-wide mt-1" style="color:#4a5568"></p>
+          </div>
+          <!-- Right: product image -->
+          <div id="shopProductIconArea" class="shrink-0 flex items-center justify-center md:w-auto"></div>
+        </div>
       </div>
       <!-- Price bar -->
       <div class="bg-white border-b border-slate-100 px-5 py-4 flex items-baseline gap-1.5">
@@ -813,12 +1610,48 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <!-- Error + Add to cart -->
       <p id="productOrderError" class="text-red-400 text-xs font-bold text-center px-4 mb-2 hidden" data-i18n="order_qty_error">Please enter at least 1 quantity.</p>
+      <div class="px-4 pt-2 pb-4">
+        <button id="shopProductAddBtn" onclick="addProductToCart()" class="w-full py-4 rounded-2xl font-black text-sm shadow-lg active:scale-[.98] transition" style="background:#D4AF37;color:#001D4A" data-i18n="order_add_cart">Add to Cart</button>
+      </div>
+      <!-- 리뷰/평점 섹션 -->
       <div class="px-4 pt-2 pb-28">
-        <button id="shopProductAddBtn" onclick="addProductToCart()" class="w-full py-4 rounded-2xl font-black text-sm shadow-lg text-white active:scale-[.98] transition" style="background:var(--color-primary-dark)" data-i18n="order_add_cart">Add to Cart</button>
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest" data-i18n="review_title">Reviews</p>
+          <div id="reviewAvgBadge" class="flex items-center gap-1 bg-amber-50 rounded-full px-2.5 py-1">
+            <span class="text-amber-500 text-xs">★</span>
+            <span id="reviewAvgScore" class="text-xs font-black text-amber-700">-</span>
+            <span id="reviewCount" class="text-[9px] text-slate-400 font-bold">(0)</span>
+          </div>
+        </div>
+        <!-- 리뷰 작성 폼 (구매 완료 유저만) -->
+        <div id="reviewFormWrap" class="hidden mb-4">
+          <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs font-black text-slate-500" data-i18n="review_your_rating">Your Rating:</span>
+              <div id="reviewStars" class="flex gap-0.5">
+                <button onclick="setReviewStar(1)" class="review-star text-xl text-slate-200 transition">★</button>
+                <button onclick="setReviewStar(2)" class="review-star text-xl text-slate-200 transition">★</button>
+                <button onclick="setReviewStar(3)" class="review-star text-xl text-slate-200 transition">★</button>
+                <button onclick="setReviewStar(4)" class="review-star text-xl text-slate-200 transition">★</button>
+                <button onclick="setReviewStar(5)" class="review-star text-xl text-slate-200 transition">★</button>
+              </div>
+            </div>
+            <textarea id="reviewComment" rows="2" data-i18n-ph="review_comment_ph" placeholder="Write a review..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-2 border-2 border-transparent focus:border-blue-200"></textarea>
+            <button onclick="submitReview()" class="w-full py-2.5 bg-amber-500 text-white rounded-xl font-black text-xs active:scale-95 transition" data-i18n="review_submit">Submit Review</button>
+          </div>
+        </div>
+        <div id="reviewNotice" class="hidden mb-4">
+          <p class="text-center text-slate-400 text-[10px] font-bold py-3 bg-slate-50 rounded-xl" data-i18n="review_purchase_required">Purchase this product to write a review.</p>
+        </div>
+        <!-- 리뷰 목록 -->
+        <div id="reviewList" class="space-y-2"></div>
       </div>
     </div>
     <!-- ==================== CUSTOM ABUTMENT ==================== -->
     <div id="page-custom" class="page px-4 pt-5 pb-28">
+      <div class="flex justify-end mb-2">
+        <button onclick="openHelp('custom')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- Tab buttons -->
       <div class="flex gap-1.5 mb-5">
         <button onclick="customTab('form')" id="ctab-form" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#001d4a] text-white shadow" data-i18n="custom_tab_new">New Order</button>
@@ -879,8 +1712,8 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <div id="wiz-stl-drop" onclick="document.getElementById('wiz-stl-input').click()" ondragover="wizOnStlDragOver(event)" ondragleave="wizOnStlDragLeave(event)" ondrop="wizOnStlDrop(event)"
               class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer bg-slate-50 transition-colors">
               <p class="text-3xl mb-2">📁</p>
-              <p class="text-xs font-black text-slate-500 mb-1">모든 파일 형식 지원</p>
-              <p class="text-[9px] text-slate-400">STL · 이미지 · PDF · 기타 · 최대 10개</p>
+              <p class="text-xs font-black text-slate-500 mb-1" data-i18n="wiz_stl_all_formats">All file formats supported</p>
+              <p class="text-[9px] text-slate-400" data-i18n="wiz_stl_formats_hint">STL · Image · PDF · Other · Max 10</p>
             </div>
             <input type="file" id="wiz-stl-input" class="hidden" multiple onchange="wizOnStlSelect(this)">
           </div>
@@ -935,19 +1768,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="editOrderModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeEditModal()">
       <div class="bg-white rounded-t-3xl w-full p-5 max-h-[88vh] overflow-y-auto pb-8">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800 text-sm">주문 수정</h3>
+          <h3 class="font-black text-slate-800 text-sm" data-i18n="edit_order_title">Edit Order</h3>
           <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 font-black text-sm">✕</button>
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-1">클리닉 / 랩 이름</p>
+          <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_clinic_ph">Clinic / Lab Name</p>
           <input id="edit-clinic" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-1">배송 주소</p>
+          <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_addr_ph">Delivery Address</p>
           <input id="edit-addr" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-1">연락처</p>
+          <p class="text-xs font-black text-slate-600 mb-1" data-i18n="custom_phone_ph">Contact Number</p>
           <input id="edit-phone" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-4">
@@ -955,7 +1788,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           <input id="edit-line" type="text" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div id="editCases" class="mb-4 space-y-3"></div>
-        <button onclick="saveEditOrder()" class="w-full py-3.5 bg-[#001d4a] text-white rounded-2xl font-black text-sm active:scale-95 transition">저장</button>
+        <button onclick="saveEditOrder()" class="w-full py-3.5 bg-[#001d4a] text-white rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="pe_save">Save</button>
       </div>
     </div>
     <!-- 배송 정보 모달 -->
@@ -992,11 +1825,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="shopShippingModal" class="hidden fixed inset-0 z-50 flex items-end" style="background:rgba(0,0,0,.5)" onclick="if(event.target===this)closeShopShippingModal()">
       <div class="bg-white rounded-t-3xl w-full p-5 pb-8">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-slate-800 text-sm">🚚 쇼핑몰 배송 정보 입력</h3>
+          <h3 class="font-black text-slate-800 text-sm" data-i18n="shop_ship_title">🚚 Shop Shipping Info</h3>
           <button onclick="closeShopShippingModal()" class="text-slate-400 font-black text-lg leading-none">✕</button>
         </div>
         <div class="mb-3">
-          <p class="text-xs font-black text-slate-600 mb-2">배송사</p>
+          <p class="text-xs font-black text-slate-600 mb-2" data-i18n="carrier_label">Carrier</p>
           <select id="sship-carrier" onchange="toggleShopCustomCarrier()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
             <option value="">Select...</option>
             <option>Kerry Express</option>
@@ -1005,21 +1838,24 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <option>DHL</option>
             <option>FedEx</option>
             <option>Thailand Post</option>
-            <option value="custom">직접 입력</option>
+            <option value="custom" data-i18n="custom_carrier_direct">Enter manually</option>
           </select>
         </div>
         <div id="sship-carrier-custom-wrap" class="mb-3 hidden">
-          <input id="sship-carrier-custom" type="text" placeholder="배송사 이름 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <input id="sship-carrier-custom" type="text" data-i18n-ph="ship_carrier_ph" placeholder="Carrier name" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
         <div class="mb-4">
-          <p class="text-xs font-black text-slate-600 mb-2">송장번호</p>
-          <input id="sship-tracking" type="text" placeholder="송장번호 입력" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
+          <p class="text-xs font-black text-slate-600 mb-2" data-i18n="ship_tracking_label">Tracking Number</p>
+          <input id="sship-tracking" type="text" data-i18n-ph="ship_tracking_ph" placeholder="Enter tracking number" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400">
         </div>
-        <button onclick="adminConfirmShopShipping()" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition">🚚 배송 처리 → LINE 발송</button>
+        <button onclick="adminConfirmShopShipping()" class="w-full py-3.5 bg-green-600 text-white rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="ship_process_btn">🚚 Process Shipping → Send LINE</button>
       </div>
     </div>
     <!-- ==================== USED MARKET ==================== -->
     <div id="page-used" class="page p-4">
+      <div class="flex justify-end mb-2">
+        <button onclick="openHelp('used')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- 등록 토글 버튼 -->
       <button onclick="usedToggleWrite()" id="usedWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
         <span data-i18n="used_post_toggle">📸 List Used Item</span>
@@ -1054,15 +1890,25 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       </div>
       <h3 class="font-black text-xs text-slate-500 uppercase tracking-widest mb-3 px-1" data-i18n="used_list_title">Available Used Parts</h3>
       <div id="usedList" class="grid grid-cols-5 gap-2"></div>
+      <div id="usedPagination"></div>
     </div>
     <!-- ==================== FORUM ==================== -->
     <div id="page-forum" class="page p-4">
+      <div class="flex justify-end mb-2">
+        <button onclick="openHelp('forum')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
+      <!-- ─── AD SLOT: FORUM TOP ──────────────────────────────── -->
+      <div id="adSlotForumTop" class="hidden mb-3"></div>
       <!-- 지역 탭 (대분류) -->
-      <div id="forumRegionBar" class="flex gap-2 mb-2 overflow-x-auto pb-1 no-scroll"></div>
+      <div id="forumRegionBar" class="grid grid-cols-3 md:grid-cols-4 gap-1.5 mb-2"></div>
       <!-- 주(province) 서브탭 -->
-      <div id="forumProvinceBar" class="hidden flex gap-2 mb-3 overflow-x-auto pb-1 no-scroll"></div>
+      <div id="forumProvinceBar" class="hidden grid grid-cols-3 md:grid-cols-4 gap-1.5 mb-3"></div>
+      <!-- 지역 임원 보기 버튼 -->
+      <button onclick="goDetailPage('leaders', t('leaders_title'), 'forum')" class="w-full mb-3 py-2.5 rounded-2xl font-black text-xs active:scale-[.97] transition flex items-center justify-center gap-2 shadow-sm" style="background:#D4AF37;color:#001D4A">
+        <span>⭐</span> <span data-i18n="leaders_view_btn">View Regional Leaders</span>
+      </button>
       <!-- 글쓰기 버튼 -->
-      <button onclick="forumToggleWrite()" id="forumWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed border-slate-200 text-slate-500 active:bg-slate-50 transition flex items-center justify-center gap-2">
+      <button onclick="forumToggleWrite()" id="forumWriteBtn" class="w-full mb-4 py-3 rounded-2xl font-black text-sm bg-white border-2 border-dashed active:bg-slate-50 transition flex items-center justify-center gap-2" style="border-color:#D4AF37;color:#001D4A">
         <span data-i18n="forum_write_btn">✍️ Write Post</span>
       </button>
       <!-- 새 글 쓰기 폼 (숨김) -->
@@ -1074,11 +1920,11 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <button onclick="forumToggleWrite()" class="text-slate-400 font-black text-xs px-2 py-1 bg-slate-100 rounded-lg active:bg-slate-200" data-i18n="forum_close_form">✕ Close</button>
           </div>
         </div>
-        <input id="postTitle" type="text" data-i18n-ph="forum_title_ph" placeholder="Title" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2 border-2 border-transparent focus:border-blue-200">
+        <input id="postTitle" type="text" data-i18n-ph="forum_title_ph" placeholder="Title" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none mb-2 border-2 border-transparent focus:border-[#D4AF37]/40">
         <!-- 카테고리 선택 -->
         <div class="mb-3">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_cat_label">Category</label>
-          <select id="postCategory" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-blue-200">
+          <select id="postCategory" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-[#D4AF37]/40">
             <option value="implant"       data-i18n="forum_cat_implant">🦷 임플란트</option>
             <option value="prosthetic"    data-i18n="forum_cat_prosthetic">💎 보철</option>
             <option value="conservative"  data-i18n="forum_cat_conservative">🪥 보존</option>
@@ -1095,7 +1941,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <!-- 지역 선택 -->
         <div class="mb-2">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_region_label">Region</label>
-          <select id="postRegion" onchange="_updateProvinceSelect()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-emerald-200">
+          <select id="postRegion" onchange="_updateProvinceSelect()" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-[#D4AF37]/40">
             <option value="all" data-i18n="forum_region_all">🌏 All Regions</option>
             <option value="north" data-i18n="forum_region_north">🏔 North</option>
             <option value="northeast" data-i18n="forum_region_northeast">🌾 Northeast</option>
@@ -1107,7 +1953,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <!-- 주(province) 선택 — 지역 선택 시 동적 렌더링 -->
         <div class="mb-3">
           <label class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1 block" data-i18n="forum_province_label">Province</label>
-          <select id="postProvince" disabled class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-emerald-200 disabled:opacity-40">
+          <select id="postProvince" disabled class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-transparent focus:border-[#D4AF37]/40 disabled:opacity-40">
             <option value="all">-</option>
           </select>
         </div>
@@ -1119,16 +1965,17 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <input id="forumPhotos" type="file" accept="image/*" multiple class="hidden" onchange="previewForumPhotos()">
           </label>
         </div>
-        <textarea id="postBody" rows="4" data-i18n-ph="forum_body_ph" placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3 border-2 border-transparent focus:border-blue-200"></textarea>
+        <textarea id="postBody" rows="4" data-i18n-ph="forum_body_ph" placeholder="Write your message..." class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none resize-none mb-3 border-2 border-transparent focus:border-[#D4AF37]/40"></textarea>
         <button onclick="submitPost()" class="w-full bg-[#001d4a] text-white py-3.5 rounded-2xl font-black text-sm active:scale-95 transition" data-i18n="forum_post_btn">POST</button>
       </div>
       <!-- 게시글 목록 (카드형) -->
       <div id="postList" class="space-y-3"></div>
+      <div id="forumPagination"></div>
     </div>
     <!-- ==================== USED DETAIL PAGE ==================== -->
     <div id="page-used-detail" class="page">
       <div id="udp-imageWrap" class="hidden">
-        <img id="udp-image" src="" class="w-full object-contain">
+        <img id="udp-image" src="" class="w-full object-contain" loading="lazy">
       </div>
       <div class="p-5">
         <div class="flex justify-between items-start mb-3">
@@ -1140,13 +1987,60 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <p id="udp-price" class="font-black text-blue-800 text-3xl font-mono mb-4"></p>
         <p id="udp-desc" class="text-sm text-slate-500 leading-relaxed mb-5 whitespace-pre-wrap"></p>
+        <!-- 판매자 프로필 -->
+        <div id="udp-sellerWrap" class="flex items-center gap-2.5 mb-5 p-3 bg-slate-50 rounded-2xl">
+          <span class="w-9 h-9 rounded-full bg-[#001d4a] flex items-center justify-center text-white text-sm">👤</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] text-slate-400 font-bold" data-i18n="used_seller">Seller</p>
+            <p id="udp-sellerName" class="font-black text-slate-800 text-sm cursor-pointer hover:text-blue-600 transition" onclick="openCompose(this.textContent)"></p>
+          </div>
+          <button id="udp-msgBtn" onclick="openCompose(document.getElementById('udp-sellerName').textContent)" class="px-3 py-1.5 bg-[#001d4a] text-white rounded-xl font-black text-[10px] active:scale-95 transition" data-i18n="used_send_msg">✉️ Send Message</button>
+        </div>
         <div class="flex justify-between items-center mb-6">
           <p id="udp-meta" class="text-xs text-slate-400"></p>
           <p class="text-xs text-slate-400 font-bold">👁 <span id="udp-views">0</span></p>
         </div>
         <button id="udp-contactBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm mb-3" data-i18n="used_contact_btn">Contact Seller</button>
-        <button id="udp-deleteBtn" class="w-full py-3 bg-red-50 text-red-400 rounded-2xl font-black text-sm" data-i18n="used_delete_btn">Delete</button>
+        <button id="udp-deleteBtn" class="w-full py-3 bg-red-50 text-red-400 rounded-2xl font-black text-sm mb-6" data-i18n="used_delete_btn">Delete</button>
+        <!-- 댓글 섹션 -->
+        <div class="border-t pt-5">
+          <h4 class="font-black text-sm text-slate-700 mb-3" data-i18n="used_comment_title">💬 Comments</h4>
+          <div id="udp-comments" class="space-y-3 mb-4"></div>
+          <div id="udp-commentForm" class="hidden">
+            <p class="text-[10px] text-slate-400 mb-2">✍️ <span data-i18n="used_comment_writing_as">Writing as</span> <span id="usedCommentNick" class="font-black text-[#001d4a]"></span></p>
+            <div class="flex gap-2">
+              <input id="usedCommentInput" type="text" data-i18n-ph="used_comment_ph" placeholder="Write a comment..." class="flex-1 p-3 bg-slate-50 rounded-xl text-sm outline-none min-w-0 border-2 border-transparent focus:border-blue-200">
+              <button onclick="submitUsedComment()" class="px-4 py-3 bg-[#001d4a] text-white rounded-xl font-black text-sm shrink-0 active:scale-95 transition" data-i18n="used_comment_submit">Reply</button>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+    <!-- ==================== LEADERS PAGE ==================== -->
+    <div id="page-leaders" class="page p-4">
+      <!-- 지도 (데스크톱) / 드롭다운 (모바일) -->
+      <div class="mb-4">
+        <!-- 모바일: 드롭다운 선택 -->
+        <div class="md:hidden mb-3 space-y-2">
+          <select id="leadersRegionSelect" onchange="leadersRegionChanged()" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-black focus:outline-none focus:border-purple-400">
+            <option value="" data-i18n="leaders_select_region">Select Region</option>
+          </select>
+          <select id="leadersProvinceSelect" onchange="leadersProvinceChanged()" class="hidden w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-black focus:outline-none focus:border-purple-400">
+            <option value="" data-i18n="leaders_select_province">Select Province</option>
+          </select>
+        </div>
+        <!-- 데스크톱: 태국 지도 SVG -->
+        <div class="hidden md:block">
+          <div id="thailandMapWrap" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative" style="max-width:520px;margin:0 auto">
+            <div id="thailandMap"></div>
+            <div id="mapTooltip" class="absolute hidden text-[10px] font-black bg-slate-800 text-white px-2 py-1 rounded-lg pointer-events-none z-50 whitespace-nowrap" style="transform:translate(-50%,-120%)"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 선택된 지역/주 임원 카드 -->
+      <div id="leadersSelected" class="mb-4"></div>
+      <!-- 전체 임원 목록 (아코디언) -->
+      <div id="leadersAccordion"></div>
     </div>
     <!-- ==================== FORUM DETAIL PAGE ==================== -->
     <div id="page-forum-detail" class="page">
@@ -1169,7 +2063,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <h2 id="fdp-title" class="font-black text-slate-800 text-xl mb-2 leading-snug"></h2>
         <p id="fdp-author" class="text-xs text-slate-400 font-bold mb-5"></p>
-        <p id="fdp-body" class="text-sm text-slate-600 leading-relaxed mb-6 whitespace-pre-wrap"></p>
+        <p id="fdp-body" class="text-sm text-slate-600 leading-relaxed mb-4 whitespace-pre-wrap"></p>
+        <!-- 리더/관리자 액션 (고정/삭제) -->
+        <div id="fdp-leaderActions" class="hidden mb-4"></div>
         <!-- 댓글 섹션 -->
         <div class="border-t pt-5">
           <h4 class="font-black text-sm text-slate-700 mb-3" data-i18n="forum_comment_title">💬 Comments</h4>
@@ -1182,29 +2078,126 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
       </div>
     </div>
+    <!-- ==================== JOBS ==================== -->
+    <div id="page-jobs" class="page p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xl">💼</span>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_jobs">Jobs</h2>
+        <button onclick="openHelp('jobs')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
+      <!-- 로그인 유저: 글쓰기 버튼 -->
+      <div id="jobsWriteBtn" class="hidden mb-3">
+        <button onclick="toggleJobForm()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-2xl font-black text-xs active:scale-95 transition">✏️ <span data-i18n="job_write_btn">Post Job</span></button>
+      </div>
+      <div id="jobFormWrap" class="hidden mb-4"></div>
+      <!-- type 탭 -->
+      <div id="jobTypeBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-2 -mx-0.5 px-0.5"></div>
+      <!-- 지역 필터 -->
+      <div id="jobRegionBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
+      <!-- 목록 -->
+      <div id="jobsList" class="flex flex-col gap-2.5"></div>
+      <div id="jobsPagination"></div>
+    </div>
+    <!-- ==================== JOB DETAIL ==================== -->
+    <div id="page-job-detail" class="page p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span id="jd-typeBadge" class="inline-block text-[10px] font-black px-2.5 py-1 rounded-full"></span>
+        <span id="jd-regionBadge" class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500"></span>
+      </div>
+      <h2 id="jd-title" class="font-black text-slate-800 text-xl mb-1 leading-snug"></h2>
+      <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold mb-4">
+        <span id="jd-author"></span>
+        <span>·</span>
+        <span id="jd-date"></span>
+      </div>
+      <!-- 급여 -->
+      <div id="jd-salaryWrap" class="hidden bg-green-50 rounded-xl p-3 mb-3">
+        <p class="text-[10px] font-black text-green-600 mb-0.5" data-i18n="job_salary">Salary</p>
+        <p id="jd-salary" class="font-black text-green-800 text-sm"></p>
+      </div>
+      <!-- 설명 -->
+      <div class="mb-3">
+        <p class="text-[10px] font-black text-slate-400 mb-1" data-i18n="job_desc">Description</p>
+        <p id="jd-desc" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"></p>
+      </div>
+      <!-- 요구사항 -->
+      <div id="jd-reqWrap" class="hidden mb-3">
+        <p class="text-[10px] font-black text-slate-400 mb-1" data-i18n="job_requirements">Requirements</p>
+        <p id="jd-req" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"></p>
+      </div>
+      <!-- 연락처 -->
+      <div id="jd-contactWrap" class="hidden bg-blue-50 rounded-xl p-3 mb-3">
+        <p class="text-[10px] font-black text-blue-600 mb-0.5" data-i18n="job_contact">Contact</p>
+        <p id="jd-contact" class="font-black text-blue-800 text-sm"></p>
+      </div>
+      <!-- 삭제 버튼 (본인 글) -->
+      <div id="jd-ownerActions" class="hidden mt-4">
+        <button onclick="deleteMyJob()" class="w-full py-2.5 bg-red-50 text-red-500 rounded-xl font-black text-xs active:scale-95 transition" data-i18n="job_delete_btn">Delete Post</button>
+      </div>
+    </div>
+    <!-- ==================== WEBZINE ==================== -->
+    <div id="page-webzine" class="page p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xl">📰</span>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_webzine">Webzine</h2>
+        <button onclick="openHelp('webzine')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
+      <!-- 관리자: 글쓰기 버튼 -->
+      <div id="webzineAdminBtn" class="hidden mb-3">
+        <button onclick="toggleWebzineForm()" class="w-full py-2.5 bg-[#001d4a] text-white rounded-2xl font-black text-xs active:scale-95 transition">✏️ <span data-i18n="wz_write_btn">Write Article</span></button>
+      </div>
+      <div id="webzineFormWrap" class="hidden mb-4"></div>
+      <!-- 카테고리 필터 -->
+      <div id="webzineCatBar" class="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-0.5 px-0.5"></div>
+      <!-- 기사 목록 -->
+      <div id="webzineList" class="grid grid-cols-2 gap-3"></div>
+      <div id="webzinePagination"></div>
+    </div>
+    <!-- ==================== WEBZINE DETAIL ==================== -->
+    <div id="page-webzine-detail" class="page">
+      <div id="wzd-thumbWrap" class="hidden">
+        <img id="wzd-thumb" src="" class="w-full max-h-[240px] object-cover" loading="lazy">
+      </div>
+      <div class="p-5">
+        <span id="wzd-catBadge" class="inline-block text-[10px] font-black px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 mb-2"></span>
+        <h2 id="wzd-title" class="font-black text-slate-800 text-xl mb-2 leading-snug"></h2>
+        <div class="flex items-center gap-2 text-[10px] text-slate-400 font-bold mb-4">
+          <span id="wzd-author"></span>
+          <span>·</span>
+          <span id="wzd-date"></span>
+          <span>·</span>
+          <span>👁 <span id="wzd-views">0</span></span>
+        </div>
+        <div id="wzd-body" class="prose prose-sm text-slate-600 leading-relaxed"></div>
+      </div>
+    </div>
     <!-- ==================== EVENTS ==================== -->
     <div id="page-events" class="page p-4">
       <div class="flex items-center gap-2 mb-4">
         <span class="text-xl">📅</span>
-        <h2 class="font-black text-slate-800 text-base" data-i18n="nav_events">Events</h2>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_events">Events</h2>
+        <button onclick="openHelp('events')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
       </div>
       <div id="eventList" class="space-y-3"></div>
+      <div id="eventsPagination"></div>
     </div>
     <!-- ==================== EVENT DETAIL PAGE ==================== -->
     <div id="page-event-detail" class="page">
       <div id="edp-imageWrap" class="hidden">
-        <img id="edp-image" src="" class="w-full object-contain">
+        <img id="edp-image" src="" class="w-full object-contain" loading="lazy">
       </div>
       <div class="p-5">
-        <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center gap-3 mb-3">
           <div id="edp-dateBadge" class="bg-[#001d4a] flex flex-col items-center justify-center px-4 py-3 rounded-2xl shrink-0 min-w-[64px]">
             <span id="edp-month" class="text-blue-300 text-[10px] font-black uppercase tracking-widest"></span>
             <span id="edp-day"   class="text-white text-2xl font-black leading-none mt-0.5"></span>
             <span id="edp-year"  class="text-blue-400 text-[10px] font-bold mt-0.5"></span>
           </div>
           <div class="flex-1 min-w-0">
+            <div id="edp-typeBadge" class="mb-1"></div>
             <h2 id="edp-title" class="font-black text-slate-800 text-xl leading-snug"></h2>
             <p id="edp-loc" class="text-sm text-slate-400 font-bold mt-1">📍 <span id="edp-locText"></span></p>
+            <p id="edp-creator" class="text-[10px] text-slate-400 mt-0.5"></p>
           </div>
         </div>
         <div id="edp-descWrap" class="hidden bg-slate-50 rounded-2xl p-4 mb-4">
@@ -1214,9 +2207,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
     <!-- ==================== FACTORY ==================== -->
     <div id="page-factory" class="page p-4">
-      <div id="factoryPromoHeader" class="bg-white rounded-3xl p-8 shadow-sm text-center mb-4">
-        <h2 class="text-xl font-black italic text-blue-900 mb-2">BIOPLANT THAILAND</h2>
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-loose" data-i18n="factory_subtitle">Premium fixture manufacturing center in Bangkok</p>
+      <div id="factoryPromoHeader" class="rounded-3xl p-8 shadow-sm text-center mb-4" style="background:#001D4A">
+        <h2 dir="ltr" style="unicode-bidi:embed;color:#D4AF37" class="text-xl font-black italic mb-2">BIOPLANT THAILAND</h2>
+        <p class="text-[10px] font-bold uppercase tracking-widest leading-loose" style="color:rgba(255,255,255,0.5)" data-i18n="factory_subtitle">Premium fixture manufacturing center in Bangkok</p>
       </div>
       <!-- 관리자 패널 (관리자 로그인 시에만 표시) -->
       <div id="adminPanel">
@@ -1230,10 +2223,15 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <!-- 보조 탭 버튼 -->
         <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">🛍 상품</button>
-          <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">♻️ 중고</button>
-          <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">💬 포럼</button>
-          <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500">📅 이벤트</button>
+          <button onclick="adminShowTab('products')" id="adminTabBtn-products" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_products">🛍 Products</button>
+          <button onclick="adminShowTab('used')" id="adminTabBtn-used" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_used">♻️ Used</button>
+          <button onclick="adminShowTab('forum')" id="adminTabBtn-forum" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_forum">💬 Forum</button>
+          <button onclick="adminShowTab('jobs')" id="adminTabBtn-jobs" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_jobs">💼 Jobs</button>
+          <button onclick="adminShowTab('webzine')" id="adminTabBtn-webzine" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_webzine">📰 Webzine</button>
+          <button onclick="adminShowTab('events')" id="adminTabBtn-events" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_events">📅 Events</button>
+          <button onclick="adminShowTab('ads')" id="adminTabBtn-ads" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_ads">📢 광고 관리</button>
+          <button onclick="adminShowTab('stats')" id="adminTabBtn-stats" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_stats">📊 통계</button>
+          <button onclick="adminShowTab('feedback')" id="adminTabBtn-feedback" class="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500" data-i18n="admin_tab_feedback">💬 피드백</button>
         </div>
         <!-- 탭 콘텐츠 -->
         <div id="adminTabOrders" class="space-y-4"></div>
@@ -1242,11 +2240,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <div id="adminTabUsed" class="hidden space-y-3"></div>
         <div id="adminTabForum" class="hidden space-y-3"></div>
         <div id="adminTabUsers" class="hidden"></div>
+        <div id="adminTabJobs" class="hidden"></div>
+        <div id="adminTabWebzine" class="hidden"></div>
         <div id="adminTabEvents" class="hidden"></div>
+        <div id="adminTabAds" class="hidden"></div>
+        <div id="adminTabStats" class="hidden"></div>
+        <div id="adminTabFeedback" class="hidden"></div>
       </div>
     </div>
     <!-- ==================== SETTINGS ==================== -->
     <div id="page-settings" class="page p-4 space-y-4">
+      <div class="flex justify-end">
+        <button onclick="openHelp('settings')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
       <!-- 프로필 카드 (상단) -->
       <div class="bg-gradient-to-br from-[#001d4a] to-[#0a3d8f] rounded-3xl p-6 shadow-lg">
         <div class="flex items-center gap-4">
@@ -1255,6 +2261,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <p id="settingsNickname" class="font-black text-white text-lg leading-snug truncate">-</p>
             <p id="settingsLicense"  class="text-blue-200 text-xs font-mono mt-0.5">-</p>
             <p id="settingsClinic"   class="text-white/60 text-xs font-bold mt-0.5 truncate">-</p>
+            <p id="settingsCredits" class="mt-1.5"><span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">💰 0</span></p>
           </div>
           <button onclick="toggleProfileEditInline()" class="shrink-0 px-3 py-2 bg-white/15 text-white rounded-xl font-black text-xs active:bg-white/30 transition" data-i18n="profile_edit_btn">Edit</button>
         </div>
@@ -1280,16 +2287,33 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_lang">Language</h3>
         <p class="text-[10px] text-amber-600 font-bold mt-2 hidden" id="langPendingNote" data-i18n="settings_pending">Select a language then press Save.</p>
-        <div class="grid grid-cols-3 gap-2 mt-4">
+        <div class="grid grid-cols-4 gap-2 mt-4">
           <button onclick="selectLang('en')" id="lang-en" class="py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1"><span class="text-xl">🇺🇸</span><span>English</span></button>
           <button onclick="selectLang('ko')" id="lang-ko" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇰🇷</span><span>한국어</span></button>
           <button onclick="selectLang('zh')" id="lang-zh" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇨🇳</span><span>中文</span></button>
           <button onclick="selectLang('th')" id="lang-th" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇭</span><span>ภาษาไทย</span></button>
           <button onclick="selectLang('vi')" id="lang-vi" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇻🇳</span><span>Tiếng Việt</span></button>
           <button onclick="selectLang('es')" id="lang-es" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇪🇸</span><span>Español</span></button>
+          <button onclick="selectLang('tr')" id="lang-tr" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇷</span><span>Türkçe</span></button>
+          <button onclick="selectLang('ar')" id="lang-ar" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇸🇦</span><span>العربية</span></button>
+          <button onclick="selectLang('fa')" id="lang-fa" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇮🇷</span><span>فارسی</span></button>
         </div>
         <button onclick="saveLang()" id="saveLangBtn" class="mt-4 w-full py-3.5 rounded-2xl bg-[#001d4a] text-white font-black text-sm shadow active:scale-95 transition" data-i18n="settings_save_btn">Save Language</button>
         <p id="savedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="settings_saved_msg">Language saved!</p>
+      </div>
+      <!-- 다크모드 토글 -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-black text-slate-800" data-i18n="settings_darkmode">Dark Mode</h3>
+            <p class="text-[10px] text-slate-400 font-bold mt-0.5" data-i18n="settings_darkmode_desc">Switch to dark theme</p>
+          </div>
+          <label class="dm-switch">
+            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+            <span class="dm-track"></span>
+            <span class="dm-thumb"></span>
+          </label>
+        </div>
       </div>
       <!-- 나의 주문 목록 요약 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
@@ -1302,20 +2326,141 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <!-- 내가 쓴 게시물 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-black text-slate-800">✍️ 내가 쓴 게시물</h3>
-          <button onclick="goPage('forum')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100">모두 보기 ›</button>
+          <h3 class="font-black text-slate-800" data-i18n="settings_my_posts">✍️ My Posts</h3>
+          <button onclick="goPage('forum')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsMyPosts" class="space-y-2"></div>
       </div>
       <!-- 내 중고물품 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-black text-slate-800">♻️ 내 중고물품</h3>
-          <button onclick="goPage('used')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100">모두 보기 ›</button>
+          <h3 class="font-black text-slate-800" data-i18n="settings_my_used">♻️ My Used Items</h3>
+          <button onclick="goPage('used')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsMyUsed" class="grid grid-cols-3 gap-2"></div>
       </div>
+      <!-- 피드백 보내기 버튼 -->
+      <button onclick="goPage('feedback')" class="w-full bg-white rounded-2xl p-5 shadow-sm active:scale-[.98] transition text-left">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">💬</span>
+          <div class="flex-1">
+            <p class="font-black text-slate-800 text-sm" data-i18n="feedback_send_btn">Send Feedback</p>
+            <p class="text-slate-400 text-[10px] font-bold" data-i18n="feedback_send_desc">Bug reports, suggestions, complaints, praise</p>
+          </div>
+          <span class="text-slate-300 text-lg">›</span>
+        </div>
+      </button>
+      <!-- LINE 친구 추가 버튼 -->
+      <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
+        class="block rounded-2xl p-4 shadow-sm active:scale-[.98] transition"
+        style="background:#06C755">
+        <div class="flex items-center gap-3">
+          <svg viewBox="0 0 24 24" class="w-8 h-8 shrink-0" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          <div>
+            <p class="font-black text-white text-sm" data-i18n="line_add_friend">Add LINE Friend</p>
+            <p class="text-white/80 text-[10px] font-bold" data-i18n="line_add_desc">Get order updates & support</p>
+          </div>
+        </div>
+      </a>
     </div>
+    <!-- ==================== FEEDBACK PAGE ==================== -->
+    <div id="page-feedback" class="page p-4 space-y-4">
+      <div class="flex items-center gap-2 mb-2">
+        <button onclick="goPage('settings')" class="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400 active:bg-slate-50">←</button>
+        <span class="text-xl">💬</span>
+        <h2 class="font-black text-slate-800 text-base" data-i18n="feedback_title">Send Feedback</h2>
+      </div>
+      <!-- 카테고리 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_category">Category</label>
+        <div id="feedbackCatBar" class="grid grid-cols-5 gap-1.5"></div>
+      </div>
+      <!-- 제목 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_title_label">Title</label>
+        <input id="fbTitle" type="text" maxlength="100" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none" data-i18n-ph="feedback_title_ph">
+      </div>
+      <!-- 내용 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_content_label">Content</label>
+        <textarea id="fbContent" rows="5" maxlength="2000" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none resize-none" data-i18n-ph="feedback_content_ph"></textarea>
+      </div>
+      <!-- 별점 -->
+      <div>
+        <label class="block text-xs font-black text-slate-500 mb-1.5" data-i18n="feedback_rating_label">Rating</label>
+        <div id="fbStars" class="flex gap-2">
+          <button onclick="setFbRating(1)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(2)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(3)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(4)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+          <button onclick="setFbRating(5)" class="fb-star text-3xl opacity-30 transition active:scale-110">⭐</button>
+        </div>
+      </div>
+      <!-- 제출 -->
+      <button onclick="submitFeedback()" class="w-full py-3.5 rounded-2xl font-black text-white text-sm bg-gradient-to-r from-[#0a3072] to-[#0d3880] active:scale-[.98] transition shadow-lg" data-i18n="feedback_submit">Submit Feedback</button>
+    </div>
+    <!-- ==================== MY ACTIVITY PAGE ==================== -->
+    <div id="page-myactivity" class="page p-4">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-xl">👤</span>
+        <h2 class="font-black text-slate-800 text-base flex-1" data-i18n="nav_myactivity">My Activity</h2>
+        <button onclick="openHelp('myactivity')" class="shrink-0 px-2.5 py-1 rounded-lg border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black active:bg-[#D4AF37]/10 transition">📖 <span data-i18n="help_btn">Guide</span></button>
+      </div>
+      <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1 no-scroll">
+        <button onclick="myActivityTab('msg')"    id="matab-msg"    class="flex-1 py-2.5 rounded-xl font-black text-xs bg-[#001d4a] text-white whitespace-nowrap px-2" data-i18n="ma_tab_msg">Messages</button>
+        <button onclick="myActivityTab('posts')"  id="matab-posts"  class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_posts">Posts</button>
+        <button onclick="myActivityTab('orders')" id="matab-orders" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_orders">Orders</button>
+        <button onclick="myActivityTab('used')"   id="matab-used"   class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_used">Used</button>
+        <button onclick="myActivityTab('credits')" id="matab-credits" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_credits">💰 Credits</button>
+      </div>
+      <div id="ma-msg" class=""></div>
+      <div id="ma-posts" class="hidden"></div>
+      <div id="ma-orders" class="hidden"></div>
+      <div id="ma-used" class="hidden"></div>
+      <div id="ma-credits" class="hidden"></div>
+    </div>
+    <!-- ==================== SITE FOOTER ==================== -->
+    <footer id="siteFooter">
+      <div class="footer-grid">
+        <div>
+          <div class="flex items-baseline gap-0 mb-3" style="font-size:24px;font-weight:900;letter-spacing:-1px;line-height:1;justify-content:inherit" dir="ltr">
+            <span style="color:#fff">den</span><span style="color:#D4AF37">t</span><span style="color:#fff">alk</span>
+          </div>
+          <p dir="ltr" style="unicode-bidi:embed;color:rgba(255,255,255,0.6)" class="text-xs leading-relaxed mb-2">BIOPLANT (Thailand) Co., Ltd.</p>
+          <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.5)" data-i18n="footer_address">Bangkok, Thailand</p>
+          <p class="text-xs mt-1" style="color:rgba(255,255,255,0.5)">Tel: +66-XX-XXX-XXXX</p>
+          <p class="text-xs mt-1" style="color:rgba(255,255,255,0.5)">Email: info@bioplant.co.th</p>
+        </div>
+        <div>
+          <p class="footer-heading" data-i18n="footer_links">Quick Links</p>
+          <div class="flex flex-col gap-2">
+            <a href="javascript:void(0)" onclick="goPage('shop')" class="text-xs font-bold" data-i18n="nav_shop">Shop</a>
+            <a href="javascript:void(0)" onclick="goPage('custom')" class="text-xs font-bold" data-i18n="nav_custom">CNC Custom</a>
+            <a href="javascript:void(0)" onclick="goPage('forum')" class="text-xs font-bold" data-i18n="nav_forum">Forum</a>
+            <a href="javascript:void(0)" onclick="goPage('webzine')" class="text-xs font-bold" data-i18n="nav_webzine">Webzine</a>
+            <a href="javascript:void(0)" onclick="goPage('jobs')" class="text-xs font-bold" data-i18n="nav_jobs">Jobs</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading" data-i18n="footer_connect">Connect</p>
+          <a href="https://line.me/R/ti/p/@452fshii" target="_blank" rel="noopener"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black text-white mb-3" style="background:#06C755">
+            <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#fff"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596a.629.629 0 0 1-.709-.219l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595a.63.63 0 0 1 .689.221l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+            <span data-i18n="line_add_friend">LINE Friend</span>
+          </a>
+          <p class="text-xs" style="color:rgba(255,255,255,0.5)">Line: @bioplant_th</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span data-i18n="footer_copyright">© 2026 Dentalk · BIOTEM × BIOPLANT. All rights reserved.</span>
+        <span class="mx-2">·</span>
+        <a href="javascript:void(0)" onclick="openPrivacyModal(event)" class="underline underline-offset-2" data-i18n="privacy_btn">Privacy Policy</a>
+      </div>
+    </footer>
+    </div><!-- /desktopMain -->
+    <!-- ==================== DESKTOP SIDEBAR ==================== -->
+    <aside id="desktopSidebar" style="display:none"></aside>
+    </div><!-- /desktopLayout -->
   </div>
   <!-- ── Floating Cart Bar ───────────────────────────────────── -->
   <div id="floatingCartBar" class="fixed bottom-0 left-0 right-0 z-[150] pointer-events-none">
@@ -1339,9 +2484,24 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
-<script src="lang.js" defer></script>
-<script src="supabase.js" defer></script>
-<script src="app.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
+<!-- APP_VERSION: bump this on each deploy to bust caches (sync with CACHE_VERSION in sw.js) -->
+<script>var APP_VERSION='v32';</script>
+<script>
+(function(){
+  var files=[
+    'supabase.js','lang.js',
+    'lang-en.js','lang-ko.js','lang-zh.js','lang-th.js','lang-vi.js','lang-es.js','lang-tr.js','lang-ar.js','lang-fa.js',
+    'auth.js','shop.js','custom.js','forum.js','leaders.js','jobs.js','webzine.js','events.js','ads.js','admin.js','app.js'
+  ];
+  files.forEach(function(f){
+    var s=document.createElement('script');
+    s.src=f+'?v='+APP_VERSION;
+    s.async=false; // ★ 순서 보장: defer는 동적 스크립트에서 무시됨, async=false로 삽입 순서대로 실행
+    document.head.appendChild(s);
+  });
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 // ── STL 3D Viewer ──────────────────────────────────────────────────────
@@ -1362,26 +2522,26 @@ function _showViewerPanel(type) {
   document.getElementById('viewerPdfPanel').style.display     = type === 'pdf'    ? '' : 'none';
   document.getElementById('viewerOtherPanel').style.display   = type === 'other'  ? '' : 'none';
   var hint = document.getElementById('fileViewerHint');
-  if (hint) hint.textContent = type === '3d' ? '드래그: 회전 · 스크롤: 줌' : '';
+  if (hint) hint.textContent = type === '3d' ? t('stl_viewer_hint') : '';
 }
 
 function openFileViewer(url, filename) {
   var type = _fileViewerType(filename || url);
-  var titleMap = { '3d':'🧊 3D 미리보기', 'image':'🖼 이미지', 'pdf':'📄 PDF', 'other':'📎 파일' };
+  var titleMap = { '3d':t('stl_viewer_3d'), 'image':t('stl_viewer_image'), 'pdf':t('stl_viewer_pdf'), 'other':t('stl_viewer_file') };
   var titleEl = document.getElementById('fileViewerTitle');
-  if (titleEl) titleEl.textContent = (titleMap[type] || '📎 파일') + ' — ' + (filename || '');
+  if (titleEl) titleEl.textContent = (titleMap[type] || t('stl_viewer_file')) + ' — ' + (filename || '');
   document.getElementById('stlDownloadBtn').href = url;
   document.getElementById('stlDownloadBtn').download = filename || '';
   document.getElementById('stlViewerModal').classList.add('open');
   _showViewerPanel(type);
   if (type === '3d') {
     document.getElementById('stlViewerMsg').style.display = 'flex';
-    document.getElementById('stlViewerMsg').textContent = '불러오는 중...';
+    document.getElementById('stlViewerMsg').textContent = t('stl_loading');
     _initStlScene();
     fetch(url)
       .then(function(r){ return r.arrayBuffer(); })
       .then(function(buf){ _loadStlBuffer(buf); })
-      .catch(function(){ document.getElementById('stlViewerMsg').textContent = '파일을 불러올 수 없습니다.'; });
+      .catch(function(){ document.getElementById('stlViewerMsg').textContent = t('stl_load_error'); });
   } else if (type === 'image') {
     document.getElementById('viewerImg').src = url;
   } else if (type === 'pdf') {
@@ -1448,7 +2608,7 @@ function _loadStlBuffer(buf) {
   if (!loader) {
     // STLLoader not bundled in three.min; parse manually (binary STL)
     var geometry = _parseBinaryStl(buf) || _parseAsciiStl(buf);
-    if (!geometry) { document.getElementById('stlViewerMsg').textContent = '파싱 오류'; return; }
+    if (!geometry) { document.getElementById('stlViewerMsg').textContent = t('stl_parse_error'); return; }
     _showStlGeometry(geometry);
   } else {
     var geometry = loader.parse(buf);
@@ -1504,5 +2664,10 @@ function _showStlGeometry(geometry) {
   (function loop(){ _stlAnimId=requestAnimationFrame(loop); if(_stlRenderer) _stlRenderer.render(_stlScene,_stlCamera); })();
 }
 </script>
+<!-- ============================== 모바일 하단 고정 광고 배너 ============================== -->
+<div id="mobileBottomAd" class="mobile-ad-bottom" style="display:none">
+  <div id="mobileBottomAdContent"></div>
+  <button id="mobileBottomAdClose" onclick="closeMobileBottomAd()" class="mobile-ad-close">✕</button>
+</div>
 </body>
 </html>

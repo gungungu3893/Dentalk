@@ -21,8 +21,31 @@ function sbHeaders(extra) {
 async function sbGet(table, params) {
   var url = SUPABASE_URL + '/rest/v1/' + table + (params ? '?' + params : '');
   var res = await fetch(url, { headers: sbHeaders() });
-  if (!res.ok) throw new Error('[sbGet] ' + table + ' HTTP ' + res.status);
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || body.hint || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbGet] ' + table + ' HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
   return res.json();
+}
+
+// ── GET with total count (for pagination) ─────────────────────
+async function sbGetWithCount(table, params) {
+  var url = SUPABASE_URL + '/rest/v1/' + table + (params ? '?' + params : '');
+  var res = await fetch(url, { headers: sbHeaders({ 'Prefer': 'count=exact' }) });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || body.hint || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbGetWithCount] ' + table + ' HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
+  var data = await res.json();
+  var count = 0;
+  var cr = res.headers.get('content-range');
+  if (cr) {
+    var parts = cr.split('/');
+    if (parts[1] && parts[1] !== '*') count = parseInt(parts[1], 10);
+  }
+  return { data: data, count: count };
 }
 
 // ── POST (insert) ─────────────────────────────────────────────
@@ -86,18 +109,20 @@ async function authLogin(nickname, password) {
     if (!data.length) return { ok: false, reason: 'not_found' };
 
     var u = data[0];
-    if (u.role !== 'admin' && !u.is_active) return { ok: false, reason: 'not_active' };
+    if (u.role !== 'admin' && u.role !== 'region_leader' && !u.is_active) return { ok: false, reason: 'not_active' };
 
     return {
-      ok:         true,
-      licenseNum: u.license_number || '',
-      doctorName: u.doctor_name    || '',
-      clinicName: u.clinic_name    || '',
-      nickname:   u.nickname       || '',
-      email:      u.email          || '',
-      phone:      u.phone          || '',
-      address:    u.address        || '',
-      role:       u.role           || 'user',
+      ok:            true,
+      licenseNum:    u.license_number || '',
+      doctorName:    u.doctor_name    || '',
+      clinicName:    u.clinic_name    || '',
+      nickname:      u.nickname       || '',
+      email:         u.email          || '',
+      phone:         u.phone          || '',
+      address:       u.address        || '',
+      role:          u.role           || 'user',
+      leaderRegion:  u.leader_region  || '',
+      leaderTitle:   u.leader_title   || '',
     };
   } catch(e) {
     console.error('[authLogin]', e);
@@ -110,7 +135,14 @@ async function authUpdateProfile(licenseNumber, fields) {
 }
 
 async function authGetAllUsers() {
-  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role&order=clinic_name.asc');
+  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region,leader_title,credits&order=clinic_name.asc');
+}
+
+async function authSetUserRole(nickname, role, leaderRegion, leaderTitle) {
+  var body = { role: role };
+  if (leaderRegion !== undefined) body.leader_region = leaderRegion;
+  if (leaderTitle !== undefined) body.leader_title = leaderTitle;
+  return sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), body);
 }
 
 async function authSetUserActive(nickname, isActive) {
@@ -142,8 +174,10 @@ async function sbSaveCustomOrder(order, casesData) {
   });
 }
 
-async function sbGetCustomOrders(userNickname, isAdmin) {
-  var params = 'order=date.desc';
+async function sbGetCustomOrders(userNickname, isAdmin, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  var params = 'select=id,user_nickname,clinic,addr,phone,line_id,cases,stage,design_versions,review_history,date,carrier,tracking_number&order=date.desc&limit=' + limit + '&offset=' + offset;
   if (!isAdmin && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
   return sbGet('custom_orders', params);
 }
@@ -177,8 +211,10 @@ async function sbSaveShopOrder(order) {
   });
 }
 
-async function sbGetShopOrders(userNickname, isAdminUser) {
-  var params = 'order=created_at.desc';
+async function sbGetShopOrders(userNickname, isAdminUser, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  var params = 'select=id,user_nickname,clinic,addr,phone,line_id,items,stage,date,carrier,tracking_number,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset;
   if (!isAdminUser && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
   return sbGet('orders', params);
 }
@@ -195,8 +231,10 @@ async function sbUpdateShopOrder(orderId, updates) {
 // Used Items (중고 거래) — used_items 테이블
 // ============================================================
 
-async function sbGetUsedItems() {
-  return sbGet('used_items', 'order=created_at.desc');
+async function sbGetUsedItems(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('used_items', 'select=id,seller,name,code,price,condition,description,contact,views,image_url,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveUsedItem(item) {
@@ -229,11 +267,70 @@ async function sbUpdateUsedItem(id, updates) {
 }
 
 // ============================================================
+// Used Comments (중고마켓 댓글) — used_comments 테이블
+// ============================================================
+
+async function sbGetUsedComments(usedItemId) {
+  return sbGet('used_comments', 'used_item_id=eq.' + encodeURIComponent(usedItemId) + '&select=id,used_item_id,author_id,author_name,content,created_at&order=created_at.asc');
+}
+
+async function sbSaveUsedComment(comment) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/used_comments', {
+    method: 'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body: JSON.stringify({
+      used_item_id: comment.used_item_id,
+      author_id: comment.author_id,
+      author_name: comment.author_name,
+      content: comment.content,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveUsedComment] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+// ============================================================
+// Messages (쪽지) — messages 테이블
+// ============================================================
+
+async function sbGetMessages(nickname) {
+  return sbGet('messages', 'or=(from_user.eq.' + encodeURIComponent(nickname) + ',to_user.eq.' + encodeURIComponent(nickname) + ')&select=id,from_user,to_user,subject,body,is_read,created_at&order=created_at.desc');
+}
+
+async function sbSendMessage(msg) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/messages', {
+    method: 'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body: JSON.stringify({
+      from_user: msg.from_user,
+      to_user: msg.to_user,
+      subject: msg.subject,
+      body: msg.body,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSendMessage] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbMarkMessageRead(msgId) {
+  return sbPatch('messages', 'id=eq.' + encodeURIComponent(msgId), { is_read: true });
+}
+
+async function sbGetUnreadMessageCount(nickname) {
+  var rows = await sbGet('messages', 'to_user=eq.' + encodeURIComponent(nickname) + '&is_read=eq.false&select=id');
+  return rows ? rows.length : 0;
+}
+
+// ============================================================
 // Forum Posts (커뮤니티) — forum_posts 테이블
 // ============================================================
 
-async function sbGetForumPosts() {
-  return sbGet('forum_posts', 'order=created_at.desc');
+async function sbGetForumPosts(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('forum_posts', 'select=id,author,category,region,province,title,body,images,views,comments,date,is_pinned,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveForumPost(post) {
@@ -270,8 +367,10 @@ async function sbUpdateForumPost(id, updates) {
 // Events (이벤트/세미나) — events 테이블
 // ============================================================
 
-async function sbGetEvents() {
-  return sbGet('events', 'order=event_date.asc');
+async function sbGetEvents(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('events', 'select=id,title,location,event_date,description,created_by,type,region,views,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveEvent(ev) {
@@ -284,6 +383,8 @@ async function sbSaveEvent(ev) {
       event_date:  ev.date,
       description: ev.desc      || null,
       created_by:  ev.createdBy || null,
+      type:        ev.type      || 'event',
+      region:      ev.region    || 'all',
     }),
   });
   if (!res.ok) throw new Error('[sbSaveEvent] HTTP ' + res.status);
@@ -293,4 +394,352 @@ async function sbSaveEvent(ev) {
 
 async function sbDeleteEvent(id) {
   return sbDelete('events', 'id=eq.' + encodeURIComponent(id));
+}
+
+async function sbUpdateEvent(id, updates) {
+  return sbPatch('events', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+// ============================================================
+// Credits (크레딧) — licenses.credits + credit_history
+// ============================================================
+
+async function sbGetUserCredits(nickname) {
+  var rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(nickname) + '&select=credits');
+  return (rows && rows[0]) ? parseInt(rows[0].credits, 10) || 0 : 0;
+}
+
+async function sbAddCredits(nickname, amount, description) {
+  amount = parseInt(amount, 10) || 0;
+  if (!amount) return 0;
+  // 1) 현재 크레딧 조회
+  var current = await sbGetUserCredits(nickname);
+  var newTotal = current + amount;
+  // 2) credits 업데이트
+  var res = await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbAddCredits] PATCH failed HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
+  // 3) 이력 기록
+  await sbPost('credit_history', { user_id: nickname, amount: amount, type: 'charge', description: description || '' });
+  return newTotal;
+}
+
+async function sbUseCredits(nickname, amount, description) {
+  amount = parseInt(amount, 10) || 0;
+  var current = await sbGetUserCredits(nickname);
+  if (current < amount) throw new Error('INSUFFICIENT_CREDITS');
+  var newTotal = current - amount;
+  var res = await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbUseCredits] PATCH failed HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
+  await sbPost('credit_history', { user_id: nickname, amount: amount, type: 'use', description: description || '' });
+  return newTotal;
+}
+
+async function sbGetCreditHistory(nickname, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('credit_history', 'user_id=eq.' + encodeURIComponent(nickname) + '&select=id,user_id,amount,type,description,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbGetAllCreditHistory(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('credit_history', 'select=id,user_id,amount,type,description,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+// ============================================================
+// Webzine Articles (웹진) — webzine_articles 테이블
+// ============================================================
+
+async function sbGetWebzineArticles(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('webzine_articles', 'select=id,category,title,body_md,thumbnail_url,author_id,views,is_published,created_at&is_published=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbSaveWebzineArticle(article) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/webzine_articles', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      category:      article.category  || 'news',
+      title:         article.title,
+      body_md:       article.body_md   || '',
+      thumbnail_url: article.thumbnail_url || null,
+      author_id:     article.author_id || null,
+      views:         0,
+      is_published:  article.is_published !== false,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveWebzineArticle] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbUpdateWebzineArticle(id, updates) {
+  return sbPatch('webzine_articles', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+async function sbDeleteWebzineArticle(id) {
+  return sbDelete('webzine_articles', 'id=eq.' + encodeURIComponent(id));
+}
+
+// ============================================================
+// Jobs (구인구직) — jobs 테이블
+// ============================================================
+
+async function sbGetJobs(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,views,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbSaveJob(job) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/jobs', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      user_id:      job.user_id      || null,
+      type:         job.type         || 'dentist_hire',
+      region:       job.region       || null,
+      province:     job.province     || null,
+      title:        job.title,
+      description:  job.description  || '',
+      salary_range: job.salary_range || null,
+      requirements: job.requirements || null,
+      contact:      job.contact      || null,
+      is_active:    job.is_active !== false,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveJob] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbUpdateJob(id, updates) {
+  return sbPatch('jobs', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+async function sbDeleteJob(id) {
+  return sbDelete('jobs', 'id=eq.' + encodeURIComponent(id));
+}
+
+// ============================================================
+// Banners (광고 배너) — banners 테이블
+// ============================================================
+
+async function sbGetBanners() {
+  return sbGet('banners', 'select=id,advertiser_name,image_url,link_url,position,start_date,end_date,is_active,clicks,impressions,created_at&is_active=eq.true&order=created_at.desc');
+}
+
+async function sbGetAllBanners() {
+  return sbGet('banners', 'select=id,advertiser_name,image_url,link_url,position,start_date,end_date,is_active,clicks,impressions,created_at&order=created_at.desc');
+}
+
+async function sbGetBannersByPosition(position) {
+  var today = new Date().toISOString().slice(0, 10);
+  return sbGet('banners',
+    'is_active=eq.true' +
+    '&position=eq.' + encodeURIComponent(position) +
+    '&start_date=lte.' + today +
+    '&end_date=gte.' + today +
+    '&order=created_at.desc'
+  );
+}
+
+async function sbSaveBanner(banner) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/banners', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      advertiser_name: banner.advertiser_name || '',
+      image_url:       banner.image_url,
+      link_url:        banner.link_url || '',
+      position:        banner.position || 'home_top',
+      start_date:      banner.start_date || new Date().toISOString().slice(0, 10),
+      end_date:        banner.end_date || '',
+      is_active:       banner.is_active !== false,
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveBanner] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbUpdateBanner(id, updates) {
+  return sbPatch('banners', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+async function sbDeleteBanner(id) {
+  return sbDelete('banners', 'id=eq.' + encodeURIComponent(id));
+}
+
+async function sbBannerClick(id) {
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/increment_banner_clicks', {
+    method:  'POST',
+    headers: sbHeaders(),
+    body:    JSON.stringify({ banner_id: id }),
+  });
+}
+
+async function sbBannerImpression(id) {
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/increment_banner_impressions', {
+    method:  'POST',
+    headers: sbHeaders(),
+    body:    JSON.stringify({ banner_id: id }),
+  });
+}
+
+// ============================================================
+// Feedback (피드백) — feedback 테이블
+// ============================================================
+
+async function sbSaveFeedback(fb) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/feedback', {
+    method:  'POST',
+    headers: sbHeaders({ 'Prefer': 'return=representation' }),
+    body:    JSON.stringify({
+      user_nickname: fb.user_nickname,
+      category:      fb.category || 'other',
+      title:         fb.title,
+      content:       fb.content || '',
+      rating:        fb.rating  || 5,
+      status:        'unread',
+    }),
+  });
+  if (!res.ok) throw new Error('[sbSaveFeedback] HTTP ' + res.status);
+  var rows = await res.json();
+  return rows[0];
+}
+
+async function sbGetFeedback(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGetWithCount('feedback', 'select=id,user_nickname,category,title,content,rating,status,admin_note,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbUpdateFeedback(id, updates) {
+  return sbPatch('feedback', 'id=eq.' + encodeURIComponent(id), updates);
+}
+
+// ============================================================
+// 통합 검색 — 여러 테이블 동시 검색
+// ============================================================
+
+async function sbSearchAll(keyword) {
+  var encoded = encodeURIComponent('%' + keyword + '%');
+  var results = { forum: [], webzine: [], jobs: [], used: [] };
+  try {
+    var queries = [
+      sbGet('forum_posts', 'select=id,title,author,category,created_at&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('webzine_articles', 'select=id,title,category,thumbnail_url,created_at&is_published=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('jobs', 'select=id,title,type,region,created_at&is_active=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('used_items', 'select=id,name,price,seller,image_url,created_at&name=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+    ];
+    var res = await Promise.allSettled(queries);
+    if (res[0].status === 'fulfilled') results.forum   = res[0].value || [];
+    if (res[1].status === 'fulfilled') results.webzine = res[1].value || [];
+    if (res[2].status === 'fulfilled') results.jobs    = res[2].value || [];
+    if (res[3].status === 'fulfilled') results.used    = res[3].value || [];
+  } catch(e) { /* search error - return partial results */ }
+  return results;
+}
+
+// ============================================================
+// Notifications (알림) — notifications 테이블
+// ============================================================
+
+async function sbGetNotifications(userId, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('notifications', 'select=id,user_id,type,title,body,link,is_read,created_at&user_id=eq.' + encodeURIComponent(userId) + '&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbMarkNotifRead(notifId) {
+  return sbPatch('notifications', 'id=eq.' + encodeURIComponent(notifId), { is_read: true });
+}
+
+async function sbMarkAllNotifsRead(userId) {
+  return sbPatch('notifications', 'user_id=eq.' + encodeURIComponent(userId) + '&is_read=eq.false', { is_read: true });
+}
+
+async function sbGetUnreadNotifCount(userId) {
+  var res = await fetch(SUPABASE_URL + '/rest/v1/notifications?user_id=eq.' + encodeURIComponent(userId) + '&is_read=eq.false&select=id', {
+    method: 'HEAD',
+    headers: sbHeaders({ 'Prefer': 'count=exact' }),
+  });
+  var count = res.headers.get('content-range');
+  if (count) {
+    var parts = count.split('/');
+    return parseInt(parts[1]) || 0;
+  }
+  return 0;
+}
+
+async function sbCreateNotification(notif) {
+  return sbPost('notifications', {
+    user_id:   notif.user_id,
+    type:      notif.type    || 'info',
+    title:     notif.title,
+    body:      notif.body    || '',
+    link:      notif.link    || '',
+    is_read:   false,
+  });
+}
+
+// ============================================================
+// Reviews (리뷰/평점)
+// ============================================================
+
+async function sbGetReviews(productId) {
+  return sbGet('reviews', 'select=id,user_id,product_id,rating,comment,created_at&product_id=eq.' + encodeURIComponent(productId) + '&order=created_at.desc&limit=50');
+}
+
+async function sbPostReview(review) {
+  return sbPost('reviews', {
+    user_id:    review.user_id,
+    product_id: review.product_id,
+    rating:     review.rating,
+    comment:    review.comment || '',
+  });
+}
+
+async function sbDeleteReview(reviewId) {
+  return sbDelete('reviews', 'id=eq.' + encodeURIComponent(reviewId));
+}
+
+async function sbCheckUserReview(userId, productId) {
+  var result = await sbGet('reviews', 'select=id&user_id=eq.' + encodeURIComponent(userId) + '&product_id=eq.' + encodeURIComponent(productId) + '&limit=1');
+  return result && result.length > 0;
+}
+
+// ============================================================
+// 통계 (Admin Dashboard Stats)
+// ============================================================
+
+async function sbGetOrderStats() {
+  return sbGet('orders', 'select=id,items,stage,date,created_at&order=created_at.desc&limit=500');
+}
+
+async function sbGetAllUsersCount() {
+  return sbGet('licenses', 'select=license_number&is_active=eq.true');
+}
+
+async function sbGetForumStats() {
+  return sbGet('forum_posts', 'select=id,author,category,created_at&order=created_at.desc&limit=500');
+}
+
+async function sbGetForumCommentStats() {
+  return sbGet('forum_comments', 'select=id,post_id,created_at&order=created_at.desc&limit=500');
+}
+
+async function sbGetAllUsers() {
+  return sbGet('licenses', 'select=license_number,nickname,created_at,is_active,role');
 }
