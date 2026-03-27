@@ -817,7 +817,8 @@ async function renderAdminUsers() {
         var titleList = curLevel === 'all' ? LEADER_TITLES_NATIONAL : curLevel === 'region' ? LEADER_TITLES_REGIONAL : curLevel === 'province' ? LEADER_TITLES_PROVINCE : [];
         var titleOpts = '<option value="">' + t('leader_select_title') + '</option>';
         titleList.forEach(function(ti) {
-          var occupied = _isTitleOccupied(u.leader_region || '', ti.key, u.nickname);
+          var occupiedRegion = u.leader_region || '';
+          var occupied = occupiedRegion ? _isTitleOccupied(occupiedRegion, ti.key, u.nickname) : false;
           titleOpts += '<option value="' + ti.key + '"' + (curTitle===ti.key?' selected':'') + (occupied?' disabled':'') + '>' + t(ti.labelKey) + (occupied ? ' ✓' : '') + '</option>';
         });
         leaderCtrl = '<div class="mt-2 space-y-1.5">' +
@@ -928,7 +929,8 @@ function _refreshTitleOpts(nickname, region, lv) {
   var titles = _getTitlesForLevel(lv);
   var html = '<option value="">' + t('leader_select_title') + '</option>';
   titles.forEach(function(ti) {
-    var occupied = _isTitleOccupied(region || '', ti.key, nickname);
+    // region이 확정되지 않은 상태면 점유 확인 건너뛰기
+    var occupied = region ? _isTitleOccupied(region, ti.key, nickname) : false;
     html += '<option value="' + ti.key + '"' + (occupied ? ' disabled' : '') + '>' + t(ti.labelKey) + (occupied ? ' ✓' : '') + '</option>';
   });
   titleSel.innerHTML = html;
@@ -945,7 +947,8 @@ function adminLeaderLevelChanged(nickname) {
   provinceSel.style.display = (lv === 'province') ? '' : 'none';
   if (lv === 'all' || lv === '') { regionSel.value = ''; provinceSel.value = ''; }
   if (lv === 'region') provinceSel.value = '';
-  var region = lv === 'all' ? 'all' : regionSel.value || '';
+  if (lv === 'province') provinceSel.innerHTML = '<option value="">' + t('leader_select_province') + '</option>';
+  var region = lv === 'all' ? 'all' : '';
   _refreshTitleOpts(nickname, region, lv);
 }
 // 지역 선택 변경 시
@@ -962,10 +965,10 @@ function adminLeaderRegionChanged(nickname) {
     html += '<option value="' + rCfg.key + ':' + p.key + '">' + p.label + '</option>';
   });
   provinceSel.innerHTML = html;
-  // 직책 드롭다운도 갱신 (지역 변경 시 해당 지역의 점유 상태 반영)
+  // 직책 드롭다운도 갱신
   var lv = levelSel ? levelSel.value : '';
-  var region = lv === 'province' ? '' : regionKey; // province 레벨이면 주 선택 후 갱신
   if (lv === 'region') _refreshTitleOpts(nickname, regionKey, lv);
+  if (lv === 'province') _refreshTitleOpts(nickname, '', lv);
 }
 // 주 선택 변경 시 직책 갱신 (province 레벨)
 function adminLeaderProvinceChanged(nickname) {
