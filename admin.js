@@ -1423,7 +1423,7 @@ var _creditChargeCurrentAmount = 0;
 function openCreditChargeModal(nickname, currentCredits) {
   console.log('modal opening', nickname, currentCredits);
   _creditChargeTarget = nickname;
-  _creditChargeCurrentAmount = currentCredits || 0;
+  _creditChargeCurrentAmount = parseInt(currentCredits, 10) || 0;
   var modal = document.getElementById('creditChargeModal');
   if (!modal) { console.error('creditChargeModal not found'); return; }
   document.getElementById('ccm-nickname').textContent = nickname;
@@ -1443,7 +1443,7 @@ async function chargeCredits(amount) {
     var newTotal = await sbAddCredits(_creditChargeTarget, amount, 'Admin charge +' + amount);
     _creditChargeCurrentAmount = parseInt(newTotal, 10) || 0;
     document.getElementById('ccm-current').textContent = _creditChargeCurrentAmount + ' ' + t('credit_unit');
-    showToast(tf('credit_charged_msg', _creditChargeTarget, amount), 'success');
+    showToast(tf('credit_charged_msg', amount, _creditChargeTarget), 'success');
     // LINE 알림
     sendLinePushText(_creditChargeTarget, '💰 ' + t('credit_line_charged').replace('%', String(amount)).replace('%', String(_creditChargeCurrentAmount)));
     // 유저 목록 갱신
