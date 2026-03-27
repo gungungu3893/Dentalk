@@ -1247,7 +1247,7 @@ function openForumDetail(id) {
   var authorEl = document.getElementById('fdp-author');
   var _li = _getLeaderInfo(post.author);
   var authorBadge = _li ? ' ⭐ ' + _resolveLeaderLabel(_li.region) + (_li.title ? ' · ' + t(_titleKeyToLabelKey(_li.title)) : '') : '';
-  authorEl.innerHTML = '<span class="font-black text-slate-500">' + post.author + '</span>' +
+  authorEl.innerHTML = '<span class="font-black text-slate-500">' + escHtml(post.author) + '</span>' +
     (authorBadge ? '<span class="text-purple-600 font-black">' + authorBadge + '</span>' : '') +
     ' · ' + (post.date||'');
   document.getElementById('fdp-views').textContent  = post.views;

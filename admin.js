@@ -456,15 +456,15 @@ function renderAdminUsed() {
       '<div class="flex justify-between items-start gap-3">' +
         (item.image ? '<img src="' + item.image + '" class="w-14 h-14 rounded-xl object-cover shrink-0" loading="lazy">' : '<div class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0">📦</div>') +
         '<div class="flex-1 min-w-0">' +
-          '<p class="font-black text-slate-800 text-sm truncate">' + item.name + '</p>' +
-          '<p class="text-[9px] font-mono text-slate-400">' + item.code + '</p>' +
+          '<p class="font-black text-slate-800 text-sm truncate">' + escHtml(item.name) + '</p>' +
+          '<p class="text-[9px] font-mono text-slate-400">' + escHtml(item.code) + '</p>' +
           '<p class="font-black text-blue-700 text-xs mt-0.5">' + item.price.toLocaleString() + ' THB</p>' +
           '<span class="inline-block text-[8px] font-bold px-1.5 py-0.5 rounded-full mt-1 ' + condColor[item.cond] + '">' + condLabel[item.cond] + '</span>' +
         '</div>' +
         '<button onclick="adminDeleteUsed(' + i + ')" class="shrink-0 px-2 py-1 bg-red-50 text-red-500 rounded-lg font-black text-[10px] active:scale-95 transition">🗑 삭제</button>' +
       '</div>' +
       '<div class="mt-2 pt-2 border-t border-slate-100 flex justify-between text-[9px] text-slate-400">' +
-        '<span>' + item.seller + ' · ' + item.date + '</span>' +
+        '<span>' + escHtml(item.seller) + ' · ' + item.date + '</span>' +
         '<span>👁 ' + (item.views||0) + '</span>' +
       '</div>' +
     '</div>';
@@ -503,9 +503,9 @@ function renderAdminForum() {
       '<div class="flex justify-between items-start gap-2">' +
         '<div class="flex-1 min-w-0">' +
           '<div class="flex items-center gap-2 flex-wrap mb-1">' + catBadge + regionBadge + '</div>' +
-          '<p class="font-black text-slate-800 text-sm leading-snug">' + post.title + '</p>' +
-          '<p class="text-[10px] text-slate-400 mt-1 line-clamp-2">' + post.body + '</p>' +
-          '<p class="text-[9px] text-slate-300 mt-1">' + post.author + ' · ' + (post.date||'') + ' · 👁 ' + (post.views||0) + ' · 💬 ' + (post.comments?post.comments.length:0) + '</p>' +
+          '<p class="font-black text-slate-800 text-sm leading-snug">' + escHtml(post.title) + '</p>' +
+          '<p class="text-[10px] text-slate-400 mt-1 line-clamp-2">' + escHtml(post.body) + '</p>' +
+          '<p class="text-[9px] text-slate-300 mt-1">' + escHtml(post.author) + ' · ' + (post.date||'') + ' · 👁 ' + (post.views||0) + ' · 💬 ' + (post.comments?post.comments.length:0) + '</p>' +
         '</div>' +
         '<button onclick="adminDeletePost(' + i + ')" class="shrink-0 px-2 py-1 bg-red-50 text-red-500 rounded-lg font-black text-[10px] active:scale-95 transition">🗑 삭제</button>' +
       '</div>' +

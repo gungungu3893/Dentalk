@@ -794,7 +794,7 @@ function _sidebarLatestPosts() {
   return p.map(function(post) {
     return '<div class="sidebar-mini-item" onclick="openForumDetail(' + post.id + ')">' +
       '<span class="smi-rank">💬</span>' +
-      '<div style="min-width:0;flex:1"><p class="smi-title">' + escHtml(post.title) + '</p><p class="smi-sub">' + (post.author || '') + ' · ' + (post.date || '') + '</p></div>' +
+      '<div style="min-width:0;flex:1"><p class="smi-title">' + escHtml(post.title) + '</p><p class="smi-sub">' + escHtml(post.author || '') + ' · ' + (post.date || '') + '</p></div>' +
     '</div>';
   }).join('');
 }
