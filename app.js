@@ -1207,7 +1207,7 @@ function renderHomeEventsPreview() {
         '<p class="text-[9px] font-bold text-slate-400 font-mono uppercase mb-0.5">' + e.date + '</p>' +
         '<p class="font-black text-slate-800 text-xs leading-snug">' + e.event + '</p>' +
         '<p class="text-[10px] text-slate-400 mt-1">📍 ' + e.loc + '</p>' +
-        '<p class="text-[9px] text-slate-300 font-medium mt-1">' + (e.createdBy||'') + (e.createdBy ? ' · ' : '') + '👁 ' + (e.views||0) + (e._rsvpCount ? ' · 👥 ' + e._rsvpCount : '') + '</p>' +
+        '<p class="text-[9px] text-slate-300 font-medium mt-1">' + (e.createdBy||'') + (e.createdBy ? ' · ' : '') + '👁 ' + (e.views||0) + '</p>' +
       '</div>' +
     '</div>';
   }).join('');

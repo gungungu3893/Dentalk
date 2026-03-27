@@ -24,7 +24,6 @@ function renderEvents() {
     var typeBadge = e.type === 'meetup'
       ? '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 mb-1">🤝 ' + t('meetup_badge') + '</span>'
       : '<span class="inline-block text-[8px] font-black px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 mb-1">📅 ' + t('event_badge') + '</span>';
-    var rsvpCount = (e._rsvpCount !== undefined) ? e._rsvpCount : '';
     var evId = typeof e.id === 'string' ? "'" + e.id + "'" : e.id;
     // 리더/관리자 삭제 버튼
     var canDel = canManageRegion(e.region || 'all') || (isLoggedIn() && e.createdBy === currentUser.nickname);
@@ -45,7 +44,6 @@ function renderEvents() {
           '<div class="flex items-center gap-1.5 flex-wrap text-[9px] text-slate-300 font-bold mt-1">' +
             (e.createdBy ? '<span class="text-slate-500 font-black">' + escHtml(e.createdBy) + '</span><span>·</span>' : '') +
             '<span>👁 ' + (e.views||0) + '</span>' +
-            (rsvpCount !== '' ? '<span>·</span><span class="text-green-600 font-black">👥 ' + rsvpCount + '</span>' : '') +
           '</div>' +
         '</div>' +
         '<span class="text-slate-300 text-lg font-black shrink-0 ml-2">›</span>' +
@@ -53,28 +51,6 @@ function renderEvents() {
       '</div>' +
     '</div>';
   }).join('');
-  // 비동기 RSVP 카운트 로드
-  _loadEventRsvpCounts();
-}
-async function _loadEventRsvpCounts() {
-  for (var i = 0; i < events_.length; i++) {
-    var ev = events_[i];
-    var sbId = String(ev._sbId || ev.id);
-    if (!sbId || sbId === 'undefined' || sbId === 'null') continue;
-    try {
-      var rsvps = await sbGetEventRsvps(sbId);
-      var count = rsvps.filter(function(r){ return r.status === 'attending'; }).length;
-      ev._rsvpCount = count;
-    } catch(e) { ev._rsvpCount = 0; }
-  }
-  // 카운트 업데이트 후 리스트 UI만 재반영
-  var el = document.getElementById('eventList');
-  if (!el) return;
-  var items = el.querySelectorAll('[data-rsvp-count]');
-  events_.forEach(function(ev) {
-    var badge = document.getElementById('rsvp-count-' + (ev._sbId || ev.id));
-    if (badge && ev._rsvpCount !== undefined) badge.textContent = '👥 ' + ev._rsvpCount + ' ' + t('rsvp_attendees');
-  });
 }
 function openEventDetail(id) {
   var ev = events_.find(function(e){ return e.id === id; });
@@ -114,101 +90,6 @@ function openEventDetail(id) {
   }
   document.getElementById('edp-imageWrap').classList.add('hidden');
   goDetailPage('event-detail', ev.event, 'events');
-  // RSVP 로드
-  _loadEventDetailRsvp(ev);
-}
-var _currentDetailEvent = null;
-async function _loadEventDetailRsvp(ev) {
-  _currentDetailEvent = ev;
-  var sbId = String(ev._sbId || ev.id);
-  var rsvpWrap = document.getElementById('edp-rsvpWrap');
-  if (!rsvpWrap) return;
-  rsvpWrap.classList.remove('hidden');
-  var rsvpBtns = document.getElementById('edp-rsvpBtns');
-  var attendeeList = document.getElementById('edp-attendeeList');
-  var countEl = document.getElementById('edp-rsvpCount');
-  if (!isLoggedIn()) {
-    rsvpBtns.innerHTML = '<p class="text-xs text-slate-400 font-bold">' + t('rsvp_login_required') + '</p>';
-  } else {
-    rsvpBtns.innerHTML =
-      '<button id="edp-rsvpYes" onclick="toggleRsvp(\'attending\')" class="flex-1 py-2.5 rounded-xl font-black text-xs border-2 transition active:scale-95">' + t('rsvp_attend') + '</button>' +
-      '<button id="edp-rsvpNo" onclick="toggleRsvp(\'not_attending\')" class="flex-1 py-2.5 rounded-xl font-black text-xs border-2 transition active:scale-95">' + t('rsvp_not_attend') + '</button>';
-  }
-  // 참석자 로드
-  if (!sbId || sbId === 'undefined' || sbId === 'null') {
-    countEl.textContent = '0 ' + t('rsvp_attendees');
-    attendeeList.innerHTML = '';
-    return;
-  }
-  try {
-    var attendees = await sbGetRsvpAttendees(sbId);
-    countEl.textContent = attendees.length + ' ' + t('rsvp_attendees');
-    ev._rsvpCount = attendees.length;
-    attendeeList.innerHTML = attendees.length
-      ? attendees.map(function(a) {
-          return '<div class="flex items-center gap-2 py-1.5 border-b border-slate-50 last:border-0">' +
-            '<span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs">👤</span>' +
-            '<span class="font-black text-xs text-slate-700">' + escHtml(a.nickname) + '</span>' +
-            '<span class="text-[10px] text-slate-400">' + escHtml(a.clinic || '') + '</span>' +
-          '</div>';
-        }).join('')
-      : '<p class="text-xs text-slate-400 font-bold py-2">' + t('rsvp_no_attendees') + '</p>';
-    // 현재 유저 RSVP 상태 반영
-    if (isLoggedIn()) {
-      var myRsvp = attendees.find(function(a){ return a.nickname === currentUser.nickname; });
-      _updateRsvpButtons(myRsvp ? 'attending' : null);
-      // not_attending 상태도 확인
-      if (!myRsvp) {
-        var allRsvps = await sbGetEventRsvps(sbId);
-        var mine = allRsvps.find(function(r){ return r.user_id === currentUser.nickname; });
-        if (mine) _updateRsvpButtons(mine.status);
-      }
-    }
-  } catch(e) {
-    console.error('[RSVP Load] Error:', e.message || e);
-    handleSupabaseError(e, 'RSVP Load');
-    countEl.textContent = '0 ' + t('rsvp_attendees');
-    attendeeList.innerHTML = '';
-  }
-}
-function _updateRsvpButtons(status) {
-  var yesBtn = document.getElementById('edp-rsvpYes');
-  var noBtn  = document.getElementById('edp-rsvpNo');
-  if (!yesBtn || !noBtn) return;
-  if (status === 'attending') {
-    yesBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs border-2 border-green-500 bg-green-50 text-green-700 transition active:scale-95';
-    noBtn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs border-2 border-slate-200 bg-white text-slate-400 transition active:scale-95';
-  } else if (status === 'not_attending') {
-    yesBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs border-2 border-slate-200 bg-white text-slate-400 transition active:scale-95';
-    noBtn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs border-2 border-red-500 bg-red-50 text-red-700 transition active:scale-95';
-  } else {
-    yesBtn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs border-2 border-slate-200 bg-white text-slate-600 transition active:scale-95';
-    noBtn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs border-2 border-slate-200 bg-white text-slate-600 transition active:scale-95';
-  }
-}
-async function toggleRsvp(status) {
-  if (!isLoggedIn() || !_currentDetailEvent) return;
-  var ev = _currentDetailEvent;
-  var sbId = String(ev._sbId || ev.id);
-  if (!sbId || sbId === 'undefined' || sbId === 'null') {
-    console.error('[RSVP] Invalid event ID:', sbId);
-    showToast(t('rsvp_error'), 'error');
-    return;
-  }
-  try {
-    console.log('[RSVP] Upserting:', { eventId: sbId, userId: currentUser.nickname, status: status });
-    await sbUpsertRsvp(sbId, currentUser.nickname, status);
-    _updateRsvpButtons(status);
-    _loadEventDetailRsvp(ev);
-    // LINE 알림: 이벤트 주최자에게 RSVP 알림 (참석 시에만, 본인 이벤트가 아닐 때)
-    if (status === 'attending' && ev.createdBy && ev.createdBy !== currentUser.nickname) {
-      sendLinePushText(ev.createdBy, '📅 ' + (ev.event || '') + ' — มีผู้สมัครเข้าร่วมใหม่\nNew RSVP for ' + (ev.event || '') + '.');
-    }
-  } catch(e) {
-    console.error('[RSVP] Error:', e.message || e);
-    handleSupabaseError(e, 'RSVP');
-    showToast(t('rsvp_error'), 'error');
-  }
 }
 async function leaderDeleteEvent(id) {
   if (!confirm(t('event_delete_confirm'))) return;

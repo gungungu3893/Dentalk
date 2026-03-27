@@ -401,49 +401,6 @@ async function sbUpdateEvent(id, updates) {
 }
 
 // ============================================================
-// Events RSVP (참석 관리) — events_rsvp 테이블
-// ============================================================
-
-async function sbGetEventRsvps(eventId) {
-  return sbGet('events_rsvp', 'event_id=eq.' + encodeURIComponent(eventId) + '&select=id,event_id,user_id,status,created_at');
-}
-
-async function sbUpsertRsvp(eventId, userId, status) {
-  // Supabase upsert: on conflict(event_id, user_id)
-  var res = await fetch(SUPABASE_URL + '/rest/v1/events_rsvp?on_conflict=event_id,user_id', {
-    method:  'POST',
-    headers: sbHeaders({ 'Prefer': 'return=representation,resolution=merge-duplicates' }),
-    body:    JSON.stringify({ event_id: eventId, user_id: userId, status: status }),
-  });
-  if (!res.ok) {
-    var detail = '';
-    try { var body = await res.json(); detail = body.message || body.hint || body.details || JSON.stringify(body); } catch(e) {}
-    throw new Error('[sbUpsertRsvp] HTTP ' + res.status + (detail ? ' — ' + detail : ''));
-  }
-  var rows = await res.json();
-  return rows[0];
-}
-
-async function sbDeleteRsvp(eventId, userId) {
-  return sbDelete('events_rsvp', 'event_id=eq.' + encodeURIComponent(eventId) + '&user_id=eq.' + encodeURIComponent(userId));
-}
-
-async function sbGetRsvpAttendees(eventId) {
-  // Join: rsvp user_id → licenses nickname, clinic_name
-  var rsvps = await sbGet('events_rsvp', 'event_id=eq.' + encodeURIComponent(eventId) + '&status=eq.attending&select=user_id,created_at');
-  if (!rsvps || !rsvps.length) return [];
-  // Fetch user info for attendees
-  var nicks = rsvps.map(function(r){ return r.user_id; });
-  var users = await sbGet('licenses', 'nickname=in.(' + nicks.map(encodeURIComponent).join(',') + ')&select=nickname,clinic_name');
-  var userMap = {};
-  (users || []).forEach(function(u){ userMap[u.nickname] = u; });
-  return rsvps.map(function(r) {
-    var u = userMap[r.user_id] || {};
-    return { nickname: r.user_id, clinic: u.clinic_name || '', date: r.created_at };
-  });
-}
-
-// ============================================================
 // Webzine Articles (웹진) — webzine_articles 테이블
 // ============================================================
 
