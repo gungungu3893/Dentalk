@@ -67,8 +67,10 @@ const PRODUCTS = [
 // ============================================================
 // Category product images — add URLs here as photos become available
 var CATEGORY_IMAGES = {
-  'q-base':  'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Q-base.png',
-  'ti-base': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Ti-base%20Abutment.png'
+  'scan-body': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/scanbody.png',
+  'q-base':    'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Q-base.png',
+  'ti-base':   'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Ti-base%20Abutment.png',
+  '3d-analog': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/3d-analog.png'
 };
 // Render category icon: image with white bg box, or SVG scaled
 // imgSize overrides size for categories with product images (Q-Base, Ti-Base)
