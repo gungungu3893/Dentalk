@@ -836,6 +836,7 @@ async function renderAdminUsers() {
       var creditDisplay = '<div class="flex items-center gap-2 mt-2">' +
         '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.15);color:#001D4A">💰 ' + (u.credits || 0) + ' ' + t('credit_unit') + '</span>' +
         (!isAdminU ? '<button onclick="openCreditChargeModal(\'' + safeNick + '\',' + (u.credits||0) + ')" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37] text-[#001D4A] active:scale-95 transition">' + t('credit_charge_btn') + '</button>' : '') +
+        (!isAdminU ? '<button onclick="openCreditAdjustModal(\'' + safeNick + '\',' + (u.credits||0) + ')" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 active:scale-95 transition">✏️ ' + t('credit_adjust_btn') + '</button>' : '') +
       '</div>';
       return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
         '<div class="flex justify-between items-start">' +
@@ -1444,14 +1445,86 @@ async function chargeCredits(amount) {
     _creditChargeCurrentAmount = parseInt(newTotal, 10) || 0;
     document.getElementById('ccm-current').textContent = _creditChargeCurrentAmount + ' ' + t('credit_unit');
     showToast(tf('credit_charged_msg', amount, _creditChargeTarget), 'success');
-    // LINE 알림
-    sendLinePushText(_creditChargeTarget, '💰 ' + t('credit_line_charged').replace('%', String(amount)).replace('%', String(_creditChargeCurrentAmount)));
+    // LINE 알림 — 고객
+    sendLinePushText(_creditChargeTarget, '💰 크레딧 ' + amount + '개가 충전되었습니다! 현재 잔액: ' + _creditChargeCurrentAmount + '크레딧 / Credit charged: ' + amount + '. Balance: ' + _creditChargeCurrentAmount);
+    // LINE 알림 — 관리자
+    if (LINE_PROXY_URL && LINE_USER_ID) {
+      try {
+        fetch(LINE_PROXY_URL + '/push', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: '💰 [' + _creditChargeTarget + ']에게 크레딧 ' + amount + '개 충전 완료. 잔액: ' + _creditChargeCurrentAmount + '크레딧' }] })
+        });
+      } catch(e) { console.error('[LINE Admin Push]', e); }
+    }
     // 유저 목록 갱신
     renderAdminUsers();
   } catch(e) {
     console.error('[Credit Charge]', e.message || e);
     handleSupabaseError(e, 'Credit Charge');
     showToast(t('credit_charge_error'), 'error');
+  }
+}
+
+// ============================================================
+// 크레딧 수동 수정 모달
+// ============================================================
+var _creditAdjustTarget = '';
+var _creditAdjustCurrentAmount = 0;
+
+function openCreditAdjustModal(nickname, currentCredits) {
+  _creditAdjustTarget = nickname;
+  _creditAdjustCurrentAmount = parseInt(currentCredits, 10) || 0;
+  var modal = document.getElementById('creditAdjustModal');
+  if (!modal) { console.error('creditAdjustModal not found'); return; }
+  document.getElementById('cam-nickname').textContent = nickname;
+  document.getElementById('cam-current').textContent = _creditAdjustCurrentAmount + ' ' + t('credit_unit');
+  document.getElementById('cam-input').value = _creditAdjustCurrentAmount;
+  modal.classList.add('open');
+}
+
+function closeCreditAdjustModal() {
+  var modal = document.getElementById('creditAdjustModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function adjustCredits() {
+  var input = document.getElementById('cam-input');
+  var newAmount = parseInt(input.value, 10);
+  if (isNaN(newAmount) || newAmount < 0) {
+    showToast('올바른 숫자를 입력하세요.', 'error');
+    return;
+  }
+  if (newAmount === _creditAdjustCurrentAmount) {
+    showToast('변경 사항이 없습니다.', 'info');
+    return;
+  }
+  if (!confirm('정말 크레딧을 ' + newAmount + '개로 변경하시겠습니까?')) return;
+  try {
+    var desc = '관리자 수동 조정: ' + _creditAdjustCurrentAmount + ' → ' + newAmount;
+    var result = await sbSetCredits(_creditAdjustTarget, newAmount, desc);
+    _creditAdjustCurrentAmount = parseInt(result, 10) || 0;
+    document.getElementById('cam-current').textContent = _creditAdjustCurrentAmount + ' ' + t('credit_unit');
+    showToast(_creditAdjustTarget + ' 크레딧 → ' + _creditAdjustCurrentAmount, 'success');
+    // LINE 알림 — 고객
+    var diff = newAmount - parseInt(input.dataset.prev || 0, 10);
+    sendLinePushText(_creditAdjustTarget, '💰 크레딧이 ' + _creditAdjustCurrentAmount + '개로 변경되었습니다. 현재 잔액: ' + _creditAdjustCurrentAmount + '크레딧 / Credit adjusted to ' + _creditAdjustCurrentAmount + '. Balance: ' + _creditAdjustCurrentAmount);
+    // LINE 알림 — 관리자
+    if (LINE_PROXY_URL && LINE_USER_ID) {
+      try {
+        fetch(LINE_PROXY_URL + '/push', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: '💰 [' + _creditAdjustTarget + '] 크레딧 수동 조정 완료. ' + desc + '. 잔액: ' + _creditAdjustCurrentAmount + '크레딧' }] })
+        });
+      } catch(e) { console.error('[LINE Admin Push]', e); }
+    }
+    closeCreditAdjustModal();
+    renderAdminUsers();
+  } catch(e) {
+    console.error('[Credit Adjust]', e.message || e);
+    handleSupabaseError(e, 'Credit Adjust');
+    showToast('크레딧 수정 실패', 'error');
   }
 }
 

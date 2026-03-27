@@ -427,6 +427,21 @@ async function sbAddCredits(nickname, amount, description) {
   return newTotal;
 }
 
+async function sbSetCredits(nickname, newTotal, description) {
+  newTotal = parseInt(newTotal, 10) || 0;
+  if (newTotal < 0) newTotal = 0;
+  var current = await sbGetUserCredits(nickname);
+  var res = await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbSetCredits] PATCH failed HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
+  var diff = newTotal - current;
+  await sbPost('credit_history', { user_id: nickname, amount: diff, type: 'adjust', description: description || '' });
+  return newTotal;
+}
+
 async function sbUseCredits(nickname, amount, description) {
   amount = parseInt(amount, 10) || 0;
   var current = await sbGetUserCredits(nickname);

@@ -1134,6 +1134,22 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <button onclick="closeCreditChargeModal()" class="w-full py-3 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 transition" data-i18n="help_close">Close</button>
   </div>
 </div>
+<!-- ============================== 크레딧 수동 수정 모달 ============================== -->
+<div id="creditAdjustModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[860] items-center justify-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+    <h3 class="font-black text-slate-800 text-base mb-1">✏️ <span data-i18n="credit_adjust_title">Adjust Credits</span></h3>
+    <p class="text-xs text-slate-400 font-bold mb-1"><span data-i18n="credit_target_user">User</span>: <span id="cam-nickname" class="text-slate-700"></span></p>
+    <p class="text-xs text-slate-400 font-bold mb-4"><span data-i18n="credit_current">Current</span>: <span id="cam-current" class="text-[#D4AF37] font-black"></span></p>
+    <div class="mb-4">
+      <label class="text-xs font-bold text-slate-500 mb-1 block" data-i18n="credit_new_amount">New Amount</label>
+      <input id="cam-input" type="number" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-black text-slate-800 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]" placeholder="0">
+    </div>
+    <div class="flex gap-2">
+      <button onclick="adjustCredits()" class="flex-1 py-3 rounded-2xl font-black text-sm bg-[#D4AF37] text-[#001D4A] active:scale-95 transition shadow" data-i18n="credit_adjust_save">Save</button>
+      <button onclick="closeCreditAdjustModal()" class="flex-1 py-3 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 transition" data-i18n="help_close">Close</button>
+    </div>
+  </div>
+</div>
 <!-- ============================== 주문 모달 (Shop) ============================== -->
 <div id="orderModal" class="modal fixed inset-0 bg-black/70 z-[500] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
