@@ -4,10 +4,9 @@
 -- from PRODUCTS constant in shop.js
 -- ============================================================
 
--- Delete GeoMedi products by matching title/name
+-- Delete GeoMedi products by matching name
 DELETE FROM products
-WHERE title ILIKE '%GeoMedi%'
-   OR name ILIKE '%GeoMedi%';
+WHERE name ILIKE '%GeoMedi%';
 
 -- Also clean up any orders referencing GeoMedi product IDs
 -- (items is JSONB array — this query finds orders containing GeoMedi items)

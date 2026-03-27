@@ -1148,9 +1148,9 @@ function renderMyMsgs() {
           '<span class="text-xs font-black text-slate-700">' + m.from + '</span>' +
           '<span class="text-[9px] text-slate-400">' + m.date + '</span>' +
         '</div>' +
-        '<p class="text-xs font-bold text-slate-600 mb-1">' + m.subject + '</p>' +
-        '<p class="text-[10px] text-slate-500 leading-relaxed">' + m.body + '</p>' +
-        '<button onclick="openCompose(\'' + m.from + '\')" class="mt-2 text-[9px] text-blue-500 font-black">' + t('ma_reply_btn') + '</button>' +
+        '<p class="text-xs font-bold text-slate-600 mb-1">' + escHtml(m.subject) + '</p>' +
+        '<p class="text-[10px] text-slate-500 leading-relaxed">' + escHtml(m.body) + '</p>' +
+        '<button onclick="openCompose(\'' + escHtml(m.from) + '\')" class="mt-2 text-[9px] text-blue-500 font-black">' + t('ma_reply_btn') + '</button>' +
       '</div>';
     }).join('');
   } else {
@@ -1164,8 +1164,8 @@ function renderMyMsgs() {
           '<span class="text-xs font-bold text-slate-600">→ ' + m.to + '</span>' +
           '<span class="text-[9px] text-slate-400">' + m.date + '</span>' +
         '</div>' +
-        '<p class="text-xs font-bold text-slate-500">' + m.subject + '</p>' +
-        '<p class="text-[10px] text-slate-400">' + m.body + '</p>' +
+        '<p class="text-xs font-bold text-slate-500">' + escHtml(m.subject) + '</p>' +
+        '<p class="text-[10px] text-slate-400">' + escHtml(m.body) + '</p>' +
       '</div>';
     }).join('');
   } else {
@@ -1400,9 +1400,9 @@ function renderHomeForumPreview() {
       'class="bg-white rounded-2xl px-4 py-3.5 mb-2 shadow-sm border border-slate-100 cursor-pointer active:bg-slate-50 transition flex items-start gap-2.5">' +
       '<span class="text-base shrink-0 mt-0.5">' + emoji + '</span>' +
       '<div class="flex-1 min-w-0">' +
-        '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-1">' + p.title + '</p>' +
-        '<p class="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-1">' + p.body + '</p>' +
-        '<p class="text-[9px] text-slate-300 font-medium mt-1.5">' + p.author + ' · ' + (p.date || '') + ' · 👁 ' + (p.views||0) + ' · 💬 ' + commentCount + '</p>' +
+        '<p class="font-black text-slate-800 text-xs leading-snug line-clamp-1">' + escHtml(p.title) + '</p>' +
+        '<p class="text-[10px] text-slate-400 mt-0.5 leading-snug line-clamp-1">' + escHtml(p.body) + '</p>' +
+        '<p class="text-[9px] text-slate-300 font-medium mt-1.5">' + escHtml(p.author) + ' · ' + (p.date || '') + ' · 👁 ' + (p.views||0) + ' · 💬 ' + commentCount + '</p>' +
       '</div>' +
       '<span class="text-slate-300 text-sm shrink-0 mt-0.5">›</span>' +
     '</div>';
