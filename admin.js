@@ -1437,16 +1437,19 @@ function closeCreditChargeModal() {
 }
 
 async function chargeCredits(amount) {
+  amount = parseInt(amount, 10) || 0;
   if (!_creditChargeTarget || !amount) return;
   try {
     var newTotal = await sbAddCredits(_creditChargeTarget, amount, 'Admin charge +' + amount);
-    _creditChargeCurrentAmount = newTotal;
-    document.getElementById('ccm-current').textContent = newTotal + ' ' + t('credit_unit');
+    _creditChargeCurrentAmount = parseInt(newTotal, 10) || 0;
+    document.getElementById('ccm-current').textContent = _creditChargeCurrentAmount + ' ' + t('credit_unit');
     showToast(tf('credit_charged_msg', _creditChargeTarget, amount), 'success');
     // LINE 알림
-    sendLinePushText(_creditChargeTarget, '💰 ' + t('credit_line_charged').replace('%', amount).replace('%', newTotal));
+    sendLinePushText(_creditChargeTarget, '💰 ' + t('credit_line_charged').replace('%', String(amount)).replace('%', String(_creditChargeCurrentAmount)));
+    // 유저 목록 갱신
     renderAdminUsers();
   } catch(e) {
+    console.error('[Credit Charge]', e.message || e);
     handleSupabaseError(e, 'Credit Charge');
     showToast(t('credit_charge_error'), 'error');
   }

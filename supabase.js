@@ -135,7 +135,7 @@ async function authUpdateProfile(licenseNumber, fields) {
 }
 
 async function authGetAllUsers() {
-  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region,leader_title&order=clinic_name.asc');
+  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region,leader_title,credits&order=clinic_name.asc');
 }
 
 async function authSetUserRole(nickname, role, leaderRegion, leaderTitle) {
@@ -406,25 +406,38 @@ async function sbUpdateEvent(id, updates) {
 
 async function sbGetUserCredits(nickname) {
   var rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(nickname) + '&select=credits');
-  return (rows && rows[0]) ? (rows[0].credits || 0) : 0;
+  return (rows && rows[0]) ? parseInt(rows[0].credits, 10) || 0 : 0;
 }
 
 async function sbAddCredits(nickname, amount, description) {
+  amount = parseInt(amount, 10) || 0;
+  if (!amount) return 0;
   // 1) 현재 크레딧 조회
   var current = await sbGetUserCredits(nickname);
   var newTotal = current + amount;
   // 2) credits 업데이트
-  await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  var res = await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbAddCredits] PATCH failed HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
   // 3) 이력 기록
   await sbPost('credit_history', { user_id: nickname, amount: amount, type: 'charge', description: description || '' });
   return newTotal;
 }
 
 async function sbUseCredits(nickname, amount, description) {
+  amount = parseInt(amount, 10) || 0;
   var current = await sbGetUserCredits(nickname);
   if (current < amount) throw new Error('INSUFFICIENT_CREDITS');
   var newTotal = current - amount;
-  await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  var res = await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  if (!res.ok) {
+    var detail = '';
+    try { var body = await res.json(); detail = body.message || JSON.stringify(body); } catch(e) {}
+    throw new Error('[sbUseCredits] PATCH failed HTTP ' + res.status + (detail ? ' — ' + detail : ''));
+  }
   await sbPost('credit_history', { user_id: nickname, amount: amount, type: 'use', description: description || '' });
   return newTotal;
 }
