@@ -401,6 +401,47 @@ async function sbUpdateEvent(id, updates) {
 }
 
 // ============================================================
+// Credits (크레딧) — licenses.credits + credit_history
+// ============================================================
+
+async function sbGetUserCredits(nickname) {
+  var rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(nickname) + '&select=credits');
+  return (rows && rows[0]) ? (rows[0].credits || 0) : 0;
+}
+
+async function sbAddCredits(nickname, amount, description) {
+  // 1) 현재 크레딧 조회
+  var current = await sbGetUserCredits(nickname);
+  var newTotal = current + amount;
+  // 2) credits 업데이트
+  await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  // 3) 이력 기록
+  await sbPost('credit_history', { user_id: nickname, amount: amount, type: 'charge', description: description || '' });
+  return newTotal;
+}
+
+async function sbUseCredits(nickname, amount, description) {
+  var current = await sbGetUserCredits(nickname);
+  if (current < amount) throw new Error('INSUFFICIENT_CREDITS');
+  var newTotal = current - amount;
+  await sbPatch('licenses', 'nickname=eq.' + encodeURIComponent(nickname), { credits: newTotal });
+  await sbPost('credit_history', { user_id: nickname, amount: amount, type: 'use', description: description || '' });
+  return newTotal;
+}
+
+async function sbGetCreditHistory(nickname, page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('credit_history', 'user_id=eq.' + encodeURIComponent(nickname) + '&select=id,user_id,amount,type,description,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+async function sbGetAllCreditHistory(page) {
+  var limit = 20;
+  var offset = ((page || 1) - 1) * limit;
+  return sbGet('credit_history', 'select=id,user_id,amount,type,description,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+}
+
+// ============================================================
 // Webzine Articles (웹진) — webzine_articles 테이블
 // ============================================================
 

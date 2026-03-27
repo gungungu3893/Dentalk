@@ -570,6 +570,19 @@ async function submitCustom() {
   }
   if (!cases.length) { showToast(t('err_add_case'), 'warning'); return; }
   var totalTeeth = cases.reduce(function(s,c){ return s+c.teeth.length; },0);
+  // 크레딧 확인 (치아 1개 = 1크레딧)
+  var requiredCredits = totalTeeth;
+  try {
+    var userCredits = await sbGetUserCredits(currentUser.nickname);
+    if (userCredits < requiredCredits) {
+      showToast(tf('credit_insufficient_msg', requiredCredits, userCredits), 'warning');
+      return;
+    }
+  } catch(e) {
+    console.error('[Credit Check]', e);
+    showToast(t('credit_check_error'), 'error');
+    return;
+  }
   var _now = new Date();
   var _month = String.fromCharCode(64 + _now.getMonth() + 1);
   var _day   = String(_now.getDate()).padStart(2,'0');
@@ -622,6 +635,12 @@ async function submitCustom() {
   var order = { id:oid, clinic:clinic, addr:addr, phone:phone, lineId:lineId, cases:cases, stage:'submitted', designVersions:[], reviewHistory:[], date:new Date().toLocaleDateString(), userNickname:currentUser.nickname };
   customOrders.unshift(order);
   saveOrderToSupabase(order);
+  // 크레딧 차감
+  var remainingCredits = 0;
+  try {
+    remainingCredits = await sbUseCredits(currentUser.nickname, requiredCredits, 'CNC Order ' + oid + ' (' + totalTeeth + ' teeth)');
+    currentUser._credits = remainingCredits;
+  } catch(e) { console.error('[Credit Deduct]', e); }
   // Notify admin of new order (customer gets LINE notification when admin confirms)
   sendLineMessage(LINE_USER_ID, [buildFlexMessage('🆕', 'คำสั่งซื้อ CNC Custom ใหม่', [
     {label:'หมายเลขคำสั่งซื้อ', value: oid},
@@ -629,9 +648,11 @@ async function submitCustom() {
     {label:'วันที่', value: order.date},
     {label:'ติดต่อ', value: phone},
     {label:'Line ID', value: lineId || 'ไม่มี'},
-    {label:'ซี่ฟัน / เคส', value: totalTeeth + 'ซี่ / ' + cases.length + 'เคส'}
+    {label:'ซี่ฟัน / เคส', value: totalTeeth + 'ซี่ / ' + cases.length + 'เคส'},
+    {label:'크레딧 사용', value: requiredCredits + ' (' + t('credit_remaining') + ': ' + remainingCredits + ')'}
   ], 'กรุณายืนยันคำสั่งซื้อในแผงผู้ดูแล')]);
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
+  msg += '\n💰 ' + t('credit_used') + ': ' + requiredCredits + ' / ' + t('credit_remaining') + ': ' + remainingCredits;
   if (lineId) msg += t('order_success_line');
   showToast(msg, 'success');
   customTab('list');

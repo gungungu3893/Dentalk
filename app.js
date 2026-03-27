@@ -662,6 +662,14 @@ function renderProfileSettings() {
   if (nickEl)   nickEl.textContent   = isLoggedIn() && currentUser.nickname   ? currentUser.nickname   : t('profile_login_msg');
   if (licEl)    licEl.textContent    = isLoggedIn() && currentUser.licenseNum ? '# ' + currentUser.licenseNum : '-';
   if (clinicEl) clinicEl.textContent = isLoggedIn() && currentUser.clinicName ? currentUser.clinicName  : '-';
+  // 크레딧 표시
+  var creditsEl = document.getElementById('settingsCredits');
+  if (creditsEl && isLoggedIn()) {
+    sbGetUserCredits(currentUser.nickname).then(function(c) {
+      currentUser._credits = c;
+      creditsEl.innerHTML = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">💰 ' + c + ' ' + t('credit_unit') + '</span>';
+    }).catch(function() {});
+  }
   // 나의 주문 목록 요약
   var summaryEl = document.getElementById('settingsOrdersSummary');
   if (summaryEl) {
@@ -831,16 +839,17 @@ async function openMyActivity() {
 }
 function activityTab(name) { myActivityTab(name); }
 function myActivityTab(name) {
-  ['msg','posts','orders','used'].forEach(function(tab){
+  ['msg','posts','orders','used','credits'].forEach(function(tab){
     var btn  = document.getElementById('matab-'+tab);
     var pane = document.getElementById('ma-'+tab);
-    if (btn)  btn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
+    if (btn)  btn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs whitespace-nowrap px-2 ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
     if (pane) pane.classList.toggle('hidden', tab!==name);
   });
-  if (name==='msg')    renderMyMsgs2();
-  if (name==='posts')  renderMyPosts2();
-  if (name==='orders') renderMyOrders2();
-  if (name==='used')   renderMyUsed2();
+  if (name==='msg')     renderMyMsgs2();
+  if (name==='posts')   renderMyPosts2();
+  if (name==='orders')  renderMyOrders2();
+  if (name==='used')    renderMyUsed2();
+  if (name==='credits') renderMyCreditHistory();
 }
 function renderMyMsgs2() {
   var el = document.getElementById('ma-msg');
@@ -920,6 +929,42 @@ function renderMyUsed2() {
     '</div>';
   }).join('') + '</div>';
 }
+async function renderMyCreditHistory() {
+  var el = document.getElementById('ma-credits');
+  if (!el || !isLoggedIn()) return;
+  el.innerHTML = '<p class="text-center text-slate-400 text-xs py-8">' + t('admin_loading') + '</p>';
+  try {
+    var credits = await sbGetUserCredits(currentUser.nickname);
+    var history = await sbGetCreditHistory(currentUser.nickname);
+    var html = '<div class="bg-white rounded-2xl p-4 shadow-sm mb-3 text-center">' +
+      '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">' + t('credit_balance') + '</p>' +
+      '<p class="text-3xl font-black mt-1" style="color:#D4AF37">💰 ' + credits + '</p>' +
+      '<p class="text-[10px] text-slate-400 mt-0.5">' + t('credit_unit') + '</p>' +
+    '</div>';
+    if (!history || !history.length) {
+      html += '<p class="text-center text-slate-400 text-xs py-6">' + t('credit_no_history') + '</p>';
+    } else {
+      html += '<p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('credit_history_title') + '</p>';
+      html += '<div class="space-y-1.5">';
+      history.forEach(function(h) {
+        var isCharge = h.type === 'charge';
+        html += '<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">' +
+          '<span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm ' + (isCharge ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500') + '">' + (isCharge ? '+' : '-') + '</span>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-xs font-black text-slate-700">' + (isCharge ? '+' : '-') + h.amount + ' ' + t('credit_unit') + '</p>' +
+            '<p class="text-[9px] text-slate-400">' + (h.description || (isCharge ? t('credit_type_charge') : t('credit_type_use'))) + '</p>' +
+          '</div>' +
+          '<span class="text-[9px] text-slate-300 shrink-0">' + (h.created_at ? h.created_at.slice(0,10) : '') + '</span>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<p class="text-center text-red-400 text-xs py-8">' + t('credit_load_error') + '</p>';
+  }
+}
+
 function renderMyMsgs() {
   var el = document.getElementById('activity-msg');
   if (!el) return;

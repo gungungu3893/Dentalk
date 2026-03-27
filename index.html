@@ -1117,6 +1117,23 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     </div>
   </div>
 </div>
+<!-- ============================== 크레딧 충전 모달 ============================== -->
+<div id="creditChargeModal" class="modal fixed inset-0 bg-black/60 backdrop-blur-sm z-[860] items-center justify-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+    <h3 class="font-black text-slate-800 text-base mb-1">💰 <span data-i18n="credit_charge_title">Charge Credits</span></h3>
+    <p class="text-xs text-slate-400 font-bold mb-1"><span data-i18n="credit_target_user">User</span>: <span id="ccm-nickname" class="text-slate-700"></span></p>
+    <p class="text-xs text-slate-400 font-bold mb-4"><span data-i18n="credit_current">Current</span>: <span id="ccm-current" class="text-[#D4AF37] font-black"></span></p>
+    <div class="grid grid-cols-3 gap-2 mb-4">
+      <button onclick="chargeCredits(1)" class="py-3 rounded-xl font-black text-sm bg-slate-50 text-slate-700 active:scale-95 transition border border-slate-200">+1</button>
+      <button onclick="chargeCredits(5)" class="py-3 rounded-xl font-black text-sm bg-slate-50 text-slate-700 active:scale-95 transition border border-slate-200">+5</button>
+      <button onclick="chargeCredits(10)" class="py-3 rounded-xl font-black text-sm bg-slate-50 text-slate-700 active:scale-95 transition border border-slate-200">+10</button>
+      <button onclick="chargeCredits(30)" class="py-3 rounded-xl font-black text-sm bg-[#D4AF37]/10 text-[#001D4A] active:scale-95 transition border border-[#D4AF37]/30 font-black">+30</button>
+      <button onclick="chargeCredits(50)" class="py-3 rounded-xl font-black text-sm bg-[#D4AF37]/10 text-[#001D4A] active:scale-95 transition border border-[#D4AF37]/30 font-black">+50</button>
+      <button onclick="chargeCredits(100)" class="py-3 rounded-xl font-black text-sm bg-[#D4AF37] text-[#001D4A] active:scale-95 transition shadow font-black">+100</button>
+    </div>
+    <button onclick="closeCreditChargeModal()" class="w-full py-3 rounded-2xl font-black text-sm bg-slate-100 text-slate-600 active:bg-slate-200 transition" data-i18n="help_close">Close</button>
+  </div>
+</div>
 <!-- ============================== 주문 모달 (Shop) ============================== -->
 <div id="orderModal" class="modal fixed inset-0 bg-black/70 z-[500] items-end">
   <div class="bg-white w-full rounded-t-3xl flex flex-col" style="max-height:90vh">
@@ -2244,6 +2261,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <p id="settingsNickname" class="font-black text-white text-lg leading-snug truncate">-</p>
             <p id="settingsLicense"  class="text-blue-200 text-xs font-mono mt-0.5">-</p>
             <p id="settingsClinic"   class="text-white/60 text-xs font-bold mt-0.5 truncate">-</p>
+            <p id="settingsCredits" class="mt-1.5"><span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">💰 0</span></p>
           </div>
           <button onclick="toggleProfileEditInline()" class="shrink-0 px-3 py-2 bg-white/15 text-white rounded-xl font-black text-xs active:bg-white/30 transition" data-i18n="profile_edit_btn">Edit</button>
         </div>
@@ -2393,11 +2411,13 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <button onclick="myActivityTab('posts')"  id="matab-posts"  class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_posts">Posts</button>
         <button onclick="myActivityTab('orders')" id="matab-orders" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_orders">Orders</button>
         <button onclick="myActivityTab('used')"   id="matab-used"   class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_used">Used</button>
+        <button onclick="myActivityTab('credits')" id="matab-credits" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-2" data-i18n="ma_tab_credits">💰 Credits</button>
       </div>
       <div id="ma-msg" class=""></div>
       <div id="ma-posts" class="hidden"></div>
       <div id="ma-orders" class="hidden"></div>
       <div id="ma-used" class="hidden"></div>
+      <div id="ma-credits" class="hidden"></div>
     </div>
     <!-- ==================== SITE FOOTER ==================== -->
     <footer id="siteFooter">

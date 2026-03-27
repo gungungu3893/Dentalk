@@ -833,6 +833,10 @@ async function renderAdminUsers() {
           '</div>' +
         '</div>';
       }
+      var creditDisplay = '<div class="flex items-center gap-2 mt-2">' +
+        '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.15);color:#001D4A">💰 ' + (u.credits || 0) + ' ' + t('credit_unit') + '</span>' +
+        (!isAdminU ? '<button onclick="openCreditChargeModal(\'' + safeNick + '\',' + (u.credits||0) + ')" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37] text-[#001D4A] active:scale-95 transition">' + t('credit_charge_btn') + '</button>' : '') +
+      '</div>';
       return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm">' +
         '<div class="flex justify-between items-start">' +
           '<div class="flex-1 min-w-0">' +
@@ -844,7 +848,7 @@ async function renderAdminUsers() {
           '</div>' +
           actionBtns +
         '</div>' +
-        badge + leaderBadge + leaderCtrl +
+        badge + creditDisplay + leaderBadge + leaderCtrl +
       '</div>';
     };
 
@@ -1408,6 +1412,43 @@ function _statCard(icon, label, value, bgClass) {
     '<div class="font-black text-sm leading-none mb-0.5 truncate">' + value + '</div>' +
     '<div class="text-[8px] font-bold opacity-75 leading-tight truncate">' + label + '</div>' +
   '</div>';
+}
+
+// ============================================================
+// 크레딧 충전 모달
+// ============================================================
+var _creditChargeTarget = '';
+var _creditChargeCurrentAmount = 0;
+
+function openCreditChargeModal(nickname, currentCredits) {
+  _creditChargeTarget = nickname;
+  _creditChargeCurrentAmount = currentCredits || 0;
+  var modal = document.getElementById('creditChargeModal');
+  if (!modal) return;
+  document.getElementById('ccm-nickname').textContent = nickname;
+  document.getElementById('ccm-current').textContent = _creditChargeCurrentAmount + ' ' + t('credit_unit');
+  modal.style.display = 'flex';
+}
+
+function closeCreditChargeModal() {
+  var modal = document.getElementById('creditChargeModal');
+  if (modal) modal.style.display = '';
+}
+
+async function chargeCredits(amount) {
+  if (!_creditChargeTarget || !amount) return;
+  try {
+    var newTotal = await sbAddCredits(_creditChargeTarget, amount, 'Admin charge +' + amount);
+    _creditChargeCurrentAmount = newTotal;
+    document.getElementById('ccm-current').textContent = newTotal + ' ' + t('credit_unit');
+    showToast(tf('credit_charged_msg', _creditChargeTarget, amount), 'success');
+    // LINE 알림
+    sendLinePushText(_creditChargeTarget, '💰 ' + t('credit_line_charged').replace('%', amount).replace('%', newTotal));
+    renderAdminUsers();
+  } catch(e) {
+    handleSupabaseError(e, 'Credit Charge');
+    showToast(t('credit_charge_error'), 'error');
+  }
 }
 
 function _guessCategoryFromName(name) {
