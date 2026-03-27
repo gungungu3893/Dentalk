@@ -160,19 +160,187 @@ const LINE_PROXY_URL = 'https://dentalk-line.gungungu.workers.dev';
 const LINE_USER_ID   = 'U6265c5810e5592b820c224588433c247';
 // ── Supabase 상수는 supabase.js에서 정의됩니다 ──────────────────
 
-// ── LINE Push 알림 헬퍼: 닉네임으로 line_user_id 조회 후 발송 ────
-async function getLineUserIdByNickname(nickname) {
+// ── LINE Push 알림 헬퍼 ──────────────────────────────────────
+// LINE 메시지 다국어 번역 사전
+var LINE_MSGS = {
+  line_credit_charged: {
+    th:'💰 เครดิต {amount} รายการถูกเติมแล้ว! ยอดคงเหลือ: {balance} เครดิต',
+    en:'💰 {amount} credits charged! Balance: {balance} credits',
+    ko:'💰 크레딧 {amount}개가 충전되었습니다! 잔액: {balance}크레딧',
+    zh:'💰 已充值 {amount} 积分！余额：{balance} 积分',
+    vi:'💰 Đã nạp {amount} tín dụng! Số dư: {balance} tín dụng',
+    es:'💰 ¡{amount} créditos cargados! Saldo: {balance} créditos',
+    tr:'💰 {amount} kredi yüklendi! Bakiye: {balance} kredi',
+    ar:'💰 تم شحن {amount} رصيد! الرصيد: {balance} رصيد',
+    fa:'💰 {amount} اعتبار شارژ شد! موجودی: {balance} اعتبار'
+  },
+  line_credit_charged_admin: {
+    th:'💰 [{nickname}] เติมเครดิต {amount} รายการเสร็จสิ้น ยอดคงเหลือ: {balance} เครดิต',
+    en:'💰 [{nickname}] charged {amount} credits. Balance: {balance} credits',
+    ko:'💰 [{nickname}]에게 크레딧 {amount}개 충전 완료. 잔액: {balance}크레딧',
+    zh:'💰 [{nickname}] 充值 {amount} 积分完成。余额：{balance} 积分',
+    vi:'💰 [{nickname}] đã nạp {amount} tín dụng. Số dư: {balance} tín dụng',
+    es:'💰 [{nickname}] cargó {amount} créditos. Saldo: {balance} créditos',
+    tr:'💰 [{nickname}] {amount} kredi yüklendi. Bakiye: {balance} kredi',
+    ar:'💰 [{nickname}] تم شحن {amount} رصيد. الرصيد: {balance} رصيد',
+    fa:'💰 [{nickname}] {amount} اعتبار شارژ شد. موجودی: {balance} اعتبار'
+  },
+  line_credit_adjusted: {
+    th:'💰 เครดิตถูกเปลี่ยนเป็น {balance} เครดิต ยอดคงเหลือ: {balance} เครดิต',
+    en:'💰 Credits adjusted to {balance}. Balance: {balance} credits',
+    ko:'💰 크레딧이 {balance}개로 변경되었습니다. 잔액: {balance}크레딧',
+    zh:'💰 积分已调整为 {balance}。余额：{balance} 积分',
+    vi:'💰 Tín dụng đã được điều chỉnh thành {balance}. Số dư: {balance} tín dụng',
+    es:'💰 Créditos ajustados a {balance}. Saldo: {balance} créditos',
+    tr:'💰 Kredi {balance} olarak ayarlandı. Bakiye: {balance} kredi',
+    ar:'💰 تم تعديل الرصيد إلى {balance}. الرصيد: {balance} رصيد',
+    fa:'💰 اعتبار به {balance} تغییر یافت. موجودی: {balance} اعتبار'
+  },
+  line_credit_adjusted_admin: {
+    th:'💰 [{nickname}] ปรับเครดิตด้วยตนเอง {desc} ยอดคงเหลือ: {balance} เครดิต',
+    en:'💰 [{nickname}] credit manual adjust. {desc}. Balance: {balance} credits',
+    ko:'💰 [{nickname}] 크레딧 수동 조정. {desc}. 잔액: {balance}크레딧',
+    zh:'💰 [{nickname}] 手动调整积分。{desc}。余额：{balance} 积分',
+    vi:'💰 [{nickname}] điều chỉnh tín dụng thủ công. {desc}. Số dư: {balance} tín dụng',
+    es:'💰 [{nickname}] ajuste manual de créditos. {desc}. Saldo: {balance} créditos',
+    tr:'💰 [{nickname}] kredi manuel düzenleme. {desc}. Bakiye: {balance} kredi',
+    ar:'💰 [{nickname}] تعديل يدوي للرصيد. {desc}. الرصيد: {balance} رصيد',
+    fa:'💰 [{nickname}] تنظیم دستی اعتبار. {desc}. موجودی: {balance} اعتبار'
+  },
+  line_order_status: {
+    th:'🦷 คำสั่งซื้อ {id} สถานะเปลี่ยนเป็น {stage}',
+    en:'🦷 Order {id} status changed to {stage}',
+    ko:'🦷 주문 {id} 상태가 {stage}(으)로 변경되었습니다',
+    zh:'🦷 订单 {id} 状态已更改为 {stage}',
+    vi:'🦷 Đơn hàng {id} trạng thái đã đổi thành {stage}',
+    es:'🦷 Pedido {id} estado cambiado a {stage}',
+    tr:'🦷 Sipariş {id} durumu {stage} olarak değiştirildi',
+    ar:'🦷 الطلب {id} تم تغيير الحالة إلى {stage}',
+    fa:'🦷 سفارش {id} وضعیت به {stage} تغییر کرد'
+  },
+  line_new_message: {
+    th:'✉️ คุณมีข้อความใหม่\n\n📨 {from}: {subject}',
+    en:'✉️ You have a new message\n\n📨 {from}: {subject}',
+    ko:'✉️ 새 쪽지가 도착했습니다\n\n📨 {from}: {subject}',
+    zh:'✉️ 您有新消息\n\n📨 {from}: {subject}',
+    vi:'✉️ Bạn có tin nhắn mới\n\n📨 {from}: {subject}',
+    es:'✉️ Tienes un nuevo mensaje\n\n📨 {from}: {subject}',
+    tr:'✉️ Yeni bir mesajınız var\n\n📨 {from}: {subject}',
+    ar:'✉️ لديك رسالة جديدة\n\n📨 {from}: {subject}',
+    fa:'✉️ شما یک پیام جدید دارید\n\n📨 {from}: {subject}'
+  },
+  line_new_comment: {
+    th:'💬 มีความคิดเห็นใหม่ในโพสต์ของคุณ\n\n📝 {title}',
+    en:'💬 New comment on your post\n\n📝 {title}',
+    ko:'💬 회원님의 글에 새 댓글이 달렸습니다\n\n📝 {title}',
+    zh:'💬 您的帖子有新评论\n\n📝 {title}',
+    vi:'💬 Có bình luận mới trên bài viết của bạn\n\n📝 {title}',
+    es:'💬 Nuevo comentario en tu publicación\n\n📝 {title}',
+    tr:'💬 Gönderinize yeni bir yorum yapıldı\n\n📝 {title}',
+    ar:'💬 تعليق جديد على منشورك\n\n📝 {title}',
+    fa:'💬 نظر جدید روی پست شما\n\n📝 {title}'
+  },
+  line_used_inquiry: {
+    th:'🏷️ มีคำถามใหม่เกี่ยวกับสินค้ามือสองของคุณ',
+    en:'🏷️ New inquiry on your listing',
+    ko:'🏷️ 중고물품에 새 문의가 있습니다',
+    zh:'🏷️ 您的二手商品有新咨询',
+    vi:'🏷️ Có câu hỏi mới về sản phẩm đã qua sử dụng của bạn',
+    es:'🏷️ Nueva consulta sobre tu anuncio',
+    tr:'🏷️ İlanınız hakkında yeni bir soru var',
+    ar:'🏷️ استفسار جديد عن إعلانك',
+    fa:'🏷️ سوال جدید درباره آگهی شما'
+  },
+  line_used_comment: {
+    th:'🏷️ มีความคิดเห็นใหม่เกี่ยวกับสินค้ามือสองของคุณ',
+    en:'🏷️ New comment on your listing',
+    ko:'🏷️ 중고물품에 새 댓글이 달렸습니다',
+    zh:'🏷️ 您的二手商品有新评论',
+    vi:'🏷️ Có bình luận mới về sản phẩm đã qua sử dụng của bạn',
+    es:'🏷️ Nuevo comentario en tu anuncio',
+    tr:'🏷️ İlanınıza yeni bir yorum yapıldı',
+    ar:'🏷️ تعليق جديد على إعلانك',
+    fa:'🏷️ نظر جدید درباره آگهی شما'
+  },
+  line_feedback_admin: {
+    th:'💬 ฟีดแบ็คใหม่: [{category}] {title} ({nickname})',
+    en:'💬 New feedback: [{category}] {title} ({nickname})',
+    ko:'💬 새 피드백: [{category}] {title} ({nickname})',
+    zh:'💬 新反馈：[{category}] {title} ({nickname})',
+    vi:'💬 Phản hồi mới: [{category}] {title} ({nickname})',
+    es:'💬 Nuevo comentario: [{category}] {title} ({nickname})',
+    tr:'💬 Yeni geri bildirim: [{category}] {title} ({nickname})',
+    ar:'💬 ملاحظات جديدة: [{category}] {title} ({nickname})',
+    fa:'💬 بازخورد جدید: [{category}] {title} ({nickname})'
+  }
+};
+
+function getLineMsg(key, lang, params) {
+  var msgs = LINE_MSGS[key];
+  if (!msgs) return key;
+  var text = msgs[lang] || msgs['th'] || '';
+  if (params) {
+    Object.keys(params).forEach(function(k) {
+      text = text.split('{' + k + '}').join(String(params[k]));
+    });
+  }
+  return text;
+}
+
+async function getLineUserInfo(nickname) {
   if (!nickname) return null;
   try {
-    var rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(nickname) + '&select=line_user_id');
-    if (rows && rows.length > 0 && rows[0].line_user_id) return rows[0].line_user_id;
-  } catch(e) { console.error('[getLineUserIdByNickname]', e); }
+    var rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(nickname) + '&select=line_user_id,lang');
+    if (rows && rows.length > 0) return { line_user_id: rows[0].line_user_id || null, lang: rows[0].lang || 'th' };
+  } catch(e) { console.error('[getLineUserInfo]', e); }
   return null;
 }
+
+// 하위 호환: 기존 코드에서 line_user_id만 필요한 경우
+async function getLineUserIdByNickname(nickname) {
+  var info = await getLineUserInfo(nickname);
+  return info ? info.line_user_id : null;
+}
+
+// 닉네임 기반 다국어 LINE 메시지 발송
+async function sendLineMsg(nickname, msgKey, params) {
+  if (!nickname || !LINE_PROXY_URL) return;
+  var info = await getLineUserInfo(nickname);
+  if (!info || !info.line_user_id) return;
+  var text = getLineMsg(msgKey, info.lang, params);
+  try {
+    await fetch(LINE_PROXY_URL + '/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: info.line_user_id, messages: [{ type: 'text', text: text }] })
+    });
+  } catch(e) { console.error('[LINE Push]', e); }
+}
+
+// 관리자(LINE_USER_ID)에게 다국어 LINE 메시지 발송
+async function sendLineAdminMsg(msgKey, params) {
+  if (!LINE_PROXY_URL || !LINE_USER_ID) return;
+  // 관리자 lang 조회
+  var adminLang = 'th';
+  try {
+    var rows = await sbGet('licenses', 'line_user_id=eq.' + encodeURIComponent(LINE_USER_ID) + '&select=lang');
+    if (rows && rows.length > 0 && rows[0].lang) adminLang = rows[0].lang;
+  } catch(e) { /* default th */ }
+  var text = getLineMsg(msgKey, adminLang, params);
+  try {
+    await fetch(LINE_PROXY_URL + '/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: text }] })
+    });
+  } catch(e) { console.error('[LINE Admin Push]', e); }
+}
+
+// 하위 호환: raw text 직접 발송 (레거시)
 async function sendLinePushText(nickname, text) {
   if (!nickname || !LINE_PROXY_URL) return;
   var lineUserId = await getLineUserIdByNickname(nickname);
-  if (!lineUserId) return; // line_user_id 없으면 건너뛰기
+  if (!lineUserId) return;
   try {
     await fetch(LINE_PROXY_URL + '/push', {
       method: 'POST',
@@ -1051,8 +1219,8 @@ async function sendMsg() {
   showToast(t('compose_sent_msg'), 'success');
   // Supabase 저장 (비동기)
   sbSendMessage({ from_user: currentUser.nickname, to_user: to, subject: subject, body: body }).catch(function(e){ console.error('[Message Save]', e); });
-  // LINE 알림: 수신자에게 쪽지 알림
-  sendLinePushText(to, '✉️ 새 쪽지가 도착했습니다.\nYou have a new message.\nคุณมีข้อความใหม่\n\n📨 ' + escHtml(currentUser.nickname) + ': ' + escHtml(subject));
+  // LINE 알림: 수신자에게 쪽지 알림 (수신자 언어로 발송)
+  sendLineMsg(to, 'line_new_message', { from: currentUser.nickname, subject: subject });
 }
 
 // ============================================================
@@ -1082,6 +1250,10 @@ function saveLang() {
   currentLang = pendingLang;
   pendingLang = null;
   localStorage.setItem('dentalk_lang', currentLang);
+  // Supabase licenses 테이블에 lang 업데이트
+  if (typeof currentUser !== 'undefined' && currentUser && currentUser.license_number) {
+    sbPatch('licenses', 'license_number=eq.' + encodeURIComponent(currentUser.license_number), { lang: currentLang }).catch(function(e) { console.error('[saveLang] Supabase update failed', e); });
+  }
   // 저장된 언어 버튼 스타일 업데이트
   ['en','ko','zh','th','vi','es','tr','ar','fa'].forEach(function(l){
     var b = document.getElementById('lang-'+l);
@@ -1864,16 +2036,8 @@ async function submitFeedback() {
       content: content,
       rating: _fbRating,
     });
-    // LINE 알림 — 관리자에게 알림
-    if (LINE_PROXY_URL && LINE_USER_ID) {
-      try {
-        fetch(LINE_PROXY_URL + '/push', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: '💬 새 피드백: [' + _fbCategory + '] ' + title + ' (' + currentUser.nickname + ')' }] })
-        });
-      } catch(e) { /* ignore */ }
-    }
+    // LINE 알림 — 관리자에게 알림 (관리자 언어로 발송)
+    sendLineAdminMsg('line_feedback_admin', { category: _fbCategory, title: title, nickname: currentUser.nickname });
     // 폼 초기화
     document.getElementById('fbTitle').value = '';
     document.getElementById('fbContent').value = '';

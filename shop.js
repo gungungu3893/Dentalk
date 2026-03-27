@@ -799,7 +799,7 @@ function _doAdvanceShopOrder(orderId, nextKey, carrier, tracking) {
     sendLineMessage(o.lineId, [buildFlexMessage(nextStage.icon, shopStageTh, fields, 'สอบถาม: Line @bioplant_th', 'Shop Order')]);
   } else if (o.nickname) {
     // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송
-    sendLinePushText(o.nickname, '🦷 คำสั่งซื้อ ' + o.id + ' สถานะเปลี่ยนเป็น ' + shopStageTh + '\nYour order ' + o.id + ' status changed to ' + nextKey + '.');
+    sendLineMsg(o.nickname, 'line_order_status', { id: o.id, stage: nextKey });
   }
   // 관리자에게도 flex 알림 (태국어)
   var adminFields = [

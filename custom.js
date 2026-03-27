@@ -1107,7 +1107,7 @@ function showContact(c, sellerNickname) {
   openModal('usedContactModal');
   // LINE 알림: 판매자에게 문의 알림 (본인 물품이 아닐 때)
   if (sellerNickname && isLoggedIn() && sellerNickname !== currentUser.nickname && sellerNickname !== 'Me') {
-    sendLinePushText(sellerNickname, '🏷️ 중고물품에 새 문의가 있습니다.\nNew inquiry on your listing.\nมีคำถามใหม่เกี่ยวกับสินค้ามือสองของคุณ');
+    sendLineMsg(sellerNickname, 'line_used_inquiry', {});
   }
 }
 function openUsedDetail(id) {
@@ -1219,7 +1219,7 @@ async function submitUsedComment() {
     _loadUsedComments(item);
     // LINE 알림: 판매자에게 댓글 알림 (자기 글에 자기가 댓글 달면 발송 안 함)
     if (item.seller && item.seller !== currentUser.nickname && item.seller !== 'Me') {
-      sendLinePushText(item.seller, '🏷️ 중고물품에 새 댓글이 달렸습니다.\nNew comment on your listing.\nมีความคิดเห็นใหม่เกี่ยวกับสินค้ามือสองของคุณ');
+      sendLineMsg(item.seller, 'line_used_comment', {});
     }
   } catch(e) {
     console.error('[Used Comment]', e);

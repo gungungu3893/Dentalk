@@ -140,9 +140,9 @@ function adminConfirmOrder(orderId) {
     orderId: ord.id, icon: '✅', statusTh: 'ยืนยันแล้ว',
     clinic: ord.clinic, note: 'เมื่อออกแบบเสร็จแล้ว คุณสามารถตรวจสอบได้ในแอป', subtitle: 'CNC Custom Order'
   });
-  // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송
+  // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송 (사용자 언어)
   if (!ord.lineId && ord.userNickname) {
-    sendLinePushText(ord.userNickname, '🦷 คำสั่งซื้อ ' + ord.id + ' สถานะเปลี่ยนเป็น ยืนยันแล้ว\nYour order ' + ord.id + ' status changed to Confirmed.');
+    sendLineMsg(ord.userNickname, 'line_order_status', { id: ord.id, stage: 'Confirmed' });
   }
 }
 async function adminUploadDesign(orderId, input) {
@@ -658,9 +658,9 @@ async function adminChangeCustomOrderStage(orderId, newStage) {
       orderId: ord.id, icon: stageObj.icon, statusTh: stageTh,
       clinic: ord.clinic, note: 'สถานะคำสั่งซื้อของคุณมีการเปลี่ยนแปลง', subtitle: 'CNC Custom Order'
     });
-    // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송
+    // lineId 없을 때 licenses 테이블에서 line_user_id 조회 후 발송 (사용자 언어)
     if (!ord.lineId && ord.userNickname) {
-      sendLinePushText(ord.userNickname, '🦷 คำสั่งซื้อ ' + ord.id + ' สถานะเปลี่ยนเป็น ' + stageTh + '\nYour order ' + ord.id + ' status changed to ' + newStage + '.');
+      sendLineMsg(ord.userNickname, 'line_order_status', { id: ord.id, stage: newStage });
     }
   }
   // 관리자에게도 알림
@@ -1445,18 +1445,10 @@ async function chargeCredits(amount) {
     _creditChargeCurrentAmount = parseInt(newTotal, 10) || 0;
     document.getElementById('ccm-current').textContent = _creditChargeCurrentAmount + ' ' + t('credit_unit');
     showToast(tf('credit_charged_msg', amount, _creditChargeTarget), 'success');
-    // LINE 알림 — 고객
-    sendLinePushText(_creditChargeTarget, '💰 크레딧 ' + amount + '개가 충전되었습니다! 현재 잔액: ' + _creditChargeCurrentAmount + '크레딧 / Credit charged: ' + amount + '. Balance: ' + _creditChargeCurrentAmount);
-    // LINE 알림 — 관리자
-    if (LINE_PROXY_URL && LINE_USER_ID) {
-      try {
-        fetch(LINE_PROXY_URL + '/push', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: '💰 [' + _creditChargeTarget + ']에게 크레딧 ' + amount + '개 충전 완료. 잔액: ' + _creditChargeCurrentAmount + '크레딧' }] })
-        });
-      } catch(e) { console.error('[LINE Admin Push]', e); }
-    }
+    // LINE 알림 — 고객 (사용자 언어로 발송)
+    sendLineMsg(_creditChargeTarget, 'line_credit_charged', { amount: amount, balance: _creditChargeCurrentAmount });
+    // LINE 알림 — 관리자 (관리자 언어로 발송)
+    sendLineAdminMsg('line_credit_charged_admin', { nickname: _creditChargeTarget, amount: amount, balance: _creditChargeCurrentAmount });
     // 유저 목록 갱신
     renderAdminUsers();
   } catch(e) {
@@ -1506,19 +1498,10 @@ async function adjustCredits() {
     _creditAdjustCurrentAmount = parseInt(result, 10) || 0;
     document.getElementById('cam-current').textContent = _creditAdjustCurrentAmount + ' ' + t('credit_unit');
     showToast(_creditAdjustTarget + ' 크레딧 → ' + _creditAdjustCurrentAmount, 'success');
-    // LINE 알림 — 고객
-    var diff = newAmount - parseInt(input.dataset.prev || 0, 10);
-    sendLinePushText(_creditAdjustTarget, '💰 크레딧이 ' + _creditAdjustCurrentAmount + '개로 변경되었습니다. 현재 잔액: ' + _creditAdjustCurrentAmount + '크레딧 / Credit adjusted to ' + _creditAdjustCurrentAmount + '. Balance: ' + _creditAdjustCurrentAmount);
-    // LINE 알림 — 관리자
-    if (LINE_PROXY_URL && LINE_USER_ID) {
-      try {
-        fetch(LINE_PROXY_URL + '/push', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to: LINE_USER_ID, messages: [{ type: 'text', text: '💰 [' + _creditAdjustTarget + '] 크레딧 수동 조정 완료. ' + desc + '. 잔액: ' + _creditAdjustCurrentAmount + '크레딧' }] })
-        });
-      } catch(e) { console.error('[LINE Admin Push]', e); }
-    }
+    // LINE 알림 — 고객 (사용자 언어로 발송)
+    sendLineMsg(_creditAdjustTarget, 'line_credit_adjusted', { balance: _creditAdjustCurrentAmount });
+    // LINE 알림 — 관리자 (관리자 언어로 발송)
+    sendLineAdminMsg('line_credit_adjusted_admin', { nickname: _creditAdjustTarget, desc: desc, balance: _creditAdjustCurrentAmount });
     closeCreditAdjustModal();
     renderAdminUsers();
   } catch(e) {

@@ -305,8 +305,8 @@ function submitComment() {
   if (post._sbId || typeof post.id === 'string') {
     sbUpdateForumPost(post._sbId || post.id, { comments: post.comments }).catch(function(){});
   }
-  // LINE 알림: 글 작성자에게 댓글 알림 (자기 글에 자기가 댓글 달면 발송 안 함)
+  // LINE 알림: 글 작성자에게 댓글 알림 (자기 글에 자기가 댓글 달면 발송 안 함, 작성자 언어로 발송)
   if (post.author && post.author !== auth) {
-    sendLinePushText(post.author, '💬 회원님의 글에 새 댓글이 달렸습니다.\nNew comment on your post.\nมีความคิดเห็นใหม่ในโพสต์ของคุณ\n\n📝 ' + escHtml(post.title));
+    sendLineMsg(post.author, 'line_new_comment', { title: post.title });
   }
 }
