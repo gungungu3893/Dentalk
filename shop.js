@@ -79,7 +79,7 @@ var CATALOG_BASE_URL = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/obje
 var CATALOG_LIST = [
   { id: 'catalog-1', name: 'BIOTEM CATALOG', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog_2026.01.pdf' },
   { id: 'catalog-2', name: 'DIGITAL PARTS', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/DigitalPartsV2.2.pdf' },
-  { id: 'catalog-3', name: '', url: '' },
+  { id: 'catalog-3', name: 'SANTA & SBB', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/SANTA%20SBB.pdf' },
   { id: 'catalog-4', name: '', url: '' },
   { id: 'catalog-5', name: '', url: '' },
 ];
