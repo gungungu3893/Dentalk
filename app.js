@@ -1121,6 +1121,150 @@ function renderMyUsed2() {
     '</div>';
   }).join('') + '</div>';
 }
+// ============================================================
+// DETAIL PAGES — Settings > See All
+// ============================================================
+function myOrdersTab(name) {
+  ['shop','cnc'].forEach(function(tab) {
+    var btn  = document.getElementById('mot-'+tab);
+    var pane = document.getElementById('mo-'+tab);
+    if (btn) btn.className = 'flex-1 py-2.5 rounded-xl font-black text-xs whitespace-nowrap px-3 ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
+    if (pane) pane.classList.toggle('hidden', tab!==name);
+  });
+  if (name==='shop') renderMyOrdersDetailShop();
+  if (name==='cnc')  renderMyOrdersDetailCnc();
+}
+
+function renderMyOrdersDetail() { myOrdersTab('shop'); }
+
+async function renderMyOrdersDetailShop() {
+  var el = document.getElementById('mo-shop');
+  if (!el) return;
+  el.innerHTML = dtLoaderHtml();
+  try {
+    var nick = currentUser && currentUser.nickname;
+    var rows = await sbGetShopOrders(nick, false);
+    var orders = rows.map(function(r) {
+      return { id:r.id, date:r.date, clinic:r.clinic, address:r.addr, phone:r.phone, lineId:r.line_id,
+        nickname:r.user_nickname, items:r.items||[], stage:r.stage, carrier:r.carrier||'', tracking:r.tracking_number||'',
+        totalAmount:(r.items||[]).reduce(function(s,i){ return s+(i.price||0)*(i.qty||1); },0) };
+    });
+    if (!orders.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('shop_no_orders_msg')+'</p>'; return; }
+    // Load user invoices for matching
+    var invoices = [];
+    try { invoices = await sbGetUserInvoices(nick) || []; } catch(e){}
+    var shopStageColors = { submitted:'bg-slate-100 text-slate-500', payment_pending:'bg-amber-100 text-amber-600', payment_confirmed:'bg-blue-100 text-blue-600', preparing:'bg-purple-100 text-purple-600', shipped:'bg-green-100 text-green-600', delivered:'bg-emerald-100 text-emerald-700' };
+    el.innerHTML = orders.map(function(o) {
+      var stageLabel = t('shop_stage_'+(o.stage||'submitted')) || o.stage;
+      var stageColor = shopStageColors[o.stage||'submitted'] || 'bg-slate-100 text-slate-500';
+      var itemsHtml = (o.items||[]).map(function(i){
+        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">'+escHtml(i.name)+'</span><span class="font-mono text-slate-400">'+escHtml(i.code||'')+'</span><span class="font-black">×'+i.qty+'</span><span class="font-mono font-black">'+((i.price||0)*(i.qty||1)).toLocaleString()+'</span></div>';
+      }).join('');
+      var total = o.totalAmount||0;
+      // Invoice button
+      var orderInvoices = invoices.filter(function(inv){ return inv.order_id === o.id; });
+      var canIssue = ['payment_confirmed','preparing','shipped','delivered'].indexOf(o.stage) !== -1;
+      var invBtn = '';
+      if (orderInvoices.length > 0) {
+        invBtn = '<button onclick="goDetailPage(\'my-orders\',t(\'settings_my_orders\'),\'settings\');myOrdersTab(\'shop\');myActivityTab(\'invoices\');goPage(\'myactivity\')" class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition border border-[#D4AF37] text-[#D4AF37]">📄 '+t('inv_view')+'</button>';
+      } else if (canIssue) {
+        var od = JSON.stringify(o).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        invBtn = '<button onclick=\'openInvoiceSelect('+od+')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition shadow-sm" style="background:#D4AF37;color:#001D4A">🧾 '+t('inv_issue_btn')+'</button>';
+      }
+      return '<div class="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-slate-100">' +
+        '<div class="flex justify-between items-center mb-2">' +
+          '<div><p class="font-black text-xs text-slate-700">' + escHtml(o.clinic||'-') + '</p>' +
+            '<p class="text-[9px] text-slate-400 font-mono">' + o.id + '</p></div>' +
+          '<span class="text-[9px] font-black px-2.5 py-1 rounded-full ' + stageColor + '">' + stageLabel + '</span>' +
+        '</div>' +
+        '<p class="text-[9px] text-slate-400 mb-2">📅 ' + (o.date||'') + (o.carrier ? ' · 🚚 '+o.carrier+(o.tracking?' '+o.tracking:'') : '') + '</p>' +
+        '<div class="space-y-0.5 mb-2">' + itemsHtml + '</div>' +
+        '<div class="flex justify-between items-center pt-2 border-t border-slate-100">' +
+          '<p class="font-black text-sm" style="color:#001D4A">' + total.toLocaleString() + ' THB</p>' +
+          invBtn +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    console.error('[MyOrdersDetailShop]', e);
+    el.innerHTML='<p class="text-center text-red-400 text-xs py-8">'+t('err_generic')+'</p>';
+  }
+}
+
+function renderMyOrdersDetailCnc() {
+  var el = document.getElementById('mo-cnc');
+  if (!el) return;
+  var myOrders = customOrders.filter(function(o){ return o.userNickname === currentUser.nickname; });
+  if (!myOrders.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('ma_no_orders')+'</p>'; return; }
+  var stageColors = {submitted:'bg-slate-100 text-slate-500',confirmed:'bg-blue-100 text-blue-600',design_ready:'bg-purple-100 text-purple-600',approved:'bg-indigo-100 text-indigo-600',milling:'bg-yellow-100 text-yellow-700',shipped:'bg-green-100 text-green-700',done:'bg-emerald-100 text-emerald-700'};
+  el.innerHTML = myOrders.map(function(o) {
+    var stageLabel = t('stage_'+(o.stage||'submitted')) || o.stage;
+    var stageColor = stageColors[o.stage||'submitted'] || 'bg-slate-100 text-slate-500';
+    var casesStr = (o.cases||[]).length + t('cases_unit') + ' · ' + (o.cases||[]).reduce(function(a,c){ return a+(c.teeth||[]).length; },0) + t('teeth_count');
+    var canIssue = ['approved','milling','shipped','done'].indexOf(o.stage) !== -1;
+    var invBtn = '';
+    if (canIssue) {
+      var cncOrder = { id:o.id, clinic:o.clinic||'', address:o.addr||'', items:(o.cases||[]).map(function(c){ return { name:'CNC Custom ('+((c.teeth||[]).join(',')||'-')+')', code:o.id, qty:1, price:0 }; }), totalAmount:0 };
+      var od = JSON.stringify(cncOrder).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      invBtn = '<button onclick=\'openInvoiceSelect('+od+')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition shadow-sm" style="background:#D4AF37;color:#001D4A">🧾 '+t('inv_issue_btn')+'</button>';
+    }
+    return '<div class="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-slate-100">' +
+      '<div class="flex justify-between items-center mb-2">' +
+        '<div><p class="font-black text-xs text-slate-700"># ' + escHtml(o.id) + '</p>' +
+          '<p class="text-[10px] text-slate-400 font-bold mt-0.5">' + casesStr + '</p></div>' +
+        '<span class="text-[9px] font-black px-2.5 py-1 rounded-full ' + stageColor + '">' + stageLabel + '</span>' +
+      '</div>' +
+      (o.clinic ? '<p class="text-[9px] text-slate-400 mb-2">🏥 '+escHtml(o.clinic)+'</p>' : '') +
+      '<div class="flex justify-end pt-2 border-t border-slate-100">' + invBtn + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMyPostsDetail() {
+  var el = document.getElementById('my-posts-list');
+  if (!el) return;
+  var nick = currentUser.nickname;
+  var myPosts = posts.filter(function(p){ return p.author === nick; });
+  if (!myPosts.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('ma_no_posts')+'</p>'; return; }
+  el.innerHTML = myPosts.map(function(p) {
+    var commentCount = p.comments ? p.comments.length : 0;
+    return '<div onclick="openForumDetail('+p.id+')" class="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-slate-100 cursor-pointer active:bg-slate-50 transition">' +
+      '<p class="font-black text-xs text-slate-800 leading-snug mb-1">' + escHtml(p.title) + '</p>' +
+      '<p class="text-[10px] text-slate-400 line-clamp-2 mb-2">' + escHtml(p.body||'') + '</p>' +
+      '<div class="flex items-center gap-3 text-[9px] text-slate-300 font-bold">' +
+        '<span>📅 ' + (p.date||'') + '</span>' +
+        '<span>👁 ' + (p.views||0) + '</span>' +
+        '<span>💬 ' + commentCount + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMyUsedDetail() {
+  var el = document.getElementById('my-used-list');
+  if (!el) return;
+  var nick = currentUser.nickname;
+  var myUsed = usedItems.filter(function(u){ return u.seller===nick || u.seller==='Me'; });
+  if (!myUsed.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('ma_no_used')+'</p>'; return; }
+  el.innerHTML = myUsed.map(function(u) {
+    var thumb = u.image
+      ? '<img src="'+u.image+'" class="w-16 h-16 rounded-xl object-cover shrink-0" loading="lazy">'
+      : '<div class="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-xl shrink-0">📦</div>';
+    var soldBadge = u.sold ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-red-100 text-red-500">SOLD</span>' : '';
+    return '<div class="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-slate-100">' +
+      '<div class="flex gap-3">' + thumb +
+        '<div class="flex-1 min-w-0">' +
+          '<div class="flex items-center gap-2 mb-0.5">' +
+            '<p class="font-black text-xs text-slate-800 truncate">' + escHtml(u.name) + '</p>' + soldBadge +
+          '</div>' +
+          '<p class="text-[10px] text-slate-400 font-mono">' + escHtml(u.code||'') + '</p>' +
+          '<p class="font-black text-sm text-blue-700 mt-1">฿' + u.price.toLocaleString() + '</p>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
 async function renderMyCreditHistory() {
   var el = document.getElementById('ma-credits');
   if (!el || !isLoggedIn()) return;

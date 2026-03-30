@@ -2399,7 +2399,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <h3 class="font-black text-slate-800" data-i18n="settings_my_orders">📦 My Orders</h3>
-          <button onclick="goPage('shop')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
+          <button onclick="goDetailPage('my-orders',t('settings_my_orders'),'settings');renderMyOrdersDetail();" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsOrdersSummary" class="space-y-2"></div>
       </div>
@@ -2407,7 +2407,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <h3 class="font-black text-slate-800" data-i18n="settings_my_posts">✍️ My Posts</h3>
-          <button onclick="goPage('forum')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
+          <button onclick="goDetailPage('my-posts',t('settings_my_posts'),'settings');renderMyPostsDetail();" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsMyPosts" class="space-y-2"></div>
       </div>
@@ -2415,7 +2415,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <h3 class="font-black text-slate-800" data-i18n="settings_my_used">♻️ My Used Items</h3>
-          <button onclick="goPage('used')" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
+          <button onclick="goDetailPage('my-used',t('settings_my_used'),'settings');renderMyUsedDetail();" class="text-xs font-black text-[#001d4a] px-3 py-1.5 bg-slate-50 rounded-xl active:bg-slate-100" data-i18n="sec_see_more">See All ›</button>
         </div>
         <div id="settingsMyUsed" class="grid grid-cols-3 gap-2"></div>
       </div>
@@ -2442,6 +2442,23 @@ body.is-admin #factoryPromoHeader { display:none !important; }
           </div>
         </div>
       </a>
+    </div>
+    <!-- ==================== MY ORDERS DETAIL ==================== -->
+    <div id="page-my-orders" class="page p-4">
+      <div class="flex gap-2 mb-4 overflow-x-auto no-scroll">
+        <button onclick="myOrdersTab('shop')" id="mot-shop" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-[#001d4a] text-white whitespace-nowrap px-3">🛒 Shop</button>
+        <button onclick="myOrdersTab('cnc')" id="mot-cnc" class="flex-1 py-2.5 rounded-xl font-black text-xs bg-slate-100 text-slate-500 whitespace-nowrap px-3">⚙️ CNC Custom</button>
+      </div>
+      <div id="mo-shop"></div>
+      <div id="mo-cnc" class="hidden"></div>
+    </div>
+    <!-- ==================== MY POSTS DETAIL ==================== -->
+    <div id="page-my-posts" class="page p-4">
+      <div id="my-posts-list"></div>
+    </div>
+    <!-- ==================== MY USED DETAIL ==================== -->
+    <div id="page-my-used" class="page p-4">
+      <div id="my-used-list"></div>
     </div>
     <!-- ==================== FEEDBACK PAGE ==================== -->
     <div id="page-feedback" class="page p-4 space-y-4">
