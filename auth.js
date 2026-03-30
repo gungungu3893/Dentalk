@@ -359,3 +359,96 @@ function doLogout() {
   if (LOCKED.includes(currentPage) || currentPage === 'factory') goPage('home');
   closeMenu();
 }
+
+// ============================================================
+// 아이디 / 비밀번호 찾기
+// ============================================================
+function showFindId() {
+  document.getElementById('findIdPanel').classList.remove('hidden');
+  document.getElementById('findPwPanel').classList.add('hidden');
+  document.getElementById('findIdResult').classList.add('hidden');
+  document.getElementById('findIdInput').value = '';
+}
+function showFindPw() {
+  document.getElementById('findPwPanel').classList.remove('hidden');
+  document.getElementById('findIdPanel').classList.add('hidden');
+  document.getElementById('findPwResult').classList.add('hidden');
+  document.getElementById('findPwInput').value = '';
+}
+function hideFindPanels() {
+  document.getElementById('findIdPanel').classList.add('hidden');
+  document.getElementById('findPwPanel').classList.add('hidden');
+}
+
+function _maskEmail(email) {
+  if (!email || email.indexOf('@') === -1) return '***';
+  var parts = email.split('@');
+  var name = parts[0];
+  var domain = parts[1];
+  if (name.length <= 2) return name[0] + '***@' + domain;
+  return name.substring(0, 2) + '***@' + domain;
+}
+
+async function findMyId() {
+  var input = document.getElementById('findIdInput').value.trim();
+  var resultEl = document.getElementById('findIdResult');
+  if (!input) { return; }
+  resultEl.classList.remove('hidden');
+  resultEl.textContent = '...';
+  try {
+    // phone으로 검색
+    var rows = await sbGet('licenses', 'phone=eq.' + encodeURIComponent(input) + '&select=email,nickname');
+    if (!rows || !rows.length) {
+      // nickname으로 검색
+      rows = await sbGet('licenses', 'nickname=eq.' + encodeURIComponent(input) + '&select=email,nickname');
+    }
+    if (rows && rows.length > 0) {
+      var masked = _maskEmail(rows[0].email || '');
+      resultEl.style.background = 'rgba(212,175,55,0.15)';
+      resultEl.style.color = '#D4AF37';
+      resultEl.textContent = t('find_id_result') + masked;
+    } else {
+      resultEl.style.background = 'rgba(239,68,68,0.15)';
+      resultEl.style.color = '#fca5a5';
+      resultEl.textContent = t('find_not_found');
+    }
+  } catch(e) {
+    resultEl.style.background = 'rgba(239,68,68,0.15)';
+    resultEl.style.color = '#fca5a5';
+    resultEl.textContent = t('find_not_found');
+  }
+}
+
+async function findMyPw() {
+  var email = document.getElementById('findPwInput').value.trim();
+  var resultEl = document.getElementById('findPwResult');
+  if (!email) { return; }
+  resultEl.classList.remove('hidden');
+  resultEl.textContent = '...';
+  try {
+    // 이메일로 사용자 존재 확인
+    var rows = await sbGet('licenses', 'email=eq.' + encodeURIComponent(email) + '&select=nickname,line_user_id');
+    if (rows && rows.length > 0) {
+      var user = rows[0];
+      // LINE으로 관리자에게 비밀번호 재설정 요청 전송
+      if (typeof sendLineAdminMsg === 'function') {
+        sendLineAdminMsg('line_feedback_admin', {
+          category: 'password_reset',
+          title: 'Password reset request: ' + (user.nickname || email),
+          nickname: email
+        });
+      }
+      resultEl.style.background = 'rgba(212,175,55,0.15)';
+      resultEl.style.color = '#D4AF37';
+      resultEl.textContent = t('find_pw_sent');
+    } else {
+      resultEl.style.background = 'rgba(239,68,68,0.15)';
+      resultEl.style.color = '#fca5a5';
+      resultEl.textContent = t('find_not_found');
+    }
+  } catch(e) {
+    resultEl.style.background = 'rgba(239,68,68,0.15)';
+    resultEl.style.color = '#fca5a5';
+    resultEl.textContent = t('find_not_found');
+  }
+}

@@ -1001,6 +1001,30 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         class="w-full text-xs font-black py-1 underline underline-offset-2 transition"
         style="color:#D4AF37;opacity:.8"
         data-i18n="login_register_link">Request Access →</button>
+      <!-- 아이디/비밀번호 찾기 -->
+      <div class="flex items-center justify-center gap-3 mt-2">
+        <button onclick="showFindId()" class="text-[10px] font-bold text-slate-400 hover:text-white transition" data-i18n="find_id">Find ID</button>
+        <span class="text-slate-600 text-[10px]">|</span>
+        <button onclick="showFindPw()" class="text-[10px] font-bold text-slate-400 hover:text-white transition" data-i18n="find_pw">Reset Password</button>
+      </div>
+      <!-- 아이디 찾기 패널 (토글) -->
+      <div id="findIdPanel" class="hidden mt-3 p-4 rounded-2xl" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)">
+        <p class="text-xs font-black text-white mb-2" data-i18n="find_id">Find ID</p>
+        <input id="findIdInput" type="text" data-i18n-ph="find_id_ph" placeholder="Phone or nickname"
+          class="w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-800 bg-white/95 outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-slate-300 mb-2">
+        <button onclick="findMyId()" class="w-full py-3 rounded-xl font-black text-xs active:scale-95 transition" style="background:#D4AF37;color:#001220" data-i18n="find_id_btn">Find my ID</button>
+        <div id="findIdResult" class="hidden mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl" style="background:rgba(212,175,55,0.15);color:#D4AF37"></div>
+        <button onclick="hideFindPanels()" class="w-full text-[10px] font-bold text-slate-500 mt-2 hover:text-white transition" data-i18n="find_back">← Back to Login</button>
+      </div>
+      <!-- 비밀번호 찾기 패널 (토글) -->
+      <div id="findPwPanel" class="hidden mt-3 p-4 rounded-2xl" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)">
+        <p class="text-xs font-black text-white mb-2" data-i18n="find_pw">Reset Password</p>
+        <input id="findPwInput" type="text" data-i18n-ph="find_pw_ph" placeholder="Your email"
+          class="w-full px-4 py-3 rounded-xl text-sm font-bold text-slate-800 bg-white/95 outline-none focus:ring-2 focus:ring-[#D4AF37] placeholder:text-slate-300 mb-2">
+        <button onclick="findMyPw()" class="w-full py-3 rounded-xl font-black text-xs active:scale-95 transition" style="background:#D4AF37;color:#001220" data-i18n="find_pw_btn">Send reset link</button>
+        <div id="findPwResult" class="hidden mt-2 text-xs font-bold text-center py-2 px-3 rounded-xl" style="background:rgba(212,175,55,0.15);color:#D4AF37"></div>
+        <button onclick="hideFindPanels()" class="w-full text-[10px] font-bold text-slate-500 mt-2 hover:text-white transition" data-i18n="find_back">← Back to Login</button>
+      </div>
     </div>
   </div>
 </div>
