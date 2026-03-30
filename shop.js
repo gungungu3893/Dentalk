@@ -80,8 +80,8 @@ var CATALOG_LIST = [
   { id: 'catalog-1', name: 'BIOTEM CATALOG', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog_2026.01.pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog-thumb.png' },
   { id: 'catalog-2', name: 'DIGITAL PARTS', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/DigitalPartsV2.2.pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/digital-parts-thumb.png' },
   { id: 'catalog-3', name: 'SANTA & SBB', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/SANTA%20SBB.pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/santa-sbb-thumb.png' },
-  { id: 'catalog-4', name: 'InnoOss-Allo', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/InnoOss-Allo%20(Eng).pdf', thumb: '' },
-  { id: 'catalog-5', name: 'MegaDerm Plus', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/MegaDerm%20Plus%20Catalog(Eng).pdf', thumb: '' },
+  { id: 'catalog-4', name: 'InnoOss-Allo', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/InnoOss-Allo%20(Eng).pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/InnoOss-Allo_page1.png' },
+  { id: 'catalog-5', name: 'MegaDerm Plus', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/MegaDerm%20Plus%20Catalog(Eng).pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/MegaDerm_Plus_page1.png' },
 ];
 
 function downloadCatalog(fileUrl) {
