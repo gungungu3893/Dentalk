@@ -758,3 +758,20 @@ async function sbGetForumCommentStats() {
 async function sbGetAllUsers() {
   return sbGet('licenses', 'select=license_number,nickname,created_at,is_active,role');
 }
+
+// ============================================================
+// Invoices (Tax Invoice / Receipt)
+// ============================================================
+
+async function sbSaveInvoice(invoice) {
+  return sbPost('invoices', invoice);
+}
+
+async function sbGetUserInvoices(nickname) {
+  return sbGet('invoices', 'user_nickname=eq.' + encodeURIComponent(nickname) + '&select=id,order_id,type,clinic_name,items,subtotal,vat_amount,total_amount,issued_date,expires_at,clinic_address,clinic_tax_id,created_at&order=created_at.desc');
+}
+
+async function sbDeleteExpiredInvoices() {
+  var now = new Date().toISOString();
+  return sbDelete('invoices', 'expires_at=lt.' + encodeURIComponent(now));
+}

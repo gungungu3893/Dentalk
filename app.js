@@ -272,6 +272,28 @@ var LINE_MSGS = {
     tr:'💬 Yeni geri bildirim: [{category}] {title} ({nickname})',
     ar:'💬 ملاحظات جديدة: [{category}] {title} ({nickname})',
     fa:'💬 بازخورد جدید: [{category}] {title} ({nickname})'
+  },
+  line_invoice_issued: {
+    th:'🧾 {type} เลขที่ {id} ออกแล้ว ยอดรวม {total} THB',
+    en:'🧾 {type} #{id} issued. Total: {total} THB',
+    ko:'🧾 {type} #{id} 발행 완료. 합계: {total} THB',
+    zh:'🧾 {type} #{id} 已开具。合计：{total} THB',
+    vi:'🧾 {type} #{id} đã phát hành. Tổng: {total} THB',
+    es:'🧾 {type} #{id} emitido. Total: {total} THB',
+    tr:'🧾 {type} #{id} düzenlendi. Toplam: {total} THB',
+    ar:'🧾 {type} #{id} صدر. المجموع: {total} THB',
+    fa:'🧾 {type} #{id} صادر شد. مجموع: {total} THB'
+  },
+  line_invoice_admin: {
+    th:'🧾 [{nickname}] ออก {type} #{id} ยอด {total} THB',
+    en:'🧾 [{nickname}] issued {type} #{id}. Total: {total} THB',
+    ko:'🧾 [{nickname}] {type} #{id} 발행. 합계: {total} THB',
+    zh:'🧾 [{nickname}] 开具 {type} #{id}。合计：{total} THB',
+    vi:'🧾 [{nickname}] phát hành {type} #{id}. Tổng: {total} THB',
+    es:'🧾 [{nickname}] emitió {type} #{id}. Total: {total} THB',
+    tr:'🧾 [{nickname}] {type} #{id} düzenledi. Toplam: {total} THB',
+    ar:'🧾 [{nickname}] أصدر {type} #{id}. المجموع: {total} THB',
+    fa:'🧾 [{nickname}] {type} #{id} صادر کرد. مجموع: {total} THB'
   }
 };
 
@@ -1008,17 +1030,18 @@ async function openMyActivity() {
 }
 function activityTab(name) { myActivityTab(name); }
 function myActivityTab(name) {
-  ['msg','posts','orders','used','credits'].forEach(function(tab){
+  ['msg','posts','orders','used','credits','invoices'].forEach(function(tab){
     var btn  = document.getElementById('matab-'+tab);
     var pane = document.getElementById('ma-'+tab);
     if (btn)  btn.className  = 'flex-1 py-2.5 rounded-xl font-black text-xs whitespace-nowrap px-2 ' + (tab===name?'bg-[#001d4a] text-white':'bg-slate-100 text-slate-500');
     if (pane) pane.classList.toggle('hidden', tab!==name);
   });
-  if (name==='msg')     renderMyMsgs2();
-  if (name==='posts')   renderMyPosts2();
-  if (name==='orders')  renderMyOrders2();
-  if (name==='used')    renderMyUsed2();
-  if (name==='credits') renderMyCreditHistory();
+  if (name==='msg')      renderMyMsgs2();
+  if (name==='posts')    renderMyPosts2();
+  if (name==='orders')   renderMyOrders2();
+  if (name==='used')     renderMyUsed2();
+  if (name==='credits')  renderMyCreditHistory();
+  if (name==='invoices') renderMyInvoices();
 }
 function renderMyMsgs2() {
   var el = document.getElementById('ma-msg');

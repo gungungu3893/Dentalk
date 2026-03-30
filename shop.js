@@ -612,10 +612,21 @@ function completePayment() {
     '<p class="font-black text-slate-500 text-[9px] uppercase mb-2">' + t('shop_receipt_order_no') + ': ' + order.id + '</p>' +
     order.items.map(function(i){ return '<div class="flex justify-between text-xs gap-2"><span class="flex-1 font-bold">' + i.name + '</span><span class="font-mono text-slate-500">' + i.code + '</span><span class="font-black ml-1">×' + i.qty + '</span><span class="font-mono font-black ml-1">' + (i.price*i.qty).toLocaleString() + '</span></div>'; }).join('') +
     '<div class="border-t mt-2 pt-2 flex justify-between font-black text-blue-800"><span>' + t('shop_total_label') + '</span><span class="font-mono">' + order.totalAmount.toLocaleString() + ' THB</span></div>';
+  _lastCompletedOrder = order;
   cart=[]; updateBadge(); closeModal('qrModal');
   openModal('payCompleteModal');
 }
-function closePayComplete() { closeModal('payCompleteModal'); goPage('shop'); }
+function closePayComplete() {
+  closeModal('payCompleteModal');
+  // Show invoice selection modal
+  if (_lastCompletedOrder) {
+    openInvoiceSelect(_lastCompletedOrder);
+    _lastCompletedOrder = null;
+  } else {
+    goPage('shop');
+  }
+}
+var _lastCompletedOrder = null;
 
 // ============================================================
 // 쇼핑몰 주문 관리
@@ -973,5 +984,242 @@ async function deleteReview(reviewId) {
     await sbDeleteReview(reviewId);
     loadProductReviews(_currentReviewProductId);
   } catch(e) { /* silent */ }
+}
+
+// ============================================================
+// TAX INVOICE / RECEIPT SYSTEM
+// ============================================================
+var SELLER_INFO = {
+  nameTh: 'บริษัท ไบโอ พลานท์ จำกัด',
+  nameEn: 'BIO PLANT Co., Ltd.',
+  taxId:  '0105559163723',
+  address:'1000/27 อาคารลิเบอร์ตี้ พลาซ่า ชั้น 9 ซอยทองหล่อ ถนนสุขุมวิท 55 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพมหานคร',
+  phone:  '02-086-6162',
+  email:  'gungungu@gmail.com'
+};
+
+var _invPendingOrder = null; // order waiting for invoice selection
+
+// Toggle checkboxes in invoice selection modal
+function invToggle(type) {
+  var chkTax  = document.getElementById('inv-chk-tax');
+  var chkRec  = document.getElementById('inv-chk-rec');
+  var chkNone = document.getElementById('inv-chk-none');
+  var taxSec  = document.getElementById('inv-taxid-section');
+  setTimeout(function() {
+    if (type === 'none') {
+      if (chkNone.checked) { chkTax.checked = false; chkRec.checked = false; }
+    } else {
+      if (chkTax.checked || chkRec.checked) chkNone.checked = false;
+    }
+    taxSec.classList.toggle('hidden', !chkTax.checked);
+  }, 10);
+}
+
+// Generate invoice number: INV-YYYYMMDD-XXXX or REC-YYYYMMDD-XXXX
+function _genInvoiceId(prefix) {
+  var d = new Date();
+  var ds = d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  var rand = String(Math.floor(1000 + Math.random() * 9000));
+  return prefix + '-' + ds + '-' + rand;
+}
+
+// Called from payCompleteModal — open invoice selection
+function openInvoiceSelect(order) {
+  _invPendingOrder = order;
+  var chkTax  = document.getElementById('inv-chk-tax');
+  var chkRec  = document.getElementById('inv-chk-rec');
+  var chkNone = document.getElementById('inv-chk-none');
+  if (chkTax)  chkTax.checked  = false;
+  if (chkRec)  chkRec.checked  = false;
+  if (chkNone) chkNone.checked = false;
+  document.getElementById('inv-taxid-section').classList.add('hidden');
+  var taxInput = document.getElementById('inv-taxid');
+  if (taxInput) taxInput.value = '';
+  openModal('invoiceSelectModal');
+}
+
+// Issue selected invoices
+async function issueInvoices() {
+  if (!_invPendingOrder) { closeModal('invoiceSelectModal'); return; }
+  var chkTax  = document.getElementById('inv-chk-tax');
+  var chkRec  = document.getElementById('inv-chk-rec');
+  var chkNone = document.getElementById('inv-chk-none');
+  if (chkNone && chkNone.checked) { closeModal('invoiceSelectModal'); _invPendingOrder = null; return; }
+  if (!chkTax.checked && !chkRec.checked) { showToast(t('inv_select_one'), 'warning'); return; }
+
+  var order = _invPendingOrder;
+  var buyerTaxId = (document.getElementById('inv-taxid') || {}).value || '';
+  var clinic = order.clinic || '';
+  var addr   = order.address || '';
+  var subtotal = order.totalAmount || 0;
+  var dateStr  = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  var issued = [];
+
+  try {
+    if (chkTax.checked) {
+      var vatAmt = Math.round(subtotal * 7 / 107 * 100) / 100;
+      var sub    = subtotal - vatAmt;
+      var invId  = _genInvoiceId('INV');
+      var taxInv = {
+        id: invId, order_id: order.id, user_nickname: currentUser.nickname,
+        type: 'tax_invoice', clinic_name: clinic, clinic_address: addr,
+        clinic_tax_id: buyerTaxId, items: order.items,
+        subtotal: sub, vat_amount: vatAmt, total_amount: subtotal, issued_date: dateStr
+      };
+      await sbSaveInvoice(taxInv);
+      issued.push(taxInv);
+    }
+    if (chkRec.checked) {
+      var recId = _genInvoiceId('REC');
+      var rec = {
+        id: recId, order_id: order.id, user_nickname: currentUser.nickname,
+        type: 'receipt', clinic_name: clinic, clinic_address: addr,
+        clinic_tax_id: '', items: order.items,
+        subtotal: subtotal, vat_amount: 0, total_amount: subtotal, issued_date: dateStr
+      };
+      await sbSaveInvoice(rec);
+      issued.push(rec);
+    }
+
+    // LINE notification to customer
+    issued.forEach(function(inv) {
+      var label = inv.type === 'tax_invoice' ? 'ใบกำกับภาษี / Tax Invoice' : 'ใบเสร็จรับเงิน / Receipt';
+      sendLineMsg(currentUser.nickname, 'line_invoice_issued', { type: label, id: inv.id, total: inv.total_amount.toLocaleString() });
+    });
+
+    // LINE notification to admin
+    issued.forEach(function(inv) {
+      var label = inv.type === 'tax_invoice' ? 'Tax Invoice' : 'Receipt';
+      sendLineAdminMsg('line_invoice_admin', { nickname: currentUser.nickname, type: label, id: inv.id, total: inv.total_amount.toLocaleString() });
+    });
+
+    showToast(t('inv_issued_ok'), 'success');
+    closeModal('invoiceSelectModal');
+    _invPendingOrder = null;
+
+    // Auto-open the first issued invoice for preview
+    if (issued.length > 0) openInvoicePrint(issued[0]);
+  } catch(e) {
+    console.error('[Invoice Issue]', e);
+    showToast(t('inv_issue_error'), 'error');
+  }
+}
+
+// Generate printable invoice HTML and open in new window
+function openInvoicePrint(inv) {
+  var isTax = inv.type === 'tax_invoice';
+  var title = isTax ? 'ใบกำกับภาษี / Tax Invoice' : 'ใบเสร็จรับเงิน / Receipt';
+  var itemRows = (inv.items || []).map(function(item, i) {
+    var amt = (item.price || 0) * (item.qty || 0);
+    return '<tr>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:center;font-size:11px">' + (i+1) + '</td>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:11px">' + escHtml(item.name) + '<br><span style="color:#94a3b8;font-size:10px">' + escHtml(item.code || '') + '</span></td>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:center;font-size:11px">' + item.qty + '</td>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:right;font-size:11px">' + (item.price||0).toLocaleString() + '</td>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:right;font-size:11px;font-weight:700">' + amt.toLocaleString() + '</td>' +
+    '</tr>';
+  }).join('');
+
+  var totalSection = '';
+  if (isTax) {
+    totalSection =
+      '<tr><td colspan="4" style="text-align:right;padding:4px 8px;font-size:11px">ราคาก่อน VAT / Subtotal</td><td style="text-align:right;padding:4px 8px;font-size:11px">' + Number(inv.subtotal).toLocaleString() + ' THB</td></tr>' +
+      '<tr><td colspan="4" style="text-align:right;padding:4px 8px;font-size:11px">ภาษีมูลค่าเพิ่ม VAT 7%</td><td style="text-align:right;padding:4px 8px;font-size:11px">' + Number(inv.vat_amount).toLocaleString() + ' THB</td></tr>' +
+      '<tr><td colspan="4" style="text-align:right;padding:6px 8px;font-weight:700;font-size:13px;border-top:2px solid #001D4A">รวมทั้งสิ้น / Grand Total</td><td style="text-align:right;padding:6px 8px;font-weight:700;font-size:13px;border-top:2px solid #001D4A;color:#001D4A">' + Number(inv.total_amount).toLocaleString() + ' THB</td></tr>';
+  } else {
+    totalSection =
+      '<tr><td colspan="4" style="text-align:right;padding:6px 8px;font-weight:700;font-size:13px;border-top:2px solid #001D4A">รวมทั้งสิ้น / Total</td><td style="text-align:right;padding:6px 8px;font-weight:700;font-size:13px;border-top:2px solid #001D4A;color:#001D4A">' + Number(inv.total_amount).toLocaleString() + ' THB</td></tr>';
+  }
+
+  var buyerInfo = '<p style="font-weight:700;font-size:12px">' + escHtml(inv.clinic_name) + '</p>' +
+    (inv.clinic_address ? '<p style="font-size:11px;color:#475569">' + escHtml(inv.clinic_address) + '</p>' : '') +
+    (isTax && inv.clinic_tax_id ? '<p style="font-size:11px">เลขประจำตัวผู้เสียภาษี / Tax ID: ' + escHtml(inv.clinic_tax_id) + '</p>' : '');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + title + ' — ' + inv.id + '</title>' +
+    '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:#1e293b;padding:24px;max-width:800px;margin:0 auto}' +
+    '@media print{body{padding:12px}.no-print{display:none!important}}</style></head><body>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">' +
+      '<div><h1 style="font-size:20px;font-weight:900;color:#001D4A;margin-bottom:4px">' + title + '</h1>' +
+        '<p style="font-size:11px;color:#94a3b8">เลขที่ / No: <strong>' + escHtml(inv.id) + '</strong></p>' +
+        '<p style="font-size:11px;color:#94a3b8">วันที่ / Date: ' + escHtml(inv.issued_date) + '</p></div>' +
+      '<div style="text-align:right"><p style="font-weight:900;font-size:14px;color:#D4AF37">BIOTEM × BIOPLANT</p>' +
+        '<p style="font-size:10px;color:#94a3b8">Dental Digital Solutions</p></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:20px;margin-bottom:20px">' +
+      '<div style="flex:1;background:#f8fafc;border-radius:8px;padding:12px">' +
+        '<p style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">ผู้ขาย / Seller</p>' +
+        '<p style="font-weight:700;font-size:12px">' + SELLER_INFO.nameTh + '</p>' +
+        '<p style="font-size:11px">' + SELLER_INFO.nameEn + '</p>' +
+        '<p style="font-size:11px;color:#475569">' + SELLER_INFO.address + '</p>' +
+        '<p style="font-size:11px">เลขประจำตัวผู้เสียภาษี / Tax ID: ' + SELLER_INFO.taxId + '</p>' +
+        '<p style="font-size:11px">โทร: ' + SELLER_INFO.phone + ' · ' + SELLER_INFO.email + '</p>' +
+      '</div>' +
+      '<div style="flex:1;background:#f8fafc;border-radius:8px;padding:12px">' +
+        '<p style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">ผู้ซื้อ / Buyer</p>' +
+        buyerInfo +
+      '</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:8px">' +
+      '<thead><tr style="background:#001D4A;color:#fff">' +
+        '<th style="padding:8px;font-size:10px;text-align:center;width:40px">#</th>' +
+        '<th style="padding:8px;font-size:10px;text-align:left">รายการ / Description</th>' +
+        '<th style="padding:8px;font-size:10px;text-align:center;width:50px">จำนวน / Qty</th>' +
+        '<th style="padding:8px;font-size:10px;text-align:right;width:80px">ราคา / Price</th>' +
+        '<th style="padding:8px;font-size:10px;text-align:right;width:90px">จำนวนเงิน / Amount</th>' +
+      '</tr></thead><tbody>' + itemRows + '</tbody>' +
+      '<tfoot>' + totalSection + '</tfoot>' +
+    '</table>' +
+    '<div style="margin-top:24px;text-align:center;color:#94a3b8;font-size:10px">' +
+      '<p>' + SELLER_INFO.nameTh + ' · ' + SELLER_INFO.phone + '</p>' +
+    '</div>' +
+    '<div class="no-print" style="text-align:center;margin-top:24px">' +
+      '<button onclick="window.print()" style="padding:10px 32px;background:#001D4A;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer">🖨️ Print / Save PDF</button></div>' +
+    '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+// Render invoice list in My Activity
+async function renderMyInvoices() {
+  var el = document.getElementById('ma-invoices');
+  if (!el) return;
+  el.innerHTML = dtLoaderHtml();
+  try {
+    // Clean expired invoices first
+    sbDeleteExpiredInvoices().catch(function(){});
+    var invoices = await sbGetUserInvoices(currentUser.nickname);
+    if (!invoices || !invoices.length) {
+      el.innerHTML = '<p class="text-center text-slate-300 text-xs font-bold py-8">' + t('inv_no_invoices') + '</p>';
+      return;
+    }
+    // Filter out expired
+    var now = new Date();
+    invoices = invoices.filter(function(inv) { return !inv.expires_at || new Date(inv.expires_at) > now; });
+    el.innerHTML = invoices.map(function(inv) {
+      var isTax = inv.type === 'tax_invoice';
+      var badge = isTax
+        ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">TAX INVOICE</span>'
+        : '<span class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">RECEIPT</span>';
+      var daysLeft = inv.expires_at ? Math.max(0, Math.ceil((new Date(inv.expires_at) - now) / 86400000)) : 30;
+      return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm border border-slate-100">' +
+        '<div class="flex justify-between items-start mb-2">' +
+          '<div>' + badge + '<p class="font-black text-xs text-slate-800 mt-1">' + escHtml(inv.id) + '</p></div>' +
+          '<p class="text-[9px] text-slate-400 font-bold">' + daysLeft + 'd left</p>' +
+        '</div>' +
+        '<p class="text-[10px] text-slate-500">' + escHtml(inv.clinic_name || '') + '</p>' +
+        '<div class="flex justify-between items-center mt-2">' +
+          '<p class="font-black text-sm" style="color:#001D4A">' + Number(inv.total_amount).toLocaleString() + ' THB</p>' +
+          '<div class="flex gap-2">' +
+            '<button onclick=\'openInvoicePrint(' + JSON.stringify(inv).replace(/'/g,"\\'") + ')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition" style="background:#D4AF37;color:#001D4A">🖨️ ' + t('inv_print') + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    console.error('[Invoices]', e);
+    el.innerHTML = '<p class="text-center text-red-400 text-xs py-8">' + t('inv_load_error') + '</p>';
+  }
 }
 
