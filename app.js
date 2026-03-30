@@ -846,26 +846,33 @@ function updateNicknameDisplays() {
   if (sn)  sn.textContent  = nick;
 }
 function renderProfileSettings() {
+  var loggedIn = isLoggedIn();
   // 상단 프로필 카드 채우기
   var nickEl    = document.getElementById('settingsNickname');
   var licEl     = document.getElementById('settingsLicense');
   var clinicEl  = document.getElementById('settingsClinic');
-  if (nickEl)   nickEl.textContent   = isLoggedIn() && currentUser.nickname   ? currentUser.nickname   : t('profile_login_msg');
-  if (licEl)    licEl.textContent    = isLoggedIn() && currentUser.licenseNum ? '# ' + currentUser.licenseNum : '-';
-  if (clinicEl) clinicEl.textContent = isLoggedIn() && currentUser.clinicName ? currentUser.clinicName  : '-';
+  if (nickEl)   nickEl.textContent   = loggedIn && currentUser.nickname   ? currentUser.nickname   : t('profile_login_msg');
+  if (licEl)    licEl.textContent    = loggedIn && currentUser.licenseNum ? '# ' + currentUser.licenseNum : '-';
+  if (clinicEl) clinicEl.textContent = loggedIn && currentUser.clinicName ? currentUser.clinicName  : '-';
   // 크레딧 표시
   var creditsEl = document.getElementById('settingsCredits');
-  if (creditsEl && isLoggedIn()) {
-    sbGetUserCredits(currentUser.nickname).then(function(c) {
-      currentUser._credits = c;
-      creditsEl.innerHTML = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">💰 ' + c + ' ' + t('credit_unit') + '</span>';
-    }).catch(function() {});
+  if (creditsEl) {
+    if (loggedIn) {
+      sbGetUserCredits(currentUser.nickname).then(function(c) {
+        currentUser._credits = c;
+        creditsEl.innerHTML = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#D4AF37]">💰 ' + c + ' ' + t('credit_unit') + '</span>';
+      }).catch(function() {});
+    } else {
+      creditsEl.innerHTML = '';
+    }
   }
+  // 비로그인 시 개인 데이터 섹션 표시 안내
+  var loginMsg = '<p class="text-[10px] text-slate-300 font-bold text-center py-3">' + t('profile_login_msg') + '</p>';
   // 나의 주문 목록 요약
   var summaryEl = document.getElementById('settingsOrdersSummary');
   if (summaryEl) {
-    if (!isLoggedIn()) {
-      summaryEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
+    if (!loggedIn) {
+      summaryEl.innerHTML = loginMsg;
     } else {
       var myOrders = customOrders.filter(function(o){ return o.userNickname === currentUser.nickname; }).slice(0, 5);
       if (!myOrders.length) {
@@ -879,7 +886,7 @@ function renderProfileSettings() {
           var casesStr = (o.cases||[]).length + t('cases_unit') + ' · ' + ((o.cases||[]).reduce(function(a,c){ return a + (c.teeth||[]).length; }, 0)) + t('teeth_count');
           return '<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">' +
             '<div>' +
-              '<p class="text-xs font-black text-slate-700"># ' + o.id + '</p>' +
+              '<p class="text-xs font-black text-slate-700"># ' + escHtml(o.id) + '</p>' +
               '<p class="text-[10px] text-slate-400 font-bold mt-0.5">' + casesStr + '</p>' +
             '</div>' +
             '<span class="text-[10px] font-black px-2 py-1 rounded-full ' + stageColor + '">' + stageLabel + '</span>' +
@@ -891,8 +898,8 @@ function renderProfileSettings() {
   // 내가 쓴 게시물
   var myPostsEl = document.getElementById('settingsMyPosts');
   if (myPostsEl) {
-    if (!isLoggedIn()) {
-      myPostsEl.innerHTML = '<p class="text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
+    if (!loggedIn) {
+      myPostsEl.innerHTML = loginMsg;
     } else {
       var myPosts = posts.filter(function(p){ return p.author === currentUser.nickname; }).slice(0, 5);
       if (!myPosts.length) {
@@ -901,7 +908,7 @@ function renderProfileSettings() {
         myPostsEl.innerHTML = myPosts.map(function(p) {
           return '<div class="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 cursor-pointer active:bg-slate-50" onclick="openForumDetail(' + p.id + ')">' +
             '<div class="flex-1 min-w-0 pr-2">' +
-              '<p class="text-xs font-black text-slate-700 truncate">' + p.title + '</p>' +
+              '<p class="text-xs font-black text-slate-700 truncate">' + escHtml(p.title) + '</p>' +
               '<p class="text-[10px] text-slate-400 font-bold mt-0.5">' + (p.date||'') + ' · 💬 ' + (p.comments||[]).length + '</p>' +
             '</div>' +
             '<span class="text-slate-300 text-sm font-black shrink-0">›</span>' +
@@ -913,8 +920,8 @@ function renderProfileSettings() {
   // 내 중고물품
   var myUsedEl = document.getElementById('settingsMyUsed');
   if (myUsedEl) {
-    if (!isLoggedIn()) {
-      myUsedEl.innerHTML = '<p class="col-span-3 text-sm text-slate-400 font-bold">' + t('profile_login_msg') + '</p>';
+    if (!loggedIn) {
+      myUsedEl.innerHTML = '<p class="col-span-3 text-[10px] text-slate-300 font-bold text-center py-3">' + t('profile_login_msg') + '</p>';
     } else {
       var myUsed = usedItems.filter(function(u){ return u.seller === 'Me' || u.seller === currentUser.nickname; }).slice(0, 6);
       if (!myUsed.length) {
@@ -927,7 +934,7 @@ function renderProfileSettings() {
           return '<div class="bg-slate-50 rounded-xl overflow-hidden cursor-pointer active:scale-[.97] transition" onclick="openUsedDetail(' + u.id + ')">' +
             '<div class="aspect-square overflow-hidden">' + thumb + '</div>' +
             '<div class="p-1.5">' +
-              '<p class="text-[9px] font-black text-slate-700 truncate">' + u.name + '</p>' +
+              '<p class="text-[9px] font-black text-slate-700 truncate">' + escHtml(u.name) + '</p>' +
               '<p class="text-[9px] font-black text-blue-700 font-mono">฿' + u.price.toLocaleString() + '</p>' +
             '</div>' +
           '</div>';
@@ -1140,6 +1147,7 @@ function renderMyOrdersDetail() { myOrdersTab('shop'); }
 async function renderMyOrdersDetailShop() {
   var el = document.getElementById('mo-shop');
   if (!el) return;
+  if (!isLoggedIn()) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('profile_login_msg')+'</p>'; return; }
   el.innerHTML = dtLoaderHtml();
   try {
     var nick = currentUser && currentUser.nickname;
@@ -1194,6 +1202,7 @@ async function renderMyOrdersDetailShop() {
 function renderMyOrdersDetailCnc() {
   var el = document.getElementById('mo-cnc');
   if (!el) return;
+  if (!isLoggedIn()) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('profile_login_msg')+'</p>'; return; }
   var myOrders = customOrders.filter(function(o){ return o.userNickname === currentUser.nickname; });
   if (!myOrders.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('ma_no_orders')+'</p>'; return; }
   var stageColors = {submitted:'bg-slate-100 text-slate-500',confirmed:'bg-blue-100 text-blue-600',design_ready:'bg-purple-100 text-purple-600',approved:'bg-indigo-100 text-indigo-600',milling:'bg-yellow-100 text-yellow-700',shipped:'bg-green-100 text-green-700',done:'bg-emerald-100 text-emerald-700'};
@@ -1223,6 +1232,7 @@ function renderMyOrdersDetailCnc() {
 function renderMyPostsDetail() {
   var el = document.getElementById('my-posts-list');
   if (!el) return;
+  if (!isLoggedIn()) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('profile_login_msg')+'</p>'; return; }
   var nick = currentUser.nickname;
   var myPosts = posts.filter(function(p){ return p.author === nick; });
   if (!myPosts.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('ma_no_posts')+'</p>'; return; }
@@ -1243,6 +1253,7 @@ function renderMyPostsDetail() {
 function renderMyUsedDetail() {
   var el = document.getElementById('my-used-list');
   if (!el) return;
+  if (!isLoggedIn()) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('profile_login_msg')+'</p>'; return; }
   var nick = currentUser.nickname;
   var myUsed = usedItems.filter(function(u){ return u.seller===nick || u.seller==='Me'; });
   if (!myUsed.length) { el.innerHTML='<p class="text-center text-slate-300 text-xs font-bold py-10">'+t('ma_no_used')+'</p>'; return; }
