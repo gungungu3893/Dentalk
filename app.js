@@ -690,6 +690,8 @@ function updateDesktopHero(pageId) {
   var heroSlot = document.getElementById('homeHeroFull');
   var homeHero = document.querySelector('#page-home > .relative.overflow-hidden');
   if (!heroSlot || !homeHero) return;
+  // 항상 원본 배너를 먼저 복원 (어떤 상태든 display:none이면 해제)
+  homeHero.style.display = '';
   if (pageId === 'home' && _isDesktop()) {
     heroSlot.innerHTML = homeHero.outerHTML;
     heroSlot.style.display = '';
@@ -703,7 +705,6 @@ function updateDesktopHero(pageId) {
   } else {
     heroSlot.style.display = 'none';
     heroSlot.innerHTML = '';
-    if (homeHero) homeHero.style.display = '';
     window._desktopHeroActive = false;
   }
 }
@@ -1339,6 +1340,9 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 var HERO_IMAGE_URL = 'https://placehold.co/500x400/1a1030/D4AF37?text=Custom+Abutment+Photo';
 
 function initHomeBanner() {
+  // 배너가 숨겨져 있으면 복원
+  var homeHero = document.querySelector('#page-home > .relative.overflow-hidden');
+  if (homeHero && homeHero.style.display === 'none') homeHero.style.display = '';
   var imgD = document.getElementById('heroImgDesktop');
   var imgM = document.getElementById('heroBgMobile');
   if (imgD) imgD.src = HERO_IMAGE_URL;
