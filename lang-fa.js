@@ -27,7 +27,7 @@ LANG.fa = {
     nav_jobs:'فرصت‌های شغلی',job_type_all:'همه',job_type_dentist:'استخدام دندانپزشک',job_type_staff:'استخدام کارمند',job_type_equipment:'واگذاری تجهیزات',
     job_empty:'هنوز آگهی شغلی وجود ندارد.',job_write_btn:'ثبت آگهی',job_form_title:'آگهی شغلی جدید',job_title_ph:'عنوان شغل',job_desc_ph:'شرح موقعیت شغلی',job_salary_ph:'محدوده حقوق (مثلاً ۳۰,۰۰۰-۵۰,۰۰۰ THB)',job_req_ph:'الزامات (اختیاری)',job_contact_ph:'اطلاعات تماس (تلفن، ایمیل، LINE)',job_province_ph:'استان را انتخاب کنید',job_submit_btn:'انتشار',job_fill_alert:'لطفاً عنوان و توضیحات را پر کنید.',job_delete_confirm:'آیا این آگهی حذف شود؟',job_delete_btn:'حذف آگهی',
     job_salary:'حقوق',job_desc:'توضیحات',job_requirements:'الزامات',job_contact:'تماس',
-    shop_hint:'یک دسته‌بندی برای سفارش انتخاب کنید',shop_select:'انتخاب ›',shop_each:'عدد',
+    shop_hint:'یک دسته‌بندی برای سفارش انتخاب کنید',shop_catalog_title:'📋 کاتالوگ محصولات',shop_catalog_download:'دانلود PDF',shop_select:'انتخاب ›',shop_each:'عدد',
     order_add_cart:'افزودن به سبد',order_qty_error:'لطفاً حداقل ۱ عدد وارد کنید.',
     cart_title:'سبد خرید من',cart_total:'جمع کل',cart_checkout:'تکمیل سفارش',cart_close:'بستن',cart_empty:'سبد خرید خالی است!',
     shop_specs:'مشخصات و تعداد',shop_in_stock:'موجود',shop_out_of_stock:'ناموجود',shop_my_orders:'سفارشات من',shop_product_count:'محصول',cart_bar_tap:'برای مشاهده سبد لمس کنید',cart_bar_items:'مورد',cart_added:'به سبد اضافه شد!',

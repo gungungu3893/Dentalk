@@ -27,7 +27,7 @@ LANG.zh = {
     nav_jobs:'招聘',job_type_all:'全部',job_type_dentist:'牙医招聘',job_type_staff:'员工招聘',job_type_equipment:'设备转让',
     job_empty:'暂无招聘信息。',job_write_btn:'发布招聘',job_form_title:'新招聘帖',job_title_ph:'标题',job_desc_ph:'详细描述',job_salary_ph:'薪资范围',job_req_ph:'要求（可选）',job_contact_ph:'联系方式（电话、邮箱、LINE）',job_province_ph:'选择省份',job_submit_btn:'发布',job_fill_alert:'请填写标题和描述。',job_delete_confirm:'确定删除此招聘信息？',job_delete_btn:'删除',
     job_salary:'薪资',job_desc:'描述',job_requirements:'要求',job_contact:'联系方式',
-    shop_hint:'请选择类别进行订购',shop_select:'选择 ›',shop_each:'件',
+    shop_hint:'请选择类别进行订购',shop_catalog_title:'📋 产品目录',shop_catalog_download:'下载 PDF',shop_select:'选择 ›',shop_each:'件',
     order_add_cart:'加入购物车',order_qty_error:'请输入至少1件数量。',
     cart_title:'购物车',cart_total:'合计',cart_checkout:'结账',cart_close:'关闭',cart_empty:'购物车为空！',
     shop_specs:'规格及数量',shop_in_stock:'有货',shop_out_of_stock:'缺货',shop_my_orders:'我的订单',shop_product_count:'款产品',cart_bar_tap:'点击查看购物车',cart_bar_items:'件',cart_added:'已加入购物车!',

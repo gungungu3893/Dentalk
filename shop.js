@@ -72,6 +72,43 @@ var CATEGORY_IMAGES = {
   'ti-base':   'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/Ti-base%20Abutment.png',
   '3d-analog': 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/product/3d-analog.png'
 };
+// ============================================================
+// CATALOG DOWNLOAD
+// ============================================================
+var CATALOG_BASE_URL = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/';
+var CATALOG_LIST = [
+  { id: 'scan-body',   name: 'Scan Body',   file: 'scan-body-catalog.pdf' },
+  { id: 'q-base',      name: 'Q-Base',      file: 'q-base-catalog.pdf' },
+  { id: 'ready-made',  name: 'Ready Made',  file: 'ready-made-catalog.pdf' },
+  { id: 'ti-base',     name: 'Ti-Base',     file: 'ti-base-catalog.pdf' },
+  { id: 'pre-milled',  name: 'Pre-Milled',  file: 'pre-milled-catalog.pdf' },
+  { id: 'multi-unit',  name: 'Multi Unit',  file: 'multi-unit-catalog.pdf' },
+  { id: '3d-analog',   name: '3D Analog',   file: '3d-analog-catalog.pdf' },
+];
+
+function downloadCatalog(fileUrl) {
+  window.open(fileUrl, '_blank');
+}
+
+function renderCatalogSection() {
+  var el = document.getElementById('shopCatalogList');
+  if (!el) return;
+  el.innerHTML = CATALOG_LIST.map(function(c) {
+    var url = CATALOG_BASE_URL + encodeURIComponent(c.file);
+    return '<div class="min-w-[140px] shrink-0 rounded-xl shadow-sm overflow-hidden" style="background:#001D4A">' +
+      '<div class="px-3 pt-3 pb-2">' +
+        '<p class="text-sm mb-0.5" style="color:#D4AF37">📄</p>' +
+        '<p class="font-black text-xs text-white leading-snug">' + escHtml(c.name) + '</p>' +
+      '</div>' +
+      '<div class="px-3 pb-3">' +
+        '<button onclick="downloadCatalog(\'' + url + '\')" class="w-full py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition" style="background:#D4AF37;color:#001D4A">' +
+          '<span data-i18n="shop_catalog_download">Download PDF</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
 // Render category icon: image with white bg box, or SVG scaled
 // imgSize overrides size for categories with product images (Q-Base, Ti-Base)
 function _catIcon(cat, size, imgSize) {
@@ -119,6 +156,7 @@ const SHOP_CATEGORIES = [
     svg:'<svg viewBox="0 0 44 70" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="16" y="5" width="12" height="12" rx="2" fill="#4a7a42" opacity=".8"/><rect x="12" y="16" width="20" height="30" rx="2" fill="#4a7a42" opacity=".7"/><rect x="15" y="20" width="5" height="22" rx="1" fill="#4a7a42" opacity=".35"/><rect x="24" y="20" width="5" height="22" rx="1" fill="#4a7a42" opacity=".35"/><rect x="13" y="45" width="18" height="7" rx="2" fill="#4a7a42" opacity=".55"/><rect x="11" y="51" width="22" height="8" rx="2.5" fill="#4a7a42" opacity=".4"/></svg>' },
 ];
 function renderShop() {
+  renderCatalogSection();
   document.getElementById('shopCategoryList').innerHTML = SHOP_CATEGORIES.map(function(cat) {
     var count = PRODUCTS.filter(function(p){ return p.category === cat.id; }).length;
     var bg = _CAT_BG[cat.id] || _CAT_BG['scan-body'];

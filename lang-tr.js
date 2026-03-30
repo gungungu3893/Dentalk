@@ -27,7 +27,7 @@ LANG.tr = {
     nav_jobs:'İŞ İLANLARI',job_type_all:'Tümü',job_type_dentist:'Diş Hekimi Alımı',job_type_staff:'Personel Alımı',job_type_equipment:'Ekipman Devri',
     job_empty:'Henüz iş ilanı yok.',job_write_btn:'İlan Ver',job_form_title:'Yeni İş İlanı',job_title_ph:'İlan başlığı',job_desc_ph:'Pozisyonu tanımlayın',job_salary_ph:'Maaş aralığı (ör. 30.000-50.000 THB)',job_req_ph:'Gereksinimler (isteğe bağlı)',job_contact_ph:'İletişim bilgileri (telefon, e-posta, LINE)',job_province_ph:'İl seçin',job_submit_btn:'Yayınla',job_fill_alert:'Lütfen başlık ve açıklama alanlarını doldurun.',job_delete_confirm:'Bu iş ilanı silinsin mi?',job_delete_btn:'İlanı Sil',
     job_salary:'Maaş',job_desc:'Açıklama',job_requirements:'Gereksinimler',job_contact:'İletişim',
-    shop_hint:'Sipariş vermek için bir kategori seçin',shop_select:'SEÇ ›',shop_each:'adet',
+    shop_hint:'Sipariş vermek için bir kategori seçin',shop_catalog_title:'📋 Ürün Kataloğu',shop_catalog_download:'PDF İndir',shop_select:'SEÇ ›',shop_each:'adet',
     order_add_cart:'Sepete Ekle',order_qty_error:'Lütfen en az 1 adet girin.',
     cart_title:'Sepetim',cart_total:'TOPLAM',cart_checkout:'SİPARİŞ VER',cart_close:'Kapat',cart_empty:'Sepet boş!',
     shop_specs:'Özellikler & Adet',shop_in_stock:'Stokta',shop_out_of_stock:'Stokta Yok',shop_my_orders:'Siparişlerim',shop_product_count:'ürün',cart_bar_tap:'Sepeti görüntülemek için dokunun',cart_bar_items:'ürün',cart_added:'Sepete eklendi!',

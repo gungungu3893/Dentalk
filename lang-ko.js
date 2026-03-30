@@ -27,7 +27,7 @@ LANG.ko = {
     nav_jobs:'구인구직',job_type_all:'전체',job_type_dentist:'치과의사 구인',job_type_staff:'직원 구인',job_type_equipment:'장비 양도',
     job_empty:'아직 구인 글이 없습니다.',job_write_btn:'글쓰기',job_form_title:'새 구인 글',job_title_ph:'제목',job_desc_ph:'상세 설명',job_salary_ph:'급여 범위 (예: 30,000-50,000 THB)',job_req_ph:'요구사항 (선택)',job_contact_ph:'연락처 (전화, 이메일, LINE)',job_province_ph:'주(Province) 선택',job_submit_btn:'등록',job_fill_alert:'제목과 설명을 입력해주세요.',job_delete_confirm:'이 구인 글을 삭제하시겠습니까?',job_delete_btn:'삭제',
     job_salary:'급여',job_desc:'설명',job_requirements:'요구사항',job_contact:'연락처',
-    shop_hint:'카테고리를 선택하여 주문하세요',shop_select:'선택 ›',shop_each:'개당',
+    shop_hint:'카테고리를 선택하여 주문하세요',shop_catalog_title:'📋 제품 카탈로그',shop_catalog_download:'PDF 다운로드',shop_select:'선택 ›',shop_each:'개당',
     order_add_cart:'장바구니 추가',order_qty_error:'수량을 1개 이상 입력해주세요.',
     cart_title:'장바구니',cart_total:'합계',cart_checkout:'결제하기',cart_close:'닫기',cart_empty:'장바구니가 비어 있습니다!',
     shop_specs:'규격 및 수량',shop_in_stock:'재고 있음',shop_out_of_stock:'품절',shop_my_orders:'내 주문 현황',shop_product_count:'개 제품',cart_bar_tap:'탭하여 보기',cart_bar_items:'개',cart_added:'장바구니에 추가됨!',

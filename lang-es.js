@@ -27,7 +27,7 @@ LANG.es = {
     nav_jobs:'EMPLEO',job_type_all:'Todos',job_type_dentist:'Busco dentista',job_type_staff:'Busco personal',job_type_equipment:'Traspaso equipo',
     job_empty:'Aún no hay ofertas.',job_write_btn:'Publicar oferta',job_form_title:'Nueva oferta',job_title_ph:'Título',job_desc_ph:'Descripción del puesto',job_salary_ph:'Rango salarial',job_req_ph:'Requisitos (opcional)',job_contact_ph:'Contacto (tel, email, LINE)',job_province_ph:'Seleccionar provincia',job_submit_btn:'Publicar',job_fill_alert:'Completa título y descripción.',job_delete_confirm:'¿Eliminar esta oferta?',job_delete_btn:'Eliminar',
     job_salary:'Salario',job_desc:'Descripción',job_requirements:'Requisitos',job_contact:'Contacto',
-    shop_hint:'Selecciona una categoría para pedir',shop_select:'SELECCIONAR ›',shop_each:'ud.',
+    shop_hint:'Selecciona una categoría para pedir',shop_catalog_title:'📋 Catálogo de productos',shop_catalog_download:'Descargar PDF',shop_select:'SELECCIONAR ›',shop_each:'ud.',
     order_add_cart:'Añadir al carrito',order_qty_error:'Por favor, introduce al menos 1 unidad.',
     cart_title:'Carrito',cart_total:'TOTAL',cart_checkout:'PAGAR',cart_close:'Cerrar',cart_empty:'¡El carrito está vacío!',
     shop_specs:'Especificaciones & Cant.',shop_in_stock:'En stock',shop_out_of_stock:'Agotado',shop_my_orders:'Mis pedidos',shop_product_count:'productos',cart_bar_tap:'Toca para ver el carrito',cart_bar_items:'artículos',cart_added:'¡Añadido al carrito!',

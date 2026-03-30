@@ -27,7 +27,7 @@ LANG.th = {
     nav_jobs:'หางาน',job_type_all:'ทั้งหมด',job_type_dentist:'รับสมัครทันตแพทย์',job_type_staff:'รับสมัครพนักงาน',job_type_equipment:'โอนอุปกรณ์',
     job_empty:'ยังไม่มีประกาศงาน',job_write_btn:'ลงประกาศ',job_form_title:'ประกาศงานใหม่',job_title_ph:'หัวข้อ',job_desc_ph:'รายละเอียดตำแหน่ง',job_salary_ph:'ช่วงเงินเดือน',job_req_ph:'คุณสมบัติ (ถ้ามี)',job_contact_ph:'ข้อมูลติดต่อ (โทร, อีเมล, LINE)',job_province_ph:'เลือกจังหวัด',job_submit_btn:'ลงประกาศ',job_fill_alert:'กรุณากรอกหัวข้อและรายละเอียด',job_delete_confirm:'ลบประกาศงานนี้?',job_delete_btn:'ลบ',
     job_salary:'เงินเดือน',job_desc:'รายละเอียด',job_requirements:'คุณสมบัติ',job_contact:'ติดต่อ',
-    shop_hint:'เลือกหมวดหมู่เพื่อสั่งซื้อ',shop_select:'เลือก ›',shop_each:'ชิ้น',
+    shop_hint:'เลือกหมวดหมู่เพื่อสั่งซื้อ',shop_catalog_title:'📋 แคตตาล็อกสินค้า',shop_catalog_download:'ดาวน์โหลด PDF',shop_select:'เลือก ›',shop_each:'ชิ้น',
     order_add_cart:'เพิ่มในรถเข็น',order_qty_error:'กรุณาระบุจำนวนอย่างน้อย 1 ชิ้น',
     cart_title:'รถเข็น',cart_total:'ยอดรวม',cart_checkout:'ชำระเงิน',cart_close:'ปิด',cart_empty:'รถเข็นว่างเปล่า!',
     shop_specs:'รายละเอียดสินค้า & จำนวน',shop_in_stock:'มีสินค้าพร้อมส่ง',shop_out_of_stock:'สินค้าหมด',shop_my_orders:'คำสั่งซื้อของฉัน',shop_product_count:'ผลิตภัณฑ์',cart_bar_tap:'แตะเพื่อดูตะกร้า',cart_bar_items:'รายการ',cart_added:'เพิ่มในตะกร้าแล้ว!',

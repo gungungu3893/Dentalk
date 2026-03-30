@@ -27,7 +27,7 @@ LANG.en = {
     nav_jobs:'JOBS',job_type_all:'All',job_type_dentist:'Dentist Hiring',job_type_staff:'Staff Hiring',job_type_equipment:'Equipment Transfer',
     job_empty:'No job posts yet.',job_write_btn:'Post Job',job_form_title:'New Job Post',job_title_ph:'Job title',job_desc_ph:'Describe the position',job_salary_ph:'Salary range (e.g. 30,000-50,000 THB)',job_req_ph:'Requirements (optional)',job_contact_ph:'Contact info (phone, email, LINE)',job_province_ph:'Select province',job_submit_btn:'Post',job_fill_alert:'Please fill in title and description.',job_delete_confirm:'Delete this job post?',job_delete_btn:'Delete Post',
     job_salary:'Salary',job_desc:'Description',job_requirements:'Requirements',job_contact:'Contact',
-    shop_hint:'Select a category to order',shop_select:'SELECT ›',shop_each:'each',
+    shop_hint:'Select a category to order',shop_catalog_title:'📋 Product Catalog',shop_catalog_download:'Download PDF',shop_select:'SELECT ›',shop_each:'each',
     order_add_cart:'Add to Cart',order_qty_error:'Please enter at least 1 quantity.',
     cart_title:'My Cart',cart_total:'TOTAL',cart_checkout:'CHECKOUT',cart_close:'Close',cart_empty:'Cart is empty!',
     shop_specs:'Specifications & Qty',shop_in_stock:'In Stock',shop_out_of_stock:'Out of Stock',shop_my_orders:'My Orders',shop_product_count:'products',cart_bar_tap:'Tap to view cart',cart_bar_items:'items',cart_added:'Added to cart!',

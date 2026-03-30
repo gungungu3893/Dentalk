@@ -27,7 +27,7 @@ LANG.ar = {
     nav_jobs:'الوظائف',job_type_all:'الكل',job_type_dentist:'توظيف طبيب أسنان',job_type_staff:'توظيف موظفين',job_type_equipment:'نقل معدات',
     job_empty:'لا توجد وظائف بعد.',job_write_btn:'نشر وظيفة',job_form_title:'إعلان وظيفة جديد',job_title_ph:'عنوان الوظيفة',job_desc_ph:'وصف الوظيفة',job_salary_ph:'نطاق الراتب (مثال: 30,000-50,000 THB)',job_req_ph:'المتطلبات (اختياري)',job_contact_ph:'معلومات الاتصال (هاتف، بريد، LINE)',job_province_ph:'اختر المحافظة',job_submit_btn:'نشر',job_fill_alert:'يرجى ملء العنوان والوصف.',job_delete_confirm:'هل تريد حذف هذا الإعلان؟',job_delete_btn:'حذف الإعلان',
     job_salary:'الراتب',job_desc:'الوصف',job_requirements:'المتطلبات',job_contact:'الاتصال',
-    shop_hint:'اختر فئة للطلب',shop_select:'اختر ›',shop_each:'للقطعة',
+    shop_hint:'اختر فئة للطلب',shop_catalog_title:'📋 كتالوج المنتجات',shop_catalog_download:'تحميل PDF',shop_select:'اختر ›',shop_each:'للقطعة',
     order_add_cart:'أضف إلى السلة',order_qty_error:'يرجى إدخال كمية 1 على الأقل.',
     cart_title:'سلتي',cart_total:'المجموع',cart_checkout:'إتمام الطلب',cart_close:'إغلاق',cart_empty:'السلة فارغة!',
     shop_specs:'المواصفات والكمية',shop_in_stock:'متوفر',shop_out_of_stock:'غير متوفر',shop_my_orders:'طلباتي',shop_product_count:'منتجات',cart_bar_tap:'انقر لعرض السلة',cart_bar_items:'عناصر',cart_added:'تمت الإضافة إلى السلة!',

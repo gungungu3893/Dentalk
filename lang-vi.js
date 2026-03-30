@@ -27,7 +27,7 @@ LANG.vi = {
     nav_jobs:'VIỆC LÀM',job_type_all:'Tất cả',job_type_dentist:'Tuyển nha sĩ',job_type_staff:'Tuyển nhân viên',job_type_equipment:'Chuyển nhượng TB',
     job_empty:'Chưa có tin tuyển dụng.',job_write_btn:'Đăng tin',job_form_title:'Tin tuyển dụng mới',job_title_ph:'Tiêu đề',job_desc_ph:'Mô tả chi tiết',job_salary_ph:'Mức lương',job_req_ph:'Yêu cầu (tùy chọn)',job_contact_ph:'Thông tin liên hệ',job_province_ph:'Chọn tỉnh',job_submit_btn:'Đăng',job_fill_alert:'Vui lòng điền tiêu đề và mô tả.',job_delete_confirm:'Xóa tin này?',job_delete_btn:'Xóa',
     job_salary:'Mức lương',job_desc:'Mô tả',job_requirements:'Yêu cầu',job_contact:'Liên hệ',
-    shop_hint:'Chọn danh mục để đặt hàng',shop_select:'CHỌN ›',shop_each:'cái',
+    shop_hint:'Chọn danh mục để đặt hàng',shop_catalog_title:'📋 Danh mục sản phẩm',shop_catalog_download:'Tải PDF',shop_select:'CHỌN ›',shop_each:'cái',
     order_add_cart:'Thêm vào giỏ',order_qty_error:'Vui lòng nhập ít nhất 1 số lượng.',
     cart_title:'Giỏ hàng',cart_total:'TỔNG CỘNG',cart_checkout:'THANH TOÁN',cart_close:'Đóng',cart_empty:'Giỏ hàng trống!',
     shop_specs:'Thông số & Số lượng',shop_in_stock:'Còn hàng',shop_out_of_stock:'Hết hàng',shop_my_orders:'Đơn hàng của tôi',shop_product_count:'sản phẩm',cart_bar_tap:'Nhấn để xem giỏ',cart_bar_items:'mục',cart_added:'Đã thêm vào giỏ!',
