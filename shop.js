@@ -77,11 +77,11 @@ var CATEGORY_IMAGES = {
 // ============================================================
 var CATALOG_BASE_URL = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/';
 var CATALOG_LIST = [
-  { id: 'catalog-1', name: '', file: 'catalog-1.pdf' },
-  { id: 'catalog-2', name: '', file: 'catalog-2.pdf' },
-  { id: 'catalog-3', name: '', file: 'catalog-3.pdf' },
-  { id: 'catalog-4', name: '', file: 'catalog-4.pdf' },
-  { id: 'catalog-5', name: '', file: 'catalog-5.pdf' },
+  { id: 'catalog-1', name: 'BIOTEM CATALOG', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog_2026.01.pdf' },
+  { id: 'catalog-2', name: '', url: '' },
+  { id: 'catalog-3', name: '', url: '' },
+  { id: 'catalog-4', name: '', url: '' },
+  { id: 'catalog-5', name: '', url: '' },
 ];
 
 function downloadCatalog(fileUrl) {
@@ -92,14 +92,15 @@ function renderCatalogSection() {
   var el = document.getElementById('shopCatalogList');
   if (!el) return;
   el.innerHTML = CATALOG_LIST.map(function(c) {
-    var url = CATALOG_BASE_URL + encodeURIComponent(c.file);
+    var url = c.url || (c.file ? CATALOG_BASE_URL + encodeURIComponent(c.file) : '');
+    var hasUrl = !!url;
     return '<div class="min-w-[140px] shrink-0 rounded-xl shadow-sm overflow-hidden" style="background:#001D4A">' +
       '<div class="px-3 pt-3 pb-2">' +
         '<p class="text-sm mb-0.5" style="color:#D4AF37">📄</p>' +
         '<p class="font-black text-xs text-white leading-snug">' + escHtml(c.name) + '</p>' +
       '</div>' +
       '<div class="px-3 pb-3">' +
-        '<button onclick="downloadCatalog(\'' + url + '\')" class="w-full py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition" style="background:#D4AF37;color:#001D4A">' +
+        '<button onclick="' + (hasUrl ? "downloadCatalog('" + url + "')" : '') + '" class="w-full py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition" style="background:' + (hasUrl ? '#D4AF37' : 'rgba(212,175,55,0.3)') + ';color:#001D4A"' + (hasUrl ? '' : ' disabled') + '>' +
           '<span data-i18n="shop_catalog_download">Download PDF</span>' +
         '</button>' +
       '</div>' +
