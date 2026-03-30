@@ -77,11 +77,11 @@ var CATEGORY_IMAGES = {
 // ============================================================
 var CATALOG_BASE_URL = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/';
 var CATALOG_LIST = [
-  { id: 'catalog-1', name: 'BIOTEM CATALOG', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog_2026.01.pdf' },
-  { id: 'catalog-2', name: 'DIGITAL PARTS', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/DigitalPartsV2.2.pdf' },
-  { id: 'catalog-3', name: 'SANTA & SBB', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/SANTA%20SBB.pdf' },
-  { id: 'catalog-4', name: '', url: '' },
-  { id: 'catalog-5', name: '', url: '' },
+  { id: 'catalog-1', name: 'BIOTEM CATALOG', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog_2026.01.pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/biotem-catalog-thumb.png' },
+  { id: 'catalog-2', name: 'DIGITAL PARTS', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/DigitalPartsV2.2.pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/digital-parts-thumb.png' },
+  { id: 'catalog-3', name: 'SANTA & SBB', url: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/SANTA%20SBB.pdf', thumb: 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/santa-sbb-thumb.png' },
+  { id: 'catalog-4', name: '', url: '', thumb: '' },
+  { id: 'catalog-5', name: '', url: '', thumb: '' },
 ];
 
 function downloadCatalog(fileUrl) {
@@ -94,9 +94,12 @@ function renderCatalogSection() {
   el.innerHTML = CATALOG_LIST.map(function(c) {
     var url = c.url || (c.file ? CATALOG_BASE_URL + encodeURIComponent(c.file) : '');
     var hasUrl = !!url;
+    var thumbHtml = c.thumb
+      ? '<img src="' + c.thumb + '" alt="' + escHtml(c.name) + '" class="w-full h-24 object-cover rounded-t-xl" loading="lazy">'
+      : '<div class="w-full h-24 flex items-center justify-center rounded-t-xl" style="background:rgba(255,255,255,0.06)"><span class="text-2xl" style="color:#D4AF37">📄</span></div>';
     return '<div class="min-w-[140px] shrink-0 rounded-xl shadow-sm overflow-hidden" style="background:#001D4A">' +
-      '<div class="px-3 pt-3 pb-2">' +
-        '<p class="text-sm mb-0.5" style="color:#D4AF37">📄</p>' +
+      thumbHtml +
+      '<div class="px-3 pt-2 pb-2">' +
         '<p class="font-black text-xs text-white leading-snug">' + escHtml(c.name) + '</p>' +
       '</div>' +
       '<div class="px-3 pb-3">' +
