@@ -167,6 +167,32 @@ gtag('js',new Date());gtag('config','G-XXXXXXXXXX',{send_page_view:false});
 * { -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font-sans); }
 
+/* ── Header Language Dropdown ────────────────────────────── */
+#headerLangWrap{position:relative;z-index:300}
+#headerLangBtn{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:none;border-radius:16px;padding:4px 8px;cursor:pointer;transition:background .15s}
+#headerLangBtn:active{background:rgba(255,255,255,0.18)}
+#headerLangBtn .lang-globe{width:18px;height:18px;fill:none;stroke:rgba(255,255,255,0.8);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+#headerLangBtn .lang-code{font-size:10px;font-weight:800;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:.5px}
+#headerLangBtn .lang-chevron{width:12px;height:12px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+#headerLangWrap.open .lang-chevron{transform:rotate(180deg)}
+#headerLangDropdown{display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:150px;background:var(--color-primary-dark,#001220);border:1px solid rgba(255,255,255,0.1);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.4);padding:6px;max-height:320px;overflow-y:auto}
+#headerLangWrap.open #headerLangDropdown{display:block;animation:_hldFade .15s ease-out}
+@keyframes _hldFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.lang-option{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:none;background:none;width:100%;cursor:pointer;transition:background .12s}
+.lang-option:hover,.lang-option:active{background:rgba(255,255,255,0.1)}
+.lang-option .lang-flag{font-size:16px;line-height:1}
+.lang-option .lang-name{font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);flex:1;text-align:left}
+.lang-option .lang-check{font-size:11px;color:#D4AF37;visibility:hidden}
+.lang-option.active{background:rgba(212,175,55,0.15)}
+.lang-option.active .lang-name{color:#D4AF37}
+.lang-option.active .lang-check{visibility:visible}
+@media(max-width:768px){
+  #headerLangBtn{padding:4px 6px}
+  #headerLangBtn .lang-globe{width:15px;height:15px}
+  #headerLangBtn .lang-code{font-size:9px}
+  #headerLangBtn .lang-chevron{width:10px;height:10px}
+}
+
 /* ============================================================
    COLOR CONTRAST FIX — WCAG AA (4.5:1 minimum)
    ============================================================ */
@@ -1338,6 +1364,25 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         <span id="timerText" class="text-[11px] font-black text-green-300 font-mono"></span>
       </div>
     </div>
+    <!-- ── Language Dropdown ── -->
+    <div id="headerLangWrap">
+      <button id="headerLangBtn" onclick="toggleHeaderLang(event)" title="Language">
+        <svg class="lang-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
+        <span id="headerLangCode" class="lang-code">TH</span>
+        <svg class="lang-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="headerLangDropdown">
+        <button class="lang-option" data-lang="en" onclick="pickHeaderLang('en',this)"><span class="lang-flag">🇺🇸</span><span class="lang-name">English</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="ko" onclick="pickHeaderLang('ko',this)"><span class="lang-flag">🇰🇷</span><span class="lang-name">한국어</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="zh" onclick="pickHeaderLang('zh',this)"><span class="lang-flag">🇨🇳</span><span class="lang-name">中文</span><span class="lang-check">✓</span></button>
+        <button class="lang-option active" data-lang="th" onclick="pickHeaderLang('th',this)"><span class="lang-flag">🇹🇭</span><span class="lang-name">ภาษาไทย</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="vi" onclick="pickHeaderLang('vi',this)"><span class="lang-flag">🇻🇳</span><span class="lang-name">Tiếng Việt</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="es" onclick="pickHeaderLang('es',this)"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="tr" onclick="pickHeaderLang('tr',this)"><span class="lang-flag">🇹🇷</span><span class="lang-name">Türkçe</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="ar" onclick="pickHeaderLang('ar',this)"><span class="lang-flag">🇸🇦</span><span class="lang-name">العربية</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="fa" onclick="pickHeaderLang('fa',this)"><span class="lang-flag">🇮🇷</span><span class="lang-name">فارسی</span><span class="lang-check">✓</span></button>
+      </div>
+    </div>
     <button onclick="openSearchModal()" class="header-icon-btn relative flex flex-col items-center justify-center bg-white/[0.08] rounded-xl active:bg-white/20 transition shrink-0 px-2 py-1.5" title="Search">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <span class="header-icon-label text-[9px] font-bold mt-0.5" style="color:rgba(255,255,255,0.5)" data-i18n="hdr_search">Search</span>
@@ -2363,24 +2408,6 @@ body.is-admin #factoryPromoHeader { display:none !important; }
         </div>
         <p id="profileSavedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="profile_saved_msg">✅ Saved!</p>
       </div>
-      <!-- 언어 선택기 -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm">
-        <h3 class="font-black text-slate-800 mb-1" data-i18n="settings_lang">Language</h3>
-        <p class="text-[10px] text-amber-600 font-bold mt-2 hidden" id="langPendingNote" data-i18n="settings_pending">Select a language then press Save.</p>
-        <div class="grid grid-cols-4 gap-2 mt-4">
-          <button onclick="selectLang('en')" id="lang-en" class="py-3 rounded-2xl font-black text-xs border-2 border-blue-600 bg-blue-50 text-blue-700 flex flex-col items-center gap-1"><span class="text-xl">🇺🇸</span><span>English</span></button>
-          <button onclick="selectLang('ko')" id="lang-ko" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇰🇷</span><span>한국어</span></button>
-          <button onclick="selectLang('zh')" id="lang-zh" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇨🇳</span><span>中文</span></button>
-          <button onclick="selectLang('th')" id="lang-th" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇭</span><span>ภาษาไทย</span></button>
-          <button onclick="selectLang('vi')" id="lang-vi" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇻🇳</span><span>Tiếng Việt</span></button>
-          <button onclick="selectLang('es')" id="lang-es" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇪🇸</span><span>Español</span></button>
-          <button onclick="selectLang('tr')" id="lang-tr" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇹🇷</span><span>Türkçe</span></button>
-          <button onclick="selectLang('ar')" id="lang-ar" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇸🇦</span><span>العربية</span></button>
-          <button onclick="selectLang('fa')" id="lang-fa" class="py-3 rounded-2xl font-black text-xs border-2 border-transparent bg-slate-50 text-slate-600 flex flex-col items-center gap-1"><span class="text-xl">🇮🇷</span><span>فارسی</span></button>
-        </div>
-        <button onclick="saveLang()" id="saveLangBtn" class="mt-4 w-full py-3.5 rounded-2xl bg-[#001d4a] text-white font-black text-sm shadow active:scale-95 transition" data-i18n="settings_save_btn">Save Language</button>
-        <p id="savedMsg" class="text-center text-green-600 text-xs font-bold mt-3 hidden" data-i18n="settings_saved_msg">Language saved!</p>
-      </div>
       <!-- 다크모드 토글 -->
       <div class="bg-white rounded-2xl p-5 shadow-sm">
         <div class="flex items-center justify-between">
@@ -2762,6 +2789,34 @@ function _showStlGeometry(geometry) {
   _stlScene.add(mesh);
   (function loop(){ _stlAnimId=requestAnimationFrame(loop); if(_stlRenderer) _stlRenderer.render(_stlScene,_stlCamera); })();
 }
+</script>
+<!-- ============================== 헤더 언어 드롭다운 JS ============================== -->
+<script>
+var _langLabels={en:'EN',ko:'KO',zh:'ZH',th:'TH',vi:'VI',es:'ES',tr:'TR',ar:'AR',fa:'FA'};
+function toggleHeaderLang(e){e.stopPropagation();document.getElementById('headerLangWrap').classList.toggle('open');}
+function pickHeaderLang(code,btn){
+  document.querySelectorAll('#headerLangDropdown .lang-option').forEach(function(o){o.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('headerLangCode').textContent=_langLabels[code]||code.toUpperCase();
+  document.getElementById('headerLangWrap').classList.remove('open');
+  if(typeof selectLang==='function') selectLang(code);
+  if(typeof saveLang==='function') setTimeout(function(){saveLang();},50);
+}
+function _initHeaderLangDropdown(){
+  var current=localStorage.getItem('dentalk_lang')||'th';
+  var codeEl=document.getElementById('headerLangCode');
+  if(codeEl) codeEl.textContent=_langLabels[current]||current.toUpperCase();
+  document.querySelectorAll('#headerLangDropdown .lang-option').forEach(function(o){
+    o.classList.remove('active');
+    if(o.getAttribute('data-lang')===current) o.classList.add('active');
+  });
+}
+document.addEventListener('click',function(e){
+  var wrap=document.getElementById('headerLangWrap');
+  if(wrap&&!wrap.contains(e.target)) wrap.classList.remove('open');
+});
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_initHeaderLangDropdown);}
+else{_initHeaderLangDropdown();}
 </script>
 <!-- ============================== 모바일 하단 고정 광고 배너 ============================== -->
 <div id="mobileBottomAd" class="mobile-ad-bottom" style="display:none">
