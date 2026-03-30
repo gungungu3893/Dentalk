@@ -213,27 +213,46 @@ async function renderMyShopOrders() {
 
   _renderMyShopOrdersList(container, orders);
 }
-function _renderMyShopOrdersList(container, orders) {
+async function _renderMyShopOrdersList(container, orders) {
   if (!orders.length) {
     container.innerHTML = '<p class="text-center text-slate-400 text-xs py-3 font-bold">' + t('shop_no_orders_msg') + '</p>';
     return;
   }
+  // Load user invoices for matching
+  var invoices = [];
+  try {
+    var nick = currentUser && currentUser.nickname;
+    if (nick) invoices = await sbGetUserInvoices(nick) || [];
+  } catch(e){}
   var html = SHOP_STAGES.map(function(stage){
     var stageOrders = orders.filter(function(o){ return o.stage === stage.key; });
     if (!stageOrders.length) return '';
     var ordersHtml = stageOrders.map(function(o){
       var itemsHtml = (o.items||[]).map(function(i){
-        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + i.name + '</span><span class="font-mono text-slate-400">' + i.code + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + ((i.price||0)*(i.qty||1)).toLocaleString() + '</span></div>';
+        return '<div class="flex justify-between text-[10px] gap-1"><span class="flex-1 font-bold truncate">' + escHtml(i.name) + '</span><span class="font-mono text-slate-400">' + escHtml(i.code||'') + '</span><span class="font-black">×' + i.qty + '</span><span class="font-mono font-black">' + ((i.price||0)*(i.qty||1)).toLocaleString() + '</span></div>';
       }).join('');
       var total = o.totalAmount || (o.items||[]).reduce(function(s,i){ return s+(i.price||0)*(i.qty||1); }, 0);
+      // Invoice button
+      var orderInvoices = invoices.filter(function(inv){ return inv.order_id === o.id; });
+      var canIssue = ['payment_confirmed','preparing','shipped','delivered'].indexOf(o.stage) !== -1;
+      var invBtn = '';
+      if (orderInvoices.length > 0) {
+        var firstInv = orderInvoices[0];
+        var invData = JSON.stringify(firstInv).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        invBtn = '<div class="flex justify-end mt-2 pt-2 border-t border-slate-200"><button onclick=\'openInvoicePrint(' + invData + ')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition border border-[#D4AF37] text-[#D4AF37]">📄 ' + t('inv_view') + '</button></div>';
+      } else if (canIssue) {
+        var od = JSON.stringify(o).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        invBtn = '<div class="flex justify-end mt-2 pt-2 border-t border-slate-200"><button onclick=\'openInvoiceSelect(' + od + ')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition shadow-sm" style="background:#D4AF37;color:#001D4A">🧾 ' + t('inv_issue_btn') + '</button></div>';
+      }
       return '<div class="bg-slate-50 rounded-xl p-3 mb-2">' +
         '<div class="flex justify-between items-center mb-1">' +
-          '<p class="font-black text-slate-700 text-xs">' + (o.clinic||'-') + '</p>' +
+          '<p class="font-black text-slate-700 text-xs">' + escHtml(o.clinic||'-') + '</p>' +
           '<p class="text-[8px] font-bold text-slate-400 font-mono">' + o.id + '</p>' +
         '</div>' +
         '<p class="text-[9px] text-slate-400 mb-2">📅 ' + (o.date||'') + (o.carrier ? ' · 🚚 ' + o.carrier + (o.tracking ? ' ' + o.tracking : '') : '') + '</p>' +
         '<div class="space-y-0.5 mb-2">' + itemsHtml + '</div>' +
         '<p class="text-xs font-black text-blue-800 text-right">' + t('shop_total_label') + ' ' + total.toLocaleString() + ' THB</p>' +
+        invBtn +
       '</div>';
     }).join('');
     return '<div class="mb-4">' +
