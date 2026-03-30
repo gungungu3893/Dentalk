@@ -77,13 +77,11 @@ var CATEGORY_IMAGES = {
 // ============================================================
 var CATALOG_BASE_URL = 'https://ikdlgnpjcmwbsrxvoxvd.supabase.co/storage/v1/object/public/catalog/';
 var CATALOG_LIST = [
-  { id: 'scan-body',   name: 'Scan Body',   file: 'scan-body-catalog.pdf' },
-  { id: 'q-base',      name: 'Q-Base',      file: 'q-base-catalog.pdf' },
-  { id: 'ready-made',  name: 'Ready Made',  file: 'ready-made-catalog.pdf' },
-  { id: 'ti-base',     name: 'Ti-Base',     file: 'ti-base-catalog.pdf' },
-  { id: 'pre-milled',  name: 'Pre-Milled',  file: 'pre-milled-catalog.pdf' },
-  { id: 'multi-unit',  name: 'Multi Unit',  file: 'multi-unit-catalog.pdf' },
-  { id: '3d-analog',   name: '3D Analog',   file: '3d-analog-catalog.pdf' },
+  { id: 'catalog-1', name: '', file: 'catalog-1.pdf' },
+  { id: 'catalog-2', name: '', file: 'catalog-2.pdf' },
+  { id: 'catalog-3', name: '', file: 'catalog-3.pdf' },
+  { id: 'catalog-4', name: '', file: 'catalog-4.pdf' },
+  { id: 'catalog-5', name: '', file: 'catalog-5.pdf' },
 ];
 
 function downloadCatalog(fileUrl) {
