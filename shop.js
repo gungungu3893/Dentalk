@@ -1187,32 +1187,51 @@ async function renderMyInvoices() {
   if (!el) return;
   el.innerHTML = dtLoaderHtml();
   try {
-    // Clean expired invoices first
     sbDeleteExpiredInvoices().catch(function(){});
     var invoices = await sbGetUserInvoices(currentUser.nickname);
+    var now = new Date();
+    if (invoices && invoices.length) {
+      invoices = invoices.filter(function(inv) { return !inv.expires_at || new Date(inv.expires_at) > now; });
+    }
     if (!invoices || !invoices.length) {
-      el.innerHTML = '<p class="text-center text-slate-300 text-xs font-bold py-8">' + t('inv_no_invoices') + '</p>';
+      el.innerHTML = '<div class="text-center py-10"><p class="text-3xl mb-2">🧾</p><p class="text-xs text-slate-300 font-bold">' + t('inv_no_invoices') + '</p></div>';
       return;
     }
-    // Filter out expired
-    var now = new Date();
-    invoices = invoices.filter(function(inv) { return !inv.expires_at || new Date(inv.expires_at) > now; });
     el.innerHTML = invoices.map(function(inv) {
       var isTax = inv.type === 'tax_invoice';
-      var badge = isTax
-        ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">TAX INVOICE</span>'
-        : '<span class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">RECEIPT</span>';
+      var borderColor = isTax ? '#D4AF37' : '#001D4A';
+      var icon = isTax ? '📋' : '🧾';
+      var typeBadge = isTax
+        ? '<span class="text-[8px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.15);color:#D4AF37">ใบกำกับภาษี · Tax Invoice</span>'
+        : '<span class="text-[8px] font-black px-2 py-0.5 rounded-full" style="background:rgba(0,18,32,0.08);color:#001D4A">ใบเสร็จรับเงิน · Receipt</span>';
       var daysLeft = inv.expires_at ? Math.max(0, Math.ceil((new Date(inv.expires_at) - now) / 86400000)) : 30;
-      return '<div class="bg-white rounded-xl p-4 mb-3 shadow-sm border border-slate-100">' +
+      var expiresColor = daysLeft <= 7 ? 'text-red-400' : 'text-slate-400';
+      var invData = JSON.stringify(inv).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return '<div class="bg-white rounded-2xl p-4 mb-3 shadow-sm" style="border-left:4px solid ' + borderColor + '">' +
         '<div class="flex justify-between items-start mb-2">' +
-          '<div>' + badge + '<p class="font-black text-xs text-slate-800 mt-1">' + escHtml(inv.id) + '</p></div>' +
-          '<p class="text-[9px] text-slate-400 font-bold">' + daysLeft + 'd left</p>' +
+          '<div class="flex items-center gap-2">' +
+            '<span class="text-lg">' + icon + '</span>' +
+            '<div>' + typeBadge +
+              '<p class="font-black text-xs text-slate-800 mt-1 font-mono">' + escHtml(inv.id) + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="text-right">' +
+            '<p class="text-[9px] ' + expiresColor + ' font-bold">' + t('inv_expires') + ' ' + daysLeft + t('inv_days') + '</p>' +
+          '</div>' +
         '</div>' +
-        '<p class="text-[10px] text-slate-500">' + escHtml(inv.clinic_name || '') + '</p>' +
-        '<div class="flex justify-between items-center mt-2">' +
-          '<p class="font-black text-sm" style="color:#001D4A">' + Number(inv.total_amount).toLocaleString() + ' THB</p>' +
+        '<div class="flex items-center gap-3 text-[10px] text-slate-400 mb-2">' +
+          '<span>📅 ' + escHtml(inv.issued_date || '') + '</span>' +
+          (inv.clinic_name ? '<span>🏥 ' + escHtml(inv.clinic_name) + '</span>' : '') +
+        '</div>' +
+        (isTax ? '<div class="flex gap-4 text-[10px] text-slate-500 mb-2">' +
+          '<span>' + t('inv_subtotal') + ': ' + Number(inv.subtotal || 0).toLocaleString() + '</span>' +
+          '<span>VAT 7%: ' + Number(inv.vat_amount || 0).toLocaleString() + '</span>' +
+        '</div>' : '') +
+        '<div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">' +
+          '<p class="font-black text-base" style="color:#001D4A">' + Number(inv.total_amount).toLocaleString() + ' THB</p>' +
           '<div class="flex gap-2">' +
-            '<button onclick=\'openInvoicePrint(' + JSON.stringify(inv).replace(/'/g,"\\'") + ')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition" style="background:#D4AF37;color:#001D4A">🖨️ ' + t('inv_print') + '</button>' +
+            '<button onclick=\'openInvoicePrint(' + invData + ')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition border border-slate-200 text-slate-600 bg-white">📥 ' + t('inv_download') + '</button>' +
+            '<button onclick=\'openInvoicePrint(' + invData + ')\' class="px-3 py-1.5 rounded-lg font-black text-[9px] active:scale-95 transition shadow-sm" style="background:#D4AF37;color:#001D4A">🖨️ ' + t('inv_print') + '</button>' +
           '</div>' +
         '</div>' +
       '</div>';
