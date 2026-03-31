@@ -1289,6 +1289,19 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <button onclick="closeModal('invoiceSelectModal')" class="w-full py-2 text-slate-400 text-[10px] font-black uppercase" data-i18n="inv_skip">Skip</button>
   </div>
 </div>
+<!-- ============================== Tax ID 입력 프롬프트 모달 ============================== -->
+<div id="taxIdPromptModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[860] items-center justify-center p-5">
+  <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
+    <h3 class="font-black text-slate-800 text-base mb-1">🧾 <span data-i18n="tax_id_required">Tax ID Required</span></h3>
+    <p class="text-[10px] text-slate-400 font-bold mb-4" data-i18n="tax_id_prompt">Please enter your Tax ID to issue a tax invoice.</p>
+    <input id="taxIdPromptInput" type="text" maxlength="13" data-i18n-ph="tax_id_placeholder" placeholder="Tax ID / Business Registration No."
+      class="w-full px-4 py-3.5 rounded-xl border border-slate-200 text-sm font-mono font-bold text-slate-800 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] mb-4">
+    <div class="flex gap-2.5">
+      <button onclick="closeModal('taxIdPromptModal')" class="flex-1 py-3 rounded-2xl font-black text-xs bg-slate-100 text-slate-500 active:scale-95 transition" data-i18n="tax_id_cancel">Cancel</button>
+      <button onclick="confirmTaxIdAndGenerate()" class="flex-1 py-3 rounded-2xl font-black text-xs active:scale-95 transition shadow" style="background:#D4AF37;color:#001D4A" data-i18n="tax_id_confirm">Confirm</button>
+    </div>
+  </div>
+</div>
 <!-- ============================== 프로필 수정 모달 ============================== -->
 <div id="profileEditModal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-[800] items-center justify-center p-5">
   <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl">

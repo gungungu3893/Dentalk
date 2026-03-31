@@ -1038,8 +1038,16 @@ function openInvoiceSelect(order) {
 // Generate Tax Invoice (ใบกำกับภาษี)
 async function generateTaxInvoice() {
   if (!_invPendingOrder) return;
-  var order = _invPendingOrder;
+  // Check Tax ID — from modal input or prompt
   var buyerTaxId = (document.getElementById('inv-taxid') || {}).value || '';
+  if (!buyerTaxId.trim()) {
+    // Open Tax ID prompt modal
+    var promptInput = document.getElementById('taxIdPromptInput');
+    if (promptInput) promptInput.value = '';
+    openModal('taxIdPromptModal');
+    return;
+  }
+  var order = _invPendingOrder;
   var subtotal = order.totalAmount || 0;
   var vatAmt = Math.round(subtotal * 7 / 107 * 100) / 100;
   var sub = subtotal - vatAmt;
@@ -1063,6 +1071,19 @@ async function generateTaxInvoice() {
     console.error('[Tax Invoice]', e);
     showToast(t('inv_issue_error'), 'error');
   }
+}
+
+// Confirm Tax ID from prompt modal and continue tax invoice generation
+function confirmTaxIdAndGenerate() {
+  var promptInput = document.getElementById('taxIdPromptInput');
+  var taxId = promptInput ? promptInput.value.trim() : '';
+  if (!taxId) { showToast(t('tax_id_required'), 'warning'); return; }
+  // Copy to the invoice modal's Tax ID field
+  var invTaxInput = document.getElementById('inv-taxid');
+  if (invTaxInput) invTaxInput.value = taxId;
+  closeModal('taxIdPromptModal');
+  // Now re-call generateTaxInvoice (which will find the tax ID filled)
+  generateTaxInvoice();
 }
 
 // Generate Receipt (ใบเสร็จรับเงิน)
