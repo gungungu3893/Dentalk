@@ -644,11 +644,14 @@ function updateNavTabs(activeId) {
   }
 }
 function goPage(id) {
+  if (!id || !/^[a-z0-9-]+$/.test(id)) { id = 'home'; }
   if (LOCKED.includes(id) && !isLoggedIn()) { closeMenu(); openLoginModal(id); return; }
   if (id === 'factory' && !isAdmin()) { goPage('home'); return; }
+  var targetPage = document.getElementById('page-' + id);
+  if (!targetPage) { if (id !== 'home') { goPage('home'); } return; }
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.menu-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('page-' + id).classList.add('active');
+  targetPage.classList.add('active');
   var mb = document.getElementById('mb-' + id);
   if (mb) mb.classList.add('active');
   document.getElementById('pageTitle') && (document.getElementById('pageTitle').textContent = t('pt_' + id));
