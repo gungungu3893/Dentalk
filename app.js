@@ -2313,38 +2313,41 @@ function _initApp() {
   // i18n: must run AFTER all render functions to translate dynamic elements
   applyLang();
   // 페이지 상태 복원 (hash 또는 localStorage)
-  var _restorePage = (location.hash && location.hash.length > 1) ? location.hash.replace('#','') : localStorage.getItem('dentalk_currentPage');
+  var _restorePage = '';
+  if (location.hash && location.hash.length > 1) {
+    _restorePage = location.hash.replace('#','');
+  } else {
+    _restorePage = localStorage.getItem('dentalk_currentPage') || '';
+  }
   if (_restorePage && _restorePage !== 'home') {
-    // 로그인 필요 페이지는 비로그인 시 home으로
     var _needsAuth = ['shop','forum','custom','settings','feedback','factory','myactivity','my-orders','my-posts','my-used'];
     if (_needsAuth.indexOf(_restorePage) !== -1 && !isLoggedIn()) {
       _restorePage = 'home';
     }
     if (_restorePage !== 'home') {
-      // detail page인지 일반 page인지 판별
       var _pageEl = document.getElementById('page-' + _restorePage);
       if (_pageEl) {
-        goPage(_restorePage);
+        try { goPage(_restorePage); } catch(e) { console.warn('[PageRestore]', e); }
       }
     }
   }
 }
 // popstate: 브라우저 뒤로가기/앞으로가기
 window.addEventListener('popstate', function(e) {
-  var page = 'home';
-  if (e.state && e.state.page) {
-    page = e.state.page;
-  } else if (location.hash && location.hash.length > 1) {
-    page = location.hash.replace('#','');
-  }
-  var _needsAuth = ['shop','forum','custom','settings','feedback','factory','myactivity','my-orders','my-posts','my-used'];
-  if (_needsAuth.indexOf(page) !== -1 && !isLoggedIn()) page = 'home';
-  var el = document.getElementById('page-' + page);
-  if (el) {
-    goPage(page);
-  } else {
-    goPage('home');
-  }
+  try {
+    var page = 'home';
+    if (e.state && e.state.page) {
+      page = e.state.page;
+    } else if (location.hash && location.hash.length > 1) {
+      page = location.hash.replace('#','');
+    }
+    // 유효한 페이지 ID만 허용 (영문, 숫자, 하이픈)
+    if (!/^[a-z0-9-]+$/.test(page)) { page = 'home'; }
+    var _needsAuth = ['shop','forum','custom','settings','feedback','factory','myactivity','my-orders','my-posts','my-used'];
+    if (_needsAuth.indexOf(page) !== -1 && !isLoggedIn()) page = 'home';
+    var el = document.getElementById('page-' + page);
+    if (el) { goPage(page); } else { goPage('home'); }
+  } catch(err) { console.warn('[popstate]', err); }
 });
 // DOMContentLoaded가 이미 발생했으면 즉시 실행, 아니면 이벤트 대기
 if (document.readyState === 'loading') {
