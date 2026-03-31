@@ -1,8 +1,8 @@
-// forum.js — 포럼 + 지역 커뮤니티
+// forum.js - Forum + Regional Community
 // ============================================================
 // FORUM
 // ============================================================
-// 리더 배지 표시용 캐시 (renderAdminUsers에서 로드)
+// Leader badge display cache (loaded from renderAdminUsers)
 var _leaderCache = {};
 async function _loadLeaderCache() {
   try {
@@ -72,7 +72,7 @@ function forumToggleWrite() {
     updateNicknameDisplays();
   }
 }
-// 글쓰기 폼: 지역 변경 시 주(province) 드롭다운 갱신
+// Write form: update province dropdown on region change
 function _updateProvinceSelect() {
   var regionSel   = document.getElementById('postRegion');
   var provinceSel = document.getElementById('postProvince');
@@ -89,13 +89,13 @@ function _updateProvinceSelect() {
       return '<option value="' + p.key + '">' + p.label + '</option>';
     }).join('');
   }
-  // 현재 선택된 지역에 맞게 초기화
+  // Initialize to currently selected region
   if (regionKey === forumRegion && forumProvince !== 'all') {
     provinceSel.value = forumProvince;
   }
 }
 function renderForum() {
-  // 지역 탭 (대분류)
+  // Region tabs (main categories)
   var regionBar = document.getElementById('forumRegionBar');
   if (regionBar) {
     regionBar.innerHTML = FORUM_REGIONS.map(function(r) {
@@ -105,7 +105,7 @@ function renderForum() {
         r.icon + ' ' + t(r.labelKey) + '</button>';
     }).join('');
   }
-  // 주(province) 서브탭 — 대분류가 선택된 경우만
+  // Province sub-tabs (shown only when a region is selected)
   var provinceBar = document.getElementById('forumProvinceBar');
   if (provinceBar) {
     var curRegion = FORUM_REGIONS.find(function(r){ return r.key === forumRegion; });
@@ -127,13 +127,13 @@ function renderForum() {
       provinceBar.innerHTML = '';
     }
   }
-  // 필터링: 지역 + 주
+  // Filter: region + province
   var filtered = posts.filter(function(p){
     if (forumRegion === 'all') return true;
     if (forumProvince !== 'all') return p.province === forumProvince;
     return p.region === forumRegion;
   });
-  // 고정 글 먼저 정렬
+  // Pinned posts first
   var pinned = filtered.filter(function(p){ return p.is_pinned; });
   var notPinned = filtered.filter(function(p){ return !p.is_pinned; });
   var sorted = pinned.concat(notPinned);
@@ -141,7 +141,7 @@ function renderForum() {
     var hasImg = p.images && p.images.length;
     var imgCount = hasImg ? p.images.length : 0;
     var commentCount = p.comments ? p.comments.length : 0;
-    // 썸네일 영역
+    // Thumbnail area
     var _fcCfg = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
     var thumbHtml = hasImg
       ? '<div class="relative shrink-0">' +
@@ -149,20 +149,20 @@ function renderForum() {
           (imgCount > 1 ? '<span class="absolute bottom-1 right-1 text-[9px] font-black bg-black/60 text-white px-1.5 py-0.5 rounded-full">+' + (imgCount - 1) + '</span>' : '') +
         '</div>'
       : '<div class="w-[56px] h-[56px] rounded-2xl flex items-center justify-center shrink-0" style="background:#001D4A">' +
-          '<span class="text-2xl opacity-90">' + (_fcCfg.icon || '💬') + '</span>' +
+          '<span class="text-2xl opacity-90">' + (_fcCfg.icon || '\uD83D\uDCAC') + '</span>' +
         '</div>';
-    // 카테고리 뱃지
+    // Category badge
     var catCfg  = FORUM_CATEGORIES.find(function(x){ return x.key === p.category; }) || {};
-    var catIcon  = catCfg.icon || '📌';
+    var catIcon  = catCfg.icon || '\uD83D\uDCCC';
     var tabLabel = catCfg;
-    // 고정 배지
+    // Pinned badge
     var pinnedBadge = p.is_pinned
-      ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.15);color:#001D4A">📌 ' + t('forum_pinned') + '</span>' : '';
-    // 리더 배지 (작성자가 리더인 경우 — 직책 포함)
+      ? '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.15);color:#001D4A">\uD83D\uDCCC ' + t('forum_pinned') + '</span>' : '';
+    // Leader badge (if author is a leader - includes title)
     var _pli = _getLeaderInfo(p.author);
     var authorLeaderBadge = _pli
-      ? '<span class="text-[9px] font-black" style="color:#D4AF37" title="' + _resolveLeaderLabel(_pli.region) + (_pli.title ? ' · ' + t(_titleKeyToLabelKey(_pli.title)) : '') + '">⭐</span>' : '';
-    // 지역/주 뱃지
+      ? '<span class="text-[9px] font-black" style="color:#D4AF37" title="' + _resolveLeaderLabel(_pli.region) + (_pli.title ? ' \u00B7 ' + t(_titleKeyToLabelKey(_pli.title)) : '') + '">\u2B50</span>' : '';
+    // Region/province badge
     var regionBadge = '';
     if (p.region && p.region !== 'all') {
       var rCfg = FORUM_REGIONS.find(function(r){ return r.key === p.region; });
@@ -173,7 +173,7 @@ function renderForum() {
       }
       var rLabel = rCfg ? (rCfg.icon + ' ' + t(rCfg.labelKey)) : p.region;
       regionBadge = '<span class="text-[10px] font-black px-2 py-0.5 rounded-full" style="background:rgba(212,175,55,0.1);color:#001D4A">' +
-        rLabel + (pLabel ? ' · ' + pLabel : '') + '</span>';
+        rLabel + (pLabel ? ' \u00B7 ' + pLabel : '') + '</span>';
     }
     return '<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer active:bg-slate-50 transition" onclick="openForumDetail(' + p.id + ')">' +
       '<div class="p-4 flex gap-3 items-start">' +
@@ -188,18 +188,18 @@ function renderForum() {
           '<div class="flex items-center gap-2 text-[10px] text-slate-300 font-bold">' +
             '<span class="font-black cursor-pointer" style="color:#001D4A" onclick="event.stopPropagation();openCompose(\'' + escHtml(p.author) + '\')">' + escHtml(p.author) + '</span>' +
             authorLeaderBadge +
-            '<span>·</span>' +
+            '<span>\u00B7</span>' +
             '<span>' + (p.date||'') + '</span>' +
-            '<span>·</span>' +
-            '<span>👁 ' + (p.views||0) + '</span>' +
-            '<span>·</span>' +
-            '<span>💬 ' + commentCount + '</span>' +
+            '<span>\u00B7</span>' +
+            '<span>\uD83D\uDC41 ' + (p.views||0) + '</span>' +
+            '<span>\u00B7</span>' +
+            '<span>\uD83D\uDCAC ' + commentCount + '</span>' +
           '</div>' +
         '</div>' +
         thumbHtml +
       '</div>' +
     '</div>';
-  }).join('') : '<div class="text-center py-16"><p class="text-4xl mb-3 opacity-30">💬</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_forum') + '</p><p class="text-xs text-slate-300">' + t('empty_forum_sub') + '</p></div>';
+  }).join('') : '<div class="text-center py-16"><p class="text-4xl mb-3 opacity-30">\uD83D\uDCAC</p><p class="font-black text-slate-400 text-sm mb-1">' + t('empty_forum') + '</p><p class="text-xs text-slate-300">' + t('empty_forum_sub') + '</p></div>';
 }
 function previewForumPhotos() {
   var input = document.getElementById('forumPhotos');
@@ -219,7 +219,7 @@ function previewForumPhotos() {
         preview.innerHTML = forumPhotos.filter(Boolean).map(function(src, idx){
           return '<div class="relative">' +
             '<img src="' + src + '" class="w-16 h-16 rounded-xl object-cover">' +
-            '<button onclick="removeForumPhoto(' + idx + ')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-black flex items-center justify-center leading-none">✕</button>' +
+            '<button onclick="removeForumPhoto(' + idx + ')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-black flex items-center justify-center leading-none">\u2715</button>' +
           '</div>';
         }).join('');
       }
@@ -235,7 +235,7 @@ function removeForumPhoto(idx) {
   preview.innerHTML = forumPhotos.filter(Boolean).map(function(src, i){
     return '<div class="relative">' +
       '<img src="' + src + '" class="w-16 h-16 rounded-xl object-cover">' +
-      '<button onclick="removeForumPhoto(' + i + ')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-black flex items-center justify-center leading-none">✕</button>' +
+      '<button onclick="removeForumPhoto(' + i + ')" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-black flex items-center justify-center leading-none">\u2715</button>' +
     '</div>';
   }).join('');
 }
@@ -260,12 +260,12 @@ function submitPost() {
   forumPhotos = [];
   // GA4 post_create tracking
   if (typeof gtag === 'function') gtag('event', 'post_create', { category: cat, region: reg });
-  // 글 작성 후 지역 필터 & 폼 닫기
+  // Close write form after posting
   if (reg && reg !== 'all') { forumRegion = reg; forumProvince = prv || 'all'; }
   var form = document.getElementById('forumWriteForm');
   if (form) form.classList.add('hidden');
   renderForum();
-  // Supabase 저장 (비동기)
+  // Save to Supabase (async)
   sbSaveForumPost(newPost).then(function(saved) {
     if (saved && saved.id) {
       var idx = posts.findIndex(function(x){ return x === newPost; });
@@ -301,11 +301,11 @@ function submitComment() {
   document.getElementById('commentInput').value = '';
   renderComments(post);
   renderForum();
-  // Supabase 댓글 업데이트 (비동기)
+  // Update comments in Supabase (async)
   if (post._sbId || typeof post.id === 'string') {
     sbUpdateForumPost(post._sbId || post.id, { comments: post.comments }).catch(function(){});
   }
-  // LINE 알림: 글 작성자에게 댓글 알림 (자기 글에 자기가 댓글 달면 발송 안 함, 작성자 언어로 발송)
+  // LINE notification to post author (skip if commenting on own post, send in author's language)
   if (post.author && post.author !== auth) {
     sendLineMsg(post.author, 'line_new_comment', { title: post.title });
   }
