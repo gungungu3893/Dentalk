@@ -81,7 +81,9 @@ async function sbDelete(table, params) {
 // Auth 헬퍼 — licenses 테이블 기반 (Supabase Auth 미사용)
 // ============================================================
 
-async function authRegister({ licenseNumber, doctorName, clinicName, contact, nickname, email, password }) {
+// NOTE: licenses 테이블에 tax_id TEXT 컬럼이 필요합니다.
+// Supabase SQL Editor에서 실행: ALTER TABLE licenses ADD COLUMN IF NOT EXISTS tax_id TEXT DEFAULT '';
+async function authRegister({ licenseNumber, doctorName, clinicName, contact, nickname, email, password, taxId }) {
   return sbPost('licenses', {
     license_number: licenseNumber,
     doctor_name:    doctorName,
@@ -90,6 +92,7 @@ async function authRegister({ licenseNumber, doctorName, clinicName, contact, ni
     nickname:       nickname,
     email:          email,
     password:       password,
+    tax_id:         taxId || '',
     is_active:      false,
     role:           'user',
   });

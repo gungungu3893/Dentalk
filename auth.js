@@ -175,6 +175,7 @@ async function submitRegistration() {
   var clinic   = document.getElementById('regClinic').value.trim();
   var email    = document.getElementById('regEmail').value.trim();
   var contact  = document.getElementById('regContact').value.trim();
+  var taxId    = (document.getElementById('regTaxId') || {}).value ? document.getElementById('regTaxId').value.trim() : '';
   var password = document.getElementById('regPassword').value.trim();
   var passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
   if (!lic || !nickname || !name || !clinic || !email || !contact || !password || !passwordConfirm) {
@@ -190,7 +191,7 @@ async function submitRegistration() {
   btn.disabled = true;
   btn.textContent = t('reg_submitting');
   try {
-    var res = await authRegister({ licenseNumber:lic, doctorName:name, clinicName:clinic, contact:contact, nickname:nickname, email:email, password:password });
+    var res = await authRegister({ licenseNumber:lic, doctorName:name, clinicName:clinic, contact:contact, nickname:nickname, email:email, password:password, taxId:taxId });
     btn.disabled = false;
     btn.textContent = t('reg_submit');
     if (res.status === 409) { showRegError(t('reg_duplicate')); return; }
