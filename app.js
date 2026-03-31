@@ -657,9 +657,8 @@ function goPage(id) {
   document.getElementById('pageTitle') && (document.getElementById('pageTitle').textContent = t('pt_' + id));
   updateNavTabs(id);
   currentPage = id;
-  // 페이지 상태 보존
+  // Save page state (localStorage only, no hash to avoid SyntaxError)
   localStorage.setItem('dentalk_currentPage', id);
-  if (location.hash !== '#' + id) history.pushState({ page: id }, '', '#' + id);
   // GA4 page_view tracking
   if (typeof gtag === 'function') gtag('event', 'page_view', { page_title: id, page_location: location.href });
   var btnBack = document.getElementById('btnBack');
@@ -694,7 +693,8 @@ function goDetailPage(pageId, title, fromPage) {
   currentPage = pageId;
   // 페이지 상태 보존
   localStorage.setItem('dentalk_currentPage', pageId);
-  if (location.hash !== '#' + pageId) history.pushState({ page: pageId, detail: true, from: prevPage }, '', '#' + pageId);
+  // Save detail page state
+  localStorage.setItem('dentalk_currentPage', pageId);
   // GA4 page_view tracking (detail pages)
   if (typeof gtag === 'function') gtag('event', 'page_view', { page_title: pageId + ': ' + title, page_location: location.href });
   var btnBack = document.getElementById('btnBack');
@@ -2315,43 +2315,19 @@ function _initApp() {
   initScrollReveal();
   // i18n: must run AFTER all render functions to translate dynamic elements
   applyLang();
-  // 페이지 상태 복원 (hash 또는 localStorage)
-  var _restorePage = '';
-  if (location.hash && location.hash.length > 1) {
-    _restorePage = location.hash.replace('#','');
-  } else {
-    _restorePage = localStorage.getItem('dentalk_currentPage') || '';
-  }
-  if (_restorePage && _restorePage !== 'home') {
+  // Restore last page from localStorage (no URL hash to avoid CDN/SW issues)
+  var _restorePage = localStorage.getItem('dentalk_currentPage') || '';
+  if (_restorePage && _restorePage !== 'home' && /^[a-z0-9-]+$/.test(_restorePage)) {
     var _needsAuth = ['shop','forum','custom','settings','feedback','factory','myactivity','my-orders','my-posts','my-used'];
-    if (_needsAuth.indexOf(_restorePage) !== -1 && !isLoggedIn()) {
-      _restorePage = 'home';
-    }
-    if (_restorePage !== 'home') {
+    if (_needsAuth.indexOf(_restorePage) !== -1 && !isLoggedIn()) _restorePage = '';
+    if (_restorePage) {
       var _pageEl = document.getElementById('page-' + _restorePage);
-      if (_pageEl) {
-        try { goPage(_restorePage); } catch(e) { console.warn('[PageRestore]', e); }
-      }
+      if (_pageEl) { try { goPage(_restorePage); } catch(e) { console.warn('[PageRestore]', e); } }
     }
   }
+  // Clear any leftover hash from previous version
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
 }
-// popstate: 브라우저 뒤로가기/앞으로가기
-window.addEventListener('popstate', function(e) {
-  try {
-    var page = 'home';
-    if (e.state && e.state.page) {
-      page = e.state.page;
-    } else if (location.hash && location.hash.length > 1) {
-      page = location.hash.replace('#','');
-    }
-    // 유효한 페이지 ID만 허용 (영문, 숫자, 하이픈)
-    if (!/^[a-z0-9-]+$/.test(page)) { page = 'home'; }
-    var _needsAuth = ['shop','forum','custom','settings','feedback','factory','myactivity','my-orders','my-posts','my-used'];
-    if (_needsAuth.indexOf(page) !== -1 && !isLoggedIn()) page = 'home';
-    var el = document.getElementById('page-' + page);
-    if (el) { goPage(page); } else { goPage('home'); }
-  } catch(err) { console.warn('[popstate]', err); }
-});
 // DOMContentLoaded가 이미 발생했으면 즉시 실행, 아니면 이벤트 대기
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', _initApp);
