@@ -1019,22 +1019,6 @@ var SELLER_INFO = {
 
 var _invPendingOrder = null; // order waiting for invoice selection
 
-// Toggle checkboxes in invoice selection modal
-function invToggle(type) {
-  var chkTax  = document.getElementById('inv-chk-tax');
-  var chkRec  = document.getElementById('inv-chk-rec');
-  var chkNone = document.getElementById('inv-chk-none');
-  var taxSec  = document.getElementById('inv-taxid-section');
-  setTimeout(function() {
-    if (type === 'none') {
-      if (chkNone.checked) { chkTax.checked = false; chkRec.checked = false; }
-    } else {
-      if (chkTax.checked || chkRec.checked) chkNone.checked = false;
-    }
-    taxSec.classList.toggle('hidden', !chkTax.checked);
-  }, 10);
-}
-
 // Generate invoice number: INV-YYYYMMDD-XXXX or REC-YYYYMMDD-XXXX
 function _genInvoiceId(prefix) {
   var d = new Date();
@@ -1043,87 +1027,74 @@ function _genInvoiceId(prefix) {
   return prefix + '-' + ds + '-' + rand;
 }
 
-// Called from payCompleteModal — open invoice selection
+// Open invoice selection modal
 function openInvoiceSelect(order) {
   _invPendingOrder = order;
-  var chkTax  = document.getElementById('inv-chk-tax');
-  var chkRec  = document.getElementById('inv-chk-rec');
-  var chkNone = document.getElementById('inv-chk-none');
-  if (chkTax)  chkTax.checked  = false;
-  if (chkRec)  chkRec.checked  = false;
-  if (chkNone) chkNone.checked = false;
-  document.getElementById('inv-taxid-section').classList.add('hidden');
   var taxInput = document.getElementById('inv-taxid');
   if (taxInput) taxInput.value = '';
   openModal('invoiceSelectModal');
 }
 
-// Issue selected invoices
-async function issueInvoices() {
-  if (!_invPendingOrder) { closeModal('invoiceSelectModal'); return; }
-  var chkTax  = document.getElementById('inv-chk-tax');
-  var chkRec  = document.getElementById('inv-chk-rec');
-  var chkNone = document.getElementById('inv-chk-none');
-  if (chkNone && chkNone.checked) { closeModal('invoiceSelectModal'); _invPendingOrder = null; return; }
-  if (!chkTax.checked && !chkRec.checked) { showToast(t('inv_select_one'), 'warning'); return; }
-
+// Generate Tax Invoice (ใบกำกับภาษี)
+async function generateTaxInvoice() {
+  if (!_invPendingOrder) return;
   var order = _invPendingOrder;
   var buyerTaxId = (document.getElementById('inv-taxid') || {}).value || '';
-  var clinic = order.clinic || '';
-  var addr   = order.address || '';
   var subtotal = order.totalAmount || 0;
-  var dateStr  = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
-  var issued = [];
-
+  var vatAmt = Math.round(subtotal * 7 / 107 * 100) / 100;
+  var sub = subtotal - vatAmt;
+  var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  var invId = _genInvoiceId('INV');
+  var taxInv = {
+    id: invId, order_id: order.id, user_nickname: currentUser.nickname,
+    type: 'tax_invoice', clinic_name: order.clinic || '', clinic_address: order.address || '',
+    clinic_tax_id: buyerTaxId, items: order.items,
+    subtotal: sub, vat_amount: vatAmt, total_amount: subtotal, issued_date: dateStr
+  };
   try {
-    if (chkTax.checked) {
-      var vatAmt = Math.round(subtotal * 7 / 107 * 100) / 100;
-      var sub    = subtotal - vatAmt;
-      var invId  = _genInvoiceId('INV');
-      var taxInv = {
-        id: invId, order_id: order.id, user_nickname: currentUser.nickname,
-        type: 'tax_invoice', clinic_name: clinic, clinic_address: addr,
-        clinic_tax_id: buyerTaxId, items: order.items,
-        subtotal: sub, vat_amount: vatAmt, total_amount: subtotal, issued_date: dateStr
-      };
-      await sbSaveInvoice(taxInv);
-      issued.push(taxInv);
-    }
-    if (chkRec.checked) {
-      var recId = _genInvoiceId('REC');
-      var rec = {
-        id: recId, order_id: order.id, user_nickname: currentUser.nickname,
-        type: 'receipt', clinic_name: clinic, clinic_address: addr,
-        clinic_tax_id: '', items: order.items,
-        subtotal: subtotal, vat_amount: 0, total_amount: subtotal, issued_date: dateStr
-      };
-      await sbSaveInvoice(rec);
-      issued.push(rec);
-    }
-
-    // LINE notification to customer
-    issued.forEach(function(inv) {
-      var label = inv.type === 'tax_invoice' ? 'ใบกำกับภาษี / Tax Invoice' : 'ใบเสร็จรับเงิน / Receipt';
-      sendLineMsg(currentUser.nickname, 'line_invoice_issued', { type: label, id: inv.id, total: inv.total_amount.toLocaleString() });
-    });
-
-    // LINE notification to admin
-    issued.forEach(function(inv) {
-      var label = inv.type === 'tax_invoice' ? 'Tax Invoice' : 'Receipt';
-      sendLineAdminMsg('line_invoice_admin', { nickname: currentUser.nickname, type: label, id: inv.id, total: inv.total_amount.toLocaleString() });
-    });
-
+    await sbSaveInvoice(taxInv);
+    sendLineMsg(currentUser.nickname, 'line_invoice_issued', { type: 'ใบกำกับภาษี / Tax Invoice', id: invId, total: subtotal.toLocaleString() });
+    sendLineAdminMsg('line_invoice_admin', { nickname: currentUser.nickname, type: 'Tax Invoice', id: invId, total: subtotal.toLocaleString() });
     showToast(t('inv_issued_ok'), 'success');
     closeModal('invoiceSelectModal');
     _invPendingOrder = null;
-
-    // Auto-open the first issued invoice for preview
-    if (issued.length > 0) openInvoicePrint(issued[0]);
+    openInvoicePrint(taxInv);
   } catch(e) {
-    console.error('[Invoice Issue]', e);
+    console.error('[Tax Invoice]', e);
     showToast(t('inv_issue_error'), 'error');
   }
 }
+
+// Generate Receipt (ใบเสร็จรับเงิน)
+async function generateReceipt() {
+  if (!_invPendingOrder) return;
+  var order = _invPendingOrder;
+  var subtotal = order.totalAmount || 0;
+  var dateStr = new Date().toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  var recId = _genInvoiceId('REC');
+  var rec = {
+    id: recId, order_id: order.id, user_nickname: currentUser.nickname,
+    type: 'receipt', clinic_name: order.clinic || '', clinic_address: order.address || '',
+    clinic_tax_id: '', items: order.items,
+    subtotal: subtotal, vat_amount: 0, total_amount: subtotal, issued_date: dateStr
+  };
+  try {
+    await sbSaveInvoice(rec);
+    sendLineMsg(currentUser.nickname, 'line_invoice_issued', { type: 'ใบเสร็จรับเงิน / Receipt', id: recId, total: subtotal.toLocaleString() });
+    sendLineAdminMsg('line_invoice_admin', { nickname: currentUser.nickname, type: 'Receipt', id: recId, total: subtotal.toLocaleString() });
+    showToast(t('inv_issued_ok'), 'success');
+    closeModal('invoiceSelectModal');
+    _invPendingOrder = null;
+    openInvoicePrint(rec);
+  } catch(e) {
+    console.error('[Receipt]', e);
+    showToast(t('inv_issue_error'), 'error');
+  }
+}
+
+// Legacy compat
+function issueInvoices() { generateTaxInvoice(); }
+function invToggle() {}
 
 // Generate printable invoice HTML and open in new window
 function openInvoicePrint(inv) {

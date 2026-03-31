@@ -1271,36 +1271,22 @@ body.is-admin #factoryPromoHeader { display:none !important; }
   <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
     <h3 class="font-black text-slate-800 text-base mb-1">🧾 <span data-i18n="inv_select_title">Tax Invoice / Receipt</span></h3>
     <p class="text-[10px] text-slate-400 font-bold mb-4" data-i18n="inv_select_desc">Select document type to issue</p>
-    <div class="space-y-2.5 mb-4">
-      <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer active:bg-slate-50 transition" onclick="invToggle('tax_invoice')">
-        <input type="checkbox" id="inv-chk-tax" class="w-4 h-4 accent-[#D4AF37]">
-        <div>
-          <p class="font-black text-xs text-slate-800">ใบกำกับภาษี</p>
-          <p class="text-[9px] text-slate-400" data-i18n="inv_tax_label">Tax Invoice (VAT 7%)</p>
-        </div>
-      </label>
-      <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer active:bg-slate-50 transition" onclick="invToggle('receipt')">
-        <input type="checkbox" id="inv-chk-rec" class="w-4 h-4 accent-[#D4AF37]">
-        <div>
-          <p class="font-black text-xs text-slate-800">ใบเสร็จรับเงิน</p>
-          <p class="text-[9px] text-slate-400" data-i18n="inv_rec_label">Receipt</p>
-        </div>
-      </label>
-      <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer active:bg-slate-50 transition" onclick="invToggle('none')">
-        <input type="checkbox" id="inv-chk-none" class="w-4 h-4 accent-slate-400">
-        <div>
-          <p class="font-black text-xs text-slate-500">ไม่ต้องการ</p>
-          <p class="text-[9px] text-slate-400" data-i18n="inv_none_label">Not needed</p>
-        </div>
-      </label>
-    </div>
-    <!-- Tax ID input (shown only when tax invoice selected) -->
-    <div id="inv-taxid-section" class="hidden mb-4">
+    <!-- Tax ID input (for tax invoice) -->
+    <div id="inv-taxid-section" class="mb-4">
       <label class="text-[9px] font-black text-slate-500 uppercase tracking-wider mb-1 block" data-i18n="inv_buyer_taxid">Buyer Tax ID</label>
       <input id="inv-taxid" type="text" maxlength="13" placeholder="0000000000000" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-mono font-bold text-slate-800 focus:outline-none focus:border-[#D4AF37]">
+      <p class="text-[8px] text-slate-300 mt-1" data-i18n="inv_taxid_hint">Required for Tax Invoice only</p>
     </div>
-    <button onclick="issueInvoices()" id="inv-issue-btn" class="w-full py-3 rounded-2xl font-black text-sm active:scale-95 transition shadow" style="background:#D4AF37;color:#001D4A" data-i18n="inv_issue_btn">Issue Document</button>
-    <button onclick="closeModal('invoiceSelectModal')" class="w-full py-2 mt-2 text-slate-400 text-[10px] font-black uppercase" data-i18n="inv_skip">Skip</button>
+    <!-- Two action buttons -->
+    <div class="flex gap-2.5 mb-3">
+      <button onclick="generateTaxInvoice()" class="flex-1 py-3.5 rounded-2xl font-black text-xs active:scale-95 transition shadow flex items-center justify-center gap-1.5" style="background:#001D4A;color:#fff">
+        🧾 <span data-i18n="doc_tax_invoice">Tax Invoice</span>
+      </button>
+      <button onclick="generateReceipt()" class="flex-1 py-3.5 rounded-2xl font-black text-xs active:scale-95 transition shadow flex items-center justify-center gap-1.5" style="background:#D4AF37;color:#001D4A">
+        🧾 <span data-i18n="doc_receipt">Receipt</span>
+      </button>
+    </div>
+    <button onclick="closeModal('invoiceSelectModal')" class="w-full py-2 text-slate-400 text-[10px] font-black uppercase" data-i18n="inv_skip">Skip</button>
   </div>
 </div>
 <!-- ============================== 프로필 수정 모달 ============================== -->
