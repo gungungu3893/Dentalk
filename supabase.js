@@ -138,7 +138,7 @@ async function authUpdateProfile(licenseNumber, fields) {
 }
 
 async function authGetAllUsers() {
-  return sbGet('licenses', 'select=license_number,nickname,clinic_name,doctor_name,email,phone,is_active,role,leader_region,leader_title,credits&order=clinic_name.asc');
+  return sbGet('licenses', 'select=*&order=clinic_name.asc');
 }
 
 async function authSetUserRole(nickname, role, leaderRegion, leaderTitle) {
@@ -180,7 +180,7 @@ async function sbSaveCustomOrder(order, casesData) {
 async function sbGetCustomOrders(userNickname, isAdmin, page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  var params = 'select=id,user_nickname,clinic,addr,phone,line_id,cases,stage,design_versions,review_history,date,carrier,tracking_number&order=date.desc&limit=' + limit + '&offset=' + offset;
+  var params = 'select=*&order=date.desc&limit=' + limit + '&offset=' + offset;
   if (!isAdmin && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
   return sbGet('custom_orders', params);
 }
@@ -217,7 +217,7 @@ async function sbSaveShopOrder(order) {
 async function sbGetShopOrders(userNickname, isAdminUser, page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  var params = 'select=id,user_nickname,clinic,addr,phone,line_id,items,stage,date,carrier,tracking_number,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset;
+  var params = 'select=*&order=created_at.desc&limit=' + limit + '&offset=' + offset;
   if (!isAdminUser && userNickname) params += '&user_nickname=eq.' + encodeURIComponent(userNickname);
   return sbGet('orders', params);
 }
@@ -237,7 +237,7 @@ async function sbUpdateShopOrder(orderId, updates) {
 async function sbGetUsedItems(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGetWithCount('used_items', 'select=id,seller,name,code,price,condition,description,contact,views,image_url,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('used_items', 'select=*&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveUsedItem(item) {
@@ -274,7 +274,7 @@ async function sbUpdateUsedItem(id, updates) {
 // ============================================================
 
 async function sbGetUsedComments(usedItemId) {
-  return sbGet('used_comments', 'used_item_id=eq.' + encodeURIComponent(usedItemId) + '&select=id,used_item_id,author_id,author_name,content,created_at&order=created_at.asc');
+  return sbGet('used_comments', 'used_item_id=eq.' + encodeURIComponent(usedItemId) + '&select=*&order=created_at.asc');
 }
 
 async function sbSaveUsedComment(comment) {
@@ -298,7 +298,7 @@ async function sbSaveUsedComment(comment) {
 // ============================================================
 
 async function sbGetMessages(nickname) {
-  return sbGet('messages', 'or=(from_user.eq.' + encodeURIComponent(nickname) + ',to_user.eq.' + encodeURIComponent(nickname) + ')&select=id,from_user,to_user,subject,body,is_read,created_at&order=created_at.desc');
+  return sbGet('messages', 'or=(from_user.eq.' + encodeURIComponent(nickname) + ',to_user.eq.' + encodeURIComponent(nickname) + ')&select=*&order=created_at.desc');
 }
 
 async function sbSendMessage(msg) {
@@ -333,7 +333,7 @@ async function sbGetUnreadMessageCount(nickname) {
 async function sbGetForumPosts(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGetWithCount('forum_posts', 'select=id,author,category,region,province,title,body,images,views,comments,date,is_pinned,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('forum_posts', 'select=*&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveForumPost(post) {
@@ -373,7 +373,7 @@ async function sbUpdateForumPost(id, updates) {
 async function sbGetEvents(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGetWithCount('events', 'select=id,title,location,event_date,description,created_by,type,region,views,created_at&order=event_date.asc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('events', 'select=*&order=event_date.asc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveEvent(ev) {
@@ -463,13 +463,13 @@ async function sbUseCredits(nickname, amount, description) {
 async function sbGetCreditHistory(nickname, page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('credit_history', 'user_id=eq.' + encodeURIComponent(nickname) + '&select=id,user_id,amount,type,description,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGet('credit_history', 'user_id=eq.' + encodeURIComponent(nickname) + '&select=*&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbGetAllCreditHistory(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('credit_history', 'select=id,user_id,amount,type,description,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGet('credit_history', 'select=*&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 // ============================================================
@@ -479,7 +479,7 @@ async function sbGetAllCreditHistory(page) {
 async function sbGetWebzineArticles(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGetWithCount('webzine_articles', 'select=id,category,title,body_md,thumbnail_url,author_id,views,is_published,created_at&is_published=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('webzine_articles', 'select=*&is_published=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveWebzineArticle(article) {
@@ -516,7 +516,7 @@ async function sbDeleteWebzineArticle(id) {
 async function sbGetJobs(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGetWithCount('jobs', 'select=id,user_id,type,region,province,title,description,salary_range,requirements,contact,is_active,views,created_at&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('jobs', 'select=*&is_active=eq.true&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbSaveJob(job) {
@@ -554,11 +554,11 @@ async function sbDeleteJob(id) {
 // ============================================================
 
 async function sbGetBanners() {
-  return sbGet('banners', 'select=id,advertiser_name,image_url,link_url,position,start_date,end_date,is_active,clicks,impressions,created_at&is_active=eq.true&order=created_at.desc');
+  return sbGet('banners', 'select=*&is_active=eq.true&order=created_at.desc');
 }
 
 async function sbGetAllBanners() {
-  return sbGet('banners', 'select=id,advertiser_name,image_url,link_url,position,start_date,end_date,is_active,clicks,impressions,created_at&order=created_at.desc');
+  return sbGet('banners', 'select=*&order=created_at.desc');
 }
 
 async function sbGetBannersByPosition(position) {
@@ -640,7 +640,7 @@ async function sbSaveFeedback(fb) {
 async function sbGetFeedback(page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGetWithCount('feedback', 'select=id,user_nickname,category,title,content,rating,status,admin_note,created_at&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGetWithCount('feedback', 'select=*&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbUpdateFeedback(id, updates) {
@@ -656,10 +656,10 @@ async function sbSearchAll(keyword) {
   var results = { forum: [], webzine: [], jobs: [], used: [] };
   try {
     var queries = [
-      sbGet('forum_posts', 'select=id,title,author,category,created_at&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
-      sbGet('webzine_articles', 'select=id,title,category,thumbnail_url,created_at&is_published=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
-      sbGet('jobs', 'select=id,title,type,region,created_at&is_active=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
-      sbGet('used_items', 'select=id,name,price,seller,image_url,created_at&name=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('forum_posts', 'select=*&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('webzine_articles', 'select=*&is_published=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('jobs', 'select=*&is_active=eq.true&title=ilike.' + encoded + '&order=created_at.desc&limit=10'),
+      sbGet('used_items', 'select=*&name=ilike.' + encoded + '&order=created_at.desc&limit=10'),
     ];
     var res = await Promise.allSettled(queries);
     if (res[0].status === 'fulfilled') results.forum   = res[0].value || [];
@@ -677,7 +677,7 @@ async function sbSearchAll(keyword) {
 async function sbGetNotifications(userId, page) {
   var limit = 20;
   var offset = ((page || 1) - 1) * limit;
-  return sbGet('notifications', 'select=id,user_id,type,title,body,link,is_read,created_at&user_id=eq.' + encodeURIComponent(userId) + '&order=created_at.desc&limit=' + limit + '&offset=' + offset);
+  return sbGet('notifications', 'select=*&user_id=eq.' + encodeURIComponent(userId) + '&order=created_at.desc&limit=' + limit + '&offset=' + offset);
 }
 
 async function sbMarkNotifRead(notifId) {
@@ -717,7 +717,7 @@ async function sbCreateNotification(notif) {
 // ============================================================
 
 async function sbGetReviews(productId) {
-  return sbGet('reviews', 'select=id,user_id,product_id,rating,comment,created_at&product_id=eq.' + encodeURIComponent(productId) + '&order=created_at.desc&limit=50');
+  return sbGet('reviews', 'select=*&product_id=eq.' + encodeURIComponent(productId) + '&order=created_at.desc&limit=50');
 }
 
 async function sbPostReview(review) {
@@ -743,7 +743,7 @@ async function sbCheckUserReview(userId, productId) {
 // ============================================================
 
 async function sbGetOrderStats() {
-  return sbGet('orders', 'select=id,items,stage,date,created_at&order=created_at.desc&limit=500');
+  return sbGet('orders', 'select=*&order=created_at.desc&limit=500');
 }
 
 async function sbGetAllUsersCount() {
@@ -751,11 +751,11 @@ async function sbGetAllUsersCount() {
 }
 
 async function sbGetForumStats() {
-  return sbGet('forum_posts', 'select=id,author,category,created_at&order=created_at.desc&limit=500');
+  return sbGet('forum_posts', 'select=*&order=created_at.desc&limit=500');
 }
 
 async function sbGetForumCommentStats() {
-  return sbGet('forum_comments', 'select=id,post_id,created_at&order=created_at.desc&limit=500');
+  return sbGet('forum_comments', 'select=*&order=created_at.desc&limit=500');
 }
 
 async function sbGetAllUsers() {
@@ -771,7 +771,7 @@ async function sbSaveInvoice(invoice) {
 }
 
 async function sbGetUserInvoices(nickname) {
-  return sbGet('invoices', 'user_nickname=eq.' + encodeURIComponent(nickname) + '&select=id,order_id,type,clinic_name,items,subtotal,vat_amount,total_amount,issued_date,expires_at,clinic_address,clinic_tax_id,created_at&order=created_at.desc');
+  return sbGet('invoices', 'user_nickname=eq.' + encodeURIComponent(nickname) + '&select=*&order=created_at.desc');
 }
 
 async function sbDeleteExpiredInvoices() {
