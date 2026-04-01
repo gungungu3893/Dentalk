@@ -6,7 +6,7 @@
 
 // ★ Bump this on every deploy — triggers install → old cache purge → skipWaiting
 // ★ Keep in sync with APP_VERSION in index.html
-const CACHE_VERSION = 'dentalk-v37';
+const CACHE_VERSION = 'dentalk-v38';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -149,10 +149,17 @@ self.addEventListener('fetch', function(e) {
 function networkFirst(request) {
   return fetch(request).then(function(response) {
     if (response && response.status === 200) {
-      var clone = response.clone();
-      caches.open(CACHE_VERSION).then(function(cache) {
-        try { cache.put(request, clone); } catch(e) { /* unsupported scheme */ }
-      });
+      // Only cache if content-type matches expected type (prevent caching HTML as JS)
+      var ct = response.headers.get('content-type') || '';
+      var reqUrl = request.url || '';
+      var isJsReq = reqUrl.indexOf('.js') !== -1;
+      var shouldCache = !isJsReq || ct.indexOf('javascript') !== -1 || ct.indexOf('application/json') !== -1;
+      if (shouldCache) {
+        var clone = response.clone();
+        caches.open(CACHE_VERSION).then(function(cache) {
+          try { cache.put(request, clone); } catch(e) {}
+        });
+      }
     }
     return response;
   }).catch(function() {

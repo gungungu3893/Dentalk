@@ -23,19 +23,35 @@ async function sbGet(table, params) {
   var res = await fetch(url, { headers: sbHeaders() });
   if (!res.ok) {
     var detail = '';
-    try { var body = await res.json(); detail = body.message || body.hint || JSON.stringify(body); } catch(e) {}
+    try {
+      var ct = res.headers.get('content-type') || '';
+      if (ct.indexOf('json') !== -1) {
+        var body = await res.json();
+        detail = body.message || body.hint || JSON.stringify(body);
+      } else {
+        detail = 'status ' + res.status;
+      }
+    } catch(e) {}
     throw new Error('[sbGet] ' + table + ' HTTP ' + res.status + (detail ? ' — ' + detail : ''));
   }
   return res.json();
 }
 
-// ── GET with total count (for pagination) ─────────────────────
+// GET with total count (for pagination)
 async function sbGetWithCount(table, params) {
   var url = SUPABASE_URL + '/rest/v1/' + table + (params ? '?' + params : '');
   var res = await fetch(url, { headers: sbHeaders({ 'Prefer': 'count=exact' }) });
   if (!res.ok) {
     var detail = '';
-    try { var body = await res.json(); detail = body.message || body.hint || JSON.stringify(body); } catch(e) {}
+    try {
+      var ct = res.headers.get('content-type') || '';
+      if (ct.indexOf('json') !== -1) {
+        var body = await res.json();
+        detail = body.message || body.hint || JSON.stringify(body);
+      } else {
+        detail = 'status ' + res.status;
+      }
+    } catch(e) {}
     throw new Error('[sbGetWithCount] ' + table + ' HTTP ' + res.status + (detail ? ' — ' + detail : ''));
   }
   var data = await res.json();
@@ -767,14 +783,21 @@ async function sbGetAllUsers() {
 // ============================================================
 
 async function sbSaveInvoice(invoice) {
-  return sbPost('invoices', invoice);
+  try { return sbPost('invoices', invoice); } catch(e) { console.warn('[sbSaveInvoice]', e.message); return null; }
 }
 
 async function sbGetUserInvoices(nickname) {
-  return sbGet('invoices', 'user_nickname=eq.' + encodeURIComponent(nickname) + '&select=*&order=created_at.desc');
+  try {
+    return await sbGet('invoices', 'user_nickname=eq.' + encodeURIComponent(nickname) + '&select=*&order=created_at.desc');
+  } catch(e) {
+    console.warn('[sbGetUserInvoices]', e.message);
+    return [];
+  }
 }
 
 async function sbDeleteExpiredInvoices() {
-  var now = new Date().toISOString();
-  return sbDelete('invoices', 'expires_at=lt.' + encodeURIComponent(now));
+  try {
+    var now = new Date().toISOString();
+    return await sbDelete('invoices', 'expires_at=lt.' + encodeURIComponent(now));
+  } catch(e) { return null; }
 }
