@@ -376,7 +376,7 @@ async function sendLinePushText(nickname, text) {
 // ============================================================
 let currentPage  = 'home';
 let prevPage     = 'home';
-let currentLang  = 'th';
+let currentLang  = 'en';
 let pendingLang  = null; // 저장 전 선택된 언어
 let currentUser  = { licenseNum:'', nickname:'', email:'', phone:'', address:'', clinicName:'', doctorName:'', role:'' };
 let cart         = [];
@@ -2249,7 +2249,7 @@ async function submitFeedback() {
 // ★ 동적 스크립트(async=false)는 DOMContentLoaded를 차단하지 않으므로
 //    이벤트가 이미 발생한 경우도 처리해야 함
 function _initApp() {
-  var saved = localStorage.getItem('dentalk_lang') || 'th';
+  var saved = localStorage.getItem('dentalk_lang') || 'en';
   currentLang = saved;
   document.documentElement.lang = currentLang; // 폰트 CSS 즉시 적용
   pendingLang = null;

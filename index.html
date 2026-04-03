@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <!-- Google Analytics 4 -->
@@ -1397,14 +1397,14 @@ body.is-admin #factoryPromoHeader { display:none !important; }
     <div id="headerLangWrap">
       <button id="headerLangBtn" onclick="toggleHeaderLang(event)" title="Language">
         <svg class="lang-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
-        <span id="headerLangCode" class="lang-code">TH</span>
+        <span id="headerLangCode" class="lang-code">EN</span>
         <svg class="lang-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="headerLangDropdown">
-        <button class="lang-option" data-lang="en" onclick="pickHeaderLang('en',this)"><span class="lang-flag">🇺🇸</span><span class="lang-name">English</span><span class="lang-check">✓</span></button>
+        <button class="lang-option active" data-lang="en" onclick="pickHeaderLang('en',this)"><span class="lang-flag">🇺🇸</span><span class="lang-name">English</span><span class="lang-check">✓</span></button>
         <button class="lang-option" data-lang="ko" onclick="pickHeaderLang('ko',this)"><span class="lang-flag">🇰🇷</span><span class="lang-name">한국어</span><span class="lang-check">✓</span></button>
         <button class="lang-option" data-lang="zh" onclick="pickHeaderLang('zh',this)"><span class="lang-flag">🇨🇳</span><span class="lang-name">中文</span><span class="lang-check">✓</span></button>
-        <button class="lang-option active" data-lang="th" onclick="pickHeaderLang('th',this)"><span class="lang-flag">🇹🇭</span><span class="lang-name">ภาษาไทย</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="th" onclick="pickHeaderLang('th',this)"><span class="lang-flag">🇹🇭</span><span class="lang-name">ภาษาไทย</span><span class="lang-check">✓</span></button>
         <button class="lang-option" data-lang="vi" onclick="pickHeaderLang('vi',this)"><span class="lang-flag">🇻🇳</span><span class="lang-name">Tiếng Việt</span><span class="lang-check">✓</span></button>
         <button class="lang-option" data-lang="es" onclick="pickHeaderLang('es',this)"><span class="lang-flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-check">✓</span></button>
         <button class="lang-option" data-lang="tr" onclick="pickHeaderLang('tr',this)"><span class="lang-flag">🇹🇷</span><span class="lang-name">Türkçe</span><span class="lang-check">✓</span></button>
@@ -2832,7 +2832,7 @@ function pickHeaderLang(code,btn){
   if(typeof saveLang==='function') setTimeout(function(){saveLang();},50);
 }
 function _initHeaderLangDropdown(){
-  var current=localStorage.getItem('dentalk_lang')||'th';
+  var current=localStorage.getItem('dentalk_lang')||'en';
   var codeEl=document.getElementById('headerLangCode');
   if(codeEl) codeEl.textContent=_langLabels[current]||current.toUpperCase();
   document.querySelectorAll('#headerLangDropdown .lang-option').forEach(function(o){
