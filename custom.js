@@ -208,7 +208,7 @@ function updateWizStlDropUI() {
     '<div class="flex items-center justify-between mb-2">' +
       '<p class="text-xs font-black text-green-700">✅ ' + files.length + ' files · ' + totalKB.toFixed(0) + 'KB</p>' +
       '<button type="button" onclick="event.stopPropagation();document.getElementById(\'wiz-stl-input\').click()" ' +
-        'class="text-[9px] font-black text-blue-600 px-2 py-1 bg-blue-50 rounded-lg active:scale-95 transition">+ 추가</button>' +
+        'class="text-[9px] font-black text-blue-600 px-2 py-1 bg-blue-50 rounded-lg active:scale-95 transition">+ ' + t('add_more') + '</button>' +
     '</div>' +
     '<div class="text-left">' + list + '</div>';
   d.className = 'border-2 border-green-200 rounded-xl p-3 bg-green-50 transition-colors';
@@ -392,7 +392,7 @@ function addCase() {
     '<div class="mb-1"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">' + t('case_tooth_hint') + '</p>' + buildToothChart(id) + '</div>' +
     '<div id="teeth-details-' + id + '" class="space-y-2 mt-3 mb-3"></div>' +
     '<p class="text-sm font-black text-slate-600 mb-2 mt-3">' + t('case_deadline_label') + '</p>' +
-    '<input type="date" id="cd-' + id + '" class="w-full p-4 bg-white rounded-xl text-base font-black outline-none border-2 border-blue-200 mb-3 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;">' +
+    '<input type="date" id="cd-' + id + '" placeholder="' + t('cnc_date_ph') + '" onclick="if(this.showPicker)this.showPicker();" class="w-full p-4 bg-white rounded-xl text-base font-black outline-none border-2 border-blue-200 mb-3 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;">' +
     '<div id="stl-drop-' + id + '" onclick="document.getElementById(\'stl-' + id + '\').click()" ondragover="onStlDragOver(' + id + ',event)" ondragleave="onStlDragLeave(' + id + ',event)" ondrop="onStlDrop(' + id + ',event)" class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center mb-2 cursor-pointer bg-white transition-colors">' +
       '<p class="text-2xl mb-1">📁</p><p class="text-xs font-black text-slate-500">' + t('stl_label') + '</p><p class="text-[9px] text-slate-400 mt-0.5">' + t('stl_hint') + '</p>' +
     '</div>' +
@@ -523,9 +523,9 @@ function onStl(id, input) {
     return '<p class="text-[9px] text-green-700 font-bold truncate">' + (i+1) + '. ' + f.name + ' <span class="text-slate-400 font-normal">(' + (f.size/1024).toFixed(0) + 'KB)</span></p>';
   }).join('');
   d.innerHTML = '<p class="text-xl mb-1">✅</p>' +
-    '<p class="text-xs font-black text-green-600 mb-1">' + files.length + '개 파일 선택됨 · ' + totalKB.toFixed(0) + 'KB</p>' +
+    '<p class="text-xs font-black text-green-600 mb-1">' + tf('files_selected_fmt', files.length, totalKB.toFixed(0)) + '</p>' +
     '<div class="text-left">' + listHtml + '</div>' +
-    '<p class="text-[8px] text-slate-400 mt-1">여기에 파일을 추가로 드래그하거나 탭하여 더 추가</p>';
+    '<p class="text-[8px] text-slate-400 mt-1">' + t('drag_more_files') + '</p>';
   d.style.borderColor = ''; d.style.background = '';
   d.className = 'border-2 border-green-200 rounded-xl p-3 mb-2 bg-green-50 cursor-pointer transition-colors';
 }
@@ -649,7 +649,7 @@ async function submitCustom() {
     {label:'ติดต่อ', value: phone},
     {label:'Line ID', value: lineId || 'ไม่มี'},
     {label:'ซี่ฟัน / เคส', value: totalTeeth + 'ซี่ / ' + cases.length + 'เคส'},
-    {label:'크레딧 사용', value: requiredCredits + ' (' + t('credit_remaining') + ': ' + remainingCredits + ')'}
+    {label: t('credit_used'), value: requiredCredits + ' (' + t('credit_remaining') + ': ' + remainingCredits + ')'}
   ], 'กรุณายืนยันคำสั่งซื้อในแผงผู้ดูแล')]);
   var msg = tf('order_success_msg', oid, cases.length, totalTeeth);
   msg += '\n💰 ' + t('credit_used') + ': ' + requiredCredits + ' / ' + t('credit_remaining') + ': ' + remainingCredits;
@@ -695,16 +695,16 @@ function renderCustomOrders() {
       var latest = o.designVersions[o.designVersions.length - 1];
       designHtml =
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
-          '<p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2">📐 디자인 확인 (ver.' + o.designVersions.length + ')</p>' +
+          '<p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2">📐 ' + tf('design_review_title', o.designVersions.length) + '</p>' +
           '<img src="' + latest.url + '" class="w-full rounded-xl mb-2 max-h-52 object-contain bg-slate-50" loading="lazy">' +
           '<p class="text-[8px] text-slate-400 mb-3">' + latest.name + ' · ' + latest.date + '</p>' +
           '<div class="flex gap-2 mb-2">' +
-            '<button onclick="customerApproveDesign(\'' + o.id + '\')" class="flex-1 py-2.5 bg-green-600 text-white rounded-xl font-black text-xs active:scale-95 transition">✅ 만족</button>' +
-            '<button onclick="showRejectPanel(\'' + o.id + '\')" class="flex-1 py-2.5 bg-red-100 text-red-600 rounded-xl font-black text-xs active:scale-95 transition">❌ 불만족</button>' +
+            '<button onclick="customerApproveDesign(\'' + o.id + '\')" class="flex-1 py-2.5 bg-green-600 text-white rounded-xl font-black text-xs active:scale-95 transition">✅ ' + t('design_satisfied') + '</button>' +
+            '<button onclick="showRejectPanel(\'' + o.id + '\')" class="flex-1 py-2.5 bg-red-100 text-red-600 rounded-xl font-black text-xs active:scale-95 transition">❌ ' + t('design_not_satisfied') + '</button>' +
           '</div>' +
           '<div id="reject-panel-' + o.id + '" class="hidden mt-2">' +
-            '<textarea id="reject-note-' + o.id + '" rows="3" placeholder="수정 요청사항을 입력해주세요..." class="w-full p-2.5 bg-slate-50 rounded-xl text-xs outline-none resize-none mb-2 border border-slate-200"></textarea>' +
-            '<button onclick="customerRejectDesign(\'' + o.id + '\')" class="w-full py-2 bg-red-500 text-white rounded-xl font-black text-xs active:scale-95 transition">불만족 제출</button>' +
+            '<textarea id="reject-note-' + o.id + '" rows="3" placeholder="' + t('design_reject_ph') + '" class="w-full p-2.5 bg-slate-50 rounded-xl text-xs outline-none resize-none mb-2 border border-slate-200"></textarea>' +
+            '<button onclick="customerRejectDesign(\'' + o.id + '\')" class="w-full py-2 bg-red-500 text-white rounded-xl font-black text-xs active:scale-95 transition">' + t('design_reject_submit') + '</button>' +
           '</div>' +
         '</div>';
     } else if (o.stage === 'design_revision') {
@@ -712,7 +712,7 @@ function renderCustomOrders() {
       var lastDesign = (o.designVersions && o.designVersions.length) ? o.designVersions[o.designVersions.length-1] : null;
       designHtml =
         '<div class="mt-3 pt-3 border-t border-slate-100">' +
-          '<p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-2">⏳ 디자인 수정 요청됨</p>' +
+          '<p class="text-[9px] font-black text-amber-500 uppercase tracking-widest mb-2">⏳ ' + t('design_revision_pending') + '</p>' +
           (lastRev ? '<div class="bg-amber-50 rounded-xl p-2.5 mb-2"><p class="text-[9px] text-slate-600 leading-relaxed">"' + lastRev.note + '"</p></div>' : '') +
           (lastDesign ? '<img src="' + lastDesign.url + '" class="w-full rounded-xl mb-1 max-h-36 object-contain bg-slate-50 opacity-50" loading="lazy">' : '') +
         '</div>';
@@ -771,7 +771,7 @@ function renderCustomOrders() {
           '<span class="text-[9px] bg-blue-50 text-blue-600 font-black px-2 py-0.5 rounded-lg">' + nTeeth + t('teeth_count') + '</span>' +
         '</div>' +
         (toothRows || '<p class="text-[9px] text-slate-300 font-bold">' + t('no_tooth_info') + '</p>') +
-        ((cs.stls && cs.stls.length) ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 STL ' + cs.stls.length + '개</p>' : (cs.stl ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '')) +
+        ((cs.stls && cs.stls.length) ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 STL ' + cs.stls.length + ' ' + t('files_unit') + '</p>' : (cs.stl ? '<p class="text-[9px] text-green-500 font-bold mt-1">📎 ' + cs.stl + '</p>' : '')) +
         (cs.deadline ? '<p class="text-[9px] text-slate-400 font-bold mt-1">📅 ' + cs.deadline + '</p>' : '') +
       '</div>';
     }).join('');
@@ -841,7 +841,7 @@ function renderDoneOrders() {
 }
 // ── 주문 삭제 ──────────────────────────────────────────────
 async function deleteCustomOrder(orderId) {
-  if (!confirm('접수 전 주문을 삭제하시겠습니까?')) return;
+  if (!confirm(t('confirm_delete_order'))) return;
   customOrders = customOrders.filter(function(o){ return o.id !== orderId; });
   try {
     await sbDelete('custom_orders', 'id=eq.' + encodeURIComponent(orderId));
@@ -863,8 +863,8 @@ function editCustomOrder(orderId) {
         (cs.teeth||[]).map(function(td){ return td.tooth; }).join(', ') + '</p>' +
       '<input type="text" id="ecp-' + i + '" value="' + (cs.patient||'').replace(/"/g,'&quot;') + '" placeholder="' + t('case_patient_ph') + '" ' +
         'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400">' +
-      '<input type="date" id="ecd-' + i + '" value="' + (cs.deadline||'') + '" ' +
-        'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400">' +
+      '<input type="date" id="ecd-' + i + '" value="' + (cs.deadline||'') + '" placeholder="' + t('cnc_date_ph') + '" onclick="if(this.showPicker)this.showPicker();" ' +
+        'class="w-full p-2.5 bg-white rounded-xl text-xs font-bold border-2 border-slate-200 mb-2 focus:outline-none focus:border-blue-400 cursor-pointer" style="color-scheme:light;">' +
       '<textarea id="ecm-' + i + '" rows="2" placeholder="' + t('memo_ph') + '" ' +
         'class="w-full p-2.5 bg-white rounded-xl text-xs border-2 border-slate-200 resize-none focus:outline-none focus:border-blue-400">' + (cs.memo||'').replace(/</g,'&lt;') + '</textarea>' +
     '</div>';
