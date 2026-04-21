@@ -6,7 +6,7 @@
 
 // ★ Bump this on every deploy — triggers install → old cache purge → skipWaiting
 // ★ Keep in sync with APP_VERSION in index.html
-const CACHE_VERSION = 'dentalk-v38';
+const CACHE_VERSION = 'dentalk-v39';
 const STATIC_ASSETS = [
   './',
   './index.html',

@@ -1824,7 +1824,9 @@ body.is-admin #factoryPromoHeader { display:none !important; }
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="wiz_patient_label">Patient ID</p>
             <input type="text" id="wiz-patient" placeholder="P001" class="w-full p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border-2 border-slate-200 focus:border-blue-400 mb-3">
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="case_deadline_label">Delivery Deadline</p>
-            <input type="date" id="wiz-deadline" class="w-full p-4 bg-slate-50 rounded-xl text-base font-black outline-none border-2 border-blue-100 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;">
+            <div onclick="var i=this.querySelector('input');if(i.showPicker){i.showPicker();}else{i.focus();}" style="cursor:pointer;width:100%;">
+              <input type="date" id="wiz-deadline" placeholder="YYYY-MM-DD" data-i18n-ph="cnc_date_ph" onclick="event.stopPropagation();if(this.showPicker){this.showPicker();}else{this.focus();}" class="w-full p-4 bg-slate-50 rounded-xl text-base font-black outline-none border-2 border-blue-100 text-slate-700 focus:border-blue-500 cursor-pointer" style="min-height:52px;color-scheme:light;pointer-events:auto;">
+            </div>
           </div>
           <div class="bg-white rounded-2xl p-5 shadow-sm mb-4">
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3" data-i18n="case_tooth_hint">Select teeth</p>
@@ -2641,7 +2643,7 @@ body.is-admin #factoryPromoHeader { display:none !important; }
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
 <!-- APP_VERSION: bump this on each deploy to bust caches (sync with CACHE_VERSION in sw.js) -->
-<script>var APP_VERSION='v38';</script>
+<script>var APP_VERSION='v39';</script>
 <script>
 (function(){
   var files=[

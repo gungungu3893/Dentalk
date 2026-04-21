@@ -35,7 +35,7 @@ LANG.zh = {
     qr_label:'扫码支付',qr_summary_title:'订单摘要',qr_total:'合计',qr_complete:'支付完成',
     used_contact_title:'联系卖家',used_contact_close:'关闭',
     custom_tab_new:'新订单',custom_form_title:'定制基台订单',custom_delivery_title:'配送信息',custom_clinic_ph:'诊所/技工所名称',custom_addr_ph:'配送地址',custom_phone_ph:'联系电话',custom_line_ph:'Line ID（接收通知）',custom_submit:'提交订单',custom_submit_note:'订单提交后将通过Line发送确认消息',custom_empty:'暂无订单记录',
-    case_label:'病例 #',case_remove:'✕ 删除',case_patient_ph:'患者ID（可匿名，如：P001）',case_tooth_hint:'选择牙齿 · 点击切换',upper_jaw:'上颌 (Upper Jaw)',lower_jaw:'下颌 (Lower Jaw)',jaw_border:'牙弓分界',selected_teeth:'已选牙齿 —',sel_count_suffix:'颗',brand_ph:'选择种植体品牌',size_ph:'尺寸（如：Ø4.0 / L10）',color_ph:'牙色（VITA）',case_add:'+ 添加病例',stl_label:'上传STL文件（最多10个）',stl_hint:'可同时选择多个.stl文件',memo_ph:'特殊要求（选填）',anon_patient:'匿名',case_deadline_label:'交货期限',
+    case_label:'病例 #',case_remove:'✕ 删除',case_patient_ph:'患者ID（可匿名，如：P001）',case_tooth_hint:'选择牙齿 · 点击切换',upper_jaw:'上颌 (Upper Jaw)',lower_jaw:'下颌 (Lower Jaw)',jaw_border:'牙弓分界',selected_teeth:'已选牙齿 —',sel_count_suffix:'颗',brand_ph:'选择种植体品牌',size_ph:'尺寸（如：Ø4.0 / L10）',color_ph:'牙色（VITA）',case_add:'+ 添加病例',stl_label:'上传STL文件（最多10个）',stl_hint:'可同时选择多个.stl文件',memo_ph:'特殊要求（选填）',anon_patient:'匿名',case_deadline_label:'交货期限',cnc_date_ph:'年-月-日',
     err_fill_delivery:'请填写诊所名称、地址和联系电话。',err_select_tooth:'病例#%：请至少选择1颗牙齿。',err_fill_tooth:'病例#% 牙齿#%：请填写种植体品牌和尺寸。',err_add_case:'请至少添加1个病例。',
     order_success_msg:'✅ 订单已提交！\n订单号：%\n病例：%个 / 牙齿：%颗',order_success_line:'\n确认消息已通过Line发送。',
     status_label:'进度',case_detail:'病例详情',teeth_count:'颗牙',cases_unit:'个',teeth_total_prefix:'共',patient_label:'患者：',no_tooth_info:'（无牙齿信息）',case_nr:'病例 #',
